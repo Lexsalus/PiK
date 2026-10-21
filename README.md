@@ -1,34 +1,63 @@
 # PiK — Porównywarka i Kalkulatory
 
-Statyczna strona (GitHub Pages) z porównywarką ofert, kalkulatorami i panelem administracyjnym.
+Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
 
-## Pliki
+🌐 **Strona:** https://lekarzeiterapeuci.github.io/PiK/
+🔐 **Panel:** https://lekarzeiterapeuci.github.io/PiK/admin.html
 
-| Plik | Rola |
-|------|------|
-| `index.html` | Strona publiczna: porównywarka (filtry, sortowanie, porównanie do 4 ofert) + kalkulatory |
-| `admin.html` | Panel administracyjny: ustawienia, kategorie, oferty, kalkulatory, eksport |
-| `data.json` | Wszystkie dane strony — jedyne źródło prawdy |
+📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
 
-## Edycja treści
+## Funkcje
 
-1. Wejdź na `/admin.html` (domyślne hasło: `admin` — zmień w Ustawieniach).
-2. Edytuj — zmiany zapisują się jako szkic w przeglądarce.
-3. Sprawdź **Podgląd** (`index.html?preview`).
-4. **Publikacja → Pobierz data.json**, podmień plik w repo, commit + push.
+**Strona publiczna**
+- Porównywarka: kategorie, wyszukiwarka, sortowanie, ★ przy najlepszej wartości, porównanie do 4 ofert w tabeli
+- Kalkulatory z suwakami, wyniki na żywo
+- Motyw ciemny/jasny, responsywność (telefon/desktop)
 
-## Kalkulatory
+**Panel administracyjny**
+- Ustawienia strony (nazwa, kolor akcentu, podtytuł, hasło)
+- Kategorie z dowolnymi parametrami (liczba / tekst / tak-nie) i ofertami
+- Kalkulatory z własnymi wzorami i testem na żywo
+- Podgląd szkicu, eksport / import `data.json`
 
-Wzory to wyrażenia JS. Dostępne są zmienne wejściowe, wyniki z wcześniejszych wierszy oraz funkcje `Math` (`pow`, `sqrt`, `round`, `min`, `max`…).
+## Struktura
 
-## Uruchomienie lokalnie
+```
+index.html      strona publiczna
+admin.html      panel administracyjny
+data.json       dane strony (kategorie, oferty, kalkulatory, ustawienia)
+version.json    aktualna wersja
+CHANGELOG.md    historia wersji
+bump.py         podbijanie wersji
+INSTRUKCJA.md   instrukcja obsługi
+.github/        workflow publikacji na GitHub Pages
+```
 
-`data.json` ładuje się przez `fetch`, więc potrzebny jest serwer, np. Live Server w VS Code albo:
+## Jak to działa
+
+1. Panel wczytuje `data.json`, zmiany trzyma jako szkic w przeglądarce.
+2. Admin pobiera gotowy `data.json` i wrzuca go do repo.
+3. Push na `main` → GitHub Actions publikuje stronę.
+
+## Wersjonowanie
+
+[SemVer](https://semver.org/lang/pl/). **Każdy push = podbicie wersji**:
+
+```
+py bump.py patch "opis"   # poprawki, dane
+py bump.py minor "opis"   # nowe funkcje
+py bump.py major "opis"   # duże zmiany
+```
+
+Wersja widoczna jest w stopce strony i w panelu.
+
+## Lokalnie
 
 ```
 py -m http.server 8000
 ```
+→ http://localhost:8000 (albo Live Server w VS Code). Bezpośrednie otwarcie pliku nie zadziała — `fetch` wymaga serwera.
 
-## Uwaga o bezpieczeństwie
+## Bezpieczeństwo
 
-Strona jest statyczna — hasło admina to tylko bramka w interfejsie. Faktyczną ochroną danych jest dostęp do zapisu w repozytorium.
+Hasło panelu to bramka w interfejsie (skrót SHA-256 w `data.json`), nie zabezpieczenie serwerowe. Dane chroni dostęp do zapisu w repozytorium.

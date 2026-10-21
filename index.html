@@ -153,7 +153,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="calc" id="calc"></div>
 </div></section>
 
-<footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span></span><a href="admin.html">Panel administracyjny</a></div></footer>
+<footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span> · <span id="ver"></span></span><a href="admin.html">Panel administracyjny</a></div></footer>
 
 <div class="cbar" id="cbar"><span id="cbarTxt"></span><button class="btn" id="cClear">Wyczyść</button><button class="btn pri" id="cGo">Porównaj</button></div>
 <div class="modal" id="modal"><div class="mbox"><div class="mhead"><h3>Porównanie</h3><button class="icon-btn" id="mClose">✕</button></div><div id="mBody" style="overflow-x:auto"></div></div></div>
@@ -283,6 +283,7 @@ function calc(){
   $('#res').innerHTML=main?`<span style="color:var(--mut)">${esc(main.label)}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(main.unit||'')}</div>
    ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(o.label)}</span><b>${fmt(o.v,o.decimals)} ${esc(o.unit||'')}</b></div>`).join('')}`:'';
 }
+fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{$('#ver').textContent='v'+v.version;$('#ver').title=v.date}).catch(()=>{});
 load();
 </script>
 </body>
