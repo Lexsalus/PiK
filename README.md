@@ -1,6 +1,6 @@
 # PiK — Porównywarka, Kalkulatory i analiza umów
 
-Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
+Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
 
 🌐 **Strona:** https://lekarzeiterapeuci.github.io/PiK/
 🔐 **Panel:** https://lekarzeiterapeuci.github.io/PiK/admin.html

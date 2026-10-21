@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "Porównaj.to",
-    "tagline": "Porównuj oferty i licz szybciej — wszystko w jednym miejscu.",
+    "tagline": "Porównuj usługi prawne, licz koszty sądowe i odsetki, sprawdzaj umowy — w jednym miejscu.",
     "accent": "#7c5cff",
     "adminHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
     "chatbot": {
@@ -10,9 +10,9 @@
     }
   },
   "seo": {
-    "title": "Porównaj.to — porównywarka ofert i kalkulatory online",
-    "description": "Porównuj oferty internetu, smartfonów i więcej. Darmowe kalkulatory: rata kredytu, procent składany, VAT, koszt paliwa.",
-    "keywords": "porównywarka, kalkulator kredytowy, procent składany, kalkulator VAT, koszt paliwa",
+    "title": "Porównaj.to — porady prawne, kalkulatory prawne i analiza umów",
+    "description": "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.",
+    "keywords": "porada prawna online, kancelaria, mediacje, kalkulator odsetek ustawowych, opłata sądowa od pozwu, koszty zastępstwa procesowego, analiza umowy",
     "siteUrl": "https://lekarzeiterapeuci.github.io/PiK/",
     "ogImage": "",
     "author": "",
@@ -43,41 +43,233 @@
   },
   "categories": [
     {
-      "id": "internet",
-      "name": "Internet domowy",
-      "icon": "📡",
+      "id": "porady",
+      "name": "Porady prawne online",
+      "icon": "💬",
       "fields": [
         {
           "key": "cena",
-          "label": "Cena",
+          "label": "Cena porady",
           "type": "number",
-          "unit": "zł/mies.",
+          "unit": "zł",
           "better": "lower"
         },
         {
-          "key": "predkosc",
-          "label": "Prędkość",
+          "key": "czas",
+          "label": "Czas odpowiedzi",
           "type": "number",
-          "unit": "Mb/s",
-          "better": "higher"
-        },
-        {
-          "key": "umowa",
-          "label": "Umowa",
-          "type": "number",
-          "unit": "mies.",
+          "unit": "godz.",
           "better": "lower"
         },
         {
-          "key": "router",
-          "label": "Router w cenie",
+          "key": "forma",
+          "label": "Forma",
+          "type": "text",
+          "unit": "",
+          "better": ""
+        },
+        {
+          "key": "opinia",
+          "label": "Opinia na piśmie",
           "type": "bool",
           "unit": "",
           "better": "higher"
         },
         {
-          "key": "technologia",
-          "label": "Technologia",
+          "key": "ocena",
+          "label": "Ocena klientów",
+          "type": "number",
+          "unit": "/ 5",
+          "better": "higher"
+        }
+      ],
+      "items": [
+        {
+          "id": "p1",
+          "name": "LexOnline Ekspres",
+          "url": "#",
+          "badge": "Najszybsza",
+          "values": {
+            "cena": 99,
+            "czas": 2,
+            "forma": "Czat",
+            "opinia": false,
+            "ocena": 4.6
+          }
+        },
+        {
+          "id": "p2",
+          "name": "Prawnik24 Wideo",
+          "url": "#",
+          "badge": "Najlepiej oceniana",
+          "values": {
+            "cena": 149,
+            "czas": 24,
+            "forma": "Wideorozmowa",
+            "opinia": true,
+            "ocena": 4.8
+          }
+        },
+        {
+          "id": "p3",
+          "name": "JurisMail",
+          "url": "#",
+          "badge": "Najtańsza",
+          "values": {
+            "cena": 79,
+            "czas": 48,
+            "forma": "E-mail",
+            "opinia": true,
+            "ocena": 4.3
+          }
+        },
+        {
+          "id": "p4",
+          "name": "PoradaPlus Telefon",
+          "url": "#",
+          "badge": "",
+          "values": {
+            "cena": 119,
+            "czas": 4,
+            "forma": "Telefon",
+            "opinia": false,
+            "ocena": 4.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "kancelarie",
+      "name": "Kancelarie",
+      "icon": "🏛️",
+      "fields": [
+        {
+          "key": "stawka",
+          "label": "Stawka godzinowa",
+          "type": "number",
+          "unit": "zł/h",
+          "better": "lower"
+        },
+        {
+          "key": "konsultacja",
+          "label": "Pierwsza konsultacja",
+          "type": "number",
+          "unit": "zł",
+          "better": "lower"
+        },
+        {
+          "key": "specjalizacja",
+          "label": "Specjalizacja",
+          "type": "text",
+          "unit": "",
+          "better": ""
+        },
+        {
+          "key": "online",
+          "label": "Spotkania online",
+          "type": "bool",
+          "unit": "",
+          "better": "higher"
+        },
+        {
+          "key": "doswiadczenie",
+          "label": "Doświadczenie",
+          "type": "number",
+          "unit": "lat",
+          "better": "higher"
+        }
+      ],
+      "items": [
+        {
+          "id": "k1",
+          "name": "Kancelaria Lexpert",
+          "url": "#",
+          "badge": "",
+          "values": {
+            "stawka": 450,
+            "konsultacja": 300,
+            "specjalizacja": "Prawo gospodarcze",
+            "online": true,
+            "doswiadczenie": 18
+          }
+        },
+        {
+          "id": "k2",
+          "name": "Juris & Partnerzy",
+          "url": "#",
+          "badge": "Darmowa konsultacja",
+          "values": {
+            "stawka": 300,
+            "konsultacja": 0,
+            "specjalizacja": "Prawo rodzinne",
+            "online": true,
+            "doswiadczenie": 9
+          }
+        },
+        {
+          "id": "k3",
+          "name": "Radca Plus",
+          "url": "#",
+          "badge": "Najdłuższe doświadczenie",
+          "values": {
+            "stawka": 380,
+            "konsultacja": 250,
+            "specjalizacja": "Prawo pracy",
+            "online": false,
+            "doswiadczenie": 22
+          }
+        },
+        {
+          "id": "k4",
+          "name": "Mecenas Online",
+          "url": "#",
+          "badge": "",
+          "values": {
+            "stawka": 520,
+            "konsultacja": 400,
+            "specjalizacja": "Prawo nieruchomości",
+            "online": true,
+            "doswiadczenie": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "mediacje",
+      "name": "Mediacje",
+      "icon": "🤝",
+      "fields": [
+        {
+          "key": "cena",
+          "label": "Posiedzenie",
+          "type": "number",
+          "unit": "zł",
+          "better": "lower"
+        },
+        {
+          "key": "termin",
+          "label": "Pierwsze spotkanie za",
+          "type": "number",
+          "unit": "dni",
+          "better": "lower"
+        },
+        {
+          "key": "online",
+          "label": "Mediacja online",
+          "type": "bool",
+          "unit": "",
+          "better": "higher"
+        },
+        {
+          "key": "lista",
+          "label": "Na liście mediatorów sądowych",
+          "type": "bool",
+          "unit": "",
+          "better": "higher"
+        },
+        {
+          "key": "dziedzina",
+          "label": "Dziedzina",
           "type": "text",
           "unit": "",
           "better": ""
@@ -85,138 +277,42 @@
       ],
       "items": [
         {
-          "id": "i1",
-          "name": "NetFala Start",
-          "url": "#",
-          "badge": "Najtańszy",
-          "values": {
-            "cena": 49,
-            "predkosc": 300,
-            "umowa": 24,
-            "router": false,
-            "technologia": "Światłowód"
-          }
-        },
-        {
-          "id": "i2",
-          "name": "Światłowód+ Max",
-          "url": "#",
-          "badge": "Najszybszy",
-          "values": {
-            "cena": 89,
-            "predkosc": 2000,
-            "umowa": 24,
-            "router": true,
-            "technologia": "Światłowód"
-          }
-        },
-        {
-          "id": "i3",
-          "name": "KablaNet 600",
+          "id": "m1",
+          "name": "Centrum Mediacji Zgoda",
           "url": "#",
           "badge": "",
           "values": {
-            "cena": 65,
-            "predkosc": 600,
-            "umowa": 12,
-            "router": true,
-            "technologia": "Kabel"
+            "cena": 150,
+            "termin": 7,
+            "online": true,
+            "lista": true,
+            "dziedzina": "Rodzinne"
           }
         },
         {
-          "id": "i4",
-          "name": "AirLink Bez umowy",
+          "id": "m2",
+          "name": "MediatorNet",
           "url": "#",
-          "badge": "Bez zobowiązań",
+          "badge": "Najszybszy termin",
           "values": {
-            "cena": 75,
-            "predkosc": 250,
-            "umowa": 0,
-            "router": true,
-            "technologia": "5G"
-          }
-        }
-      ]
-    },
-    {
-      "id": "smartfony",
-      "name": "Smartfony",
-      "icon": "📱",
-      "fields": [
-        {
-          "key": "cena",
-          "label": "Cena",
-          "type": "number",
-          "unit": "zł",
-          "better": "lower"
-        },
-        {
-          "key": "bateria",
-          "label": "Bateria",
-          "type": "number",
-          "unit": "mAh",
-          "better": "higher"
-        },
-        {
-          "key": "pamiec",
-          "label": "Pamięć",
-          "type": "number",
-          "unit": "GB",
-          "better": "higher"
-        },
-        {
-          "key": "waga",
-          "label": "Waga",
-          "type": "number",
-          "unit": "g",
-          "better": "lower"
-        },
-        {
-          "key": "nfc",
-          "label": "NFC",
-          "type": "bool",
-          "unit": "",
-          "better": "higher"
-        }
-      ],
-      "items": [
-        {
-          "id": "s1",
-          "name": "Nova X1",
-          "url": "#",
-          "badge": "",
-          "values": {
-            "cena": 1199,
-            "bateria": 5000,
-            "pamiec": 128,
-            "waga": 195,
-            "nfc": true
+            "cena": 200,
+            "termin": 3,
+            "online": true,
+            "lista": false,
+            "dziedzina": "Gospodarcze"
           }
         },
         {
-          "id": "s2",
-          "name": "Orbit Pro",
+          "id": "m3",
+          "name": "Porozumienie — Mediacje",
           "url": "#",
-          "badge": "Flagowiec",
+          "badge": "Najtańsze",
           "values": {
-            "cena": 3899,
-            "bateria": 4800,
-            "pamiec": 512,
-            "waga": 210,
-            "nfc": true
-          }
-        },
-        {
-          "id": "s3",
-          "name": "Lumo Lite",
-          "url": "#",
-          "badge": "Najlżejszy",
-          "values": {
-            "cena": 899,
-            "bateria": 4200,
-            "pamiec": 64,
-            "waga": 168,
-            "nfc": false
+            "cena": 120,
+            "termin": 14,
+            "online": false,
+            "lista": true,
+            "dziedzina": "Sąsiedzkie i cywilne"
           }
         }
       ]
@@ -224,231 +320,177 @@
   ],
   "calculators": [
     {
-      "id": "kredyt",
-      "name": "Rata kredytu",
-      "icon": "🏦",
-      "description": "Rata równa, miesięczna spłata i koszt odsetek.",
+      "id": "odsetki",
+      "name": "Odsetki ustawowe",
+      "icon": "📅",
+      "description": "Za opóźnienie, w transakcjach handlowych i kapitałowe. Stawki od 5.03.2026 (stopa ref. NBP 3,75%).",
       "inputs": [
         {
           "key": "kwota",
-          "label": "Kwota kredytu",
+          "label": "Kwota zaległości",
           "unit": "zł",
-          "default": 300000,
-          "min": 1000,
-          "max": 2000000,
-          "step": 1000
+          "default": 10000,
+          "min": 0,
+          "max": 1000000,
+          "step": 100
         },
         {
-          "key": "opr",
-          "label": "Oprocentowanie roczne",
-          "unit": "%",
-          "default": 7.5,
-          "min": 0.1,
-          "max": 20,
-          "step": 0.1
-        },
-        {
-          "key": "lata",
-          "label": "Okres",
-          "unit": "lat",
-          "default": 25,
+          "key": "dni",
+          "label": "Liczba dni opóźnienia",
+          "unit": "dni",
+          "default": 90,
           "min": 1,
-          "max": 35,
+          "max": 3650,
           "step": 1
         }
       ],
       "outputs": [
         {
-          "key": "rata",
-          "label": "Rata miesięczna",
-          "formula": "kwota*(opr/1200)/(1-pow(1+opr/1200,-lata*12))",
+          "key": "opozn",
+          "label": "Odsetki za opóźnienie (9,25%)",
+          "formula": "kwota*9.25/100*dni/365",
           "unit": "zł",
           "decimals": 2,
           "main": true
         },
         {
-          "key": "suma",
-          "label": "Łącznie do spłaty",
-          "formula": "rata*lata*12",
+          "key": "handlowe",
+          "label": "W transakcjach handlowych (13,75%)",
+          "formula": "kwota*13.75/100*dni/365",
           "unit": "zł",
-          "decimals": 0
+          "decimals": 2
         },
         {
-          "key": "odsetki",
-          "label": "Koszt odsetek",
-          "formula": "suma-kwota",
+          "key": "kapitalowe",
+          "label": "Kapitałowe (7,25%)",
+          "formula": "kwota*7.25/100*dni/365",
           "unit": "zł",
-          "decimals": 0
+          "decimals": 2
+        },
+        {
+          "key": "razem",
+          "label": "Zaległość z odsetkami za opóźnienie",
+          "formula": "kwota+opozn",
+          "unit": "zł",
+          "decimals": 2
         }
       ]
     },
     {
-      "id": "oszczednosci",
-      "name": "Procent składany",
-      "icon": "📈",
-      "description": "Ile urośnie kapitał z miesięcznymi wpłatami.",
+      "id": "oplata",
+      "name": "Opłata sądowa od pozwu",
+      "icon": "⚖️",
+      "description": "Sprawy o prawa majątkowe: opłata stała do 20 000 zł, powyżej 5% wartości (maks. 100 000 zł).",
       "inputs": [
         {
-          "key": "kapital",
-          "label": "Kapitał startowy",
+          "key": "wps",
+          "label": "Wartość przedmiotu sporu",
           "unit": "zł",
-          "default": 10000,
+          "default": 25000,
           "min": 0,
-          "max": 1000000,
-          "step": 500
-        },
-        {
-          "key": "wplata",
-          "label": "Wpłata miesięczna",
-          "unit": "zł",
-          "default": 500,
-          "min": 0,
-          "max": 20000,
-          "step": 50
-        },
-        {
-          "key": "opr",
-          "label": "Oprocentowanie roczne",
-          "unit": "%",
-          "default": 5,
-          "min": 0.1,
-          "max": 20,
-          "step": 0.1
-        },
-        {
-          "key": "lata",
-          "label": "Okres",
-          "unit": "lat",
-          "default": 10,
-          "min": 1,
-          "max": 50,
-          "step": 1
+          "max": 3000000,
+          "step": 100
         }
       ],
       "outputs": [
         {
-          "key": "wynik",
-          "label": "Wartość końcowa",
-          "formula": "kapital*pow(1+opr/1200,lata*12)+wplata*(pow(1+opr/1200,lata*12)-1)/(opr/1200)",
+          "key": "oplata",
+          "label": "Opłata od pozwu",
+          "formula": "wps<=500?30:wps<=1500?100:wps<=4000?200:wps<=7500?400:wps<=10000?500:wps<=15000?750:wps<=20000?1000:min(100000,ceil(wps*0.05))",
           "unit": "zł",
           "decimals": 0,
           "main": true
         },
         {
-          "key": "wplacono",
-          "label": "Wpłacono łącznie",
-          "formula": "kapital+wplata*lata*12",
-          "unit": "zł",
-          "decimals": 0
-        },
-        {
-          "key": "zysk",
-          "label": "Zysk",
-          "formula": "wynik-wplacono",
-          "unit": "zł",
-          "decimals": 0
+          "key": "procent",
+          "label": "Udział w wartości sporu",
+          "formula": "wps>0?oplata/wps*100:0",
+          "unit": "%",
+          "decimals": 2
         }
       ]
     },
     {
-      "id": "vat",
-      "name": "Netto / brutto",
-      "icon": "🧾",
-      "description": "Szybkie przeliczenie VAT.",
+      "id": "zastepstwo",
+      "name": "Koszty zastępstwa procesowego",
+      "icon": "👨‍⚖️",
+      "description": "Stawka minimalna adwokata lub radcy prawnego w sprawie cywilnej + opłata skarbowa od pełnomocnictwa.",
       "inputs": [
         {
-          "key": "netto",
-          "label": "Kwota netto",
+          "key": "wps",
+          "label": "Wartość przedmiotu sporu",
           "unit": "zł",
-          "default": 1000,
+          "default": 25000,
           "min": 0,
-          "max": 100000,
-          "step": 10
-        },
+          "max": 10000000,
+          "step": 100
+        }
+      ],
+      "outputs": [
         {
           "key": "stawka",
-          "label": "Stawka VAT",
-          "unit": "%",
-          "default": 23,
-          "min": 0,
-          "max": 23,
-          "step": 1
-        }
-      ],
-      "outputs": [
-        {
-          "key": "brutto",
-          "label": "Kwota brutto",
-          "formula": "netto*(1+stawka/100)",
+          "label": "Stawka minimalna",
+          "formula": "wps<=500?90:wps<=1500?270:wps<=5000?900:wps<=10000?1800:wps<=50000?3600:wps<=200000?5400:wps<=2000000?10800:wps<=5000000?15000:25000",
           "unit": "zł",
-          "decimals": 2,
+          "decimals": 0,
           "main": true
         },
         {
-          "key": "podatek",
-          "label": "VAT",
-          "formula": "netto*stawka/100",
+          "key": "skarbowa",
+          "label": "Opłata skarbowa od pełnomocnictwa",
+          "formula": "17",
           "unit": "zł",
-          "decimals": 2
+          "decimals": 0
+        },
+        {
+          "key": "razem",
+          "label": "Razem",
+          "formula": "stawka+skarbowa",
+          "unit": "zł",
+          "decimals": 0
         }
       ]
     },
     {
-      "id": "paliwo",
-      "name": "Koszt paliwa",
-      "icon": "⛽",
-      "description": "Koszt przejazdu na podstawie spalania.",
+      "id": "kara",
+      "name": "Kara umowna a wartość umowy",
+      "icon": "📑",
+      "description": "Jaki procent wartości umowy stanowi kara — pomaga ocenić, czy nie jest rażąco wygórowana.",
       "inputs": [
         {
-          "key": "dystans",
-          "label": "Dystans",
-          "unit": "km",
-          "default": 300,
-          "min": 1,
-          "max": 5000,
-          "step": 1
+          "key": "wartosc",
+          "label": "Wartość umowy",
+          "unit": "zł",
+          "default": 50000,
+          "min": 100,
+          "max": 5000000,
+          "step": 100
         },
         {
-          "key": "spalanie",
-          "label": "Spalanie",
-          "unit": "l/100 km",
-          "default": 7,
-          "min": 1,
-          "max": 30,
-          "step": 0.1
-        },
-        {
-          "key": "cena",
-          "label": "Cena paliwa",
-          "unit": "zł/l",
-          "default": 6.2,
-          "min": 1,
-          "max": 15,
-          "step": 0.01
+          "key": "kara",
+          "label": "Kara umowna",
+          "unit": "zł",
+          "default": 10000,
+          "min": 0,
+          "max": 5000000,
+          "step": 100
         }
       ],
       "outputs": [
         {
-          "key": "koszt",
-          "label": "Koszt przejazdu",
-          "formula": "dystans*spalanie/100*cena",
-          "unit": "zł",
-          "decimals": 2,
+          "key": "procent",
+          "label": "Kara jako % wartości umowy",
+          "formula": "kara/wartosc*100",
+          "unit": "%",
+          "decimals": 1,
           "main": true
         },
         {
-          "key": "litry",
-          "label": "Zużyte paliwo",
-          "formula": "dystans*spalanie/100",
-          "unit": "l",
-          "decimals": 1
-        },
-        {
-          "key": "kosztkm",
-          "label": "Koszt 1 km",
-          "formula": "koszt/dystans",
+          "key": "roznica",
+          "label": "Kara ponad 10% wartości",
+          "formula": "max(0,kara-wartosc*0.1)",
           "unit": "zł",
-          "decimals": 2
+          "decimals": 0
         }
       ]
     }
@@ -880,68 +922,6 @@
       "Brak wyników.": "Немає результатів.",
       "Brak kategorii.": "Немає категорій.",
       "PODGLĄD — dane z panelu admina (niezapisane w repo)": "ПЕРЕГЛЯД — дані з панелі адміністратора (не збережені в репозиторії)",
-      "Porównuj oferty i licz szybciej — wszystko w jednym miejscu.": "Порівнюйте пропозиції та рахуйте швидше — все в одному місці.",
-      "Internet domowy": "Домашній інтернет",
-      "Cena": "Ціна",
-      "zł/mies.": "зл/міс.",
-      "Prędkość": "Швидкість",
-      "Mb/s": "Мб/с",
-      "Umowa": "Договір",
-      "mies.": "міс.",
-      "Router w cenie": "Роутер у ціні",
-      "Technologia": "Технологія",
-      "Najtańszy": "Найдешевший",
-      "Najszybszy": "Найшвидший",
-      "Bez zobowiązań": "Без зобов'язань",
-      "AirLink Bez umowy": "AirLink Без договору",
-      "Światłowód": "Оптоволокно",
-      "Kabel": "Кабель",
-      "Smartfony": "Смартфони",
-      "zł": "зл",
-      "Bateria": "Батарея",
-      "mAh": "мАг",
-      "Pamięć": "Пам'ять",
-      "GB": "ГБ",
-      "Waga": "Вага",
-      "g": "г",
-      "Flagowiec": "Флагман",
-      "Najlżejszy": "Найлегший",
-      "Rata kredytu": "Платіж за кредитом",
-      "Rata równa, miesięczna spłata i koszt odsetek.": "Ануїтетний платіж, щомісячна сплата та вартість відсотків.",
-      "Kwota kredytu": "Сума кредиту",
-      "Oprocentowanie roczne": "Річна ставка",
-      "Okres": "Термін",
-      "lat": "років",
-      "Rata miesięczna": "Щомісячний платіж",
-      "Łącznie do spłaty": "Всього до сплати",
-      "Koszt odsetek": "Вартість відсотків",
-      "Procent składany": "Складні відсотки",
-      "Ile urośnie kapitał z miesięcznymi wpłatami.": "Скільки зросте капітал із щомісячними внесками.",
-      "Kapitał startowy": "Початковий капітал",
-      "Wpłata miesięczna": "Щомісячний внесок",
-      "Wartość końcowa": "Кінцева сума",
-      "Wpłacono łącznie": "Внесено всього",
-      "Zysk": "Прибуток",
-      "Netto / brutto": "Нетто / брутто",
-      "Szybkie przeliczenie VAT.": "Швидкий перерахунок ПДВ.",
-      "Kwota netto": "Сума нетто",
-      "Stawka VAT": "Ставка ПДВ",
-      "Kwota brutto": "Сума брутто",
-      "VAT": "ПДВ",
-      "Koszt paliwa": "Вартість пального",
-      "Koszt przejazdu na podstawie spalania.": "Вартість поїздки на основі витрати пального.",
-      "Dystans": "Відстань",
-      "km": "км",
-      "Spalanie": "Витрата",
-      "l/100 km": "л/100 км",
-      "Cena paliwa": "Ціна пального",
-      "zł/l": "зл/л",
-      "Koszt przejazdu": "Вартість поїздки",
-      "Zużyte paliwo": "Витрачене пальне",
-      "l": "л",
-      "Koszt 1 km": "Вартість 1 км",
-      "Porównaj.to — porównywarka ofert i kalkulatory online": "Porównaj.to — порівняння пропозицій та онлайн-калькулятори",
-      "Porównuj oferty internetu, smartfonów i więcej. Darmowe kalkulatory: rata kredytu, procent składany, VAT, koszt paliwa.": "Порівнюйте пропозиції інтернету, смартфонів та інше. Безкоштовні калькулятори: кредит, складні відсотки, ПДВ, вартість пального.",
       "Używamy plików cookie do analityki.": "Ми використовуємо файли cookie для аналітики.",
       "Akceptuję": "Прийняти",
       "Odrzuć": "Відхилити",
@@ -1058,7 +1038,75 @@
       "uwaga": "увага",
       "źle": "погано",
       "Ryzyko prawne": "Правовий ризик",
-      "za opóźnienie": "за прострочення"
+      "za opóźnienie": "за прострочення",
+      "Porady prawne online": "Юридичні консультації онлайн",
+      "Cena porady": "Ціна консультації",
+      "zł": "зл",
+      "Czas odpowiedzi": "Час відповіді",
+      "godz.": "год.",
+      "Forma": "Формат",
+      "Opinia na piśmie": "Письмовий висновок",
+      "Ocena klientów": "Оцінка клієнтів",
+      "Najszybsza": "Найшвидша",
+      "Czat": "Чат",
+      "Najlepiej oceniana": "Найкраще оцінена",
+      "Wideorozmowa": "Відеодзвінок",
+      "Najtańsza": "Найдешевша",
+      "E-mail": "Електронна пошта",
+      "Telefon": "Телефон",
+      "Kancelarie": "Юридичні фірми",
+      "Stawka godzinowa": "Погодинна ставка",
+      "zł/h": "зл/год",
+      "Pierwsza konsultacja": "Перша консультація",
+      "Specjalizacja": "Спеціалізація",
+      "Spotkania online": "Онлайн-зустрічі",
+      "Doświadczenie": "Досвід",
+      "lat": "років",
+      "Prawo gospodarcze": "Господарське право",
+      "Darmowa konsultacja": "Безкоштовна консультація",
+      "Prawo rodzinne": "Сімейне право",
+      "Najdłuższe doświadczenie": "Найбільший досвід",
+      "Prawo pracy": "Трудове право",
+      "Prawo nieruchomości": "Право нерухомості",
+      "Mediacje": "Медіація",
+      "Posiedzenie": "Засідання",
+      "Pierwsze spotkanie za": "Перша зустріч через",
+      "dni": "днів",
+      "Mediacja online": "Онлайн-медіація",
+      "Na liście mediatorów sądowych": "У списку судових медіаторів",
+      "Dziedzina": "Сфера",
+      "Rodzinne": "Сімейні",
+      "Najszybszy termin": "Найшвидший термін",
+      "Gospodarcze": "Господарські",
+      "Najtańsze": "Найдешевші",
+      "Sąsiedzkie i cywilne": "Сусідські та цивільні",
+      "Wartość przedmiotu sporu": "Ціна позову",
+      "Odsetki ustawowe": "Законні відсотки",
+      "Za opóźnienie, w transakcjach handlowych i kapitałowe. Stawki od 5.03.2026 (stopa ref. NBP 3,75%).": "За прострочення, у комерційних угодах і капітальні. Ставки з 05.03.2026 (облікова ставка НБП 3,75%).",
+      "Kwota zaległości": "Сума заборгованості",
+      "Liczba dni opóźnienia": "Кількість днів прострочення",
+      "Odsetki za opóźnienie (9,25%)": "Відсотки за прострочення (9,25%)",
+      "W transakcjach handlowych (13,75%)": "У комерційних угодах (13,75%)",
+      "Kapitałowe (7,25%)": "Капітальні (7,25%)",
+      "Zaległość z odsetkami za opóźnienie": "Заборгованість із відсотками за прострочення",
+      "Opłata sądowa od pozwu": "Судовий збір за позов",
+      "Sprawy o prawa majątkowe: opłata stała do 20 000 zł, powyżej 5% wartości (maks. 100 000 zł).": "Майнові справи: фіксований збір до 20 000 зл, понад — 5% ціни позову (макс. 100 000 зл).",
+      "Opłata od pozwu": "Збір за позов",
+      "Udział w wartości sporu": "Частка від ціни позову",
+      "Koszty zastępstwa procesowego": "Витрати на представництво",
+      "Stawka minimalna adwokata lub radcy prawnego w sprawie cywilnej + opłata skarbowa od pełnomocnictwa.": "Мінімальна ставка адвоката або юрисконсульта в цивільній справі + гербовий збір за довіреність.",
+      "Stawka minimalna": "Мінімальна ставка",
+      "Opłata skarbowa od pełnomocnictwa": "Гербовий збір за довіреність",
+      "Razem": "Разом",
+      "Kara umowna a wartość umowy": "Договірний штраф і вартість договору",
+      "Jaki procent wartości umowy stanowi kara — pomaga ocenić, czy nie jest rażąco wygórowana.": "Який відсоток вартості договору становить штраф — допомагає оцінити, чи не є він надмірним.",
+      "Wartość umowy": "Вартість договору",
+      "Kara umowna": "Договірний штраф",
+      "Kara jako % wartości umowy": "Штраф у % від вартості",
+      "Kara ponad 10% wartości": "Штраф понад 10% вартості",
+      "Porównuj usługi prawne, licz koszty sądowe i odsetki, sprawdzaj umowy — w jednym miejscu.": "Порівнюйте юридичні послуги, рахуйте судові витрати й відсотки, перевіряйте договори — в одному місці.",
+      "Porównaj.to — porady prawne, kalkulatory prawne i analiza umów": "Porównaj.to — юридичні консультації, калькулятори та аналіз договорів",
+      "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.": "Порівняйте онлайн-консультації, юридичні фірми та медіацію. Розрахуйте відсотки, судовий збір і витрати на представництво. Перевірте договір безкоштовно."
     },
     "en": {
       "Porównaj": "Compare",
@@ -1088,60 +1136,6 @@
       "Brak wyników.": "No results.",
       "Brak kategorii.": "No categories.",
       "PODGLĄD — dane z panelu admina (niezapisane w repo)": "PREVIEW — admin panel data (not saved to repo)",
-      "Porównuj oferty i licz szybciej — wszystko w jednym miejscu.": "Compare offers and calculate faster — all in one place.",
-      "Internet domowy": "Home internet",
-      "Cena": "Price",
-      "zł/mies.": "PLN/mo",
-      "Prędkość": "Speed",
-      "Umowa": "Contract",
-      "mies.": "mo",
-      "Router w cenie": "Router included",
-      "Technologia": "Technology",
-      "Najtańszy": "Cheapest",
-      "Najszybszy": "Fastest",
-      "Bez zobowiązań": "No commitment",
-      "AirLink Bez umowy": "AirLink No contract",
-      "Światłowód": "Fiber",
-      "Kabel": "Cable",
-      "Smartfony": "Smartphones",
-      "zł": "PLN",
-      "Bateria": "Battery",
-      "Pamięć": "Storage",
-      "Waga": "Weight",
-      "Flagowiec": "Flagship",
-      "Najlżejszy": "Lightest",
-      "Rata kredytu": "Loan payment",
-      "Rata równa, miesięczna spłata i koszt odsetek.": "Fixed installment, monthly payment and interest cost.",
-      "Kwota kredytu": "Loan amount",
-      "Oprocentowanie roczne": "Annual interest rate",
-      "Okres": "Term",
-      "lat": "years",
-      "Rata miesięczna": "Monthly payment",
-      "Łącznie do spłaty": "Total to repay",
-      "Koszt odsetek": "Interest cost",
-      "Procent składany": "Compound interest",
-      "Ile urośnie kapitał z miesięcznymi wpłatami.": "How your capital grows with monthly deposits.",
-      "Kapitał startowy": "Starting capital",
-      "Wpłata miesięczna": "Monthly deposit",
-      "Wartość końcowa": "Final value",
-      "Wpłacono łącznie": "Total deposited",
-      "Zysk": "Profit",
-      "Netto / brutto": "Net / gross",
-      "Szybkie przeliczenie VAT.": "Quick VAT conversion.",
-      "Kwota netto": "Net amount",
-      "Stawka VAT": "VAT rate",
-      "Kwota brutto": "Gross amount",
-      "Koszt paliwa": "Fuel cost",
-      "Koszt przejazdu na podstawie spalania.": "Trip cost based on fuel consumption.",
-      "Dystans": "Distance",
-      "Spalanie": "Consumption",
-      "Cena paliwa": "Fuel price",
-      "zł/l": "PLN/l",
-      "Koszt przejazdu": "Trip cost",
-      "Zużyte paliwo": "Fuel used",
-      "Koszt 1 km": "Cost per km",
-      "Porównaj.to — porównywarka ofert i kalkulatory online": "Porównaj.to — offer comparison and online calculators",
-      "Porównuj oferty internetu, smartfonów i więcej. Darmowe kalkulatory: rata kredytu, procent składany, VAT, koszt paliwa.": "Compare internet plans, smartphones and more. Free calculators: loan payment, compound interest, VAT, fuel cost.",
       "Używamy plików cookie do analityki.": "We use cookies for analytics.",
       "Akceptuję": "Accept",
       "Odrzuć": "Decline",
@@ -1258,7 +1252,75 @@
       "uwaga": "caution",
       "źle": "bad",
       "Ryzyko prawne": "Legal risk",
-      "za opóźnienie": "for late payment"
+      "za opóźnienie": "for late payment",
+      "Porady prawne online": "Online legal advice",
+      "Cena porady": "Price",
+      "zł": "PLN",
+      "Czas odpowiedzi": "Response time",
+      "godz.": "h",
+      "Forma": "Format",
+      "Opinia na piśmie": "Written opinion",
+      "Ocena klientów": "Customer rating",
+      "Najszybsza": "Fastest",
+      "Czat": "Chat",
+      "Najlepiej oceniana": "Top rated",
+      "Wideorozmowa": "Video call",
+      "Najtańsza": "Cheapest",
+      "E-mail": "Email",
+      "Telefon": "Phone",
+      "Kancelarie": "Law firms",
+      "Stawka godzinowa": "Hourly rate",
+      "zł/h": "PLN/h",
+      "Pierwsza konsultacja": "First consultation",
+      "Specjalizacja": "Specialisation",
+      "Spotkania online": "Online meetings",
+      "Doświadczenie": "Experience",
+      "lat": "years",
+      "Prawo gospodarcze": "Business law",
+      "Darmowa konsultacja": "Free consultation",
+      "Prawo rodzinne": "Family law",
+      "Najdłuższe doświadczenie": "Most experienced",
+      "Prawo pracy": "Employment law",
+      "Prawo nieruchomości": "Real estate law",
+      "Mediacje": "Mediation",
+      "Posiedzenie": "Session",
+      "Pierwsze spotkanie za": "First meeting in",
+      "dni": "days",
+      "Mediacja online": "Online mediation",
+      "Na liście mediatorów sądowych": "Court-listed mediator",
+      "Dziedzina": "Area",
+      "Rodzinne": "Family",
+      "Najszybszy termin": "Fastest",
+      "Gospodarcze": "Business",
+      "Najtańsze": "Cheapest",
+      "Sąsiedzkie i cywilne": "Neighbour & civil",
+      "Wartość przedmiotu sporu": "Value of the claim",
+      "Odsetki ustawowe": "Statutory interest",
+      "Za opóźnienie, w transakcjach handlowych i kapitałowe. Stawki od 5.03.2026 (stopa ref. NBP 3,75%).": "Late-payment, commercial-transaction and capital interest. Rates from 5 Mar 2026 (NBP reference rate 3.75%).",
+      "Kwota zaległości": "Amount overdue",
+      "Liczba dni opóźnienia": "Days overdue",
+      "Odsetki za opóźnienie (9,25%)": "Late-payment interest (9.25%)",
+      "W transakcjach handlowych (13,75%)": "Commercial transactions (13.75%)",
+      "Kapitałowe (7,25%)": "Capital interest (7.25%)",
+      "Zaległość z odsetkami za opóźnienie": "Total with late-payment interest",
+      "Opłata sądowa od pozwu": "Court fee for a claim",
+      "Sprawy o prawa majątkowe: opłata stała do 20 000 zł, powyżej 5% wartości (maks. 100 000 zł).": "Property claims: fixed fee up to PLN 20,000, above that 5% of the value (max PLN 100,000).",
+      "Opłata od pozwu": "Court fee",
+      "Udział w wartości sporu": "Share of claim value",
+      "Koszty zastępstwa procesowego": "Legal representation costs",
+      "Stawka minimalna adwokata lub radcy prawnego w sprawie cywilnej + opłata skarbowa od pełnomocnictwa.": "Minimum fee of an advocate or legal adviser in a civil case + stamp duty on the power of attorney.",
+      "Stawka minimalna": "Minimum fee",
+      "Opłata skarbowa od pełnomocnictwa": "Stamp duty on power of attorney",
+      "Razem": "Total",
+      "Kara umowna a wartość umowy": "Penalty vs contract value",
+      "Jaki procent wartości umowy stanowi kara — pomaga ocenić, czy nie jest rażąco wygórowana.": "What share of the contract value the penalty represents — helps judge whether it is excessive.",
+      "Wartość umowy": "Contract value",
+      "Kara umowna": "Penalty",
+      "Kara jako % wartości umowy": "Penalty as % of value",
+      "Kara ponad 10% wartości": "Penalty above 10% of value",
+      "Porównuj usługi prawne, licz koszty sądowe i odsetki, sprawdzaj umowy — w jednym miejscu.": "Compare legal services, calculate court costs and interest, check contracts — all in one place.",
+      "Porównaj.to — porady prawne, kalkulatory prawne i analiza umów": "Porównaj.to — legal advice, legal calculators and contract analysis",
+      "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.": "Compare online legal advice, law firms and mediation. Calculate statutory interest, court fees and representation costs. Check your contract for free."
     }
   }
 }

@@ -2,6 +2,13 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.4.0] — 2026-10-21
+- Strona prawnicza: porównywarka usług prawnych (porady online, kancelarie, mediacje) i kalkulatory prawne
+- Kalkulatory: odsetki ustawowe (9,25% / 13,75% / 7,25%), opłata sądowa od pozwu (art. 13 UKSC, maks. 100 000 zł), koszty zastępstwa procesowego (Dz.U. 2026 poz. 215), kara umowna a wartość umowy
+- Nowe treści SEO i tłumaczenia UA/EN; usunięte przykładowe treści ogólne
+- Panel: ostrzeżenie, gdy data.json w repo zmienił się od utworzenia szkicu (użyj nowej wersji / zostaw szkic)
+- Instrukcja: tabela stawek do aktualizacji, opis zapisu szkicu
+
 ## [1.3.0] — 2026-10-21
 - Analiza umów: upload PDF/Word/ODT/RTF/TXT/HTML lub wklejenie tekstu, analiza lokalnie w przeglądarce
 - Trzy działy i paski od zielonego do czerwonego: Ryzyko zapisów, Zgodność z prawem (klauzule niedozwolone, limity odsetek, braki), Styl i przejrzystość (podejrzana treść)
