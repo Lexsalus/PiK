@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Panel administracyjny</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#7c5cff;--bg:#0b0d14;--bg2:#10131c;--card:#151927;--card2:#1b2032;--line:#262c42;--txt:#e8eaf3;--mut:#8b92ad;--good:#2fd6a0;--bad:#ff6b81;--warn:#f5b84a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.lbox{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;width:100%;max-width:360px;text-align:center}
+.lbox h1{font-size:1.4rem;margin:10px 0 20px}
+.lbox .err{color:var(--bad);margin-top:10px;min-height:1.2em}
+/* layout */
+#app{display:none;grid-template-columns:230px 1fr;min-height:100vh}
+aside{background:var(--bg2);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{font-weight:800;font-size:1.05rem;padding:6px 10px 20px;display:flex;gap:10px;align-items:center}
+.brand i{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;font-style:normal;color:#fff}
+.nav{padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--mut);font-weight:600;border:0;background:none;text-align:left;display:flex;gap:10px}
+.nav:hover{background:var(--card)}.nav.on{background:var(--card2);color:var(--txt)}
+aside .sp{flex:1}
+main{padding:28px;max-width:1200px;width:100%}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.top h2{font-size:1.5rem}
+.status{font-size:.82rem;padding:6px 12px;border-radius:20px;background:var(--card);border:1px solid var(--line);color:var(--mut)}
+.status.dirty{color:var(--warn);border-color:var(--warn)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+.box h3{font-size:1rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.f{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;outline:none;width:100%;min-width:0}
+.f:focus{border-color:var(--accent)}
+.f.code{font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.form label{display:grid;gap:6px;color:var(--mut);font-weight:600;font-size:.82rem}
+.btn{padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.del{color:var(--bad)}.btn.del:hover{border-color:var(--bad)}
+.btn.sm{padding:5px 9px;font-size:.8rem}
+.split{display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:start}
+.list{display:grid;gap:6px}
+.li{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:flex;justify-content:space-between;gap:6px}
+.li.on{border-color:var(--accent);background:var(--card2)}
+.li small{color:var(--mut)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th{color:var(--mut);font-weight:600;font-size:.78rem;text-align:left;padding:6px;white-space:nowrap}
+td{padding:4px 6px;vertical-align:middle}
+td input[type=checkbox],td input[type=radio]{accent-color:var(--accent);width:18px;height:18px}
+.hint{color:var(--mut);font-size:.82rem;line-height:1.5;margin-top:8px}
+.hint code{background:var(--bg2);padding:1px 6px;border-radius:5px}
+.test{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+.test div{background:var(--bg2);border-radius:10px;padding:10px 12px}
+.test span{display:block;color:var(--mut);font-size:.78rem}
+.test b.err{color:var(--bad)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--accent);padding:12px 18px;border-radius:12px;opacity:0;transform:translateY(10px);transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+@media(max-width:860px){#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.brand{width:100%;padding-bottom:8px}aside .sp{display:none}.split{grid-template-columns:1fr}main{padding:16px}}
+</style>
+</head>
+<body>
+
+<div id="login"><div class="lbox">
+  <div style="font-size:2rem">🔐</div><h1>Panel administracyjny</h1>
+  <input class="f" type="password" id="pw" placeholder="Hasło" autofocus>
+  <button class="btn pri" id="pwGo" style="width:100%;margin-top:12px;padding:11px">Zaloguj</button>
+  <div class="err" id="pwErr"></div>
+  <p class="hint">Domyślne hasło: <code>admin</code> — zmień je w Ustawieniach.</p>
+</div></div>
+
+<div id="app">
+  <aside>
+    <div class="brand"><i>◆</i><span id="bName">Admin</span></div>
+    <button class="nav on" data-v="settings">⚙️ Ustawienia</button>
+    <button class="nav" data-v="cats">🗂️ Kategorie</button>
+    <button class="nav" data-v="calcs">🧮 Kalkulatory</button>
+    <button class="nav" data-v="export">💾 Publikacja</button>
+    <div class="sp"></div>
+    <a class="nav" href="index.html?preview" target="_blank" style="text-decoration:none">👁️ Podgląd</a>
+    <button class="nav" id="logout">↩ Wyloguj</button>
+  </aside>
+  <main><div class="top"><h2 id="vTitle"></h2><span class="status" id="status">Zapisano</span></div><div id="view"></div></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='pk_draft';
+let D,ORIG,view='settings',ci=0,ki=0;
+
+async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)};
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ł/g,'l').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'id';
+const uid=p=>p+Math.random().toString(36).slice(2,7);
+
+async function load(){
+  try{ORIG=await (await fetch('data.json',{cache:'no-store'})).json()}catch(e){ORIG=null}
+  let draft=null;try{draft=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  D=draft||structuredClone(ORIG);
+  if(!D){$('#pwErr').textContent='Brak data.json — uruchom przez serwer.';return}
+  if(sessionStorage.getItem('pk_auth')===D.site.adminHash)enter();
+}
+$('#pwGo').onclick=async()=>{
+  const h=await sha($('#pw').value);
+  const ok=[D?.site?.adminHash,ORIG?.site?.adminHash].includes(h);
+  if(ok){sessionStorage.setItem('pk_auth',D.site.adminHash);enter()}else{$('#pwErr').textContent='Nieprawidłowe hasło'}
+};
+$('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwGo').click()};
+$('#logout').onclick=()=>{sessionStorage.removeItem('pk_auth');location.reload()};
+function enter(){$('#login').style.display='none';$('#app').style.display='grid';render()}
+
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}
+  const dirty=JSON.stringify(D)!==JSON.stringify(ORIG);
+  $('#status').textContent=dirty?'Szkic — niewyeksportowany':'Zgodne z data.json';
+  $('#status').classList.toggle('dirty',dirty);
+  document.documentElement.style.setProperty('--accent',D.site.accent||'#7c5cff');
+  $('#bName').textContent=D.site.name||'Admin';
+}
+
+/* ścieżkowe wiązanie pól: data-p="categories.0.name" */
+const getP=p=>p.split('.').reduce((o,k)=>o?.[k],D);
+function setP(p,v){const ks=p.split('.'),last=ks.pop();ks.reduce((o,k)=>o[k],D)[last]=v}
+$('#view').addEventListener('input',e=>{
+  const el=e.target,p=el.dataset.p;if(!p)return;
+  let v=el.type==='checkbox'?el.checked:el.value;
+  if(el.dataset.t==='num')v=el.value===''?'':Number(el.value);
+  if(el.type==='radio'){ // jeden "main" w kalkulatorze
+    D.calculators[ki].outputs.forEach((o,i)=>o.main=i==el.value);save();testCalc();return;
+  }
+  setP(p,v);save();
+  if(view==='calcs')testCalc();
+});
+$('#view').addEventListener('change',e=>{
+  const el=e.target;
+  if(el.dataset.rekey!==undefined){ // zmiana klucza pola => migracja wartości ofert
+    const c=D.categories[ci],f=c.fields[el.dataset.rekey],nk=slug(el.value),ok=el.dataset.old;
+    f.key=nk;c.items.forEach(it=>{if(ok in it.values){it.values[nk]=it.values[ok];if(nk!==ok)delete it.values[ok]}});save();render();
+  }
+  if(el.dataset.rerender!==undefined)render();
+});
+
+document.querySelectorAll('aside .nav[data-v]').forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll('aside .nav').forEach(x=>x.classList.toggle('on',x===b));render()});
+
+function render(){
+  save();
+  const T={settings:'Ustawienia strony',cats:'Kategorie porównywarki',calcs:'Kalkulatory',export:'Publikacja'};
+  $('#vTitle').textContent=T[view];
+  $('#view').innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,export:vExport})[view]();
+  if(view==='calcs')testCalc();
+}
+
+/* ---------- Ustawienia ---------- */
+function vSettings(){
+  const s=D.site;
+  return `<div class="box"><h3>Podstawowe</h3><div class="form">
+    <label>Nazwa strony<input class="f" data-p="site.name" value="${esc(s.name)}"></label>
+    <label>Kolor akcentu<input class="f" type="color" data-p="site.accent" value="${esc(s.accent||'#7c5cff')}" style="height:40px;padding:4px"></label>
+    <label style="grid-column:1/-1">Hasło (podtytuł)<input class="f" data-p="site.tagline" value="${esc(s.tagline)}"></label>
+  </div></div>
+  <div class="box"><h3>Hasło administratora</h3><div class="form">
+    <label>Nowe hasło<input class="f" type="password" id="np"></label>
+    <label>&nbsp;<button class="btn pri" onclick="chPw()">Zmień hasło</button></label></div>
+    <p class="hint">Hasło jest przechowywane jako skrót SHA-256 w <code>data.json</code>. To zabezpieczenie „na drzwiach” — strona jest statyczna, więc nie chroni danych przed kimś, kto zajrzy do repozytorium. Prawdziwą ochroną jest to, że tylko Ty masz prawo zapisu w repo.</p></div>`;
+}
+async function chPw(){const v=$('#np').value;if(v.length<4)return toast('Min. 4 znaki');D.site.adminHash=await sha(v);sessionStorage.setItem('pk_auth',D.site.adminHash);save();$('#np').value='';toast('Hasło zmienione — wyeksportuj data.json')}
+
+/* ---------- Kategorie ---------- */
+function vCats(){
+  const cs=D.categories;ci=Math.min(ci,cs.length-1);
+  const list=`<div class="list">${cs.map((c,i)=>`<div class="li ${i===ci?'on':''}" onclick="ci=${i};render()"><span>${esc(c.icon)} ${esc(c.name)}</span><small>${c.items.length}</small></div>`).join('')}
+    <button class="btn" onclick="addCat()">+ Nowa kategoria</button></div>`;
+  if(ci<0)return `<div class="split">${list}<div class="box">Brak kategorii.</div></div>`;
+  const c=cs[ci],P=`categories.${ci}`;
+  const fields=c.fields.map((f,i)=>`<tr>
+    <td><input class="f code" value="${esc(f.key)}" data-rekey="${i}" data-old="${esc(f.key)}" style="width:110px"></td>
+    <td><input class="f" data-p="${P}.fields.${i}.label" value="${esc(f.label)}"></td>
+    <td><select class="f" data-p="${P}.fields.${i}.type" data-rerender>${['number','text','bool'].map(t=>`<option ${f.type===t?'selected':''} value="${t}">${{number:'liczba',text:'tekst',bool:'tak/nie'}[t]}</option>`).join('')}</select></td>
+    <td><input class="f" data-p="${P}.fields.${i}.unit" value="${esc(f.unit)}" style="width:90px"></td>
+    <td><select class="f" data-p="${P}.fields.${i}.better">${[['','—'],['lower','niższa'],['higher','wyższa']].map(([v,l])=>`<option value="${v}" ${f.better===v?'selected':''}>${l}</option>`).join('')}</select></td>
+    <td><button class="btn sm" onclick="mv('fields',${i},-1)">↑</button> <button class="btn sm del" onclick="delField(${i})">✕</button></td></tr>`).join('');
+  const items=c.items.map((it,i)=>`<tr>
+    <td><input class="f" data-p="${P}.items.${i}.name" value="${esc(it.name)}" style="min-width:150px"></td>
+    <td><input class="f" data-p="${P}.items.${i}.badge" value="${esc(it.badge)}" style="width:110px"></td>
+    ${c.fields.map(f=>{const p=`${P}.items.${i}.values.${f.key}`,v=it.values[f.key];
+      return `<td>${f.type==='bool'?`<input type="checkbox" data-p="${p}" ${v?'checked':''}>`:`<input class="f" ${f.type==='number'?'type="number" step="any" data-t="num"':''} data-p="${p}" value="${esc(v)}" style="width:${f.type==='number'?90:130}px">`}</td>`}).join('')}
+    <td><input class="f" data-p="${P}.items.${i}.url" value="${esc(it.url)}" style="width:140px" placeholder="https://"></td>
+    <td><button class="btn sm" onclick="mv('items',${i},-1)">↑</button> <button class="btn sm del" onclick="delItem(${i})">✕</button></td></tr>`).join('');
+  return `<div class="split">${list}<div>
+   <div class="box"><h3>Kategoria <button class="btn sm del" onclick="delCat()">Usuń kategorię</button></h3><div class="form">
+     <label>Nazwa<input class="f" data-p="${P}.name" value="${esc(c.name)}"></label>
+     <label>Ikona (emoji)<input class="f" data-p="${P}.icon" value="${esc(c.icon)}"></label>
+     <label>ID<input class="f code" data-p="${P}.id" value="${esc(c.id)}"></label></div></div>
+   <div class="box"><h3>Parametry porównania <button class="btn sm" onclick="addField()">+ Parametr</button></h3><div class="tw"><table>
+     <tr><th>Klucz</th><th>Etykieta</th><th>Typ</th><th>Jednostka</th><th>Lepsza wartość</th><th></th></tr>${fields}</table></div>
+     <p class="hint">„Lepsza wartość” podświetla najlepszą ofertę (★) dla danego parametru.</p></div>
+   <div class="box"><h3>Oferty (${c.items.length}) <button class="btn sm pri" onclick="addItem()">+ Oferta</button></h3><div class="tw"><table>
+     <tr><th>Nazwa</th><th>Etykieta</th>${c.fields.map(f=>`<th>${esc(f.label)}${f.unit?` (${esc(f.unit)})`:''}</th>`).join('')}<th>Link</th><th></th></tr>${items}</table></div></div>
+  </div></div>`;
+}
+function addCat(){D.categories.push({id:uid('cat_'),name:'Nowa kategoria',icon:'📦',fields:[{key:'cena',label:'Cena',type:'number',unit:'zł',better:'lower'}],items:[]});ci=D.categories.length-1;render()}
+function delCat(){if(confirm('Usunąć kategorię „'+D.categories[ci].name+'”?')){D.categories.splice(ci,1);ci=0;render()}}
+function addField(){const c=D.categories[ci];let k='param',n=1;while(c.fields.some(f=>f.key===k+n))n++;c.fields.push({key:k+n,label:'Nowy parametr',type:'number',unit:'',better:''});render()}
+function delField(i){const c=D.categories[ci],k=c.fields[i].key;if(!confirm('Usunąć parametr i jego wartości?'))return;c.fields.splice(i,1);c.items.forEach(it=>delete it.values[k]);render()}
+function addItem(){const c=D.categories[ci];c.items.push({id:uid('it_'),name:'Nowa oferta',url:'',badge:'',values:Object.fromEntries(c.fields.map(f=>[f.key,f.type==='bool'?false:f.type==='number'?0:'']))});render()}
+function delItem(i){if(confirm('Usunąć ofertę?')){D.categories[ci].items.splice(i,1);render()}}
+function mv(arr,i,d){const a=view==='cats'?D.categories[ci][arr]:D.calculators[ki][arr],j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()}
+
+/* ---------- Kalkulatory ---------- */
+function vCalcs(){
+  const cs=D.calculators;ki=Math.min(ki,cs.length-1);
+  const list=`<div class="list">${cs.map((c,i)=>`<div class="li ${i===ki?'on':''}" onclick="ki=${i};render()"><span>${esc(c.icon)} ${esc(c.name)}</span></div>`).join('')}
+    <button class="btn" onclick="addCalc()">+ Nowy kalkulator</button></div>`;
+  if(ki<0)return `<div class="split">${list}<div class="box">Brak kalkulatorów.</div></div>`;
+  const c=cs[ki],P=`calculators.${ki}`;
+  const ins=c.inputs.map((x,i)=>`<tr>
+    <td><input class="f code" data-p="${P}.inputs.${i}.key" value="${esc(x.key)}" style="width:100px"></td>
+    <td><input class="f" data-p="${P}.inputs.${i}.label" value="${esc(x.label)}" style="min-width:150px"></td>
+    <td><input class="f" data-p="${P}.inputs.${i}.unit" value="${esc(x.unit)}" style="width:70px"></td>
+    ${['default','min','max','step'].map(k=>`<td><input class="f" type="number" step="any" data-t="num" data-p="${P}.inputs.${i}.${k}" value="${x[k]}" style="width:85px"></td>`).join('')}
+    <td><button class="btn sm" onclick="mv('inputs',${i},-1)">↑</button> <button class="btn sm del" onclick="D.calculators[ki].inputs.splice(${i},1);render()">✕</button></td></tr>`).join('');
+  const outs=c.outputs.map((o,i)=>`<tr>
+    <td><input type="radio" name="main" value="${i}" data-p="x" ${o.main?'checked':''} title="Wynik główny"></td>
+    <td><input class="f code" data-p="${P}.outputs.${i}.key" value="${esc(o.key)}" style="width:90px"></td>
+    <td><input class="f" data-p="${P}.outputs.${i}.label" value="${esc(o.label)}" style="min-width:140px"></td>
+    <td><input class="f code" data-p="${P}.outputs.${i}.formula" value="${esc(o.formula)}" style="min-width:260px"></td>
+    <td><input class="f" data-p="${P}.outputs.${i}.unit" value="${esc(o.unit)}" style="width:60px"></td>
+    <td><input class="f" type="number" data-t="num" min="0" max="6" data-p="${P}.outputs.${i}.decimals" value="${o.decimals??0}" style="width:60px"></td>
+    <td><button class="btn sm" onclick="mv('outputs',${i},-1)">↑</button> <button class="btn sm del" onclick="D.calculators[ki].outputs.splice(${i},1);render()">✕</button></td></tr>`).join('');
+  return `<div class="split">${list}<div>
+   <div class="box"><h3>Kalkulator <button class="btn sm del" onclick="delCalc()">Usuń kalkulator</button></h3><div class="form">
+     <label>Nazwa<input class="f" data-p="${P}.name" value="${esc(c.name)}"></label>
+     <label>Ikona<input class="f" data-p="${P}.icon" value="${esc(c.icon)}"></label>
+     <label>ID<input class="f code" data-p="${P}.id" value="${esc(c.id)}"></label>
+     <label style="grid-column:1/-1">Opis<input class="f" data-p="${P}.description" value="${esc(c.description)}"></label></div></div>
+   <div class="box"><h3>Pola wejściowe <button class="btn sm" onclick="addIn()">+ Pole</button></h3><div class="tw"><table>
+     <tr><th>Zmienna</th><th>Etykieta</th><th>Jedn.</th><th>Domyślna</th><th>Min</th><th>Max</th><th>Krok</th><th></th></tr>${ins}</table></div></div>
+   <div class="box"><h3>Wyniki <button class="btn sm" onclick="addOut()">+ Wynik</button></h3><div class="tw"><table>
+     <tr><th title="Wynik główny">★</th><th>Zmienna</th><th>Etykieta</th><th>Wzór</th><th>Jedn.</th><th>Miejsca po przec.</th><th></th></tr>${outs}</table></div>
+     <p class="hint">Wzory to wyrażenia JavaScript. Dostępne: zmienne wejściowe, wyniki z wierszy <b>powyżej</b> oraz funkcje <code>pow</code>, <code>sqrt</code>, <code>round</code>, <code>min</code>, <code>max</code>, <code>abs</code>, <code>log</code>, <code>PI</code>. Warunki: <code>a&gt;b ? x : y</code>.</p>
+     <h3 style="margin-top:18px">Test na wartościach domyślnych</h3><div class="test" id="test"></div></div>
+  </div></div>`;
+}
+function testCalc(){
+  const t=$('#test');if(!t)return;const c=D.calculators[ki];
+  const scope=Object.fromEntries(c.inputs.map(i=>[i.key,Number(i.default)||0]));
+  t.innerHTML=c.outputs.map(o=>{let v,err='';
+    try{v=new Function(...Object.keys(scope),'with(Math){return ('+o.formula+')}')(...Object.values(scope));if(!Number.isFinite(v))err='nie jest liczbą'}catch(e){err=e.message}
+    scope[o.key]=Number(v);
+    return `<div><span>${esc(o.label)}${o.main?' ★':''}</span>${err?`<b class="err">⚠ ${esc(err)}</b>`:`<b>${Number(v).toLocaleString('pl-PL',{maximumFractionDigits:o.decimals??2})} ${esc(o.unit)}</b>`}</div>`}).join('');
+}
+function addCalc(){D.calculators.push({id:uid('calc_'),name:'Nowy kalkulator',icon:'🧮',description:'',inputs:[{key:'a',label:'Wartość A',unit:'',default:10,min:0,max:100,step:1},{key:'b',label:'Wartość B',unit:'',default:5,min:0,max:100,step:1}],outputs:[{key:'suma',label:'Suma',formula:'a+b',unit:'',decimals:0,main:true}]});ki=D.calculators.length-1;render()}
+function delCalc(){if(confirm('Usunąć kalkulator?')){D.calculators.splice(ki,1);ki=0;render()}}
+function addIn(){D.calculators[ki].inputs.push({key:'x'+D.calculators[ki].inputs.length,label:'Nowe pole',unit:'',default:0,min:0,max:100,step:1});render()}
+function addOut(){D.calculators[ki].outputs.push({key:'w'+D.calculators[ki].outputs.length,label:'Nowy wynik',formula:'0',unit:'',decimals:2});render()}
+
+/* ---------- Publikacja ---------- */
+function vExport(){
+  return `<div class="box"><h3>Jak opublikować zmiany</h3>
+    <ol class="hint" style="padding-left:18px;font-size:.9rem;color:var(--txt)">
+      <li>Edytuj dane — zapisują się automatycznie jako szkic w tej przeglądarce.</li>
+      <li>Sprawdź <a href="index.html?preview" target="_blank">podgląd strony</a>.</li>
+      <li>Pobierz <code>data.json</code> i podmień plik w repozytorium (commit + push).</li>
+      <li>GitHub Pages opublikuje zmiany w ~1 min.</li></ol></div>
+   <div class="box"><h3>Akcje</h3><div style="display:flex;gap:10px;flex-wrap:wrap">
+     <button class="btn pri" onclick="dl()">⬇ Pobierz data.json</button>
+     <button class="btn" onclick="navigator.clipboard.writeText(JSON.stringify(D,null,2)).then(()=>toast('Skopiowano JSON'))">📋 Kopiuj JSON</button>
+     <label class="btn">📂 Importuj plik<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label>
+     <button class="btn del" onclick="reset()">↺ Odrzuć szkic</button></div></div>`;
+}
+function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));a.download='data.json';a.click();URL.revokeObjectURL(a.href);toast('Pobrano data.json')}
+function imp(f){if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(!j.site||!j.categories||!j.calculators)throw 0;D=j;render();toast('Zaimportowano')}catch(e){toast('Nieprawidłowy plik')}})}
+function reset(){if(!ORIG||!confirm('Odrzucić wszystkie niezapisane zmiany?'))return;D=structuredClone(ORIG);try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono data.json')}
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Porównywarka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#7c5cff;
+  --bg:#0b0d14;--bg2:#11141e;--card:#151927;--card2:#1b2032;--line:#262c42;
+  --txt:#e8eaf3;--mut:#8b92ad;--good:#2fd6a0;--bad:#ff6b81;
+  --r:18px;--sh:0 10px 40px -12px rgba(0,0,0,.6);
+}
+[data-theme=light]{
+  --bg:#f5f6fb;--bg2:#ffffff;--card:#ffffff;--card2:#f0f2f8;--line:#e2e5ef;
+  --txt:#141826;--mut:#6a718a;--sh:0 10px 30px -14px rgba(30,40,80,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 75%,transparent);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.logo{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+.logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 40%,#2fd6a0));display:grid;place-items:center;font-style:normal;font-size:.95rem;color:#fff}
+.links{display:flex;gap:6px;margin-left:auto}
+.links a{padding:8px 14px;border-radius:10px;color:var(--mut);font-weight:600;font-size:.92rem;transition:.2s}
+.links a:hover,.links a.on{color:var(--txt);background:var(--card2)}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center}
+
+/* hero */
+.hero{position:relative;padding:80px 0 50px;text-align:center;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto;height:520px;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 35%,transparent),transparent);filter:blur(30px);z-index:-1;opacity:.8}
+.hero h1{font-size:clamp(2rem,5.5vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.08}
+.hero h1 span{background:linear-gradient(90deg,var(--accent),#2fd6a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);font-size:1.1rem;max-width:600px;margin:18px auto 30px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{padding:12px 22px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{transform:translateY(-2px)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 8px 24px -8px var(--accent)}
+.stats{display:flex;gap:28px;justify-content:center;margin-top:40px;color:var(--mut);font-size:.9rem}
+.stats b{display:block;color:var(--txt);font-size:1.5rem}
+
+section{padding:50px 0}
+.sec-h{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+.sec-h h2{font-size:1.8rem;letter-spacing:-.02em}
+.sec-h p{color:var(--mut)}
+
+/* category tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;transition:.2s}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.field{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;outline:none;transition:.2s}
+.field:focus{border-color:var(--accent)}
+.toolbar .field.search{flex:1;min-width:200px}
+
+/* offer cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;position:relative;transition:.25s;box-shadow:var(--sh);display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 40%,transparent)}
+.badge{position:absolute;top:-10px;left:18px;background:linear-gradient(90deg,var(--accent),#2fd6a0);color:#fff;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px}
+.card h3{font-size:1.15rem;margin:6px 0 14px}
+.rows{display:grid;gap:8px;margin-bottom:16px;flex:1}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.row span{color:var(--mut)}
+.row b.best{color:var(--good)}
+.row b.best::after{content:" ★";font-size:.75em}
+.card-foot{display:flex;gap:8px}
+.card-foot .btn{flex:1;justify-content:center;padding:10px;font-size:.88rem}
+.chk{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--mut);font-size:.85rem;font-weight:600;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.chk input{accent-color:var(--accent)}
+.empty{color:var(--mut);padding:40px;text-align:center;border:1px dashed var(--line);border-radius:var(--r)}
+
+/* compare bar + modal */
+.cbar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,150%);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh);transition:.35s;z-index:60;max-width:calc(100% - 32px)}
+.cbar.show{transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(5,7,12,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:80;padding:16px}
+.modal.show{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--line);border-radius:22px;max-width:960px;width:100%;max-height:90vh;overflow:auto;padding:24px;animation:pop .25s}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600}
+td.best{color:var(--good);font-weight:700}
+
+/* calculators */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.ccard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;cursor:pointer;transition:.25s}
+.ccard:hover,.ccard.on{border-color:var(--accent);transform:translateY(-3px)}
+.ccard .ic{font-size:1.6rem;width:48px;height:48px;border-radius:14px;background:var(--card2);display:grid;place-items:center;margin-bottom:12px}
+.ccard p{color:var(--mut);font-size:.88rem}
+.calc{margin-top:22px;display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.inp{margin-bottom:20px}
+.inp label{display:flex;justify-content:space-between;font-weight:600;font-size:.92rem;margin-bottom:8px}
+.inp label input{width:130px;text-align:right;padding:6px 10px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.res{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 22%,var(--card)),var(--card));}
+.res .main{font-size:2.3rem;font-weight:800;letter-spacing:-.02em;margin:4px 0 20px}
+.res .sub{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.res .sub span{color:var(--mut)}
+
+footer{border-top:1px solid var(--line);padding:30px 0;color:var(--mut);font-size:.88rem;margin-top:40px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.preview-flag{background:#f5b84a;color:#1a1300;text-align:center;font-weight:700;font-size:.85rem;padding:6px}
+@media(max-width:760px){.calc{grid-template-columns:1fr}.links a:not(.keep){display:none}.hero{padding-top:50px}}
+.fade{animation:fade .4s both}@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+</style>
+</head>
+<body>
+<div id="pv"></div>
+<nav><div class="wrap">
+  <a class="logo" href="#"><i>◆</i><span id="siteName">…</span></a>
+  <div class="links">
+    <a href="#porownaj" class="keep">Porównaj</a>
+    <a href="#kalkulatory" class="keep">Kalkulatory</a>
+  </div>
+  <button class="icon-btn" id="theme" title="Motyw">🌓</button>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <h1 id="heroTitle">Porównuj mądrzej.<br><span>Licz szybciej.</span></h1>
+  <p id="tagline"></p>
+  <div class="cta">
+    <a class="btn pri" href="#porownaj">Zacznij porównywać →</a>
+    <a class="btn" href="#kalkulatory">Kalkulatory</a>
+  </div>
+  <div class="stats"><div><b id="stCat">0</b>kategorii</div><div><b id="stItem">0</b>ofert</div><div><b id="stCalc">0</b>kalkulatorów</div></div>
+</div></header>
+
+<section id="porownaj"><div class="wrap">
+  <div class="sec-h"><div><h2>Porównywarka</h2><p>Zaznacz do 4 ofert, aby zestawić je obok siebie.</p></div></div>
+  <div class="tabs" id="catTabs"></div>
+  <div class="toolbar">
+    <input class="field search" id="q" placeholder="Szukaj oferty…">
+    <select class="field" id="sort"></select>
+  </div>
+  <div class="grid" id="items"></div>
+</div></section>
+
+<section id="kalkulatory"><div class="wrap">
+  <div class="sec-h"><div><h2>Kalkulatory</h2><p>Wyniki liczą się na bieżąco.</p></div></div>
+  <div class="cgrid" id="calcs"></div>
+  <div class="calc" id="calc"></div>
+</div></section>
+
+<footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span></span><a href="admin.html">Panel administracyjny</a></div></footer>
+
+<div class="cbar" id="cbar"><span id="cbarTxt"></span><button class="btn" id="cClear">Wyczyść</button><button class="btn pri" id="cGo">Porównaj</button></div>
+<div class="modal" id="modal"><div class="mbox"><div class="mhead"><h3>Porównanie</h3><button class="icon-btn" id="mClose">✕</button></div><div id="mBody" style="overflow-x:auto"></div></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=(v,d=0)=>Number.isFinite(v)?v.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+let D,cat,sel=new Set(),curCalc;
+
+/* motyw */
+const th=localStorage.getItem('theme');if(th)document.documentElement.dataset.theme=th;
+$('#theme').onclick=()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}};
+
+async function load(){
+  if(new URLSearchParams(location.search).has('preview')){
+    try{const d=localStorage.getItem('pk_draft');if(d){D=JSON.parse(d);$('#pv').innerHTML='<div class="preview-flag">PODGLĄD — dane z panelu admina (niezapisane w repo)</div>'}}catch(e){}
+  }
+  if(!D){
+    try{D=await (await fetch('data.json',{cache:'no-store'})).json()}
+    catch(e){document.body.innerHTML='<p style="padding:40px">Nie udało się wczytać <code>data.json</code>. Uruchom stronę przez serwer (np. Live Server w VS Code) lub na GitHub Pages.</p>';return}
+  }
+  init();
+}
+
+function init(){
+  const s=D.site||{};
+  document.title=s.name||'Porównywarka';
+  document.documentElement.style.setProperty('--accent',s.accent||'#7c5cff');
+  $('#siteName').textContent=$('#fName').textContent=s.name||'';
+  $('#tagline').textContent=s.tagline||'';
+  $('#yr').textContent=new Date().getFullYear();
+  $('#stCat').textContent=D.categories.length;
+  $('#stItem').textContent=D.categories.reduce((a,c)=>a+c.items.length,0);
+  $('#stCalc').textContent=D.calculators.length;
+  renderTabs();setCat(D.categories[0]?.id);
+  renderCalcs();if(D.calculators[0])openCalc(D.calculators[0].id,false);
+}
+
+/* ---------- porównywarka ---------- */
+function renderTabs(){
+  $('#catTabs').innerHTML=D.categories.map(c=>`<button class="tab" data-id="${esc(c.id)}">${esc(c.icon||'')} ${esc(c.name)}</button>`).join('');
+  $('#catTabs').onclick=e=>{const b=e.target.closest('.tab');if(b)setCat(b.dataset.id)};
+}
+function setCat(id){
+  cat=D.categories.find(c=>c.id===id);sel.clear();updBar();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.id===id));
+  if(!cat){$('#items').innerHTML='<div class="empty">Brak kategorii.</div>';return}
+  const opts=['<option value="">Sortuj: domyślnie</option>'];
+  cat.fields.filter(f=>f.type==='number').forEach(f=>{
+    opts.push(`<option value="${f.key}:1">${esc(f.label)} rosnąco</option><option value="${f.key}:-1">${esc(f.label)} malejąco</option>`)});
+  $('#sort').innerHTML=opts.join('');$('#q').value='';
+  renderItems();
+}
+function bestMap(items){
+  const m={};
+  cat.fields.forEach(f=>{
+    if(!f.better)return;
+    const vals=items.map(i=>f.type==='bool'?(i.values[f.key]?1:0):Number(i.values[f.key])).filter(Number.isFinite);
+    if(!vals.length)return;
+    m[f.key]=f.better==='lower'?Math.min(...vals):Math.max(...vals);
+  });return m;
+}
+const val=(f,v)=>f.type==='bool'?(v?'✓ Tak':'✗ Nie'):f.type==='number'?fmt(Number(v),Number(v)%1?2:0)+(f.unit?' '+f.unit:''):esc(v);
+const isBest=(f,v,m)=>f.key in m&&(f.type==='bool'?(v?1:0):Number(v))===m[f.key];
+function renderItems(){
+  const q=$('#q').value.trim().toLowerCase();
+  let items=cat.items.filter(i=>i.name.toLowerCase().includes(q));
+  const [sk,sd]=$('#sort').value.split(':');
+  if(sk)items=[...items].sort((a,b)=>(a.values[sk]-b.values[sk])*sd);
+  const m=bestMap(cat.items);
+  $('#items').innerHTML=items.length?items.map((it,n)=>`
+   <div class="card fade ${sel.has(it.id)?'sel':''}" style="animation-delay:${n*40}ms">
+     ${it.badge?`<div class="badge">${esc(it.badge)}</div>`:''}
+     <h3>${esc(it.name)}</h3>
+     <div class="rows">${cat.fields.map(f=>`<div class="row"><span>${esc(f.label)}</span><b class="${isBest(f,it.values[f.key],m)?'best':''}">${val(f,it.values[f.key])}</b></div>`).join('')}</div>
+     <div class="card-foot">
+       <label class="chk"><input type="checkbox" data-id="${esc(it.id)}" ${sel.has(it.id)?'checked':''}>Porównaj</label>
+       ${it.url&&it.url!=='#'?`<a class="btn pri" href="${esc(it.url)}" target="_blank" rel="noopener">Zobacz →</a>`:''}
+     </div>
+   </div>`).join(''):'<div class="empty">Brak wyników.</div>';
+}
+$('#q').oninput=renderItems;$('#sort').onchange=renderItems;
+$('#items').onchange=e=>{
+  const c=e.target.closest('input[type=checkbox]');if(!c)return;
+  if(c.checked){if(sel.size>=4){c.checked=false;return}sel.add(c.dataset.id)}else sel.delete(c.dataset.id);
+  c.closest('.card').classList.toggle('sel',c.checked);updBar();
+};
+function updBar(){$('#cbar').classList.toggle('show',sel.size>0);$('#cbarTxt').textContent=`Wybrano: ${sel.size}/4`}
+$('#cClear').onclick=()=>{sel.clear();updBar();renderItems()};
+$('#cGo').onclick=()=>{
+  const items=cat.items.filter(i=>sel.has(i.id)),m=bestMap(items);
+  $('#mBody').innerHTML=`<table><tr><th></th>${items.map(i=>`<th style="color:var(--txt)">${esc(i.name)}</th>`).join('')}</tr>
+   ${cat.fields.map(f=>`<tr><th>${esc(f.label)}</th>${items.map(i=>`<td class="${items.length>1&&isBest(f,i.values[f.key],m)?'best':''}">${val(f,i.values[f.key])}</td>`).join('')}</tr>`).join('')}</table>`;
+  $('#modal').classList.add('show');
+};
+$('#mClose').onclick=()=>$('#modal').classList.remove('show');
+$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('show')};
+addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').classList.remove('show')});
+
+/* ---------- kalkulatory ---------- */
+function renderCalcs(){
+  $('#calcs').innerHTML=D.calculators.map(c=>`<div class="ccard" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(c.name)}</h3><p>${esc(c.description||'')}</p></div>`).join('');
+  $('#calcs').onclick=e=>{const c=e.target.closest('.ccard');if(c)openCalc(c.dataset.id,true)};
+}
+function compute(c,vals){
+  const scope={...vals};
+  return c.outputs.map(o=>{
+    let v=NaN;
+    try{v=Number(new Function(...Object.keys(scope),'with(Math){return ('+o.formula+')}')(...Object.values(scope)))}catch(e){}
+    scope[o.key]=v;return{...o,v};
+  });
+}
+function openCalc(id,scroll){
+  curCalc=D.calculators.find(c=>c.id===id);if(!curCalc)return;
+  document.querySelectorAll('.ccard').forEach(c=>c.classList.toggle('on',c.dataset.id===id));
+  $('#calc').innerHTML=`<div class="panel fade"><h3 style="margin-bottom:18px">${esc(curCalc.icon||'')} ${esc(curCalc.name)}</h3>
+    ${curCalc.inputs.map(i=>`<div class="inp"><label>${esc(i.label)}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${i.default}" step="${i.step||1}"> ${esc(i.unit||'')}</span></label>
+    <input type="range" data-k="${esc(i.key)}" min="${i.min}" max="${i.max}" step="${i.step||1}" value="${i.default}"></div>`).join('')}</div>
+    <div class="panel res fade" id="res"></div>`;
+  $('#calc').oninput=e=>{const k=e.target.dataset.k;if(!k)return;$('#calc').querySelectorAll(`[data-k="${k}"]`).forEach(x=>{if(x!==e.target)x.value=e.target.value});calc()};
+  calc();if(scroll)$('#calc').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function calc(){
+  const vals={};$('#calc').querySelectorAll('input[type=range]').forEach(r=>{const n=$('#calc').querySelector(`input[type=number][data-k="${r.dataset.k}"]`);vals[r.dataset.k]=parseFloat(n.value)||0});
+  const out=compute(curCalc,vals),main=out.find(o=>o.main)||out[0];
+  $('#res').innerHTML=main?`<span style="color:var(--mut)">${esc(main.label)}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(main.unit||'')}</div>
+   ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(o.label)}</span><b>${fmt(o.v,o.decimals)} ${esc(o.unit||'')}</b></div>`).join('')}`:'';
+}
+load();
+</script>
+</body>
+</html>
