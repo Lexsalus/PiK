@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.4.2] — 2026-10-21
+- Nowy adres po zmianie organizacji na Lexsalus: lexsalus.github.io (strona, SEO, sitemap, chatbot Ilona)
+
 ## [1.4.1] — 2026-10-21
 - Numer wersji przy nazwie strony w górnym pasku
 - Poprawka: przełącznik języka nie ściska się na telefonie (węższy pasek na małych ekranach)

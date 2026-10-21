@@ -2,8 +2,8 @@
 
 Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
 
-🌐 **Strona:** https://lekarzeiterapeuci.github.io/PiK/
-🔐 **Panel:** https://lekarzeiterapeuci.github.io/PiK/admin.html
+🌐 **Strona:** https://lexsalus.github.io/PiK/
+🔐 **Panel:** https://lexsalus.github.io/PiK/admin.html
 
 📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
 

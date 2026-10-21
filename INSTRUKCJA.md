@@ -4,9 +4,9 @@
 
 | Co | Adres |
 |----|-------|
-| Strona | `https://lekarzeiterapeuci.github.io/PiK/` |
-| Panel admina | `https://lekarzeiterapeuci.github.io/PiK/admin.html` |
-| Podgląd szkicu | `https://lekarzeiterapeuci.github.io/PiK/index.html?preview` |
+| Strona | `https://lexsalus.github.io/PiK/` |
+| Panel admina | `https://lexsalus.github.io/PiK/admin.html` |
+| Podgląd szkicu | `https://lexsalus.github.io/PiK/index.html?preview` |
 
 Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi też przycisk **⚙️ Panel** w prawym górnym rogu strony.
 
@@ -158,7 +158,7 @@ Tytuł i opis tłumaczysz w zakładce Tłumaczenia (grupa „SEO”).
 
 ## 9. Chatbot (Ilona)
 
-Na stronie jest osadzony chatbot z `lekarzeiterapeuci.github.io/Ilona/embed.js`.
+Na stronie jest osadzony chatbot z `lexsalus.github.io/Ilona/embed.js`.
 
 **Ustawienia → Chatbot (Ilona):**
 - **Pokaż chatbota na stronie** — włącza / wyłącza,

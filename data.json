@@ -6,14 +6,14 @@
     "adminHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
     "chatbot": {
       "enabled": true,
-      "src": "https://lekarzeiterapeuci.github.io/Ilona/embed.js"
+      "src": "https://lexsalus.github.io/Ilona/embed.js"
     }
   },
   "seo": {
     "title": "Porównaj.to — porady prawne, kalkulatory prawne i analiza umów",
     "description": "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.",
     "keywords": "porada prawna online, kancelaria, mediacje, kalkulator odsetek ustawowych, opłata sądowa od pozwu, koszty zastępstwa procesowego, analiza umowy",
-    "siteUrl": "https://lekarzeiterapeuci.github.io/PiK/",
+    "siteUrl": "https://lexsalus.github.io/PiK/",
     "ogImage": "",
     "author": "",
     "themeColor": "#0b0d14",
