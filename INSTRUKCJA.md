@@ -14,7 +14,7 @@ Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi te
 
 1. Otwórz panel i zaloguj się hasłem `admin`.
 2. **Ustawienia → Hasło administratora** — ustaw nowe hasło.
-3. Wyeksportuj `data.json` i wrzuć do repo (pkt 9) — bez tego nowe hasło nie zadziała na innych komputerach.
+3. Wyeksportuj `data.json` i wrzuć do repo (pkt 10) — bez tego nowe hasło nie zadziała na innych komputerach.
 
 ## 3. Ustawienia strony
 
@@ -68,7 +68,36 @@ suma    = rata*lata*12
 odsetki = suma-kwota
 ```
 
-## 6. Tłumaczenia (PL / UA / EN)
+## 6. Analiza umów
+
+Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Plik nie opuszcza przeglądarki** — analiza działa lokalnie, bez serwera.
+
+**Formaty:** PDF, Word `.docx`, OpenDocument `.odt`, `.rtf`, `.txt` / `.md`, `.html`. Nieobsługiwane: stary `.doc` oraz skany (PDF bez tekstu) — strona prosi wtedy o zapis jako `.docx`/PDF albo wklejenie treści.
+
+**Wynik** to trzy paski od zielonego do czerwonego (0–29 dobrze, 30–59 uwaga, 60+ źle) i trzy działy:
+
+| Dział | Co sprawdza | Pasek |
+|-------|-------------|-------|
+| 📋 Podstawowa analiza | ryzykowne zapisy (kary, automatyczne przedłużenie, weksel…) i braki (np. okres wypowiedzenia) + wykryte kwoty, daty, okresy, procenty | Ryzyko zapisów |
+| ⚖️ Zgodność z prawem | możliwe klauzule niedozwolone (art. 385¹ i 385³ KC), odsetki ponad limit ustawowy, brak danych stron i daty | Ryzyko prawne |
+| 🔍 Styl i przejrzystość | nieostre sformułowania, odesłania do regulaminów, zawiłe odesłania, presja czasu, ukryte opłaty, podwójne zaprzeczenia, bardzo długie zdania | Podejrzana treść |
+
+Przy każdym zapisie jest porada, podstawa prawna (dział prawny) i cytaty z umowy z podświetleniem. **Pokaż pełny tekst** — cała umowa z zaznaczeniami; **Pobierz raport** — plik `.txt`.
+
+### Panel → 📄 Analiza umów
+
+- **Ustawienia:** włączenie sekcji, maks. rozmiar pliku, dozwolone formaty, zastrzeżenie pod wynikiem.
+- **Reguły** (podstawowe i prawne): nazwa, poziom (🔴 wysokie / 🟠 do sprawdzenia / 🔵 informacyjnie), kiedy zgłosić (*gdy występuje* / *gdy brakuje* / *odsetki > limit*), wzorce, porada, podstawa prawna.
+- **Wzorce** to wyrażenia regularne (wielkość liter bez znaczenia), np. `kar[aąy] umown`, `okres\w* wypowiedzeni` (`\w*` = dowolna końcówka), `.{0,60}` = do 60 znaków pomiędzy. Zwykły fragment tekstu też działa.
+- **Odsetki maksymalne** — dwa pola (umowne i za opóźnienie). Wzór: umowne = 2 × (stopa ref. NBP + 3,5 pp), za opóźnienie = 2 × (stopa + 5,5 pp). Przy stopie 3,75% (od 5.03.2026): **14,5%** i **18,5%**. ⚠️ Aktualizuj po każdej zmianie stóp przez RPP.
+- **Podejrzana treść:** wskaźniki z punktami za wystąpienie i maksimum, próg długiego zdania.
+- **Tester reguł** — wklej fragment umowy i zobacz od razu, które reguły zadziałały (⚠️ = błędny wzorzec).
+
+Nazwy reguł, porady i wyjaśnienia tłumaczysz w zakładce Tłumaczenia (grupy „Analiza umów”).
+
+> Analiza opiera się na wzorcach tekstu — to lista kontrolna, nie opinia prawna. Może przeoczyć zapis sformułowany inaczej albo zgłosić zapis dopuszczalny w danej umowie.
+
+## 7. Tłumaczenia (PL / UA / EN)
 
 Na stronie w górnym pasku jest przełącznik **PL · UA · EN**. Język wybiera się też automatycznie wg przeglądarki odwiedzającego i można go wymusić linkiem `?lang=uk` / `?lang=en`.
 
@@ -87,9 +116,9 @@ Tabela tekstów:
 - licznik u góry pokazuje postęp, np. `Ukraiński: 92/101`,
 - zmiana polskiego tekstu w kategorii/kalkulatorze tworzy nowy wpis, a stare tłumaczenie trafia do grupy **Nieużywane** (przycisk **Usuń nieużywane** je czyści).
 
-Tłumaczenia są zapisywane w `data.json` — publikujesz je jak resztę zmian (pkt 9).
+Tłumaczenia są zapisywane w `data.json` — publikujesz je jak resztę zmian (pkt 10).
 
-## 7. SEO — optymalizacja pod Google
+## 8. SEO — optymalizacja pod Google
 
 W panelu: **🔎 SEO**. Na górze jest **podgląd wyniku w Google**, podgląd przy udostępnianiu i lista kontrolna z oceną.
 
@@ -112,9 +141,9 @@ Tytuł i opis tłumaczysz w zakładce Tłumaczenia (grupa „SEO”).
 3. Opublikuj `data.json`, odczekaj ~1 min i kliknij *Zweryfikuj*.
 4. W Search Console → *Mapy witryn* dodaj `sitemap.xml`.
 
-> Na adresie `github.io/PiK/` Google czyta `robots.txt` tylko z głównej domeny, dlatego mapę witryny trzeba zgłosić ręcznie (pkt 4). Po podpięciu własnej domeny `robots.txt` zacznie działać automatycznie.
+> Na adresie `github.io/PiK/` Google czyta `robots.txt` tylko z głównej domeny, dlatego mapę witryny trzeba zgłosić ręcznie (krok 4). Po podpięciu własnej domeny `robots.txt` zacznie działać automatycznie.
 
-## 8. Chatbot (Ilona)
+## 9. Chatbot (Ilona)
 
 Na stronie jest osadzony chatbot z `lekarzeiterapeuci.github.io/Ilona/embed.js`.
 
@@ -124,19 +153,19 @@ Na stronie jest osadzony chatbot z `lekarzeiterapeuci.github.io/Ilona/embed.js`.
 
 Skrypt dostaje atrybut `data-lang` z aktualnym językiem strony.
 
-## 9. Publikacja zmian
+## 10. Publikacja zmian
 
 Zmiany w panelu to **szkic** zapisany tylko w tej przeglądarce (status „Szkic — niewyeksportowany”).
 
 1. **Podgląd** — sprawdź stronę z danymi szkicu.
 2. **Publikacja → Pobierz data.json**.
 3. Podmień `data.json` w repozytorium.
-4. Podbij wersję (pkt 10), commit, push.
+4. Podbij wersję (pkt 11), commit, push.
 5. Po ~1 min zmiany są na stronie (zakładka *Actions* w GitHubie pokazuje postęp).
 
 Inne akcje: **Kopiuj JSON**, **Importuj plik** (wczytanie `data.json` z dysku), **Odrzuć szkic** (powrót do wersji z repo).
 
-## 10. Wersjonowanie
+## 11. Wersjonowanie
 
 Zasada: **każdy push = nowa wersja**.
 
@@ -152,7 +181,7 @@ Skrypt aktualizuje `version.json` i dopisuje wpis do `CHANGELOG.md`. Pełna sekw
 py bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe oferty internetu"; git push
 ```
 
-## 11. Rozwiązywanie problemów
+## 12. Rozwiązywanie problemów
 
 | Problem | Rozwiązanie |
 |---------|-------------|

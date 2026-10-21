@@ -1,4 +1,4 @@
-# PiK — Porównywarka i Kalkulatory
+# PiK — Porównywarka, Kalkulatory i analiza umów
 
 Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
 
@@ -12,6 +12,7 @@ Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel admin
 **Strona publiczna**
 - Porównywarka: kategorie, wyszukiwarka, sortowanie, ★ przy najlepszej wartości, porównanie do 4 ofert w tabeli
 - Kalkulatory z suwakami, wyniki na żywo
+- Analiza umów (PDF, Word, ODT, RTF, TXT, HTML) w przeglądarce: ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
 - Wersje językowe PL / UA / EN (własne tłumaczenia lub Google Translate)
 - Chatbot Ilona osadzony na stronie
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
@@ -21,6 +22,7 @@ Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel admin
 - Ustawienia strony (nazwa, kolor akcentu, podtytuł, hasło)
 - Kategorie z dowolnymi parametrami (liczba / tekst / tak-nie) i ofertami
 - Kalkulatory z własnymi wzorami i testem na żywo
+- Analiza umów: reguły podstawowe i prawne (z podstawą prawną), limity odsetek, wskaźniki podejrzanej treści, tester reguł
 - Tłumaczenia: tryb własny/Google, wybór języków, tabela z postępem i filtrem brakujących
 - SEO: tytuł, opis, hreflang, Open Graph, schema.org, Search Console, Bing, GA4 z banerem zgody, robots.txt, sitemap.xml, podgląd wyniku Google i ocena
 - Włączanie/wyłączanie chatbota
