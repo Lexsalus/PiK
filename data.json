@@ -453,6 +453,404 @@
       ]
     }
   ],
+  "contracts": {
+    "enabled": true,
+    "maxMB": 15,
+    "formats": [
+      "pdf",
+      "docx",
+      "odt",
+      "rtf",
+      "txt",
+      "html"
+    ],
+    "disclaimer": "Analiza jest automatyczna i orientacyjna — nie zastępuje porady prawnej.",
+    "rules": [
+      {
+        "id": "kara",
+        "name": "Kary umowne",
+        "level": "high",
+        "mode": "present",
+        "patterns": [
+          "kar[aąyęo]\\w*\\s+umown",
+          "penalty",
+          "liquidated damages"
+        ],
+        "advice": "Sprawdź wysokość kar i za co grożą. Wysokie kary można negocjować lub ograniczyć do rażących naruszeń."
+      },
+      {
+        "id": "auto",
+        "name": "Automatyczne przedłużenie umowy",
+        "level": "high",
+        "mode": "present",
+        "patterns": [
+          "automatyczn\\w*\\s+przedłuż",
+          "przedłuża\\s+się\\s+(automatycznie|na\\s+(czas|kolejn))",
+          "auto[- ]?renew"
+        ],
+        "advice": "Umowa może się odnowić bez Twojej zgody. Zanotuj termin, do którego trzeba ją wypowiedzieć."
+      },
+      {
+        "id": "zmiana",
+        "name": "Jednostronna zmiana warunków",
+        "level": "high",
+        "mode": "present",
+        "patterns": [
+          "(jednostronn\\w*|zastrzega\\s+sobie\\s+prawo).{0,80}(zmian|podwyż|modyfikac)",
+          "unilateral(ly)?\\s+(change|amend)"
+        ],
+        "advice": "Druga strona może zmienić warunki bez Twojej zgody. Sprawdź, czy przysługuje Ci wtedy prawo wypowiedzenia bez opłat."
+      },
+      {
+        "id": "wczesne",
+        "name": "Opłata za wcześniejsze rozwiązanie",
+        "level": "high",
+        "mode": "present",
+        "patterns": [
+          "(opłat|zwrot|kar)\\w*.{0,60}(wcześniejsz|przedterminow)\\w*\\s+(rozwiązani|wypowiedzeni)",
+          "zwrot\\w*\\s+(przyznan\\w+\\s+)?ulg",
+          "early termination fee"
+        ],
+        "advice": "Wyjście z umowy przed czasem może kosztować. Sprawdź, jak liczona jest opłata."
+      },
+      {
+        "id": "weksel",
+        "name": "Weksel",
+        "level": "high",
+        "mode": "present",
+        "patterns": [
+          "weks(el|l)"
+        ],
+        "advice": "Weksel in blanco to silne zabezpieczenie wierzyciela. Sprawdź deklarację wekslową i jej warunki."
+      },
+      {
+        "id": "wypowiedzenie",
+        "name": "Okres wypowiedzenia",
+        "level": "medium",
+        "mode": "missing",
+        "patterns": [
+          "okres\\w*\\s+wypowiedzeni",
+          "wypowiedzeni\\w*\\s+z\\s+zachowaniem",
+          "notice period"
+        ],
+        "advice": "W umowie nie znaleziono okresu wypowiedzenia — upewnij się, jak i kiedy możesz ją zakończyć."
+      },
+      {
+        "id": "odsetki",
+        "name": "Odsetki",
+        "level": "medium",
+        "mode": "present",
+        "patterns": [
+          "odset(ek|k)",
+          "\\binterest\\b"
+        ],
+        "advice": "Sprawdź wysokość odsetek (zwłaszcza za opóźnienie) i od kiedy są naliczane."
+      },
+      {
+        "id": "stopa",
+        "name": "Zmienne oprocentowanie",
+        "level": "medium",
+        "mode": "present",
+        "patterns": [
+          "WIBOR|WIRON|POLSTR|EURIBOR",
+          "zmienn\\w+\\s+(oprocentowani|stop)"
+        ],
+        "advice": "Rata może wzrosnąć wraz ze zmianą wskaźnika. Policz ratę przy wyższej stopie (kalkulator obok)."
+      },
+      {
+        "id": "odpowiedzialnosc",
+        "name": "Wyłączenie odpowiedzialności",
+        "level": "medium",
+        "mode": "present",
+        "patterns": [
+          "(wyłącz|ogranicz)\\w*\\s+(swoj\\w+\\s+)?odpowiedzialno",
+          "(limitation|exclusion) of liability"
+        ],
+        "advice": "Druga strona ogranicza swoją odpowiedzialność. Sprawdź, czy limit nie jest zbyt niski."
+      },
+      {
+        "id": "kaucja",
+        "name": "Kaucja, zadatek, depozyt",
+        "level": "medium",
+        "mode": "present",
+        "patterns": [
+          "kaucj",
+          "zadat",
+          "depozyt",
+          "\\bdeposit\\b"
+        ],
+        "advice": "Sprawdź, kiedy i na jakich warunkach wpłacone pieniądze wracają."
+      },
+      {
+        "id": "cesja",
+        "name": "Cesja / przeniesienie wierzytelności",
+        "level": "medium",
+        "mode": "present",
+        "patterns": [
+          "\\bcesj",
+          "przeni\\w+\\s+wierzytelno",
+          "przelew\\w*\\s+wierzytelno",
+          "\\bassign(ment)?\\b"
+        ],
+        "advice": "Dług lub prawa z umowy mogą zostać przeniesione na inny podmiot (np. firmę windykacyjną)."
+      },
+      {
+        "id": "odstapienie",
+        "name": "Prawo odstąpienia (14 dni)",
+        "level": "info",
+        "mode": "present",
+        "patterns": [
+          "odstąpi\\w*.{0,60}14\\s*dni",
+          "14\\s*dni.{0,60}odstąpi",
+          "right of withdrawal"
+        ],
+        "advice": "Przy umowie zawartej na odległość lub poza lokalem masz zwykle 14 dni na odstąpienie bez podania przyczyny."
+      },
+      {
+        "id": "sad",
+        "name": "Sąd właściwy / arbitraż",
+        "level": "info",
+        "mode": "present",
+        "patterns": [
+          "sąd\\w*\\s+(właściw|polubown|arbitraż)",
+          "arbitraż",
+          "jurisdiction"
+        ],
+        "advice": "Sprawdź, który sąd rozstrzyga spory — odległy sąd utrudnia dochodzenie roszczeń."
+      },
+      {
+        "id": "rodo",
+        "name": "Dane osobowe (RODO)",
+        "level": "info",
+        "mode": "present",
+        "patterns": [
+          "\\bRODO\\b",
+          "dan\\w+\\s+osobow",
+          "\\bGDPR\\b"
+        ],
+        "advice": "Umowa zawiera postanowienia o danych osobowych — sprawdź zakres zgód i cel przetwarzania."
+      }
+    ],
+    "legal": {
+      "enabled": true,
+      "maxInterest": 14.5,
+      "maxDefault": 18.5,
+      "rules": [
+        {
+          "id": "rekojmia",
+          "name": "Wyłączenie lub ograniczenie odpowiedzialności wobec konsumenta",
+          "level": "high",
+          "mode": "present",
+          "patterns": [
+            "(wyłącz|ogranicz)\\w*.{0,40}(rękojmi|reklamacj|odpowiedzialno)",
+            "nie\\s+(przysługuje|podlega)\\w*.{0,30}reklamacj"
+          ],
+          "advice": "W umowie z konsumentem taki zapis może być klauzulą niedozwoloną — nie wiąże konsumenta.",
+          "basis": "art. 385³ pkt 2 KC"
+        },
+        {
+          "id": "sad_siedziba",
+          "name": "Sąd właściwy dla siedziby firmy",
+          "level": "high",
+          "mode": "present",
+          "patterns": [
+            "sąd\\w*\\s+właściw\\w*.{0,80}siedzib",
+            "sąd\\w*.{0,40}siedzib\\w*\\s+(sprzedawc|operator|usługodawc|wynajmując|zleceniobiorc|przedsiębiorc)"
+          ],
+          "advice": "Narzucenie konsumentowi sądu innego niż wynikający z ustawy to typowa klauzula niedozwolona.",
+          "basis": "art. 385³ pkt 23 KC"
+        },
+        {
+          "id": "zmiana_bez",
+          "name": "Jednostronna zmiana umowy bez ważnej przyczyny",
+          "level": "high",
+          "mode": "present",
+          "patterns": [
+            "zastrzega\\s+sobie\\s+prawo.{0,80}(zmian|podwyż)(?!.{0,200}(ważn\\w*\\s+przyczyn|w\\s+przypadku))",
+            "może\\s+w\\s+każdym\\s+czasie\\s+zmienić"
+          ],
+          "advice": "Zmiana umowy powinna mieć ważne przyczyny wskazane w umowie. Brak takiej listy może oznaczać klauzulę niedozwoloną.",
+          "basis": "art. 385³ pkt 10 KC"
+        },
+        {
+          "id": "brak_zwrotu",
+          "name": "Brak zwrotu wpłat przy rezygnacji",
+          "level": "high",
+          "mode": "present",
+          "patterns": [
+            "(odstąpieni|rezygnacj|wypowiedzeni)\\w*.{0,80}(nie\\s+podlega\\w*\\s+zwrotowi|bez\\s+zwrotu|przepada)",
+            "(wpłat|zaliczk|opłat)\\w*.{0,40}nie\\s+podlega\\w*\\s+zwrotowi"
+          ],
+          "advice": "Zatrzymanie pieniędzy za niewykonane świadczenie po rezygnacji konsumenta może być niedozwolone.",
+          "basis": "art. 385³ pkt 12 KC"
+        },
+        {
+          "id": "kara_odstap",
+          "name": "Kara lub odstępne przy odstąpieniu",
+          "level": "medium",
+          "mode": "present",
+          "patterns": [
+            "kar\\w*\\s+umown\\w*.{0,80}(odstąpi|rezygnac|wypowiedzeni)",
+            "odstępn"
+          ],
+          "advice": "Rażąco wygórowana kara za odstąpienie od umowy jest niedozwolona — porównaj jej wysokość z wartością umowy.",
+          "basis": "art. 385³ pkt 17 KC"
+        },
+        {
+          "id": "zrzeczenie",
+          "name": "Zrzeczenie się praw",
+          "level": "high",
+          "mode": "present",
+          "patterns": [
+            "zrzeka\\s+się",
+            "zrzecze\\w*\\s+się",
+            "waive"
+          ],
+          "advice": "Zrzeczenie się ustawowych uprawnień przez konsumenta jest zwykle nieskuteczne. Sprawdź, czego dotyczy.",
+          "basis": "art. 385¹ KC"
+        },
+        {
+          "id": "odsetki_max",
+          "name": "Odsetki powyżej limitu ustawowego",
+          "level": "high",
+          "mode": "interest",
+          "patterns": [
+            "(odset|oprocentow)\\w*"
+          ],
+          "advice": "Odsetki ponad odsetki maksymalne są z mocy prawa obniżane do limitu — taki zapis jest wadliwy.",
+          "basis": "art. 359 § 2¹ i art. 481 § 2¹ KC"
+        },
+        {
+          "id": "strony",
+          "name": "Oznaczenie stron (NIP, KRS, PESEL)",
+          "level": "medium",
+          "mode": "missing",
+          "patterns": [
+            "\\bNIP\\b",
+            "\\bREGON\\b",
+            "\\bKRS\\b",
+            "\\bPESEL\\b",
+            "dowod\\w*\\s+osobist"
+          ],
+          "advice": "Nie znaleziono danych identyfikujących strony. Bez nich trudno ustalić, z kim zawierasz umowę.",
+          "basis": ""
+        },
+        {
+          "id": "data_zaw",
+          "name": "Data zawarcia umowy",
+          "level": "medium",
+          "mode": "missing",
+          "patterns": [
+            "zawart\\w*\\s+(w\\s+dniu|dnia)",
+            "\\b\\d{1,2}[./-]\\d{1,2}[./-](19|20)\\d{2}\\b",
+            "\\b(19|20)\\d{2}-\\d{2}-\\d{2}\\b"
+          ],
+          "advice": "Nie znaleziono daty zawarcia — od niej liczą się terminy (np. 14 dni na odstąpienie).",
+          "basis": ""
+        },
+        {
+          "id": "reklamacje",
+          "name": "Informacja o reklamacjach",
+          "level": "info",
+          "mode": "missing",
+          "patterns": [
+            "reklamacj",
+            "rękojmi",
+            "gwarancj"
+          ],
+          "advice": "Brak zapisów o reklamacjach. W umowie konsumenckiej obowiązują wtedy przepisy ustawowe — warto o nie dopytać.",
+          "basis": "ustawa o prawach konsumenta"
+        }
+      ]
+    },
+    "suspicion": {
+      "enabled": true,
+      "longSentence": 40,
+      "longWeight": 4,
+      "longMax": 20,
+      "indicators": [
+        {
+          "id": "nieostre",
+          "name": "Nieostre sformułowania",
+          "patterns": [
+            "w\\s+uzasadnionych\\s+przypadkach",
+            "według\\s+(własnego\\s+)?uznania",
+            "w\\s+szczególności",
+            "w\\s+razie\\s+potrzeby",
+            "stosown\\w+\\s+(opłat|zmian|decyzj)",
+            "w\\s+zależności\\s+od\\s+okoliczności"
+          ],
+          "weight": 4,
+          "max": 25,
+          "explain": "Pozostawiają drugiej stronie dużą swobodę interpretacji."
+        },
+        {
+          "id": "odeslania",
+          "name": "Odesłania do innych dokumentów",
+          "patterns": [
+            "regulamin",
+            "cennik",
+            "\\bOWU\\b",
+            "ogólne\\w*\\s+warunk",
+            "tabel\\w+\\s+opłat"
+          ],
+          "weight": 4,
+          "max": 20,
+          "explain": "Część warunków jest poza umową — przeczytaj też te dokumenty."
+        },
+        {
+          "id": "zawile",
+          "name": "Zawiłe odesłania wewnętrzne",
+          "patterns": [
+            "o\\s+któr\\w+\\s+mowa\\s+w",
+            "z\\s+zastrzeżeniem",
+            "stosuje\\s+się\\s+odpowiednio",
+            "\\bust\\.\\s*\\d+\\s+pkt"
+          ],
+          "weight": 3,
+          "max": 15,
+          "explain": "Utrudniają zrozumienie, co faktycznie obowiązuje."
+        },
+        {
+          "id": "presja",
+          "name": "Presja czasu",
+          "patterns": [
+            "tylko\\s+dziś",
+            "ostatni\\w*\\s+szans",
+            "natychmiast\\w*",
+            "oferta\\s+ważna\\s+(do|tylko)",
+            "nieodwołaln"
+          ],
+          "weight": 8,
+          "max": 25,
+          "explain": "Nacisk na szybką decyzję to częsty sygnał ostrzegawczy."
+        },
+        {
+          "id": "oplaty",
+          "name": "Ukryte lub dodatkowe opłaty",
+          "patterns": [
+            "opłat\\w*\\s+(dodatkow|manipulacyjn|administracyjn|serwisow|aktywacyjn|przygotowawcz)",
+            "prowizj",
+            "inne\\s+opłaty"
+          ],
+          "weight": 5,
+          "max": 25,
+          "explain": "Koszty poza główną ceną — policz łączny koszt umowy."
+        },
+        {
+          "id": "zaprzeczenia",
+          "name": "Podwójne zaprzeczenia",
+          "patterns": [
+            "nie\\s+jest\\s+(niemożliw|wykluczon|nieuzasadnion|niedozwolon)",
+            "nie\\s+można\\s+wykluczyć"
+          ],
+          "weight": 6,
+          "max": 15,
+          "explain": "Mogą maskować rzeczywiste znaczenie zapisu."
+        }
+      ]
+    }
+  },
   "translations": {
     "uk": {
       "Porównaj": "Порівняти",
@@ -546,7 +944,121 @@
       "Porównuj oferty internetu, smartfonów i więcej. Darmowe kalkulatory: rata kredytu, procent składany, VAT, koszt paliwa.": "Порівнюйте пропозиції інтернету, смартфонів та інше. Безкоштовні калькулятори: кредит, складні відсотки, ПДВ, вартість пального.",
       "Używamy plików cookie do analityki.": "Ми використовуємо файли cookie для аналітики.",
       "Akceptuję": "Прийняти",
-      "Odrzuć": "Відхилити"
+      "Odrzuć": "Відхилити",
+      "Umowy": "Договори",
+      "Analiza umów": "Аналіз договорів",
+      "Analizuj umowę →": "Аналізувати договір →",
+      "Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.": "Завантажте договір, і ми вкажемо ризиковані положення, суми, терміни та дати.",
+      "Przeciągnij plik tutaj lub kliknij, aby wybrać": "Перетягніть файл сюди або натисніть, щоб вибрати",
+      "Obsługiwane formaty:": "Підтримувані формати:",
+      "lub wklej treść umowy": "або вставте текст договору",
+      "Analizuj": "Аналізувати",
+      "Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.": "Файл не залишає ваш браузер — аналіз виконується локально.",
+      "Wczytywanie pliku…": "Завантаження файлу…",
+      "Ryzyko": "Ризик",
+      "niskie": "низький",
+      "średnie": "середній",
+      "wysokie": "високий",
+      "Wysokie ryzyko": "Високий ризик",
+      "Do sprawdzenia": "Перевірити",
+      "Informacyjnie": "Інформаційно",
+      "Brak zapisu": "Відсутнє положення",
+      "Wykryte dane": "Виявлені дані",
+      "Kwoty": "Суми",
+      "Daty": "Дати",
+      "Okresy": "Терміни",
+      "Procenty": "Відсотки",
+      "Pokaż pełny tekst": "Показати повний текст",
+      "Pobierz raport": "Завантажити звіт",
+      "Nowa analiza": "Новий аналіз",
+      "Nie wykryto zapisów z listy kontrolnej.": "Не виявлено положень зі списку перевірки.",
+      "słów": "слів",
+      "stron": "сторінок",
+      "Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.": "Не вдалося прочитати текст — файл може бути скан-копією (зображенням). Вставте текст вручну.",
+      "Nieobsługiwany format pliku.": "Непідтримуваний формат файлу.",
+      "Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.": "Старий формат .doc не підтримується — збережіть файл як .docx або PDF.",
+      "Plik jest za duży. Maksymalny rozmiar:": "Файл завеликий. Максимальний розмір:",
+      "Raport analizy umowy": "Звіт аналізу договору",
+      "Nie udało się wczytać pliku.": "Не вдалося завантажити файл.",
+      "Wklej tekst": "Вставте текст",
+      "Analiza jest automatyczna i orientacyjna — nie zastępuje porady prawnej.": "Аналіз автоматичний і орієнтовний — він не замінює юридичної консультації.",
+      "Kary umowne": "Договірні штрафи",
+      "Sprawdź wysokość kar i za co grożą. Wysokie kary można negocjować lub ograniczyć do rażących naruszeń.": "Перевірте розмір штрафів і за що вони загрожують. Високі штрафи можна обговорити або обмежити грубими порушеннями.",
+      "Automatyczne przedłużenie umowy": "Автоматичне продовження договору",
+      "Umowa może się odnowić bez Twojej zgody. Zanotuj termin, do którego trzeba ją wypowiedzieć.": "Договір може поновитися без вашої згоди. Запишіть термін, до якого його потрібно розірвати.",
+      "Jednostronna zmiana warunków": "Одностороння зміна умов",
+      "Druga strona może zmienić warunki bez Twojej zgody. Sprawdź, czy przysługuje Ci wtedy prawo wypowiedzenia bez opłat.": "Інша сторона може змінити умови без вашої згоди. Перевірте, чи маєте ви тоді право розірвати договір без плати.",
+      "Opłata za wcześniejsze rozwiązanie": "Плата за дострокове розірвання",
+      "Wyjście z umowy przed czasem może kosztować. Sprawdź, jak liczona jest opłata.": "Достроковий вихід з договору може коштувати. Перевірте, як розраховується плата.",
+      "Weksel": "Вексель",
+      "Weksel in blanco to silne zabezpieczenie wierzyciela. Sprawdź deklarację wekslową i jej warunki.": "Бланковий вексель — сильне забезпечення кредитора. Перевірте вексельну декларацію та її умови.",
+      "Okres wypowiedzenia": "Термін повідомлення про розірвання",
+      "W umowie nie znaleziono okresu wypowiedzenia — upewnij się, jak i kiedy możesz ją zakończyć.": "У договорі не знайдено терміну повідомлення про розірвання — з'ясуйте, як і коли його можна завершити.",
+      "Odsetki": "Відсотки",
+      "Sprawdź wysokość odsetek (zwłaszcza za opóźnienie) i od kiedy są naliczane.": "Перевірте розмір відсотків (особливо за прострочення) і з якого моменту вони нараховуються.",
+      "Zmienne oprocentowanie": "Змінна процентна ставка",
+      "Rata może wzrosnąć wraz ze zmianą wskaźnika. Policz ratę przy wyższej stopie (kalkulator obok).": "Платіж може зрости разом зі зміною індексу. Розрахуйте платіж за вищої ставки (калькулятор поруч).",
+      "Wyłączenie odpowiedzialności": "Виключення відповідальності",
+      "Druga strona ogranicza swoją odpowiedzialność. Sprawdź, czy limit nie jest zbyt niski.": "Інша сторона обмежує свою відповідальність. Перевірте, чи ліміт не надто низький.",
+      "Kaucja, zadatek, depozyt": "Застава, завдаток, депозит",
+      "Sprawdź, kiedy i na jakich warunkach wpłacone pieniądze wracają.": "Перевірте, коли і на яких умовах внесені гроші повертаються.",
+      "Cesja / przeniesienie wierzytelności": "Цесія / передача вимоги",
+      "Dług lub prawa z umowy mogą zostać przeniesione na inny podmiot (np. firmę windykacyjną).": "Борг або права за договором можуть бути передані іншій особі (наприклад, колекторській компанії).",
+      "Prawo odstąpienia (14 dni)": "Право відмови (14 днів)",
+      "Przy umowie zawartej na odległość lub poza lokalem masz zwykle 14 dni na odstąpienie bez podania przyczyny.": "При договорі, укладеному дистанційно або поза приміщенням, зазвичай маєте 14 днів на відмову без пояснення причин.",
+      "Sąd właściwy / arbitraż": "Компетентний суд / арбітраж",
+      "Sprawdź, który sąd rozstrzyga spory — odległy sąd utrudnia dochodzenie roszczeń.": "Перевірте, який суд вирішує спори — віддалений суд ускладнює захист прав.",
+      "Dane osobowe (RODO)": "Персональні дані (GDPR)",
+      "Umowa zawiera postanowienia o danych osobowych — sprawdź zakres zgód i cel przetwarzania.": "Договір містить положення про персональні дані — перевірте обсяг згод і мету обробки.",
+      "Wyłączenie lub ograniczenie odpowiedzialności wobec konsumenta": "Виключення або обмеження відповідальності перед споживачем",
+      "W umowie z konsumentem taki zapis może być klauzulą niedozwoloną — nie wiąże konsumenta.": "У договорі зі споживачем таке положення може бути недозволеним — воно не зобов'язує споживача.",
+      "Sąd właściwy dla siedziby firmy": "Суд за місцезнаходженням компанії",
+      "Narzucenie konsumentowi sądu innego niż wynikający z ustawy to typowa klauzula niedozwolona.": "Нав'язування споживачу суду, іншого ніж передбачений законом, — типове недозволене положення.",
+      "Jednostronna zmiana umowy bez ważnej przyczyny": "Одностороння зміна договору без поважної причини",
+      "Zmiana umowy powinna mieć ważne przyczyny wskazane w umowie. Brak takiej listy może oznaczać klauzulę niedozwoloną.": "Зміна договору повинна мати поважні причини, зазначені в договорі. Їх відсутність може означати недозволене положення.",
+      "Brak zwrotu wpłat przy rezygnacji": "Неповернення коштів при відмові",
+      "Zatrzymanie pieniędzy za niewykonane świadczenie po rezygnacji konsumenta może być niedozwolone.": "Утримання коштів за невиконану послугу після відмови споживача може бути недозволеним.",
+      "Kara lub odstępne przy odstąpieniu": "Штраф або відступне при відмові",
+      "Rażąco wygórowana kara za odstąpienie od umowy jest niedozwolona — porównaj jej wysokość z wartością umowy.": "Надмірно високий штраф за відмову від договору є недозволеним — порівняйте його розмір із вартістю договору.",
+      "Zrzeczenie się praw": "Відмова від прав",
+      "Zrzeczenie się ustawowych uprawnień przez konsumenta jest zwykle nieskuteczne. Sprawdź, czego dotyczy.": "Відмова споживача від законних прав зазвичай не має сили. Перевірте, чого вона стосується.",
+      "Odsetki powyżej limitu ustawowego": "Відсотки понад законний ліміт",
+      "Odsetki ponad odsetki maksymalne są z mocy prawa obniżane do limitu — taki zapis jest wadliwy.": "Відсотки понад максимальні за законом зменшуються до ліміту — таке положення є дефектним.",
+      "Oznaczenie stron (NIP, KRS, PESEL)": "Ідентифікація сторін (NIP, KRS, PESEL)",
+      "Nie znaleziono danych identyfikujących strony. Bez nich trudno ustalić, z kim zawierasz umowę.": "Не знайдено даних, що ідентифікують сторони. Без них важко встановити, з ким ви укладаєте договір.",
+      "Data zawarcia umowy": "Дата укладення договору",
+      "Nie znaleziono daty zawarcia — od niej liczą się terminy (np. 14 dni na odstąpienie).": "Не знайдено дати укладення — від неї відраховуються строки (напр. 14 днів на відмову).",
+      "Informacja o reklamacjach": "Інформація про рекламації",
+      "Brak zapisów o reklamacjach. W umowie konsumenckiej obowiązują wtedy przepisy ustawowe — warto o nie dopytać.": "Немає положень про рекламації. У споживчому договорі тоді діють законодавчі норми — варто про них запитати.",
+      "Nieostre sformułowania": "Нечіткі формулювання",
+      "Pozostawiają drugiej stronie dużą swobodę interpretacji.": "Залишають іншій стороні велику свободу тлумачення.",
+      "Odesłania do innych dokumentów": "Посилання на інші документи",
+      "Część warunków jest poza umową — przeczytaj też te dokumenty.": "Частина умов знаходиться поза договором — прочитайте також ці документи.",
+      "Zawiłe odesłania wewnętrzne": "Заплутані внутрішні посилання",
+      "Utrudniają zrozumienie, co faktycznie obowiązuje.": "Ускладнюють розуміння того, що насправді діє.",
+      "Presja czasu": "Тиск часу",
+      "Nacisk na szybką decyzję to częsty sygnał ostrzegawczy.": "Тиск на швидке рішення — поширений тривожний сигнал.",
+      "Ukryte lub dodatkowe opłaty": "Приховані або додаткові платежі",
+      "Koszty poza główną ceną — policz łączny koszt umowy.": "Витрати поза основною ціною — порахуйте загальну вартість договору.",
+      "Podwójne zaprzeczenia": "Подвійні заперечення",
+      "Mogą maskować rzeczywiste znaczenie zapisu.": "Можуть маскувати справжній зміст положення.",
+      "Zgodność z prawem": "Відповідність закону",
+      "Podejrzana treść": "Підозрілий зміст",
+      "Ryzyko zapisów": "Ризик положень",
+      "Podstawowa analiza": "Базовий аналіз",
+      "Styl i przejrzystość treści": "Стиль і зрозумілість тексту",
+      "Podstawa:": "Підстава:",
+      "Nie wykryto naruszeń z listy kontrolnej.": "Порушень зі списку перевірки не виявлено.",
+      "Nie wykryto podejrzanych sygnałów.": "Підозрілих сигналів не виявлено.",
+      "Średnia długość zdania:": "Середня довжина речення:",
+      "Długie zdania": "Довгі речення",
+      "Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.": "Дуже довгі речення ускладнюють розуміння і можуть приховувати важливі умови.",
+      "limit:": "ліміт:",
+      "dobrze": "добре",
+      "uwaga": "увага",
+      "źle": "погано",
+      "Ryzyko prawne": "Правовий ризик",
+      "za opóźnienie": "за прострочення"
     },
     "en": {
       "Porównaj": "Compare",
@@ -632,7 +1144,121 @@
       "Porównuj oferty internetu, smartfonów i więcej. Darmowe kalkulatory: rata kredytu, procent składany, VAT, koszt paliwa.": "Compare internet plans, smartphones and more. Free calculators: loan payment, compound interest, VAT, fuel cost.",
       "Używamy plików cookie do analityki.": "We use cookies for analytics.",
       "Akceptuję": "Accept",
-      "Odrzuć": "Decline"
+      "Odrzuć": "Decline",
+      "Umowy": "Contracts",
+      "Analiza umów": "Contract analysis",
+      "Analizuj umowę →": "Analyze a contract →",
+      "Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.": "Upload a contract and we'll point out risky clauses, amounts, deadlines and dates.",
+      "Przeciągnij plik tutaj lub kliknij, aby wybrać": "Drop a file here or click to choose",
+      "Obsługiwane formaty:": "Supported formats:",
+      "lub wklej treść umowy": "or paste the contract text",
+      "Analizuj": "Analyze",
+      "Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.": "The file never leaves your browser — analysis runs locally.",
+      "Wczytywanie pliku…": "Loading file…",
+      "Ryzyko": "Risk",
+      "niskie": "low",
+      "średnie": "medium",
+      "wysokie": "high",
+      "Wysokie ryzyko": "High risk",
+      "Do sprawdzenia": "Worth checking",
+      "Informacyjnie": "For information",
+      "Brak zapisu": "Missing clause",
+      "Wykryte dane": "Detected data",
+      "Kwoty": "Amounts",
+      "Daty": "Dates",
+      "Okresy": "Periods",
+      "Procenty": "Percentages",
+      "Pokaż pełny tekst": "Show full text",
+      "Pobierz raport": "Download report",
+      "Nowa analiza": "New analysis",
+      "Nie wykryto zapisów z listy kontrolnej.": "No checklist clauses detected.",
+      "słów": "words",
+      "stron": "pages",
+      "Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.": "Could not read text — the file may be a scan (image). Paste the text manually.",
+      "Nieobsługiwany format pliku.": "Unsupported file format.",
+      "Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.": "The old .doc format is not supported — save the file as .docx or PDF.",
+      "Plik jest za duży. Maksymalny rozmiar:": "File is too large. Maximum size:",
+      "Raport analizy umowy": "Contract analysis report",
+      "Nie udało się wczytać pliku.": "Could not load the file.",
+      "Wklej tekst": "Paste text",
+      "Analiza jest automatyczna i orientacyjna — nie zastępuje porady prawnej.": "The analysis is automatic and indicative — it is not legal advice.",
+      "Kary umowne": "Contractual penalties",
+      "Sprawdź wysokość kar i za co grożą. Wysokie kary można negocjować lub ograniczyć do rażących naruszeń.": "Check the amount of penalties and what triggers them. High penalties can be negotiated or limited to serious breaches.",
+      "Automatyczne przedłużenie umowy": "Automatic renewal",
+      "Umowa może się odnowić bez Twojej zgody. Zanotuj termin, do którego trzeba ją wypowiedzieć.": "The contract may renew without your consent. Note the deadline for giving notice.",
+      "Jednostronna zmiana warunków": "Unilateral change of terms",
+      "Druga strona może zmienić warunki bez Twojej zgody. Sprawdź, czy przysługuje Ci wtedy prawo wypowiedzenia bez opłat.": "The other party can change terms without your consent. Check whether you may then terminate free of charge.",
+      "Opłata za wcześniejsze rozwiązanie": "Early termination fee",
+      "Wyjście z umowy przed czasem może kosztować. Sprawdź, jak liczona jest opłata.": "Leaving early may cost you. Check how the fee is calculated.",
+      "Weksel": "Promissory note",
+      "Weksel in blanco to silne zabezpieczenie wierzyciela. Sprawdź deklarację wekslową i jej warunki.": "A blank promissory note strongly secures the creditor. Check the note declaration and its terms.",
+      "Okres wypowiedzenia": "Notice period",
+      "W umowie nie znaleziono okresu wypowiedzenia — upewnij się, jak i kiedy możesz ją zakończyć.": "No notice period was found — make sure you know how and when you can end the contract.",
+      "Odsetki": "Interest",
+      "Sprawdź wysokość odsetek (zwłaszcza za opóźnienie) i od kiedy są naliczane.": "Check the interest rate (especially for late payment) and when it starts accruing.",
+      "Zmienne oprocentowanie": "Variable interest rate",
+      "Rata może wzrosnąć wraz ze zmianą wskaźnika. Policz ratę przy wyższej stopie (kalkulator obok).": "Your installment may rise with the index. Calculate it at a higher rate (calculator nearby).",
+      "Wyłączenie odpowiedzialności": "Limitation of liability",
+      "Druga strona ogranicza swoją odpowiedzialność. Sprawdź, czy limit nie jest zbyt niski.": "The other party limits its liability. Check that the cap is not too low.",
+      "Kaucja, zadatek, depozyt": "Deposit",
+      "Sprawdź, kiedy i na jakich warunkach wpłacone pieniądze wracają.": "Check when and on what terms the money you paid is returned.",
+      "Cesja / przeniesienie wierzytelności": "Assignment of claims",
+      "Dług lub prawa z umowy mogą zostać przeniesione na inny podmiot (np. firmę windykacyjną).": "Debts or rights under the contract may be transferred to another entity (e.g. a debt collector).",
+      "Prawo odstąpienia (14 dni)": "Right of withdrawal (14 days)",
+      "Przy umowie zawartej na odległość lub poza lokalem masz zwykle 14 dni na odstąpienie bez podania przyczyny.": "For distance or off-premises contracts you usually have 14 days to withdraw without giving a reason.",
+      "Sąd właściwy / arbitraż": "Jurisdiction / arbitration",
+      "Sprawdź, który sąd rozstrzyga spory — odległy sąd utrudnia dochodzenie roszczeń.": "Check which court handles disputes — a distant court makes claims harder.",
+      "Dane osobowe (RODO)": "Personal data (GDPR)",
+      "Umowa zawiera postanowienia o danych osobowych — sprawdź zakres zgód i cel przetwarzania.": "The contract contains personal-data provisions — check the scope of consents and purpose of processing.",
+      "Wyłączenie lub ograniczenie odpowiedzialności wobec konsumenta": "Exclusion or limitation of liability towards a consumer",
+      "W umowie z konsumentem taki zapis może być klauzulą niedozwoloną — nie wiąże konsumenta.": "In a consumer contract such a clause may be unfair (prohibited) and not binding on the consumer.",
+      "Sąd właściwy dla siedziby firmy": "Court competent for the company's seat",
+      "Narzucenie konsumentowi sądu innego niż wynikający z ustawy to typowa klauzula niedozwolona.": "Imposing a court other than the statutory one on a consumer is a typical unfair clause.",
+      "Jednostronna zmiana umowy bez ważnej przyczyny": "Unilateral amendment without a valid reason",
+      "Zmiana umowy powinna mieć ważne przyczyny wskazane w umowie. Brak takiej listy może oznaczać klauzulę niedozwoloną.": "Amendments should be based on valid reasons listed in the contract. Missing reasons may indicate an unfair clause.",
+      "Brak zwrotu wpłat przy rezygnacji": "No refund on cancellation",
+      "Zatrzymanie pieniędzy za niewykonane świadczenie po rezygnacji konsumenta może być niedozwolone.": "Keeping payment for services not provided after a consumer cancels may be unfair.",
+      "Kara lub odstępne przy odstąpieniu": "Penalty or forfeit on withdrawal",
+      "Rażąco wygórowana kara za odstąpienie od umowy jest niedozwolona — porównaj jej wysokość z wartością umowy.": "A grossly excessive withdrawal penalty is prohibited — compare it with the contract value.",
+      "Zrzeczenie się praw": "Waiver of rights",
+      "Zrzeczenie się ustawowych uprawnień przez konsumenta jest zwykle nieskuteczne. Sprawdź, czego dotyczy.": "A consumer's waiver of statutory rights is usually ineffective. Check what it concerns.",
+      "Odsetki powyżej limitu ustawowego": "Interest above the statutory cap",
+      "Odsetki ponad odsetki maksymalne są z mocy prawa obniżane do limitu — taki zapis jest wadliwy.": "Interest above the statutory maximum is reduced to the cap by law — the clause is defective.",
+      "Oznaczenie stron (NIP, KRS, PESEL)": "Identification of parties (tax ID, registry)",
+      "Nie znaleziono danych identyfikujących strony. Bez nich trudno ustalić, z kim zawierasz umowę.": "No identifying data of the parties found. Without it, it is hard to tell who you are contracting with.",
+      "Data zawarcia umowy": "Date of conclusion",
+      "Nie znaleziono daty zawarcia — od niej liczą się terminy (np. 14 dni na odstąpienie).": "No date of conclusion found — deadlines (e.g. 14-day withdrawal) are counted from it.",
+      "Informacja o reklamacjach": "Complaints information",
+      "Brak zapisów o reklamacjach. W umowie konsumenckiej obowiązują wtedy przepisy ustawowe — warto o nie dopytać.": "No complaint provisions. Statutory rules then apply to consumer contracts — worth asking about.",
+      "Nieostre sformułowania": "Vague wording",
+      "Pozostawiają drugiej stronie dużą swobodę interpretacji.": "They give the other party wide room for interpretation.",
+      "Odesłania do innych dokumentów": "References to other documents",
+      "Część warunków jest poza umową — przeczytaj też te dokumenty.": "Some terms are outside the contract — read those documents too.",
+      "Zawiłe odesłania wewnętrzne": "Convoluted cross-references",
+      "Utrudniają zrozumienie, co faktycznie obowiązuje.": "They make it hard to understand what actually applies.",
+      "Presja czasu": "Time pressure",
+      "Nacisk na szybką decyzję to częsty sygnał ostrzegawczy.": "Pressure to decide quickly is a common warning sign.",
+      "Ukryte lub dodatkowe opłaty": "Hidden or extra fees",
+      "Koszty poza główną ceną — policz łączny koszt umowy.": "Costs beyond the headline price — calculate the total cost.",
+      "Podwójne zaprzeczenia": "Double negatives",
+      "Mogą maskować rzeczywiste znaczenie zapisu.": "They may obscure the real meaning of a clause.",
+      "Zgodność z prawem": "Legal compliance",
+      "Podejrzana treść": "Suspicious content",
+      "Ryzyko zapisów": "Clause risk",
+      "Podstawowa analiza": "Basic analysis",
+      "Styl i przejrzystość treści": "Style and clarity",
+      "Podstawa:": "Legal basis:",
+      "Nie wykryto naruszeń z listy kontrolnej.": "No checklist violations detected.",
+      "Nie wykryto podejrzanych sygnałów.": "No suspicious signals detected.",
+      "Średnia długość zdania:": "Average sentence length:",
+      "Długie zdania": "Long sentences",
+      "Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.": "Very long sentences hinder understanding and may hide important terms.",
+      "limit:": "cap:",
+      "dobrze": "good",
+      "uwaga": "caution",
+      "źle": "bad",
+      "Ryzyko prawne": "Legal risk",
+      "za opóźnienie": "for late payment"
     }
   }
 }

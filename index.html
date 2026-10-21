@@ -117,6 +117,45 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .res .sub{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .res .sub span{color:var(--mut)}
 
+/* analiza umów */
+.an{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:34px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--card);display:grid;place-items:center;gap:8px}
+.drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--card))}
+.drop .big{font-size:2.4rem}
+.drop small{color:var(--mut)}
+.paste{display:flex;flex-direction:column;gap:10px}
+.paste textarea{flex:1;min-height:150px;resize:vertical;font:inherit;font-size:.9rem}
+.priv{color:var(--mut);font-size:.85rem;margin-top:12px;display:flex;gap:8px;align-items:center}
+.ares{margin-top:22px}
+.ahead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.ahead h3{font-size:1.2rem;word-break:break-all}
+.ahead small{color:var(--mut)}
+.bars{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:4px 0 22px}
+.bar-l{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:6px}
+.bar-l small{color:var(--mut);font-weight:600}
+.bar{height:12px;border-radius:8px;background:linear-gradient(90deg,#2fd6a0,#c8d84a 35%,#f5b84a 60%,#ff6b81);position:relative}
+.bar::after{content:"";position:absolute;top:0;bottom:0;right:0;left:var(--v);background:color-mix(in srgb,var(--bg) 78%,transparent);border-radius:0 8px 8px 0}
+.bar i{position:absolute;left:var(--v);top:-4px;width:4px;height:20px;margin-left:-2px;background:var(--txt);border-radius:2px;z-index:1;box-shadow:0 0 0 2px var(--bg)}
+.asec{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.asec>h4{font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.basis{font-size:.78rem;color:var(--mut);margin-top:4px}
+.counts{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.counts span{padding:6px 12px;border-radius:20px;font-size:.85rem;font-weight:700;background:var(--card2)}
+.finding{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--lc);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.finding h4{display:flex;justify-content:space-between;gap:10px;font-size:1rem}
+.finding h4 small{color:var(--mut);font-weight:600}
+.finding p{color:var(--mut);font-size:.9rem;margin:6px 0}
+.snip{font-size:.85rem;background:var(--bg2);border-radius:8px;padding:8px 10px;margin-top:6px;line-height:1.55}
+mark{background:color-mix(in srgb,var(--lc,var(--accent)) 35%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.chips span{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:.82rem}
+.full{max-height:420px;overflow:auto;white-space:pre-wrap;font-size:.85rem;background:var(--bg2);border-radius:12px;padding:16px;margin-top:10px}
+.disc{color:var(--mut);font-size:.82rem;margin-top:14px;font-style:italic}
+.err{color:var(--bad);margin-top:12px;font-weight:600}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:760px){.an{grid-template-columns:1fr}}
+
 footer{border-top:1px solid var(--line);padding:30px 0;color:var(--mut);font-size:.88rem;margin-top:40px}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .preview-flag{background:#f5b84a;color:#1a1300;text-align:center;font-weight:700;font-size:.85rem;padding:6px}
@@ -138,6 +177,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="links">
     <a href="#porownaj" data-i18n>Porównaj</a>
     <a href="#kalkulatory" data-i18n>Kalkulatory</a>
+    <a href="#umowy" class="nav-umowy" data-i18n>Umowy</a>
   </div>
   <div class="lang notranslate" id="lang"></div>
   <button class="icon-btn" id="theme" data-i18n-title="Motyw">🌓</button>
@@ -150,6 +190,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="cta">
     <a class="btn pri" href="#porownaj" data-i18n>Zacznij porównywać →</a>
     <a class="btn" href="#kalkulatory" data-i18n>Kalkulatory</a>
+    <a class="btn nav-umowy" href="#umowy" data-i18n>Analizuj umowę →</a>
   </div>
   <div class="stats"><div><b id="stCat">0</b><span data-i18n>kategorii</span></div><div><b id="stItem">0</b><span data-i18n>ofert</span></div><div><b id="stCalc">0</b><span data-i18n>kalkulatorów</span></div></div>
 </div></header>
@@ -168,6 +209,18 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="sec-h"><div><h2 data-i18n>Kalkulatory</h2><p data-i18n>Wyniki liczą się na bieżąco.</p></div></div>
   <div class="cgrid" id="calcs"></div>
   <div class="calc" id="calc"></div>
+</div></section>
+
+<section id="umowy"><div class="wrap">
+  <div class="sec-h"><div><h2 data-i18n>Analiza umów</h2><p data-i18n>Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.</p></div></div>
+  <div class="an">
+    <label class="drop" id="drop"><input type="file" id="file" hidden>
+      <div class="big">📄</div><b data-i18n>Przeciągnij plik tutaj lub kliknij, aby wybrać</b>
+      <small><span data-i18n>Obsługiwane formaty:</span> <span id="fmts" class="notranslate"></span></small></label>
+    <div class="paste"><textarea class="field" id="ptext" data-i18n-ph="lub wklej treść umowy"></textarea><button class="btn pri" id="pgo" data-i18n>Analizuj</button></div>
+  </div>
+  <div class="priv">🔒 <span data-i18n>Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.</span></div>
+  <div class="ares" id="ares"></div>
 </div></section>
 
 <footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span> · <span id="ver" class="notranslate"></span></span><a href="admin.html" data-i18n>Panel administracyjny</a></div></footer>
@@ -236,6 +289,7 @@ function applyLang(keep){
   if(keep)document.querySelectorAll('#calc input[type=number]').forEach(i=>vals[i.dataset.k]=i.value);
   renderTabs();setCat(catId||D.categories[0]?.id);
   renderCalcs();
+  initContracts();
   if(calcId||D.calculators[0]){openCalc(calcId||D.calculators[0].id,false);
     if(keep){Object.entries(vals).forEach(([k,v])=>document.querySelectorAll(`#calc [data-k="${k}"]`).forEach(x=>x.value=v));calc()}}
 }
@@ -366,6 +420,171 @@ function calc(){
   const out=compute(curCalc,vals),main=out.find(o=>o.main)||out[0];
   $('#res').innerHTML=main?`<span style="color:var(--mut)">${esc(t(main.label))}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</div>
    ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(t(o.label))}</span><b>${fmt(o.v,o.decimals)} ${esc(t(o.unit||''))}</b></div>`).join('')}`:'';
+}
+
+/* ---------- analiza umów ---------- */
+const LIB={
+  pdf:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  pdfW:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  docx:'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',
+  zip:'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'};
+const libs={};
+const needLib=src=>libs[src]??=new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{delete libs[src];rej(new Error(t('Nie udało się wczytać pliku.')))};document.head.appendChild(s)});
+const LV={high:{w:3,c:'var(--bad)',l:'Wysokie ryzyko'},medium:{w:2,c:'#f5b84a',l:'Do sprawdzenia'},info:{w:0,c:'#5aa9ff',l:'Informacyjnie'}};
+let lastRep=null;
+
+function initContracts(){
+  const C=D.contracts;const on=!!C?.enabled;
+  $('#umowy').style.display=on?'':'none';document.querySelectorAll('.nav-umowy').forEach(e=>e.style.display=on?'':'none');
+  if(!on)return;
+  const f=C.formats||[];$('#fmts').textContent=f.map(x=>'.'+x).join(' ');
+  $('#file').accept=f.map(x=>'.'+x).join(',');
+  if(lastRep)renderReport(lastRep);
+}
+const dz=$('#drop');
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f)});
+$('#file').onchange=e=>{const f=e.target.files[0];if(f)handleFile(f);e.target.value=''};
+$('#pgo').onclick=()=>{const v=$('#ptext').value.trim();if(v)analyze(v,t('Wklej tekst'),0)};
+
+async function handleFile(f){
+  const C=D.contracts,ext=(f.name.split('.').pop()||'').toLowerCase();
+  const err=m=>{$('#ares').innerHTML=`<div class="err">⚠ ${esc(m)}</div>`};
+  if(f.size>(C.maxMB||15)*1048576)return err(`${t('Plik jest za duży. Maksymalny rozmiar:')} ${C.maxMB} MB`);
+  if(ext==='doc')return err(t('Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.'));
+  if(!(C.formats||[]).includes(ext==='htm'?'html':ext==='md'?'txt':ext))return err(t('Nieobsługiwany format pliku.'));
+  $('#ares').innerHTML=`<div class="priv"><span class="spin"></span> ${esc(t('Wczytywanie pliku…'))}</div>`;
+  try{
+    const {text,pages}=await extractText(f,ext);
+    if(text.replace(/\s/g,'').length<20)return err(t('Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.'));
+    analyze(text,f.name,pages);
+  }catch(e){console.error(e);err(e.message||t('Nie udało się wczytać pliku.'))}
+}
+async function extractText(f,ext){
+  if(ext==='txt'||ext==='md')return{text:await f.text()};
+  if(ext==='html'||ext==='htm'){const d=new DOMParser().parseFromString(await f.text(),'text/html');d.querySelectorAll('script,style').forEach(x=>x.remove());
+    d.querySelectorAll('p,div,br,li,tr,h1,h2,h3,h4').forEach(x=>x.append('\n'));return{text:d.body.textContent}}
+  if(ext==='rtf')return{text:rtfText(await f.text())};
+  if(ext==='pdf'){
+    await needLib(LIB.pdf);pdfjsLib.GlobalWorkerOptions.workerSrc=LIB.pdfW;
+    const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,out=[];
+    for(let i=1;i<=pdf.numPages;i++){const c=await (await pdf.getPage(i)).getTextContent();out.push(c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join(''))}
+    return{text:out.join('\n\n').replace(/(\p{L})-\n(\p{L})/gu,'$1$2'),pages:pdf.numPages};
+  }
+  if(ext==='docx'){await needLib(LIB.docx);return{text:(await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value}}
+  if(ext==='odt'){
+    await needLib(LIB.zip);const z=await JSZip.loadAsync(await f.arrayBuffer()),x=await z.file('content.xml')?.async('string');
+    if(!x)throw new Error(t('Nie udało się wczytać pliku.'));
+    const d=new DOMParser().parseFromString(x.replace(/<\/text:(p|h)>/g,'\n$&').replace(/<text:(tab|line-break)\/>/g,' '),'application/xml');
+    return{text:d.documentElement.textContent};
+  }
+  throw new Error(t('Nieobsługiwany format pliku.'));
+}
+function rtfText(r){
+  // prosty konwerter RTF: usuwa grupy sterujące, zamienia \'hh (cp1250) i \uN na znaki
+  const dec=new TextDecoder('windows-1250');
+  r=r.replace(/\{\\\*[^{}]*(\{[^{}]*\}[^{}]*)*\}/g,'').replace(/\{\\(fonttbl|colortbl|stylesheet|info)[\s\S]*?\}\s*\}/g,'');
+  r=r.replace(/\\'([0-9a-f]{2})/gi,(_,h)=>dec.decode(new Uint8Array([parseInt(h,16)])))
+     .replace(/\\u(-?\d+)\??/g,(_,n)=>String.fromCharCode((+n+65536)%65536))
+     .replace(/\\(par|line)\b ?/g,'\n').replace(/\\tab\b ?/g,'\t')
+     .replace(/\\[a-z]+-?\d* ?/gi,'').replace(/\\([{}\\])/g,'$1').replace(/[{}]/g,'');
+  return r.replace(/\n{3,}/g,'\n\n').trim();
+}
+const RX={
+  amounts:/(?:\d{1,3}(?:[  .]\d{3})+|\d+)(?:,\d{1,2})?\s?(?:zł|PLN|EUR|€|USD|\$|UAH|грн)/gi,
+  dates:/\b(?:\d{1,2}[./-]\d{1,2}[./-](?:19|20)?\d{2}|\d{4}-\d{2}-\d{2})\b|\b\d{1,2}\s+(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4}/gi,
+  periods:/\b\d+\s?(?:dni|dnia|tygodni\w*|miesi[ąę]c\w*|mies\.|lat|lata|rok\w*|days?|months?|years?)\b/gi,
+  percents:/\d+(?:[.,]\d+)?\s?%/g};
+function compileRule(r){return (r.patterns||[]).map(p=>{try{return new RegExp(p,'gi')}catch(e){return null}}).filter(Boolean)}
+function analyze(raw,name,pages){
+  const text=raw.replace(/\r/g,'').replace(/[ \t ]+/g,' ').replace(/ ?\n ?/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  const flat=text.replace(/\n/g,' ');// dopasowania przez złamania linii, te same indeksy
+  const C=D.contracts,findings=runRules(C.rules||[],flat);
+  const legal=C.legal?.enabled?runRules(C.legal.rules||[],flat,C.legal):null;
+  const sus=C.suspicion?.enabled?suspicion(text,flat,C.suspicion):null;
+  const ex={};Object.entries(RX).forEach(([k,rx])=>ex[k]=[...new Set((text.match(rx)||[]).map(s=>s.replace(/\s+/g,' ').trim()))].slice(0,30));
+  const pts=findings.reduce((a,f)=>a+(LV[f.r.level]?.w||0),0),max=(D.contracts.rules||[]).reduce((a,r)=>a+(LV[r.level]?.w||0),0)||1;
+  const score=Math.min(100,Math.round(pts/max*100*1.6));
+  const lscore=legal?Math.min(100,legal.reduce((a,f)=>a+({high:30,medium:15,info:5}[f.r.level]||0),0)):0;
+  lastRep={name,pages,text,findings,ex,score,legal,lscore,sus,words:(text.match(/\S+/g)||[]).length};
+  renderReport(lastRep);
+  $('#ares').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function runRules(rules,flat,cfg){
+  const out=[];
+  rules.forEach(r=>{
+    const hits=[];compileRule(r).forEach(rx=>{for(const m of flat.matchAll(rx)){if(m[0])hits.push([m.index,m.index+m[0].length])}});
+    hits.sort((a,b)=>a[0]-b[0]);
+    if(r.mode==='interest'){ // procenty w pobliżu słowa „odsetki/oprocentowanie” powyżej limitu
+      const bad=[];hits.forEach(([a,b])=>{const win=flat.slice(a,b+120);const dflt=/opóźnieni|zwłok/i.test(flat.slice(Math.max(0,a-80),b+120));
+        for(const m of win.matchAll(/(\d+(?:[.,]\d+)?)\s?%/g)){const v=parseFloat(m[1].replace(',','.')),lim=dflt?cfg.maxDefault:cfg.maxInterest;
+          if(lim&&v>lim){bad.push([a+m.index,a+m.index+m[0].length]);r=Object.assign({},r,{lim:cfg})}}});
+      if(bad.length)out.push({r,hits:bad});
+    }
+    else if(r.mode==='missing'){if(!hits.length)out.push({r,hits:[],missing:true})}
+    else if(hits.length)out.push({r,hits});
+  });return out;
+}
+function suspicion(text,flat,cfg){
+  const items=[];let pts=0;
+  (cfg.indicators||[]).forEach(r=>{const hits=[];compileRule(r).forEach(rx=>{for(const m of flat.matchAll(rx))if(m[0])hits.push([m.index,m.index+m[0].length])});
+    if(hits.length){hits.sort((a,b)=>a[0]-b[0]);const p=Math.min(r.max||100,hits.length*(r.weight||0));pts+=p;items.push({r,hits,p})}});
+  const sents=text.split(/(?<=[.!?;])\s+|\n+/).map(x=>(x.match(/\S+/g)||[]).length).filter(n=>n>2);
+  const avg=sents.length?Math.round(sents.reduce((a,b)=>a+b,0)/sents.length):0,lim=cfg.longSentence||40,long=sents.filter(n=>n>lim).length;
+  const lp=Math.min(cfg.longMax||20,long*(cfg.longWeight||4));pts+=lp;
+  return{items:items.sort((a,b)=>b.p-a.p),avg,long,lim,lp,score:Math.min(100,pts)};
+}
+const verdict=v=>v>=60?['źle','var(--bad)']:v>=30?['uwaga','#f5b84a']:['dobrze','var(--good)'];
+const bar=(label,v)=>{const [w,c]=verdict(v);return `<div><div class="bar-l"><span>${esc(t(label))}</span><small><b style="color:${c}">${esc(t(w))}</b> · ${v}/100</small></div><div class="bar" style="--v:${v}%"><i></i></div></div>`};
+function snippet(text,[a,b],lc){
+  const s=Math.max(0,text.lastIndexOf(' ',Math.max(0,a-90))),e=text.indexOf(' ',Math.min(text.length,b+90));const end=e<0?text.length:e;
+  return `<div class="snip" style="--lc:${lc}">${s>0?'…':''}${esc(text.slice(s,a))}<mark>${esc(text.slice(a,b))}</mark>${esc(text.slice(b,end))}${end<text.length?'…':''}</div>`;
+}
+function highlighted(R){
+  const rs=R.findings.flatMap(f=>f.hits.map(h=>[...h,LV[f.r.level].c])).sort((a,b)=>a[0]-b[0]);
+  let out='',pos=0;rs.forEach(([a,b,c])=>{if(a<pos)return;out+=esc(R.text.slice(pos,a))+`<mark style="--lc:${c}">${esc(R.text.slice(a,b))}</mark>`;pos=b});
+  return out+esc(R.text.slice(pos));
+}
+function renderReport(R){
+  const lvl=R.score>=60?'wysokie':R.score>=30?'średnie':'niskie',rc=R.score>=60?'var(--bad)':R.score>=30?'#f5b84a':'var(--good)';
+  const order={high:0,medium:1,info:2},fs=[...R.findings].sort((a,b)=>order[a.r.level]-order[b.r.level]);
+  const cnt=k=>R.findings.filter(f=>f.r.level===k).length;
+  const exNames={amounts:'Kwoty',dates:'Daty',periods:'Okresy',percents:'Procenty'};
+  $('#ares').innerHTML=`<div class="panel fade">
+    <div class="ahead"><div><h3>📄 ${esc(R.name)}</h3><small>${R.pages?R.pages+' '+esc(t('stron'))+' · ':''}${R.words.toLocaleString(loc())} ${esc(t('słów'))}</small></div>
+      </div>
+    <div class="bars">${bar('Ryzyko zapisów',R.score)}${R.legal?bar('Ryzyko prawne',R.lscore):''}${R.sus?bar('Podejrzana treść',R.sus.score):''}</div>
+    <div class="asec" style="border:0;margin:0;padding:0"><h4>📋 ${esc(t('Podstawowa analiza'))}</h4></div>
+    <div class="counts">${['high','medium','info'].map(k=>`<span style="color:${LV[k].c}">${esc(t(LV[k].l))}: ${cnt(k)}</span>`).join('')}</div>
+    ${fs.length?fs.map(f=>{const c=LV[f.r.level].c;return `<div class="finding" style="--lc:${c}"><h4>${esc(t(f.r.name))}<small>${f.missing?esc(t('Brak zapisu')):f.hits.length+'×'}</small></h4><p>${esc(t(f.r.advice))}</p>${f.hits.slice(0,3).map(h=>snippet(R.text,h,c)).join('')}</div>`}).join('')
+      :`<p class="priv">${esc(t('Nie wykryto zapisów z listy kontrolnej.'))}</p>`}
+    <h4 style="margin:18px 0 6px">${esc(t('Wykryte dane'))}</h4>
+    ${Object.entries(R.ex).filter(([,v])=>v.length).map(([k,v])=>`<small style="color:var(--mut)">${esc(t(exNames[k]))}</small><div class="chips">${v.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`).join('')||'<small style="color:var(--mut)">—</small>'}
+    ${R.legal?`<div class="asec"><h4>⚖️ ${esc(t('Zgodność z prawem'))}</h4>
+      ${R.legal.length?[...R.legal].sort((a,b)=>order[a.r.level]-order[b.r.level]).map(f=>{const c=LV[f.r.level].c;return `<div class="finding" style="--lc:${c}"><h4>${esc(t(f.r.name))}<small>${f.missing?esc(t('Brak zapisu')):f.hits.length+'×'}</small></h4><p>${esc(t(f.r.advice))}${f.r.lim?` (${esc(t('limit:'))} ${fmt(f.r.lim.maxInterest,1)}% / ${fmt(f.r.lim.maxDefault,1)}% ${esc(t('za opóźnienie'))})`:''}</p>${f.r.basis?`<div class="basis">${esc(t('Podstawa:'))} ${esc(f.r.basis)}</div>`:''}${f.hits.slice(0,3).map(h=>snippet(R.text,h,c)).join('')}</div>`}).join('')
+        :`<p class="priv">✅ ${esc(t('Nie wykryto naruszeń z listy kontrolnej.'))}</p>`}</div>`:''}
+    ${R.sus?`<div class="asec"><h4>🔍 ${esc(t('Styl i przejrzystość treści'))}</h4>
+      <p class="priv" style="margin:0 0 12px">${esc(t('Średnia długość zdania:'))} ${R.sus.avg} ${esc(t('słów'))}</p>
+      ${R.sus.long?`<div class="finding" style="--lc:#f5b84a"><h4>${esc(t('Długie zdania'))} (&gt;${R.sus.lim} ${esc(t('słów'))})<small>${R.sus.long}× · +${R.sus.lp}</small></h4><p>${esc(t('Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.'))}</p></div>`:''}
+      ${R.sus.items.map(x=>{const c=x.p>=15?'var(--bad)':'#f5b84a';return `<div class="finding" style="--lc:${c}"><h4>${esc(t(x.r.name))}<small>${x.hits.length}× · +${x.p}</small></h4><p>${esc(t(x.r.explain))}</p>${x.hits.slice(0,2).map(h=>snippet(R.text,h,c)).join('')}</div>`}).join('')}
+      ${!R.sus.long&&!R.sus.items.length?`<p class="priv">✅ ${esc(t('Nie wykryto podejrzanych sygnałów.'))}</p>`:''}</div>`:''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn" id="aFull">${esc(t('Pokaż pełny tekst'))}</button><button class="btn" id="aDl">⬇ ${esc(t('Pobierz raport'))}</button><button class="btn" id="aNew">${esc(t('Nowa analiza'))}</button></div>
+    <div class="full" id="aText" hidden></div>
+    <p class="disc">${esc(t(D.contracts.disclaimer||''))}</p></div>`;
+  $('#aFull').onclick=()=>{const x=$('#aText');if(!x.innerHTML)x.innerHTML=highlighted(R);x.hidden=!x.hidden};
+  $('#aNew').onclick=()=>{lastRep=null;$('#ares').innerHTML='';$('#ptext').value='';$('#umowy').scrollIntoView({behavior:'smooth'})};
+  $('#aDl').onclick=()=>{
+    const L=[t('Raport analizy umowy'),'='.repeat(40),R.name,`${t('Ryzyko zapisów')}: ${R.score}/100`,''];
+    fs.forEach(f=>{L.push(`[${t(LV[f.r.level].l)}] ${t(f.r.name)}${f.missing?' — '+t('Brak zapisu'):' ('+f.hits.length+'×)'}`,'  '+t(f.r.advice));
+      f.hits.slice(0,3).forEach(([a,b])=>L.push('  > '+R.text.slice(Math.max(0,a-80),b+80).replace(/\s+/g,' ')));L.push('')});
+    Object.entries(R.ex).forEach(([k,v])=>v.length&&L.push(`${t(exNames[k])}: ${v.join('; ')}`));
+    if(R.legal){L.push('',`== ${t('Zgodność z prawem')} — ${t('Ryzyko prawne')}: ${R.lscore}/100`);R.legal.forEach(f=>L.push(`[${t(LV[f.r.level].l)}] ${t(f.r.name)}${f.r.basis?' — '+f.r.basis:''}`,'  '+t(f.r.advice)))}
+    if(R.sus){L.push('',`== ${t('Podejrzana treść')}: ${R.sus.score}/100`,`${t('Średnia długość zdania:')} ${R.sus.avg}`);if(R.sus.long)L.push(`${t('Długie zdania')}: ${R.sus.long}`);R.sus.items.forEach(x=>L.push(`${t(x.r.name)} (${x.hits.length}×, +${x.p})`))}
+    L.push('',t(D.contracts.disclaimer||''));
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\n')],{type:'text/plain'}));a.download='raport-umowy.txt';a.click();URL.revokeObjectURL(a.href);
+  };
 }
 
 /* ---------- Google Analytics + zgoda ---------- */

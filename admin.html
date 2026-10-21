@@ -79,6 +79,7 @@ td input[type=checkbox],td input[type=radio]{accent-color:var(--accent);width:18
     <button class="nav on" data-v="settings">⚙️ Ustawienia</button>
     <button class="nav" data-v="cats">🗂️ Kategorie</button>
     <button class="nav" data-v="calcs">🧮 Kalkulatory</button>
+    <button class="nav" data-v="contracts">📄 Analiza umów</button>
     <button class="nav" data-v="i18n">🌐 Tłumaczenia</button>
     <button class="nav" data-v="seo">🔎 SEO</button>
     <button class="nav" data-v="export">💾 Publikacja</button>
@@ -155,12 +156,13 @@ document.querySelectorAll('aside .nav[data-v]').forEach(b=>b.onclick=()=>{view=b
 
 function render(){
   save();
-  const T={settings:'Ustawienia strony',cats:'Kategorie porównywarki',calcs:'Kalkulatory',i18n:'Tłumaczenia',seo:'Optymalizacja pod Google (SEO)',export:'Publikacja'};
+  const T={settings:'Ustawienia strony',cats:'Kategorie porównywarki',calcs:'Kalkulatory',contracts:'Analiza umów',i18n:'Tłumaczenia',seo:'Optymalizacja pod Google (SEO)',export:'Publikacja'};
   $('#vTitle').textContent=T[view];
-  $('#view').innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,i18n:vI18n,seo:vSeo,export:vExport})[view]();
+  $('#view').innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,i18n:vI18n,seo:vSeo,export:vExport})[view]();
   if(view==='calcs')testCalc();
   if(view==='i18n')renderTl();
   if(view==='seo')seoPreview();
+  if(view==='contracts')testRules();
 }
 
 /* ---------- Ustawienia ---------- */
@@ -278,13 +280,16 @@ function norm(){
   D.i18n=D.i18n||structuredClone(O.i18n||{mode:'own',languages:['pl']});
   D.translations=D.translations||structuredClone(O.translations||{});
   ['uk','en'].forEach(l=>D.translations[l]=D.translations[l]||{});
+  D.contracts=D.contracts||structuredClone(O.contracts||{enabled:false,maxMB:15,formats:['pdf','docx','txt'],disclaimer:'',rules:[]});
+  D.contracts.legal=D.contracts.legal||structuredClone(O.contracts?.legal||{enabled:false,maxInterest:14.5,maxDefault:18.5,rules:[]});
+  D.contracts.suspicion=D.contracts.suspicion||structuredClone(O.contracts?.suspicion||{enabled:false,longSentence:40,longWeight:4,longMax:20,indicators:[]});
   D.site.chatbot=D.site.chatbot||structuredClone(O.site?.chatbot||{enabled:false,src:''});
 }
 
 /* ---------- Tłumaczenia ---------- */
 const LN={uk:'Ukraiński',en:'Angielski'};
 // teksty interfejsu strony (index.html) — źródło po polsku
-const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','Zacznij porównywać →','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — dane z panelu admina (niezapisane w repo)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć'];
+const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','Zacznij porównywać →','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — dane z panelu admina (niezapisane w repo)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć','Umowy','Analiza umów','Analizuj umowę →','Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.','Przeciągnij plik tutaj lub kliknij, aby wybrać','Obsługiwane formaty:','lub wklej treść umowy','Analizuj','Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.','Wczytywanie pliku…','Ryzyko','niskie','średnie','wysokie','Wysokie ryzyko','Do sprawdzenia','Informacyjnie','Brak zapisu','Wykryte dane','Kwoty','Daty','Okresy','Procenty','Pokaż pełny tekst','Pobierz raport','Nowa analiza','Nie wykryto zapisów z listy kontrolnej.','słów','stron','Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.','Nieobsługiwany format pliku.','Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.','Plik jest za duży. Maksymalny rozmiar:','Raport analizy umowy','Nie udało się wczytać pliku.','Wklej tekst','Zgodność z prawem','Podejrzana treść','Ryzyko zapisów','Podstawowa analiza','Styl i przejrzystość treści','Podstawa:','Nie wykryto naruszeń z listy kontrolnej.','Nie wykryto podejrzanych sygnałów.','Średnia długość zdania:','Długie zdania','Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.','limit:','dobrze','uwaga','źle','Ryzyko prawne','za opóźnienie'];
 let TL=[],tlQ='',tlMiss=false;
 function collect(){
   const out=new Map(),add=(s,ctx)=>{s=String(s??'').trim();if(s&&!/^[\d\s.,%+\-*/()]+$/.test(s)&&!out.has(s))out.set(s,ctx)};
@@ -294,6 +299,9 @@ function collect(){
     c.items.forEach(it=>{add(it.name,x);add(it.badge,x);c.fields.filter(f=>f.type==='text').forEach(f=>add(it.values[f.key],x))})});
   D.calculators.forEach(c=>{const x='Kalkulator: '+c.name;add(c.name,x);add(c.description,x);
     c.inputs.forEach(i=>{add(i.label,x);add(i.unit,x)});c.outputs.forEach(o=>{add(o.label,x);add(o.unit,x)})});
+  add(D.contracts?.disclaimer,'Analiza umów');(D.contracts?.rules||[]).forEach(r=>{add(r.name,'Analiza umów');add(r.advice,'Analiza umów')});
+  (D.contracts?.legal?.rules||[]).forEach(r=>{add(r.name,'Analiza umów — prawo');add(r.advice,'Analiza umów — prawo')});
+  (D.contracts?.suspicion?.indicators||[]).forEach(r=>{add(r.name,'Analiza umów — styl');add(r.explain,'Analiza umów — styl')});
   UI_KEYS.forEach(k=>add(k,'Interfejs strony'));
   const used=new Set(out.keys());
   ['uk','en'].forEach(l=>Object.keys(D.translations[l]||{}).forEach(k=>{if(!used.has(k))out.set(k,'Nieużywane')}));
@@ -421,6 +429,89 @@ function seoPreview(){
 }
 $('#view').addEventListener('input',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
 $('#view').addEventListener('change',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
+
+/* ---------- Analiza umów ---------- */
+const FMT={pdf:'PDF',docx:'Word (.docx)',odt:'OpenDocument (.odt)',rtf:'RTF',txt:'Tekst (.txt, .md)',html:'HTML'};
+const LVL={high:'🔴 wysokie',medium:'🟠 do sprawdzenia',info:'🔵 informacyjnie'};
+const MODE={present:'gdy występuje',missing:'gdy brakuje',interest:'odsetki > limit'};
+let ruleTest='Umowa zawarta w dniu 01.11.2026. Umowa przedłuża się automatycznie na kolejny rok. W przypadku wcześniejszego rozwiązania umowy Klient zapłaci opłatę 300 zł. Odsetki za opóźnienie wynoszą 25% w skali roku. Sądem właściwym jest sąd właściwy dla siedziby Sprzedawcy. Szczegóły określa regulamin, w szczególności cennik.';
+const chkBox=(path,on,label)=>`<label style="display:flex;gap:10px;align-items:center;color:var(--txt);font-weight:500"><input type="checkbox" data-p="${path}" ${on?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">${label}</label>`;
+const patCell=(path,arr)=>`<td><textarea class="f code" data-pat="${path}" rows="3" style="min-width:220px">${esc((arr||[]).join('\n'))}</textarea></td>`;
+const rowBtns=(list,i)=>`<td style="white-space:nowrap"><button class="btn sm" onclick="mvRule('${list}',${i})">↑</button> <button class="btn sm del" onclick="delRule('${list}',${i})">✕</button></td>`;
+function ruleTable(list,withBasis,modes){
+  const arr=getP(list);
+  return `<div class="tw"><table><tr><th>Nazwa</th><th>Poziom / kiedy</th><th>Wzorce (jeden w linii)</th><th>Porada dla użytkownika</th>${withBasis?'<th>Podstawa prawna</th>':''}<th></th></tr>
+   ${arr.map((r,i)=>{const P=`${list}.${i}`;return `<tr style="vertical-align:top">
+    <td><input class="f" data-p="${P}.name" value="${esc(r.name)}" style="min-width:170px"></td>
+    <td><select class="f" data-p="${P}.level">${Object.entries(LVL).map(([v,l])=>`<option value="${v}" ${r.level===v?'selected':''}>${l}</option>`).join('')}</select>
+      <select class="f" data-p="${P}.mode" style="margin-top:4px">${modes.map(v=>`<option value="${v}" ${(r.mode||'present')===v?'selected':''}>${MODE[v]}</option>`).join('')}</select></td>
+    ${patCell(P,r.patterns)}
+    <td><textarea class="f" data-p="${P}.advice" rows="3" style="min-width:220px">${esc(r.advice)}</textarea></td>
+    ${withBasis?`<td><input class="f" data-p="${P}.basis" value="${esc(r.basis||'')}" style="min-width:140px" placeholder="np. art. 385³ KC"></td>`:''}
+    ${rowBtns(list,i)}</tr>`}).join('')}</table></div>`;
+}
+function vContracts(){
+  const C=D.contracts,P='contracts',L=C.legal,S=C.suspicion;
+  return `<div class="box"><h3>Ustawienia</h3><div class="form">
+     ${chkBox(P+'.enabled',C.enabled,'Pokaż analizę umów na stronie')}
+     <label>Maks. rozmiar pliku (MB)<input class="f" type="number" min="1" max="100" data-t="num" data-p="${P}.maxMB" value="${C.maxMB}"></label>
+     <label style="grid-column:1/-1">Dozwolone formaty<span style="display:flex;flex-wrap:wrap;gap:14px;color:var(--txt);font-weight:500;padding:6px 0">${Object.entries(FMT).map(([k,l])=>`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="fmt" value="${k}" ${C.formats.includes(k)?'checked':''} style="accent-color:var(--accent)">${l}</label>`).join('')}</span></label>
+     <label style="grid-column:1/-1">Zastrzeżenie pod wynikiem<input class="f" data-p="${P}.disclaimer" value="${esc(C.disclaimer)}"></label></div>
+     <p class="hint">Pliki są analizowane w przeglądarce odwiedzającego — nic nie trafia na serwer. Skany (PDF bez warstwy tekstu) i stary format .doc nie są obsługiwane; strona poprosi wtedy o wklejenie tekstu.</p></div>
+   <div class="box"><h3>📋 Podstawowa analiza — reguły (${C.rules.length}) <button class="btn sm pri" onclick="addRule('contracts.rules')">+ Reguła</button></h3>
+     ${ruleTable('contracts.rules',false,['present','missing'])}
+     <p class="hint"><b>Wzorce</b> to wyrażenia regularne, wielkość liter nie ma znaczenia. Przykłady: <code>kar[aąy] umown</code> (różne odmiany), <code>okres\\w* wypowiedzeni</code> (<code>\\w*</code> = dowolna końcówka), <code>.{0,60}</code> = do 60 dowolnych znaków pomiędzy. Wystarczy też zwykły fragment tekstu, np. <code>weksel</code>.<br>
+     <b>Gdy brakuje</b> — reguła zgłasza problem, jeśli w umowie <i>nie</i> znaleziono żadnego wzorca.<br>
+     <b>Pasek „Ryzyko zapisów”</b> 0–100: wysokie = 3 pkt, do sprawdzenia = 2 pkt, informacyjne = 0 pkt (w stosunku do sumy wszystkich reguł).</p></div>
+   <div class="box"><h3>⚖️ Zgodność z prawem (${L.rules.length}) <button class="btn sm pri" onclick="addRule('contracts.legal.rules')">+ Reguła</button></h3>
+     <div class="form" style="margin-bottom:14px">
+       ${chkBox(P+'.legal.enabled',L.enabled,'Włącz dział „Zgodność z prawem”')}
+       <label>Odsetki maksymalne umowne (% rocznie)<input class="f" type="number" step="0.01" data-t="num" data-p="${P}.legal.maxInterest" value="${L.maxInterest}"></label>
+       <label>Odsetki maksymalne za opóźnienie (% rocznie)<input class="f" type="number" step="0.01" data-t="num" data-p="${P}.legal.maxDefault" value="${L.maxDefault}"></label></div>
+     <p class="hint" style="margin-bottom:12px">Limity zależą od stopy referencyjnej NBP: umowne = 2 × (stopa + 3,5 pp), za opóźnienie = 2 × (stopa + 5,5 pp). Przy stopie 3,75% (od 5.03.2026): 14,5% i 18,5%. <b>Zaktualizuj po każdej zmianie stóp przez RPP.</b></p>
+     ${ruleTable('contracts.legal.rules',true,['present','missing','interest'])}
+     <p class="hint"><b>Odsetki &gt; limit</b> — wzorce wskazują słowa (np. „odsetki”), a reguła sprawdza procenty do 120 znaków dalej. Jeśli w pobliżu jest „opóźnienie” lub „zwłoka”, porównuje z limitem za opóźnienie.<br>
+     <b>Pasek „Ryzyko prawne”</b>: wysokie = 30 pkt, do sprawdzenia = 15 pkt, informacyjne = 5 pkt (maks. 100). Reguły są wskazówkami, nie oceną prawną.</p></div>
+   <div class="box"><h3>🔍 Podejrzana treść — wskaźniki (${S.indicators.length}) <button class="btn sm pri" onclick="addInd()">+ Wskaźnik</button></h3>
+     <div class="form" style="margin-bottom:14px">
+       ${chkBox(P+'.suspicion.enabled',S.enabled,'Włącz dział „Styl i przejrzystość”')}
+       <label>Długie zdanie = ponad (słów)<input class="f" type="number" data-t="num" data-p="${P}.suspicion.longSentence" value="${S.longSentence}"></label>
+       <label>Punkty za każde długie zdanie<input class="f" type="number" data-t="num" data-p="${P}.suspicion.longWeight" value="${S.longWeight}"></label>
+       <label>Maks. punktów za długie zdania<input class="f" type="number" data-t="num" data-p="${P}.suspicion.longMax" value="${S.longMax}"></label></div>
+     <div class="tw"><table><tr><th>Nazwa</th><th>Wzorce (jeden w linii)</th><th>Pkt / wystąpienie</th><th>Maks. pkt</th><th>Wyjaśnienie</th><th></th></tr>
+     ${S.indicators.map((r,i)=>{const Q=`${P}.suspicion.indicators.${i}`;return `<tr style="vertical-align:top">
+       <td><input class="f" data-p="${Q}.name" value="${esc(r.name)}" style="min-width:170px"></td>${patCell(Q,r.patterns)}
+       <td><input class="f" type="number" data-t="num" data-p="${Q}.weight" value="${r.weight}" style="width:70px"></td>
+       <td><input class="f" type="number" data-t="num" data-p="${Q}.max" value="${r.max}" style="width:70px"></td>
+       <td><textarea class="f" data-p="${Q}.explain" rows="3" style="min-width:200px">${esc(r.explain)}</textarea></td>${rowBtns(P+'.suspicion.indicators',i)}</tr>`}).join('')}</table></div>
+     <p class="hint"><b>Pasek „Podejrzana treść”</b> = suma punktów wskaźników (każdy ograniczony swoim maksimum) + punkty za długie zdania, maks. 100. Zielony 0–29, żółty 30–59, czerwony 60+.</p></div>
+   <div class="box"><h3>Tester reguł</h3>
+     <textarea class="f" id="ruleTest" rows="4" placeholder="Wklej fragment umowy…">${esc(ruleTest)}</textarea>
+     <div id="ruleOut" style="margin-top:12px;display:grid;gap:6px"></div></div>`;
+}
+function testRules(){
+  const o=$('#ruleOut');if(!o)return;const txt=ruleTest,C=D.contracts;
+  const row=(r,kind)=>{
+    let bad=[],hits=[];(r.patterns||[]).forEach(p=>{try{const m=txt.match(new RegExp(p,'gi'));if(m)hits.push(...m)}catch(e){bad.push(p)}});
+    let found=hits.length>0,flag=r.mode==='missing'?!found:found,info='';
+    if(r.mode==='interest'){const pc=[...txt.matchAll(/(\d+(?:[.,]\d+)?)\s?%/g)].map(m=>parseFloat(m[1].replace(',','.')));const over=pc.filter(v=>v>Math.min(C.legal.maxInterest,C.legal.maxDefault));flag=found&&over.length>0;info=flag?'powyżej limitu: '+over.join('%, ')+'%':''}
+    return `<div style="display:flex;gap:10px;align-items:baseline;font-size:.85rem"><span style="width:20px">${bad.length?'⚠️':flag?'✅':'·'}</span><span style="width:24px">${kind}</span><b style="min-width:240px;color:${flag?'var(--txt)':'var(--mut)'}">${esc(r.name)}</b>
+      <span class="hint" style="margin:0">${bad.length?'<span style="color:var(--bad)">błędny wzorzec: '+esc(bad.join(', '))+'</span>':info||(r.mode==='missing'?(found?'zapis jest — OK':'<b>brak zapisu → zgłoszone</b>'):(found?esc([...new Set(hits)].slice(0,4).join(' · ')):''))}</span></div>`};
+  o.innerHTML=C.rules.map(r=>row(r,'📋')).join('')+C.legal.rules.map(r=>row(r,'⚖️')).join('')+C.suspicion.indicators.map(r=>row(r,'🔍')).join('');
+}
+function addRule(list){getP(list).push({id:uid('r_'),name:'Nowa reguła',level:'medium',mode:'present',patterns:['fragment tekstu'],advice:'',...(list.includes('legal')?{basis:''}:{})});render()}
+function addInd(){D.contracts.suspicion.indicators.push({id:uid('s_'),name:'Nowy wskaźnik',patterns:['fragment tekstu'],weight:4,max:20,explain:''});render()}
+function delRule(list,i){const a=getP(list);if(confirm('Usunąć „'+a[i].name+'”?')){a.splice(i,1);render()}}
+function mvRule(list,i){const a=getP(list);if(i<1)return;[a[i-1],a[i]]=[a[i],a[i-1]];render()}
+$('#view').addEventListener('input',e=>{
+  if(view!=='contracts')return;const el=e.target;
+  if(el.dataset.pat){getP(el.dataset.pat).patterns=el.value.split('\n').map(x=>x.trim()).filter(Boolean);save()}
+  if(el.id==='ruleTest')ruleTest=el.value;
+  testRules();
+});
+$('#view').addEventListener('change',e=>{
+  if(view==='contracts'&&e.target.classList.contains('fmt')){D.contracts.formats=[...document.querySelectorAll('.fmt:checked')].map(x=>x.value);save()}
+});
 
 /* ---------- Publikacja ---------- */
 function vExport(){
