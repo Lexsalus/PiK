@@ -29,13 +29,16 @@ button,input,select{font:inherit;color:inherit}
 /* nav */
 nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 75%,transparent);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;align-items:center;gap:14px;height:64px}
-.logo{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.logo{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:10px;white-space:nowrap;min-width:0}
+#siteName{overflow:hidden;text-overflow:ellipsis}
+.ver-badge{font-size:.68rem;font-weight:700;color:var(--mut);background:var(--card2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;margin-left:-4px;letter-spacing:.02em}
+.ver-badge:empty{display:none}
 .logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 40%,#2fd6a0));display:grid;place-items:center;font-style:normal;font-size:.95rem;color:#fff}
 .links{display:flex;gap:6px;margin-left:auto}
 .links a{padding:8px 14px;border-radius:10px;color:var(--mut);font-weight:600;font-size:.92rem;transition:.2s}
 .links a:hover{color:var(--txt);background:var(--card2)}
 .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center;flex:none}
-.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.lang{flex:none;display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
 .lang button{border:0;background:none;padding:8px 10px;font-weight:700;font-size:.8rem;cursor:pointer;color:var(--mut)}
 .lang button.on{background:var(--accent);color:#fff}
 .admin-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:.88rem;white-space:nowrap;transition:.2s}
@@ -166,14 +169,14 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 /* Google Translate: ukrycie paska i podpowiedzi */
 #gt,.goog-te-banner-frame,iframe.skiptranslate,.goog-te-balloon-frame,#goog-gt-tt,.goog-tooltip{display:none!important}
 .goog-text-highlight{background:none!important;box-shadow:none!important}
-@media(max-width:760px){.calc{grid-template-columns:1fr}.links,.admin-btn span{display:none}.hero{padding-top:50px}.lang{margin-left:auto}}
+@media(max-width:760px){nav .wrap{gap:6px;padding:0 10px}.logo{font-size:1rem;gap:6px}.logo i{display:none}.ver-badge{margin-left:0}.lang button{padding:7px 7px}.icon-btn{width:34px;height:34px}.admin-btn{padding:7px 9px}.calc{grid-template-columns:1fr}.links,.admin-btn span{display:none}.hero{padding-top:50px}.lang{margin-left:auto}}
 .fade{animation:fade .4s both}@keyframes fade{from{opacity:0;transform:translateY(8px)}}
 </style>
 </head>
 <body>
 <div id="pv"></div>
 <nav><div class="wrap">
-  <a class="logo" href="#"><i>◆</i><span id="siteName">…</span></a>
+  <a class="logo" href="#"><i>◆</i><span id="siteName">…</span><small class="ver-badge notranslate" id="verNav"></small></a>
   <div class="links">
     <a href="#porownaj" data-i18n>Porównaj</a>
     <a href="#kalkulatory" data-i18n>Kalkulatory</a>
@@ -601,7 +604,7 @@ function initConsent(){
 $('#cYes').onclick=()=>{store.set('pk_consent','yes');$('#consent').classList.remove('show');loadGA(D.seo.gaId.trim())};
 $('#cNo').onclick=()=>{store.set('pk_consent','no');$('#consent').classList.remove('show')};
 
-fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{$('#ver').textContent='v'+v.version;$('#ver').title=v.date}).catch(()=>{});
+fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{['#ver','#verNav'].forEach(id=>{$(id).textContent='v'+v.version;$(id).title=v.date})}).catch(()=>{});
 load();
 </script>
 </body>

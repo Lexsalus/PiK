@@ -2,6 +2,10 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.4.1] — 2026-10-21
+- Numer wersji przy nazwie strony w górnym pasku
+- Poprawka: przełącznik języka nie ściska się na telefonie (węższy pasek na małych ekranach)
+
 ## [1.4.0] — 2026-10-21
 - Strona prawnicza: porównywarka usług prawnych (porady online, kancelarie, mediacje) i kalkulatory prawne
 - Kalkulatory: odsetki ustawowe (9,25% / 13,75% / 7,25%), opłata sądowa od pozwu (art. 13 UKSC, maks. 100 000 zł), koszty zastępstwa procesowego (Dz.U. 2026 poz. 215), kara umowna a wartość umowy
