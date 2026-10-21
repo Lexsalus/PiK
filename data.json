@@ -1,0 +1,110 @@
+{
+  "site": {
+    "name": "Porównaj.to",
+    "tagline": "Porównuj oferty i licz szybciej — wszystko w jednym miejscu.",
+    "accent": "#7c5cff",
+    "adminHash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+  },
+  "categories": [
+    {
+      "id": "internet",
+      "name": "Internet domowy",
+      "icon": "📡",
+      "fields": [
+        { "key": "cena", "label": "Cena", "type": "number", "unit": "zł/mies.", "better": "lower" },
+        { "key": "predkosc", "label": "Prędkość", "type": "number", "unit": "Mb/s", "better": "higher" },
+        { "key": "umowa", "label": "Umowa", "type": "number", "unit": "mies.", "better": "lower" },
+        { "key": "router", "label": "Router w cenie", "type": "bool", "unit": "", "better": "higher" },
+        { "key": "technologia", "label": "Technologia", "type": "text", "unit": "", "better": "" }
+      ],
+      "items": [
+        { "id": "i1", "name": "NetFala Start", "url": "#", "badge": "Najtańszy", "values": { "cena": 49, "predkosc": 300, "umowa": 24, "router": false, "technologia": "Światłowód" } },
+        { "id": "i2", "name": "Światłowód+ Max", "url": "#", "badge": "Najszybszy", "values": { "cena": 89, "predkosc": 2000, "umowa": 24, "router": true, "technologia": "Światłowód" } },
+        { "id": "i3", "name": "KablaNet 600", "url": "#", "badge": "", "values": { "cena": 65, "predkosc": 600, "umowa": 12, "router": true, "technologia": "Kabel" } },
+        { "id": "i4", "name": "AirLink Bez umowy", "url": "#", "badge": "Bez zobowiązań", "values": { "cena": 75, "predkosc": 250, "umowa": 0, "router": true, "technologia": "5G" } }
+      ]
+    },
+    {
+      "id": "smartfony",
+      "name": "Smartfony",
+      "icon": "📱",
+      "fields": [
+        { "key": "cena", "label": "Cena", "type": "number", "unit": "zł", "better": "lower" },
+        { "key": "bateria", "label": "Bateria", "type": "number", "unit": "mAh", "better": "higher" },
+        { "key": "pamiec", "label": "Pamięć", "type": "number", "unit": "GB", "better": "higher" },
+        { "key": "waga", "label": "Waga", "type": "number", "unit": "g", "better": "lower" },
+        { "key": "nfc", "label": "NFC", "type": "bool", "unit": "", "better": "higher" }
+      ],
+      "items": [
+        { "id": "s1", "name": "Nova X1", "url": "#", "badge": "", "values": { "cena": 1199, "bateria": 5000, "pamiec": 128, "waga": 195, "nfc": true } },
+        { "id": "s2", "name": "Orbit Pro", "url": "#", "badge": "Flagowiec", "values": { "cena": 3899, "bateria": 4800, "pamiec": 512, "waga": 210, "nfc": true } },
+        { "id": "s3", "name": "Lumo Lite", "url": "#", "badge": "Najlżejszy", "values": { "cena": 899, "bateria": 4200, "pamiec": 64, "waga": 168, "nfc": false } }
+      ]
+    }
+  ],
+  "calculators": [
+    {
+      "id": "kredyt",
+      "name": "Rata kredytu",
+      "icon": "🏦",
+      "description": "Rata równa, miesięczna spłata i koszt odsetek.",
+      "inputs": [
+        { "key": "kwota", "label": "Kwota kredytu", "unit": "zł", "default": 300000, "min": 1000, "max": 2000000, "step": 1000 },
+        { "key": "opr", "label": "Oprocentowanie roczne", "unit": "%", "default": 7.5, "min": 0.1, "max": 20, "step": 0.1 },
+        { "key": "lata", "label": "Okres", "unit": "lat", "default": 25, "min": 1, "max": 35, "step": 1 }
+      ],
+      "outputs": [
+        { "key": "rata", "label": "Rata miesięczna", "formula": "kwota*(opr/1200)/(1-pow(1+opr/1200,-lata*12))", "unit": "zł", "decimals": 2, "main": true },
+        { "key": "suma", "label": "Łącznie do spłaty", "formula": "rata*lata*12", "unit": "zł", "decimals": 0 },
+        { "key": "odsetki", "label": "Koszt odsetek", "formula": "suma-kwota", "unit": "zł", "decimals": 0 }
+      ]
+    },
+    {
+      "id": "oszczednosci",
+      "name": "Procent składany",
+      "icon": "📈",
+      "description": "Ile urośnie kapitał z miesięcznymi wpłatami.",
+      "inputs": [
+        { "key": "kapital", "label": "Kapitał startowy", "unit": "zł", "default": 10000, "min": 0, "max": 1000000, "step": 500 },
+        { "key": "wplata", "label": "Wpłata miesięczna", "unit": "zł", "default": 500, "min": 0, "max": 20000, "step": 50 },
+        { "key": "opr", "label": "Oprocentowanie roczne", "unit": "%", "default": 5, "min": 0.1, "max": 20, "step": 0.1 },
+        { "key": "lata", "label": "Okres", "unit": "lat", "default": 10, "min": 1, "max": 50, "step": 1 }
+      ],
+      "outputs": [
+        { "key": "wynik", "label": "Wartość końcowa", "formula": "kapital*pow(1+opr/1200,lata*12)+wplata*(pow(1+opr/1200,lata*12)-1)/(opr/1200)", "unit": "zł", "decimals": 0, "main": true },
+        { "key": "wplacono", "label": "Wpłacono łącznie", "formula": "kapital+wplata*lata*12", "unit": "zł", "decimals": 0 },
+        { "key": "zysk", "label": "Zysk", "formula": "wynik-wplacono", "unit": "zł", "decimals": 0 }
+      ]
+    },
+    {
+      "id": "vat",
+      "name": "Netto / brutto",
+      "icon": "🧾",
+      "description": "Szybkie przeliczenie VAT.",
+      "inputs": [
+        { "key": "netto", "label": "Kwota netto", "unit": "zł", "default": 1000, "min": 0, "max": 100000, "step": 10 },
+        { "key": "stawka", "label": "Stawka VAT", "unit": "%", "default": 23, "min": 0, "max": 23, "step": 1 }
+      ],
+      "outputs": [
+        { "key": "brutto", "label": "Kwota brutto", "formula": "netto*(1+stawka/100)", "unit": "zł", "decimals": 2, "main": true },
+        { "key": "podatek", "label": "VAT", "formula": "netto*stawka/100", "unit": "zł", "decimals": 2 }
+      ]
+    },
+    {
+      "id": "paliwo",
+      "name": "Koszt paliwa",
+      "icon": "⛽",
+      "description": "Koszt przejazdu na podstawie spalania.",
+      "inputs": [
+        { "key": "dystans", "label": "Dystans", "unit": "km", "default": 300, "min": 1, "max": 5000, "step": 1 },
+        { "key": "spalanie", "label": "Spalanie", "unit": "l/100 km", "default": 7, "min": 1, "max": 30, "step": 0.1 },
+        { "key": "cena", "label": "Cena paliwa", "unit": "zł/l", "default": 6.2, "min": 1, "max": 15, "step": 0.01 }
+      ],
+      "outputs": [
+        { "key": "koszt", "label": "Koszt przejazdu", "formula": "dystans*spalanie/100*cena", "unit": "zł", "decimals": 2, "main": true },
+        { "key": "litry", "label": "Zużyte paliwo", "formula": "dystans*spalanie/100", "unit": "l", "decimals": 1 },
+        { "key": "kosztkm", "label": "Koszt 1 km", "formula": "koszt/dystans", "unit": "zł", "decimals": 2 }
+      ]
+    }
+  ]
+}
