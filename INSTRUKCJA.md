@@ -68,6 +68,19 @@ suma    = rata*lata*12
 odsetki = suma-kwota
 ```
 
+## 5a. Stawki w kalkulatorach prawnych — do aktualizacji
+
+Kalkulatory mają stawki wpisane we wzorach (Panel → Kalkulatory → Wyniki). Sprawdzaj je przy zmianach przepisów:
+
+| Kalkulator | Stawka | Źródło | Kiedy zmienić |
+|------------|--------|--------|---------------|
+| Odsetki ustawowe | 9,25% / 13,75% / 7,25% | art. 481 KC, ustawa o przeciwdziałaniu nadmiernym opóźnieniom, art. 359 KC | po każdej zmianie stopy referencyjnej NBP (stawki od 5.03.2026, stopa 3,75%) |
+| Opłata od pozwu | 30–1000 zł do 20 000 zł, potem 5%, maks. 100 000 zł | art. 13 ustawy o kosztach sądowych w sprawach cywilnych | przy nowelizacji ustawy |
+| Koszty zastępstwa | 90 zł … 25 000 zł | § 2 rozporządzenia o opłatach za czynności adwokackie (t.j. Dz.U. 2026 poz. 215); dla radców prawnych stawki są takie same | przy zmianie rozporządzenia |
+| Opłata skarbowa od pełnomocnictwa | 17 zł | ustawa o opłacie skarbowej | przy nowelizacji |
+
+To samo dotyczy limitów odsetek w Analizie umów (pkt 6).
+
 ## 6. Analiza umów
 
 Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Plik nie opuszcza przeglądarki** — analiza działa lokalnie, bez serwera.
@@ -155,7 +168,9 @@ Skrypt dostaje atrybut `data-lang` z aktualnym językiem strony.
 
 ## 10. Publikacja zmian
 
-Zmiany w panelu to **szkic** zapisany tylko w tej przeglądarce (status „Szkic — niewyeksportowany”).
+Zmiany w panelu to **szkic** zapisany tylko w tej przeglądarce (status „Szkic — niewyeksportowany”). Nie widać go na stronie publicznej ani na innym komputerze. Wyczyszczenie danych przeglądarki lub tryb incognito kasuje szkic — przy większych zmianach pobieraj co jakiś czas `data.json` jako kopię.
+
+Jeśli `data.json` w repo zmieni się po utworzeniu szkicu (np. po aktualizacji strony), panel pokaże żółty komunikat z wyborem: **Użyj nowej wersji z repo** albo **Zostaw mój szkic**.
 
 1. **Podgląd** — sprawdź stronę z danymi szkicu.
 2. **Publikacja → Pobierz data.json**.

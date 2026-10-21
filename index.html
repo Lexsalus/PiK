@@ -355,7 +355,7 @@ function bestMap(items){
     m[f.key]=f.better==='lower'?Math.min(...vals):Math.max(...vals);
   });return m;
 }
-const val=(f,v)=>f.type==='bool'?(v?'✓ '+esc(t('Tak')):'✗ '+esc(t('Nie'))):f.type==='number'?fmt(Number(v),Number(v)%1?2:0)+(f.unit?' '+esc(t(f.unit)):''):esc(t(v));
+const val=(f,v)=>f.type==='bool'?(v?'✓ '+esc(t('Tak')):'✗ '+esc(t('Nie'))):f.type==='number'?(Number.isFinite(Number(v))?Number(v).toLocaleString(loc(),{maximumFractionDigits:2}):'—')+(f.unit?' '+esc(t(f.unit)):''):esc(t(v));
 const isBest=(f,v,m)=>f.key in m&&(f.type==='bool'?(v?1:0):Number(v))===m[f.key];
 function renderItems(){
   const q=$('#q').value.trim().toLowerCase();

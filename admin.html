@@ -89,7 +89,7 @@ td input[type=checkbox],td input[type=radio]{accent-color:var(--accent);width:18
     <a class="nav" href="index.html?preview" target="_blank" style="text-decoration:none">👁️ Podgląd</a>
     <button class="nav" id="logout">↩ Wyloguj</button>
   </aside>
-  <main><div class="top"><h2 id="vTitle"></h2><span class="status" id="status">Zapisano</span></div><div id="view"></div></main>
+  <main><div id="stale" style="display:none;background:color-mix(in srgb,var(--warn) 15%,var(--card));border:1px solid var(--warn);border-radius:14px;padding:14px 16px;margin-bottom:18px;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:240px">⚠️ <b>Plik data.json w repozytorium zmienił się</b> od czasu utworzenia Twojego szkicu. Szkic nie zawiera tych zmian.</span><button class="btn pri" onclick="useNew()">Użyj nowej wersji z repo</button><button class="btn" onclick="keepDraft()">Zostaw mój szkic</button></div><div class="top"><h2 id="vTitle"></h2><span class="status" id="status">Zapisano</span></div><div id="view"></div></main>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -97,7 +97,8 @@ td input[type=checkbox],td input[type=radio]{accent-color:var(--accent);width:18
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='pk_draft';
-let D,ORIG,view='settings',ci=0,ki=0;
+let D,ORIG,view='settings',ci=0,ki=0,BASE='',STALE=false;
+const hash=t=>{let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(36)};
 
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)};
@@ -107,6 +108,9 @@ const uid=p=>p+Math.random().toString(36).slice(2,7);
 async function load(){
   try{ORIG=await (await fetch('data.json',{cache:'no-store'})).json()}catch(e){ORIG=null}
   let draft=null;try{draft=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  BASE=ORIG?hash(JSON.stringify(ORIG)):'';
+  let dBase=null;try{dBase=localStorage.getItem(KEY+'_base')}catch(e){}
+  STALE=!!(draft&&ORIG&&dBase!==BASE&&JSON.stringify(draft)!==JSON.stringify(ORIG));
   D=draft||structuredClone(ORIG);
   if(!D){$('#pwErr').textContent='Brak data.json — uruchom przez serwer.';return}
   norm();
@@ -119,10 +123,12 @@ $('#pwGo').onclick=async()=>{
 };
 $('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwGo').click()};
 $('#logout').onclick=()=>{sessionStorage.removeItem('pk_auth');location.reload()};
-function enter(){$('#login').style.display='none';$('#app').style.display='grid';render()}
+function enter(){$('#login').style.display='none';$('#app').style.display='grid';$('#stale').style.display=STALE?'flex':'none';render()}
+function useNew(){if(!confirm('Odrzucić szkic i wczytać data.json z repozytorium?'))return;D=structuredClone(ORIG);norm();STALE=false;$('#stale').style.display='none';render();toast('Wczytano wersję z repo')}
+function keepDraft(){STALE=false;$('#stale').style.display='none';save();toast('Zostawiono szkic')}
 
 function save(){
-  try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}
+  try{localStorage.setItem(KEY,JSON.stringify(D));if(!STALE)localStorage.setItem(KEY+'_base',BASE)}catch(e){}
   const dirty=JSON.stringify(D)!==JSON.stringify(ORIG);
   $('#status').textContent=dirty?'Szkic — niewyeksportowany':'Zgodne z data.json';
   $('#status').classList.toggle('dirty',dirty);
@@ -529,7 +535,7 @@ function vExport(){
 }
 function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));a.download='data.json';a.click();URL.revokeObjectURL(a.href);toast('Pobrano data.json')}
 function imp(f){if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(!j.site||!j.categories||!j.calculators)throw 0;D=j;render();toast('Zaimportowano')}catch(e){toast('Nieprawidłowy plik')}})}
-function reset(){if(!ORIG||!confirm('Odrzucić wszystkie niezapisane zmiany?'))return;D=structuredClone(ORIG);try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono data.json')}
+function reset(){if(!ORIG||!confirm('Odrzucić wszystkie niezapisane zmiany?'))return;D=structuredClone(ORIG);STALE=false;$('#stale').style.display='none';try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono data.json')}
 fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{$('#ver').textContent='Wersja '+v.version+' · '+v.date}).catch(()=>{});
 load();
 </script>
