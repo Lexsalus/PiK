@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!--SEO-->
 <title>Porównywarka</title>
+<!--/SEO-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -19,26 +21,31 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;min-height:100vh;overflow-x:hidden}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;min-height:100vh;overflow-x:hidden;top:0!important}
 a{color:inherit;text-decoration:none}
 button,input,select{font:inherit;color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
 
 /* nav */
 nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--bg) 75%,transparent);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;gap:20px;height:64px}
-.logo{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:10px}
+nav .wrap{display:flex;align-items:center;gap:14px;height:64px}
+.logo{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:10px;white-space:nowrap}
 .logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 40%,#2fd6a0));display:grid;place-items:center;font-style:normal;font-size:.95rem;color:#fff}
 .links{display:flex;gap:6px;margin-left:auto}
 .links a{padding:8px 14px;border-radius:10px;color:var(--mut);font-weight:600;font-size:.92rem;transition:.2s}
-.links a:hover,.links a.on{color:var(--txt);background:var(--card2)}
-.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center}
+.links a:hover{color:var(--txt);background:var(--card2)}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:grid;place-items:center;flex:none}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.lang button{border:0;background:none;padding:8px 10px;font-weight:700;font-size:.8rem;cursor:pointer;color:var(--mut)}
+.lang button.on{background:var(--accent);color:#fff}
+.admin-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:.88rem;white-space:nowrap;transition:.2s}
+.admin-btn:hover{border-color:var(--accent)}
 
 /* hero */
 .hero{position:relative;padding:80px 0 50px;text-align:center;overflow:hidden}
 .hero::before{content:"";position:absolute;inset:-40% -10% auto;height:520px;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 35%,transparent),transparent);filter:blur(30px);z-index:-1;opacity:.8}
 .hero h1{font-size:clamp(2rem,5.5vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.08}
-.hero h1 span{background:linear-gradient(90deg,var(--accent),#2fd6a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .grad{background:linear-gradient(90deg,var(--accent),#2fd6a0);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{color:var(--mut);font-size:1.1rem;max-width:600px;margin:18px auto 30px}
 .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn{padding:12px 22px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
@@ -71,6 +78,7 @@ section{padding:50px 0}
 .rows{display:grid;gap:8px;margin-bottom:16px;flex:1}
 .row{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;padding-bottom:8px;border-bottom:1px dashed var(--line)}
 .row span{color:var(--mut)}
+.row b{text-align:right}
 .row b.best{color:var(--good)}
 .row b.best::after{content:" ★";font-size:.75em}
 .card-foot{display:flex;gap:8px}
@@ -101,18 +109,25 @@ td.best{color:var(--good);font-weight:700}
 .calc{margin-top:22px;display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
 .inp{margin-bottom:20px}
-.inp label{display:flex;justify-content:space-between;font-weight:600;font-size:.92rem;margin-bottom:8px}
+.inp label{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:.92rem;margin-bottom:8px}
 .inp label input{width:130px;text-align:right;padding:6px 10px}
 input[type=range]{width:100%;accent-color:var(--accent)}
 .res{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 22%,var(--card)),var(--card));}
 .res .main{font-size:2.3rem;font-weight:800;letter-spacing:-.02em;margin:4px 0 20px}
-.res .sub{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.res .sub{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .res .sub span{color:var(--mut)}
 
 footer{border-top:1px solid var(--line);padding:30px 0;color:var(--mut);font-size:.88rem;margin-top:40px}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .preview-flag{background:#f5b84a;color:#1a1300;text-align:center;font-weight:700;font-size:.85rem;padding:6px}
-@media(max-width:760px){.calc{grid-template-columns:1fr}.links a:not(.keep){display:none}.hero{padding-top:50px}}
+.consent{position:fixed;left:16px;bottom:16px;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--sh);z-index:90;display:none;gap:12px;flex-direction:column}
+.consent.show{display:flex}
+.consent div{display:flex;gap:8px}
+.consent .btn{padding:8px 14px;font-size:.88rem}
+/* Google Translate: ukrycie paska i podpowiedzi */
+#gt,.goog-te-banner-frame,iframe.skiptranslate,.goog-te-balloon-frame,#goog-gt-tt,.goog-tooltip{display:none!important}
+.goog-text-highlight{background:none!important;box-shadow:none!important}
+@media(max-width:760px){.calc{grid-template-columns:1fr}.links,.admin-btn span{display:none}.hero{padding-top:50px}.lang{margin-left:auto}}
 .fade{animation:fade .4s both}@keyframes fade{from{opacity:0;transform:translateY(8px)}}
 </style>
 </head>
@@ -121,90 +136,159 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 <nav><div class="wrap">
   <a class="logo" href="#"><i>◆</i><span id="siteName">…</span></a>
   <div class="links">
-    <a href="#porownaj" class="keep">Porównaj</a>
-    <a href="#kalkulatory" class="keep">Kalkulatory</a>
+    <a href="#porownaj" data-i18n>Porównaj</a>
+    <a href="#kalkulatory" data-i18n>Kalkulatory</a>
   </div>
-  <button class="icon-btn" id="theme" title="Motyw">🌓</button>
+  <div class="lang notranslate" id="lang"></div>
+  <button class="icon-btn" id="theme" data-i18n-title="Motyw">🌓</button>
+  <a class="admin-btn" href="admin.html" id="adminLink">⚙️ <span data-i18n>Panel</span></a>
 </div></nav>
 
 <header class="hero"><div class="wrap">
-  <h1 id="heroTitle">Porównuj mądrzej.<br><span>Licz szybciej.</span></h1>
+  <h1><span data-i18n>Porównuj mądrzej.</span><br><span class="grad" data-i18n>Licz szybciej.</span></h1>
   <p id="tagline"></p>
   <div class="cta">
-    <a class="btn pri" href="#porownaj">Zacznij porównywać →</a>
-    <a class="btn" href="#kalkulatory">Kalkulatory</a>
+    <a class="btn pri" href="#porownaj" data-i18n>Zacznij porównywać →</a>
+    <a class="btn" href="#kalkulatory" data-i18n>Kalkulatory</a>
   </div>
-  <div class="stats"><div><b id="stCat">0</b>kategorii</div><div><b id="stItem">0</b>ofert</div><div><b id="stCalc">0</b>kalkulatorów</div></div>
+  <div class="stats"><div><b id="stCat">0</b><span data-i18n>kategorii</span></div><div><b id="stItem">0</b><span data-i18n>ofert</span></div><div><b id="stCalc">0</b><span data-i18n>kalkulatorów</span></div></div>
 </div></header>
 
 <section id="porownaj"><div class="wrap">
-  <div class="sec-h"><div><h2>Porównywarka</h2><p>Zaznacz do 4 ofert, aby zestawić je obok siebie.</p></div></div>
+  <div class="sec-h"><div><h2 data-i18n>Porównywarka</h2><p data-i18n>Zaznacz do 4 ofert, aby zestawić je obok siebie.</p></div></div>
   <div class="tabs" id="catTabs"></div>
   <div class="toolbar">
-    <input class="field search" id="q" placeholder="Szukaj oferty…">
+    <input class="field search" id="q" data-i18n-ph="Szukaj oferty…">
     <select class="field" id="sort"></select>
   </div>
   <div class="grid" id="items"></div>
 </div></section>
 
 <section id="kalkulatory"><div class="wrap">
-  <div class="sec-h"><div><h2>Kalkulatory</h2><p>Wyniki liczą się na bieżąco.</p></div></div>
+  <div class="sec-h"><div><h2 data-i18n>Kalkulatory</h2><p data-i18n>Wyniki liczą się na bieżąco.</p></div></div>
   <div class="cgrid" id="calcs"></div>
   <div class="calc" id="calc"></div>
 </div></section>
 
-<footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span> · <span id="ver"></span></span><a href="admin.html">Panel administracyjny</a></div></footer>
+<footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span> · <span id="ver" class="notranslate"></span></span><a href="admin.html" data-i18n>Panel administracyjny</a></div></footer>
 
-<div class="cbar" id="cbar"><span id="cbarTxt"></span><button class="btn" id="cClear">Wyczyść</button><button class="btn pri" id="cGo">Porównaj</button></div>
-<div class="modal" id="modal"><div class="mbox"><div class="mhead"><h3>Porównanie</h3><button class="icon-btn" id="mClose">✕</button></div><div id="mBody" style="overflow-x:auto"></div></div></div>
+<div class="cbar" id="cbar"><span id="cbarTxt"></span><button class="btn" id="cClear" data-i18n>Wyczyść</button><button class="btn pri" id="cGo" data-i18n>Porównaj</button></div>
+<div class="modal" id="modal"><div class="mbox"><div class="mhead"><h3 data-i18n>Porównanie</h3><button class="icon-btn" id="mClose">✕</button></div><div id="mBody" style="overflow-x:auto"></div></div></div>
+<div class="consent" id="consent"><span data-i18n>Używamy plików cookie do analityki.</span><div><button class="btn pri" id="cYes" data-i18n>Akceptuję</button><button class="btn" id="cNo" data-i18n>Odrzuć</button></div></div>
+<div id="gt"></div>
 
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt=(v,d=0)=>Number.isFinite(v)?v.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
-let D,cat,sel=new Set(),curCalc;
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const LANGS={pl:{label:'PL',loc:'pl-PL'},uk:{label:'UA',loc:'uk-UA'},en:{label:'EN',loc:'en-GB'}};
+let D,cat,sel=new Set(),curCalc,lang='pl',mode='own',enabled=['pl'];
 
-/* motyw */
-const th=localStorage.getItem('theme');if(th)document.documentElement.dataset.theme=th;
-$('#theme').onclick=()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}};
+/* ---------- tłumaczenia ---------- */
+// t(): tekst źródłowy (polski) -> tłumaczenie z data.json; w trybie Google strona zostaje po polsku, tłumaczy widget
+const t=s=>{if(s==null||s==='')return s??'';if(lang==='pl'||mode!=='own')return s;return D.translations?.[lang]?.[s]||s};
+const loc=()=>LANGS[mode==='own'?lang:'pl'].loc;
+const fmt=(v,d=0)=>Number.isFinite(v)?v.toLocaleString(loc(),{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 
+function pickLang(){
+  const want=new URLSearchParams(location.search).get('lang')||store.get('pk_lang')||(navigator.language||'pl').slice(0,2).replace('ua','uk');
+  return enabled.includes(want)?want:'pl';
+}
+function setGoogleCookie(l){
+  const host=location.hostname,past='expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  ['',';domain='+host,';domain=.'+host].forEach(dm=>{document.cookie=`googtrans=;path=/${dm};${past}`});
+  if(l!=='pl')document.cookie=`googtrans=/pl/${l};path=/`;
+}
+function loadGoogle(){
+  window.gtInit=()=>new google.translate.TranslateElement({pageLanguage:'pl',includedLanguages:enabled.filter(l=>l!=='pl').join(','),autoDisplay:false},'gt');
+  const s=document.createElement('script');s.src='https://translate.google.com/translate_a/element.js?cb=gtInit';document.head.appendChild(s);
+}
+function renderLang(){
+  $('#lang').style.display=enabled.length>1?'':'none';
+  $('#lang').innerHTML=enabled.map(l=>`<button class="${l===lang?'on':''}" data-l="${l}">${LANGS[l].label}</button>`).join('');
+}
+$('#lang').onclick=e=>{const b=e.target.closest('button');if(b&&b.dataset.l!==lang)setLang(b.dataset.l)};
+function setLang(l){
+  store.set('pk_lang',l);
+  const u=new URL(location.href);if(l==='pl')u.searchParams.delete('lang');else u.searchParams.set('lang',l);
+  if(mode==='google'){setGoogleCookie(l);location.href=u.toString();return}
+  history.replaceState(null,'',u);lang=l;applyLang(true);
+}
+function applyStatic(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.dataset.src??=el.textContent.trim();el.textContent=t(el.dataset.src)});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>el.title=t(el.dataset.i18nTitle));
+}
+function applySeo(){
+  const s=D.seo||{};
+  document.documentElement.lang=mode==='own'?lang:'pl';
+  document.title=t(s.title)||t(D.site.name)||'Porównywarka';
+  let m=document.querySelector('meta[name=description]');
+  if(!m){m=document.createElement('meta');m.name='description';document.head.appendChild(m)}
+  m.content=t(s.description)||'';
+}
+function applyLang(keep){
+  renderLang();applyStatic();applySeo();
+  $('#siteName').textContent=$('#fName').textContent=t(D.site.name)||'';
+  $('#tagline').textContent=t(D.site.tagline)||'';
+  // zachowaj wybraną kategorię i wartości kalkulatora przy zmianie języka
+  const catId=cat?.id,calcId=curCalc?.id,vals={};
+  if(keep)document.querySelectorAll('#calc input[type=number]').forEach(i=>vals[i.dataset.k]=i.value);
+  renderTabs();setCat(catId||D.categories[0]?.id);
+  renderCalcs();
+  if(calcId||D.calculators[0]){openCalc(calcId||D.calculators[0].id,false);
+    if(keep){Object.entries(vals).forEach(([k,v])=>document.querySelectorAll(`#calc [data-k="${k}"]`).forEach(x=>x.value=v));calc()}}
+}
+
+/* ---------- motyw ---------- */
+const th=store.get('theme');if(th)document.documentElement.dataset.theme=th;
+$('#theme').onclick=()=>{const v=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=v;store.set('theme',v)};
+
+/* ---------- start ---------- */
 async function load(){
-  if(new URLSearchParams(location.search).has('preview')){
-    try{const d=localStorage.getItem('pk_draft');if(d){D=JSON.parse(d);$('#pv').innerHTML='<div class="preview-flag">PODGLĄD — dane z panelu admina (niezapisane w repo)</div>'}}catch(e){}
-  }
+  const preview=new URLSearchParams(location.search).has('preview');
+  if(preview){try{const d=store.get('pk_draft');if(d){D=JSON.parse(d);$('#pv').innerHTML='<div class="preview-flag" data-i18n>PODGLĄD — dane z panelu admina (niezapisane w repo)</div>'}}catch(e){}}
   if(!D){
     try{D=await (await fetch('data.json',{cache:'no-store'})).json()}
     catch(e){document.body.innerHTML='<p style="padding:40px">Nie udało się wczytać <code>data.json</code>. Uruchom stronę przez serwer (np. Live Server w VS Code) lub na GitHub Pages.</p>';return}
   }
+  const i=D.i18n||{};
+  mode=i.mode==='google'?'google':'own';
+  enabled=['pl',...(i.languages||[]).filter(l=>l!=='pl'&&LANGS[l])];
+  lang=pickLang();
+  if(mode==='google'){setGoogleCookie(lang);if(lang!=='pl')loadGoogle()}
   init();
 }
-
 function init(){
   const s=D.site||{};
-  document.title=s.name||'Porównywarka';
   document.documentElement.style.setProperty('--accent',s.accent||'#7c5cff');
-  $('#siteName').textContent=$('#fName').textContent=s.name||'';
-  $('#tagline').textContent=s.tagline||'';
   $('#yr').textContent=new Date().getFullYear();
   $('#stCat').textContent=D.categories.length;
   $('#stItem').textContent=D.categories.reduce((a,c)=>a+c.items.length,0);
   $('#stCalc').textContent=D.calculators.length;
-  renderTabs();setCat(D.categories[0]?.id);
-  renderCalcs();if(D.calculators[0])openCalc(D.calculators[0].id,false);
+  applyLang(false);
+  initConsent();
+  initChatbot();
+}
+
+/* ---------- chatbot (Ilona) ---------- */
+function initChatbot(){
+  const c=D.site?.chatbot;if(!c?.enabled||!c.src)return;
+  const s=document.createElement('script');s.src=c.src;s.defer=true;s.dataset.lang=mode==='own'?lang:'pl';document.body.appendChild(s);
 }
 
 /* ---------- porównywarka ---------- */
 function renderTabs(){
-  $('#catTabs').innerHTML=D.categories.map(c=>`<button class="tab" data-id="${esc(c.id)}">${esc(c.icon||'')} ${esc(c.name)}</button>`).join('');
+  $('#catTabs').innerHTML=D.categories.map(c=>`<button class="tab" data-id="${esc(c.id)}">${esc(c.icon||'')} ${esc(t(c.name))}</button>`).join('');
   $('#catTabs').onclick=e=>{const b=e.target.closest('.tab');if(b)setCat(b.dataset.id)};
 }
 function setCat(id){
   cat=D.categories.find(c=>c.id===id);sel.clear();updBar();
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.id===id));
-  if(!cat){$('#items').innerHTML='<div class="empty">Brak kategorii.</div>';return}
-  const opts=['<option value="">Sortuj: domyślnie</option>'];
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.id===id));
+  if(!cat){$('#items').innerHTML=`<div class="empty">${esc(t('Brak kategorii.'))}</div>`;return}
+  const opts=[`<option value="">${esc(t('Sortuj: domyślnie'))}</option>`];
   cat.fields.filter(f=>f.type==='number').forEach(f=>{
-    opts.push(`<option value="${f.key}:1">${esc(f.label)} rosnąco</option><option value="${f.key}:-1">${esc(f.label)} malejąco</option>`)});
+    opts.push(`<option value="${esc(f.key)}:1">${esc(t(f.label))} ${esc(t('rosnąco'))}</option><option value="${esc(f.key)}:-1">${esc(t(f.label))} ${esc(t('malejąco'))}</option>`)});
   $('#sort').innerHTML=opts.join('');$('#q').value='';
   renderItems();
 }
@@ -217,24 +301,24 @@ function bestMap(items){
     m[f.key]=f.better==='lower'?Math.min(...vals):Math.max(...vals);
   });return m;
 }
-const val=(f,v)=>f.type==='bool'?(v?'✓ Tak':'✗ Nie'):f.type==='number'?fmt(Number(v),Number(v)%1?2:0)+(f.unit?' '+f.unit:''):esc(v);
+const val=(f,v)=>f.type==='bool'?(v?'✓ '+esc(t('Tak')):'✗ '+esc(t('Nie'))):f.type==='number'?fmt(Number(v),Number(v)%1?2:0)+(f.unit?' '+esc(t(f.unit)):''):esc(t(v));
 const isBest=(f,v,m)=>f.key in m&&(f.type==='bool'?(v?1:0):Number(v))===m[f.key];
 function renderItems(){
   const q=$('#q').value.trim().toLowerCase();
-  let items=cat.items.filter(i=>i.name.toLowerCase().includes(q));
+  let items=cat.items.filter(i=>(i.name+' '+t(i.name)).toLowerCase().includes(q));
   const [sk,sd]=$('#sort').value.split(':');
   if(sk)items=[...items].sort((a,b)=>(a.values[sk]-b.values[sk])*sd);
   const m=bestMap(cat.items);
   $('#items').innerHTML=items.length?items.map((it,n)=>`
    <div class="card fade ${sel.has(it.id)?'sel':''}" style="animation-delay:${n*40}ms">
-     ${it.badge?`<div class="badge">${esc(it.badge)}</div>`:''}
-     <h3>${esc(it.name)}</h3>
-     <div class="rows">${cat.fields.map(f=>`<div class="row"><span>${esc(f.label)}</span><b class="${isBest(f,it.values[f.key],m)?'best':''}">${val(f,it.values[f.key])}</b></div>`).join('')}</div>
+     ${it.badge?`<div class="badge">${esc(t(it.badge))}</div>`:''}
+     <h3>${esc(t(it.name))}</h3>
+     <div class="rows">${cat.fields.map(f=>`<div class="row"><span>${esc(t(f.label))}</span><b class="${isBest(f,it.values[f.key],m)?'best':''}">${val(f,it.values[f.key])}</b></div>`).join('')}</div>
      <div class="card-foot">
-       <label class="chk"><input type="checkbox" data-id="${esc(it.id)}" ${sel.has(it.id)?'checked':''}>Porównaj</label>
-       ${it.url&&it.url!=='#'?`<a class="btn pri" href="${esc(it.url)}" target="_blank" rel="noopener">Zobacz →</a>`:''}
+       <label class="chk"><input type="checkbox" data-id="${esc(it.id)}" ${sel.has(it.id)?'checked':''}>${esc(t('Porównaj'))}</label>
+       ${it.url&&it.url!=='#'?`<a class="btn pri" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(t('Zobacz →'))}</a>`:''}
      </div>
-   </div>`).join(''):'<div class="empty">Brak wyników.</div>';
+   </div>`).join(''):`<div class="empty">${esc(t('Brak wyników.'))}</div>`;
 }
 $('#q').oninput=renderItems;$('#sort').onchange=renderItems;
 $('#items').onchange=e=>{
@@ -242,12 +326,12 @@ $('#items').onchange=e=>{
   if(c.checked){if(sel.size>=4){c.checked=false;return}sel.add(c.dataset.id)}else sel.delete(c.dataset.id);
   c.closest('.card').classList.toggle('sel',c.checked);updBar();
 };
-function updBar(){$('#cbar').classList.toggle('show',sel.size>0);$('#cbarTxt').textContent=`Wybrano: ${sel.size}/4`}
+function updBar(){$('#cbar').classList.toggle('show',sel.size>0);$('#cbarTxt').textContent=`${t('Wybrano')}: ${sel.size}/4`}
 $('#cClear').onclick=()=>{sel.clear();updBar();renderItems()};
 $('#cGo').onclick=()=>{
   const items=cat.items.filter(i=>sel.has(i.id)),m=bestMap(items);
-  $('#mBody').innerHTML=`<table><tr><th></th>${items.map(i=>`<th style="color:var(--txt)">${esc(i.name)}</th>`).join('')}</tr>
-   ${cat.fields.map(f=>`<tr><th>${esc(f.label)}</th>${items.map(i=>`<td class="${items.length>1&&isBest(f,i.values[f.key],m)?'best':''}">${val(f,i.values[f.key])}</td>`).join('')}</tr>`).join('')}</table>`;
+  $('#mBody').innerHTML=`<table><tr><th></th>${items.map(i=>`<th style="color:var(--txt)">${esc(t(i.name))}</th>`).join('')}</tr>
+   ${cat.fields.map(f=>`<tr><th>${esc(t(f.label))}</th>${items.map(i=>`<td class="${items.length>1&&isBest(f,i.values[f.key],m)?'best':''}">${val(f,i.values[f.key])}</td>`).join('')}</tr>`).join('')}</table>`;
   $('#modal').classList.add('show');
 };
 $('#mClose').onclick=()=>$('#modal').classList.remove('show');
@@ -256,7 +340,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').classList.remove(
 
 /* ---------- kalkulatory ---------- */
 function renderCalcs(){
-  $('#calcs').innerHTML=D.calculators.map(c=>`<div class="ccard" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(c.name)}</h3><p>${esc(c.description||'')}</p></div>`).join('');
+  $('#calcs').innerHTML=D.calculators.map(c=>`<div class="ccard" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(t(c.name))}</h3><p>${esc(t(c.description||''))}</p></div>`).join('');
   $('#calcs').onclick=e=>{const c=e.target.closest('.ccard');if(c)openCalc(c.dataset.id,true)};
 }
 function compute(c,vals){
@@ -270,8 +354,8 @@ function compute(c,vals){
 function openCalc(id,scroll){
   curCalc=D.calculators.find(c=>c.id===id);if(!curCalc)return;
   document.querySelectorAll('.ccard').forEach(c=>c.classList.toggle('on',c.dataset.id===id));
-  $('#calc').innerHTML=`<div class="panel fade"><h3 style="margin-bottom:18px">${esc(curCalc.icon||'')} ${esc(curCalc.name)}</h3>
-    ${curCalc.inputs.map(i=>`<div class="inp"><label>${esc(i.label)}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${i.default}" step="${i.step||1}"> ${esc(i.unit||'')}</span></label>
+  $('#calc').innerHTML=`<div class="panel fade"><h3 style="margin-bottom:18px">${esc(curCalc.icon||'')} ${esc(t(curCalc.name))}</h3>
+    ${curCalc.inputs.map(i=>`<div class="inp"><label>${esc(t(i.label))}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${i.default}" step="${i.step||1}"> ${esc(t(i.unit||''))}</span></label>
     <input type="range" data-k="${esc(i.key)}" min="${i.min}" max="${i.max}" step="${i.step||1}" value="${i.default}"></div>`).join('')}</div>
     <div class="panel res fade" id="res"></div>`;
   $('#calc').oninput=e=>{const k=e.target.dataset.k;if(!k)return;$('#calc').querySelectorAll(`[data-k="${k}"]`).forEach(x=>{if(x!==e.target)x.value=e.target.value});calc()};
@@ -280,9 +364,24 @@ function openCalc(id,scroll){
 function calc(){
   const vals={};$('#calc').querySelectorAll('input[type=range]').forEach(r=>{const n=$('#calc').querySelector(`input[type=number][data-k="${r.dataset.k}"]`);vals[r.dataset.k]=parseFloat(n.value)||0});
   const out=compute(curCalc,vals),main=out.find(o=>o.main)||out[0];
-  $('#res').innerHTML=main?`<span style="color:var(--mut)">${esc(main.label)}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(main.unit||'')}</div>
-   ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(o.label)}</span><b>${fmt(o.v,o.decimals)} ${esc(o.unit||'')}</b></div>`).join('')}`:'';
+  $('#res').innerHTML=main?`<span style="color:var(--mut)">${esc(t(main.label))}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</div>
+   ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(t(o.label))}</span><b>${fmt(o.v,o.decimals)} ${esc(t(o.unit||''))}</b></div>`).join('')}`:'';
 }
+
+/* ---------- Google Analytics + zgoda ---------- */
+function loadGA(id){
+  const s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(id);document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',id,{anonymize_ip:true});
+}
+function initConsent(){
+  const id=(D.seo?.gaId||'').trim();if(!id||new URLSearchParams(location.search).has('preview'))return;
+  if(!D.seo.consentBanner){loadGA(id);return}
+  const c=store.get('pk_consent');
+  if(c==='yes')loadGA(id);else if(c!=='no')$('#consent').classList.add('show');
+}
+$('#cYes').onclick=()=>{store.set('pk_consent','yes');$('#consent').classList.remove('show');loadGA(D.seo.gaId.trim())};
+$('#cNo').onclick=()=>{store.set('pk_consent','no');$('#consent').classList.remove('show')};
+
 fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{$('#ver').textContent='v'+v.version;$('#ver').title=v.date}).catch(()=>{});
 load();
 </script>

@@ -12,12 +12,18 @@ Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel admin
 **Strona publiczna**
 - Porównywarka: kategorie, wyszukiwarka, sortowanie, ★ przy najlepszej wartości, porównanie do 4 ofert w tabeli
 - Kalkulatory z suwakami, wyniki na żywo
+- Wersje językowe PL / UA / EN (własne tłumaczenia lub Google Translate)
+- Chatbot Ilona osadzony na stronie
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
+- Przycisk panelu w górnym pasku
 
 **Panel administracyjny**
 - Ustawienia strony (nazwa, kolor akcentu, podtytuł, hasło)
 - Kategorie z dowolnymi parametrami (liczba / tekst / tak-nie) i ofertami
 - Kalkulatory z własnymi wzorami i testem na żywo
+- Tłumaczenia: tryb własny/Google, wybór języków, tabela z postępem i filtrem brakujących
+- SEO: tytuł, opis, hreflang, Open Graph, schema.org, Search Console, Bing, GA4 z banerem zgody, robots.txt, sitemap.xml, podgląd wyniku Google i ocena
+- Włączanie/wyłączanie chatbota
 - Podgląd szkicu, eksport / import `data.json`
 
 ## Struktura
@@ -25,10 +31,11 @@ Statyczna strona na GitHub Pages: porównywarka ofert, kalkulatory i panel admin
 ```
 index.html      strona publiczna
 admin.html      panel administracyjny
-data.json       dane strony (kategorie, oferty, kalkulatory, ustawienia)
+data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
 version.json    aktualna wersja
 CHANGELOG.md    historia wersji
 bump.py         podbijanie wersji
+build_seo.py    SEO z data.json -> index.html, robots.txt, sitemap.xml (uruchamia Actions)
 INSTRUKCJA.md   instrukcja obsługi
 .github/        workflow publikacji na GitHub Pages
 ```
@@ -37,7 +44,7 @@ INSTRUKCJA.md   instrukcja obsługi
 
 1. Panel wczytuje `data.json`, zmiany trzyma jako szkic w przeglądarce.
 2. Admin pobiera gotowy `data.json` i wrzuca go do repo.
-3. Push na `main` → GitHub Actions publikuje stronę.
+3. Push na `main` → GitHub Actions uruchamia `build_seo.py` i publikuje stronę.
 
 ## Wersjonowanie
 
