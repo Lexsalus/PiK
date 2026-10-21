@@ -79,9 +79,12 @@ td input[type=checkbox],td input[type=radio]{accent-color:var(--accent);width:18
     <button class="nav on" data-v="settings">⚙️ Ustawienia</button>
     <button class="nav" data-v="cats">🗂️ Kategorie</button>
     <button class="nav" data-v="calcs">🧮 Kalkulatory</button>
+    <button class="nav" data-v="i18n">🌐 Tłumaczenia</button>
+    <button class="nav" data-v="seo">🔎 SEO</button>
     <button class="nav" data-v="export">💾 Publikacja</button>
     <div class="sp"></div>
     <div id="ver" style="color:var(--mut);font-size:.78rem;padding:4px 12px"></div>
+    <a class="nav" href="index.html" target="_blank" style="text-decoration:none">🏠 Strona</a>
     <a class="nav" href="index.html?preview" target="_blank" style="text-decoration:none">👁️ Podgląd</a>
     <button class="nav" id="logout">↩ Wyloguj</button>
   </aside>
@@ -105,6 +108,7 @@ async function load(){
   let draft=null;try{draft=JSON.parse(localStorage.getItem(KEY))}catch(e){}
   D=draft||structuredClone(ORIG);
   if(!D){$('#pwErr').textContent='Brak data.json — uruchom przez serwer.';return}
+  norm();
   if(sessionStorage.getItem('pk_auth')===D.site.adminHash)enter();
 }
 $('#pwGo').onclick=async()=>{
@@ -151,10 +155,12 @@ document.querySelectorAll('aside .nav[data-v]').forEach(b=>b.onclick=()=>{view=b
 
 function render(){
   save();
-  const T={settings:'Ustawienia strony',cats:'Kategorie porównywarki',calcs:'Kalkulatory',export:'Publikacja'};
+  const T={settings:'Ustawienia strony',cats:'Kategorie porównywarki',calcs:'Kalkulatory',i18n:'Tłumaczenia',seo:'Optymalizacja pod Google (SEO)',export:'Publikacja'};
   $('#vTitle').textContent=T[view];
-  $('#view').innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,export:vExport})[view]();
+  $('#view').innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,i18n:vI18n,seo:vSeo,export:vExport})[view]();
   if(view==='calcs')testCalc();
+  if(view==='i18n')renderTl();
+  if(view==='seo')seoPreview();
 }
 
 /* ---------- Ustawienia ---------- */
@@ -165,6 +171,10 @@ function vSettings(){
     <label>Kolor akcentu<input class="f" type="color" data-p="site.accent" value="${esc(s.accent||'#7c5cff')}" style="height:40px;padding:4px"></label>
     <label style="grid-column:1/-1">Hasło (podtytuł)<input class="f" data-p="site.tagline" value="${esc(s.tagline)}"></label>
   </div></div>
+  <div class="box"><h3>Chatbot (Ilona)</h3><div class="form">
+    <label style="display:flex;align-items:center;gap:10px;color:var(--txt)"><input type="checkbox" data-p="site.chatbot.enabled" ${s.chatbot?.enabled?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">Pokaż chatbota na stronie</label>
+    <label style="grid-column:1/-1">Adres skryptu osadzającego<input class="f code" data-p="site.chatbot.src" value="${esc(s.chatbot?.src||'')}"></label></div>
+    <p class="hint">Skrypt ładuje się na stronie publicznej (także w podglądzie). Dostaje atrybut <code>data-lang</code> z aktualnym językiem strony.</p></div>
   <div class="box"><h3>Hasło administratora</h3><div class="form">
     <label>Nowe hasło<input class="f" type="password" id="np"></label>
     <label>&nbsp;<button class="btn pri" onclick="chPw()">Zmień hasło</button></label></div>
@@ -260,6 +270,157 @@ function addCalc(){D.calculators.push({id:uid('calc_'),name:'Nowy kalkulator',ic
 function delCalc(){if(confirm('Usunąć kalkulator?')){D.calculators.splice(ki,1);ki=0;render()}}
 function addIn(){D.calculators[ki].inputs.push({key:'x'+D.calculators[ki].inputs.length,label:'Nowe pole',unit:'',default:0,min:0,max:100,step:1});render()}
 function addOut(){D.calculators[ki].outputs.push({key:'w'+D.calculators[ki].outputs.length,label:'Nowy wynik',formula:'0',unit:'',decimals:2});render()}
+
+/* uzupełnienie brakujących sekcji (np. stary szkic sprzed aktualizacji) */
+function norm(){
+  const O=ORIG||{};
+  D.seo={...structuredClone(O.seo||{}),...(D.seo||{})};
+  D.i18n=D.i18n||structuredClone(O.i18n||{mode:'own',languages:['pl']});
+  D.translations=D.translations||structuredClone(O.translations||{});
+  ['uk','en'].forEach(l=>D.translations[l]=D.translations[l]||{});
+  D.site.chatbot=D.site.chatbot||structuredClone(O.site?.chatbot||{enabled:false,src:''});
+}
+
+/* ---------- Tłumaczenia ---------- */
+const LN={uk:'Ukraiński',en:'Angielski'};
+// teksty interfejsu strony (index.html) — źródło po polsku
+const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','Zacznij porównywać →','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — dane z panelu admina (niezapisane w repo)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć'];
+let TL=[],tlQ='',tlMiss=false;
+function collect(){
+  const out=new Map(),add=(s,ctx)=>{s=String(s??'').trim();if(s&&!/^[\d\s.,%+\-*/()]+$/.test(s)&&!out.has(s))out.set(s,ctx)};
+  add(D.site.name,'Strona');add(D.site.tagline,'Strona');add(D.seo.title,'SEO');add(D.seo.description,'SEO');
+  D.categories.forEach(c=>{const x='Kategoria: '+c.name;add(c.name,x);
+    c.fields.forEach(f=>{add(f.label,x);add(f.unit,x)});
+    c.items.forEach(it=>{add(it.name,x);add(it.badge,x);c.fields.filter(f=>f.type==='text').forEach(f=>add(it.values[f.key],x))})});
+  D.calculators.forEach(c=>{const x='Kalkulator: '+c.name;add(c.name,x);add(c.description,x);
+    c.inputs.forEach(i=>{add(i.label,x);add(i.unit,x)});c.outputs.forEach(o=>{add(o.label,x);add(o.unit,x)})});
+  UI_KEYS.forEach(k=>add(k,'Interfejs strony'));
+  const used=new Set(out.keys());
+  ['uk','en'].forEach(l=>Object.keys(D.translations[l]||{}).forEach(k=>{if(!used.has(k))out.set(k,'Nieużywane')}));
+  return [...out].map(([s,ctx])=>({s,ctx}));
+}
+const langsOn=()=>(D.i18n.languages||[]).filter(l=>l!=='pl');
+function vI18n(){
+  const i=D.i18n,on=langsOn();
+  return `<div class="box"><h3>Ustawienia tłumaczeń</h3><div class="form">
+     <label>Tryb tłumaczenia<select class="f" id="tlMode">
+       <option value="own" ${i.mode!=='google'?'selected':''}>Własne — tłumaczenia z tabeli poniżej</option>
+       <option value="google" ${i.mode==='google'?'selected':''}>Google Translate — automatycznie</option></select></label>
+     <label>Języki na stronie<span style="display:flex;gap:16px;padding:9px 0;color:var(--txt)">
+       <span>🇵🇱 Polski (źródłowy)</span>
+       ${Object.keys(LN).map(l=>`<label style="display:flex;gap:6px;align-items:center;font-weight:500;font-size:.88rem"><input type="checkbox" class="tlLang" value="${l}" ${on.includes(l)?'checked':''} style="accent-color:var(--accent)">${LN[l]}</label>`).join('')}</span></label></div>
+     <p class="hint">${i.mode==='google'
+       ?'<b>Google:</b> strona jest pisana po polsku, a widget Google tłumaczy ją automatycznie po wybraniu języka. Zero pracy, ale jakość i terminologia zależą od Google, a tłumaczenie działa w przeglądarce (dla wyszukiwarki strona zostaje po polsku). Tabela niżej jest zachowana — możesz wrócić do trybu własnego.'
+       :'<b>Własne:</b> każdy tekst tłumaczysz w tabeli. Brakujące tłumaczenie = na stronie pokaże się tekst polski. Przycisk <b>G↗</b> otwiera Tłumacza Google z danym tekstem, żeby szybko skopiować propozycję.'}</p></div>
+   <div class="box"><h3>Teksty <span id="tlProg" style="font-weight:500;color:var(--mut);font-size:.85rem"></span></h3>
+     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+       <input class="f" id="tlQ" placeholder="Szukaj tekstu…" value="${esc(tlQ)}" style="max-width:280px">
+       <label style="display:flex;gap:6px;align-items:center;color:var(--mut)"><input type="checkbox" id="tlMiss" ${tlMiss?'checked':''} style="accent-color:var(--accent)">Tylko brakujące</label>
+       <button class="btn sm del" onclick="delUnused()" style="margin-left:auto">Usuń nieużywane</button></div>
+     <div class="tw"><table><thead><tr><th>Polski (źródło)</th>${on.map(l=>`<th>${LN[l]}</th>`).join('')}</tr></thead><tbody id="tlBody"></tbody></table></div>
+     <p class="hint">Zmiana tekstu polskiego w kategoriach/kalkulatorach tworzy nowy wpis — stare tłumaczenie trafia do „Nieużywane”.</p></div>`;
+}
+function renderTl(){
+  const on=langsOn(),q=tlQ.toLowerCase();TL=collect();
+  const prog=on.map(l=>{const n=TL.filter(x=>x.ctx!=='Nieużywane').length,ok=TL.filter(x=>x.ctx!=='Nieużywane'&&D.translations[l]?.[x.s]).length;return `${LN[l]}: ${ok}/${n}`}).join(' · ');
+  $('#tlProg').textContent=prog;
+  let last='';
+  $('#tlBody').innerHTML=TL.map((x,i)=>({...x,i})).filter(x=>(!q||x.s.toLowerCase().includes(q)||on.some(l=>(D.translations[l]?.[x.s]||'').toLowerCase().includes(q)))&&(!tlMiss||on.some(l=>!D.translations[l]?.[x.s]))).map(x=>{
+    const grp=x.ctx!==last?`<tr><td colspan="${on.length+1}" style="padding-top:14px;color:var(--accent);font-weight:700;font-size:.78rem">${esc(x.ctx)}</td></tr>`:'';last=x.ctx;
+    return grp+`<tr><td style="max-width:320px">${esc(x.s)}</td>${on.map(l=>`<td><div style="display:flex;gap:4px"><input class="f" data-tl="${l}" data-i="${x.i}" value="${esc(D.translations[l]?.[x.s]||'')}" style="min-width:200px;${D.translations[l]?.[x.s]?'':'border-color:color-mix(in srgb,var(--warn) 50%,var(--line))'}">
+      <a class="btn sm" target="_blank" rel="noopener" title="Otwórz w Tłumaczu Google" href="https://translate.google.com/?sl=pl&tl=${l}&op=translate&text=${encodeURIComponent(x.s)}" style="text-decoration:none">G↗</a></div></td>`).join('')}</tr>`}).join('')||`<tr><td class="hint">Brak tekstów.</td></tr>`;
+}
+$('#view').addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.tl){const s=TL[el.dataset.i].s,l=el.dataset.tl,v=el.value.trim();if(v)D.translations[l][s]=v;else delete D.translations[l][s];save();el.style.borderColor=v?'':'color-mix(in srgb,var(--warn) 50%,var(--line))'}
+  if(el.id==='tlQ'){tlQ=el.value;renderTl()}
+});
+$('#view').addEventListener('change',e=>{
+  const el=e.target;
+  if(el.id==='tlMiss'){tlMiss=el.checked;renderTl()}
+  if(el.id==='tlMode'){D.i18n.mode=el.value;render()}
+  if(el.classList.contains('tlLang')){const s=new Set(langsOn());el.checked?s.add(el.value):s.delete(el.value);D.i18n.languages=['pl',...Object.keys(LN).filter(l=>s.has(l))];render()}
+});
+function delUnused(){const u=TL.filter(x=>x.ctx==='Nieużywane');if(!u.length)return toast('Brak nieużywanych');if(!confirm(`Usunąć ${u.length} nieużywanych tłumaczeń?`))return;u.forEach(x=>['uk','en'].forEach(l=>delete D.translations[l][x.s]));render()}
+
+/* ---------- SEO ---------- */
+function vSeo(){
+  const s=D.seo,P='seo',inp=(k,l,ph='',extra='')=>`<label>${l}<input class="f" data-p="${P}.${k}" value="${esc(s[k]??'')}" placeholder="${esc(ph)}" ${extra}></label>`,
+    chk=(k,l)=>`<label style="display:flex;gap:8px;align-items:center;color:var(--txt);font-weight:500"><input type="checkbox" data-p="${P}.${k}" ${s[k]?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">${l}</label>`;
+  return `<div class="box"><h3>Wynik w Google <span id="seoScore" style="font-size:.85rem"></span></h3>
+     <div id="serp" style="background:#fff;color:#202124;border-radius:12px;padding:16px 18px;font-family:Arial,sans-serif;max-width:640px"></div>
+     <ul id="seoChecks" class="hint" style="list-style:none;display:grid;gap:4px;margin-top:12px"></ul></div>
+   <div class="box"><h3>Podstawowe</h3><div class="form">
+     <label style="grid-column:1/-1">Tytuł strony <span id="cTitle"></span><input class="f" data-p="${P}.title" value="${esc(s.title)}"></label>
+     <label style="grid-column:1/-1">Opis (meta description) <span id="cDesc"></span><textarea class="f" data-p="${P}.description" rows="3">${esc(s.description)}</textarea></label>
+     ${inp('keywords','Słowa kluczowe (po przecinku)','porównywarka, kalkulator')}
+     ${inp('siteUrl','Adres strony (kanoniczny)','https://…/')}
+     ${inp('author','Autor')}
+     ${inp('themeColor','Kolor paska przeglądarki (mobile)','#0b0d14')}</div>
+     <p class="hint">Tytuł i opis są tłumaczone w zakładce <b>Tłumaczenia</b> (grupa „SEO”) — wersje językowe dostają je w meta tagach i <code>hreflang</code>.</p></div>
+   <div class="box"><h3>Indeksowanie</h3><div class="form">
+     ${chk('robotsIndex','Pozwól indeksować (index)')}
+     ${chk('robotsFollow','Pozwól śledzić linki (follow)')}
+     <label>Częstotliwość zmian (sitemap)<select class="f" data-p="${P}.sitemapChangefreq">${['always','hourly','daily','weekly','monthly','yearly','never'].map(v=>`<option ${s.sitemapChangefreq===v?'selected':''}>${v}</option>`).join('')}</select></label>
+     ${inp('sitemapPriority','Priorytet (sitemap, 0.0–1.0)','1.0')}
+     <label style="grid-column:1/-1">Dodatkowe reguły robots.txt<textarea class="f code" data-p="${P}.robotsExtra" rows="3" placeholder="Disallow: /prywatne/">${esc(s.robotsExtra)}</textarea></label></div>
+     <p class="hint"><code>admin.html</code> jest zawsze wyłączony z indeksowania.</p></div>
+   <div class="box"><h3>Google i Bing</h3><div class="form">
+     ${inp('googleVerification','Google Search Console — kod weryfikacji','zawartość content="…"')}
+     ${inp('bingVerification','Bing Webmaster — kod weryfikacji')}
+     ${inp('gaId','Google Analytics 4 — identyfikator','G-XXXXXXXXXX')}
+     ${chk('consentBanner','Pytaj o zgodę na cookies przed włączeniem Analytics (RODO)')}</div></div>
+   <div class="box"><h3>Udostępnianie (Facebook, LinkedIn, X)</h3><div class="form">
+     ${inp('ogImage','Obrazek podglądu (URL, 1200×630)','https://…/og.png')}
+     <label>Karta X / Twitter<select class="f" data-p="${P}.twitterCard">${['summary_large_image','summary'].map(v=>`<option ${s.twitterCard===v?'selected':''}>${v}</option>`).join('')}</select></label>
+     ${inp('twitterSite','Konto X (@nazwa)','@')}</div>
+     <div id="ogPrev" style="margin-top:14px;max-width:520px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg2)"></div></div>
+   <div class="box"><h3>Dane strukturalne (schema.org)</h3><div class="form">
+     <label>Typ<select class="f" data-p="${P}.schemaType">${[['','— wyłączone'],['WebSite','WebSite'],['Organization','Organization'],['LocalBusiness','LocalBusiness']].map(([v,l])=>`<option value="${v}" ${s.schemaType===v?'selected':''}>${l}</option>`).join('')}</select></label>
+     ${inp('orgName','Nazwa firmy / organizacji')}
+     ${inp('orgLogo','Logo (URL)','https://…/logo.png')}</div></div>
+   <div class="box"><h3>Zaawansowane</h3>
+     <label class="hint" style="display:grid;gap:6px;font-weight:600">Własny kod w &lt;head&gt; (np. inne meta, piksel)<textarea class="f code" data-p="${P}.headExtra" rows="4">${esc(s.headExtra)}</textarea></label>
+     <h3 style="margin-top:16px">Podgląd plików generowanych przy publikacji</h3>
+     <div class="form"><label>robots.txt<textarea class="f code" id="pRobots" rows="6" readonly></textarea></label>
+     <label>sitemap.xml<textarea class="f code" id="pSitemap" rows="6" readonly></textarea></label></div>
+     <p class="hint">Meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy automatycznie GitHub Actions (<code>build_seo.py</code>) przy każdej publikacji — wystarczy wrzucić <code>data.json</code>.</p></div>`;
+}
+const tr=(l,s)=>l==='pl'?s:(D.translations[l]?.[s]||s);
+function seoPreview(){
+  if(!$('#serp'))return;
+  const s=D.seo,url=(s.siteUrl||'').trim(),title=s.title||D.site.name,desc=s.description||'';
+  const host=url.replace(/^https?:\/\//,'').replace(/\/$/,'');
+  $('#serp').innerHTML=`<div style="font-size:12px;color:#4d5156">${esc(host||'twoja-strona.pl')}</div>
+    <div style="font-size:20px;color:#1a0dab;margin:2px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(title.length>60?title.slice(0,58)+'…':title)}</div>
+    <div style="font-size:14px;line-height:1.5;color:#4d5156">${esc(desc.length>160?desc.slice(0,157)+'…':desc)}</div>`;
+  const cnt=(n,a,b)=>`<span style="color:${n>=a&&n<=b?'var(--good)':'var(--warn)'};font-weight:500">(${n} zn., zalecane ${a}–${b})</span>`;
+  $('#cTitle').innerHTML=cnt(title.length,30,60);$('#cDesc').innerHTML=cnt(desc.length,70,160);
+  const langs=['pl',...langsOn()];
+  const checks=[
+    [title.length>=30&&title.length<=60,'Długość tytułu 30–60 znaków'],
+    [desc.length>=70&&desc.length<=160,'Długość opisu 70–160 znaków'],
+    [/^https:\/\/.+\/$/.test(url),'Adres strony z https:// i ukośnikiem na końcu'],
+    [s.robotsIndex,'Indeksowanie włączone'],
+    [!!s.ogImage,'Obrazek podglądu do udostępniania'],
+    [!!s.googleVerification,'Weryfikacja Google Search Console'],
+    [!!s.schemaType,'Dane strukturalne schema.org'],
+    [langs.length<2||langs.slice(1).every(l=>D.translations[l]?.[s.title]&&D.translations[l]?.[s.description]),'Tytuł i opis przetłumaczone na wszystkie języki'],
+    [D.i18n.mode!=='google'||langs.length<2,'Tłumaczenia własne (Google Translate nie jest widoczny dla wyszukiwarki)']];
+  const ok=checks.filter(c=>c[0]).length;
+  $('#seoScore').innerHTML=`<span style="color:${ok>=7?'var(--good)':'var(--warn)'}">${ok}/${checks.length}</span>`;
+  $('#seoChecks').innerHTML=checks.map(([v,l])=>`<li>${v?'✅':'⚠️'} ${l}</li>`).join('');
+  $('#ogPrev').innerHTML=(s.ogImage?`<img src="${esc(s.ogImage)}" alt="" style="width:100%;aspect-ratio:1.91;object-fit:cover;display:block" onerror="this.style.display='none'">`:`<div style="aspect-ratio:1.91;display:grid;place-items:center;color:var(--mut);background:var(--card2)">brak obrazka</div>`)+
+    `<div style="padding:10px 12px"><div class="hint" style="margin:0">${esc(host.toUpperCase())}</div><b>${esc(title)}</b><div class="hint" style="margin:2px 0 0">${esc(desc.slice(0,110))}</div></div>`;
+  const base=url||'https://twoja-strona.pl/';
+  $('#pRobots').value=`User-agent: *\n${s.robotsIndex?'Allow: /':'Disallow: /'}\nDisallow: ${new URL('admin.html',base).pathname}\n${s.robotsExtra?s.robotsExtra.trim()+'\n':''}\nSitemap: ${base}sitemap.xml`;
+  const today=new Date().toISOString().slice(0,10);
+  $('#pSitemap').value=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n`+
+    langs.map(l=>`  <url>\n    <loc>${base}${l==='pl'?'':'?lang='+l}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${s.sitemapChangefreq}</changefreq>\n    <priority>${s.sitemapPriority}</priority>\n`+
+      (langs.length>1?langs.map(a=>`    <xhtml:link rel="alternate" hreflang="${a}" href="${base}${a==='pl'?'':'?lang='+a}"/>\n`).join(''):'')+`  </url>`).join('\n')+`\n</urlset>`;
+}
+$('#view').addEventListener('input',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
+$('#view').addEventListener('change',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
 
 /* ---------- Publikacja ---------- */
 function vExport(){
