@@ -2,6 +2,12 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.5.0] — 2026-10-23
+- „Co mi się należy”: kalkulatory roszczeń SKD, CHF/FX, WIBOR, restrukturyzacja + formularz zgłoszenia
+- Zgłoszenie zawiera kategorię CRM, wpisane wartości i wynik; tryb test (podgląd w CRM) lub e-mail kancelarii; zgoda RODO
+- Panel: rodzaj kalkulatora, kategoria CRM, uwaga pod polami; ustawienia formularza zgłoszenia
+- Uwagi prawne: TSUE C-471/24 (WIBOR), C-828/25 (termin SKD); tłumaczenia UA/EN
+
 ## [1.4.2] — 2026-10-21
 - Nowy adres po zmianie organizacji na Lexsalus: lexsalus.github.io (strona, SEO, sitemap, chatbot Ilona)
 

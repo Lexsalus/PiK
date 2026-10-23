@@ -173,12 +173,19 @@ function render(){
 
 /* ---------- Ustawienia ---------- */
 function vSettings(){
+  const L=D.leads||(D.leads={enabled:true,mode:'demo',email:'',consent:''});
   const s=D.site;
   return `<div class="box"><h3>Podstawowe</h3><div class="form">
     <label>Nazwa strony<input class="f" data-p="site.name" value="${esc(s.name)}"></label>
     <label>Kolor akcentu<input class="f" type="color" data-p="site.accent" value="${esc(s.accent||'#7c5cff')}" style="height:40px;padding:4px"></label>
     <label style="grid-column:1/-1">Hasło (podtytuł)<input class="f" data-p="site.tagline" value="${esc(s.tagline)}"></label>
   </div></div>
+  <div class="box"><h3>Formularz zgłoszenia sprawy</h3><div class="form">
+    <label style="display:flex;align-items:center;gap:10px;color:var(--txt)"><input type="checkbox" data-p="leads.enabled" ${L.enabled?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">Przycisk „Chcę bezpłatną analizę” pod kalkulatorami</label>
+    <label>Gdzie trafia zgłoszenie<select class="f" data-p="leads.mode"><option value="demo" ${L.mode!=='email'?'selected':''}>Test — tylko ta przeglądarka (podgląd w CRM)</option><option value="email" ${L.mode==='email'?'selected':''}>E-mail kancelarii (program pocztowy klienta)</option></select></label>
+    <label>Adres e-mail kancelarii<input class="f" type="email" data-p="leads.email" value="${esc(L.email||'')}" placeholder="biuro@kancelaria.pl"></label>
+    <label style="grid-column:1/-1">Treść zgody RODO<textarea class="f" data-p="leads.consent" rows="3">${esc(L.consent||'')}</textarea></label></div>
+    <p class="hint"><b>Test:</b> zgłoszenie zapisuje się tylko w przeglądarce, w której je wysłano — do prezentacji CRM. Klient widzi komunikat, że to wersja testowa.<br><b>E-mail:</b> otwiera program pocztowy klienta z gotową wiadomością do kancelarii (klient musi ją wysłać). Docelowo zgłoszenia trafią prosto do CRM (Supabase).</p></div>
   <div class="box"><h3>Chatbot (Ilona)</h3><div class="form">
     <label style="display:flex;align-items:center;gap:10px;color:var(--txt)"><input type="checkbox" data-p="site.chatbot.enabled" ${s.chatbot?.enabled?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">Pokaż chatbota na stronie</label>
     <label style="grid-column:1/-1">Adres skryptu osadzającego<input class="f code" data-p="site.chatbot.src" value="${esc(s.chatbot?.src||'')}"></label></div>
@@ -257,7 +264,11 @@ function vCalcs(){
      <label>Nazwa<input class="f" data-p="${P}.name" value="${esc(c.name)}"></label>
      <label>Ikona<input class="f" data-p="${P}.icon" value="${esc(c.icon)}"></label>
      <label>ID<input class="f code" data-p="${P}.id" value="${esc(c.id)}"></label>
-     <label style="grid-column:1/-1">Opis<input class="f" data-p="${P}.description" value="${esc(c.description)}"></label></div></div>
+     <label>Gdzie na stronie<select class="f" data-p="${P}.kind" data-rerender><option value="claim" ${c.kind==='claim'?'selected':''}>Co mi się należy (dla klienta)</option><option value="tool" ${c.kind!=='claim'?'selected':''}>Kalkulatory prawne</option></select></label>
+     ${c.kind==='claim'?`<label>Kategoria sprawy w CRM<select class="f" data-p="${P}.crmCategory">${['RST','SKD','CHF','PLN','FX','ROD','CIV','INNE'].map(k=>`<option ${c.crmCategory===k?'selected':''}>${k}</option>`).join('')}</select></label>`:''}
+     <label style="grid-column:1/-1">Opis<input class="f" data-p="${P}.description" value="${esc(c.description)}"></label>
+     <label style="grid-column:1/-1">Uwaga pod polami (zastrzeżenia, podstawa, warunki)<textarea class="f" data-p="${P}.note" rows="3">${esc(c.note||'')}</textarea></label></div>
+     ${c.kind==='claim'?'<p class="hint">Kalkulatory „Co mi się należy” mają przycisk zgłoszenia — wynik i dane klienta trafiają do CRM jako nowa sprawa w wybranej kategorii.</p>':''}</div>
    <div class="box"><h3>Pola wejściowe <button class="btn sm" onclick="addIn()">+ Pole</button></h3><div class="tw"><table>
      <tr><th>Zmienna</th><th>Etykieta</th><th>Jedn.</th><th>Domyślna</th><th>Min</th><th>Max</th><th>Krok</th><th></th></tr>${ins}</table></div></div>
    <div class="box"><h3>Wyniki <button class="btn sm" onclick="addOut()">+ Wynik</button></h3><div class="tw"><table>
@@ -289,21 +300,23 @@ function norm(){
   D.contracts=D.contracts||structuredClone(O.contracts||{enabled:false,maxMB:15,formats:['pdf','docx','txt'],disclaimer:'',rules:[]});
   D.contracts.legal=D.contracts.legal||structuredClone(O.contracts?.legal||{enabled:false,maxInterest:14.5,maxDefault:18.5,rules:[]});
   D.contracts.suspicion=D.contracts.suspicion||structuredClone(O.contracts?.suspicion||{enabled:false,longSentence:40,longWeight:4,longMax:20,indicators:[]});
+  D.leads=D.leads||structuredClone(O.leads||{enabled:true,mode:'demo',email:'',consent:''});
+  if(O.calculators&&!D.calculators.some(c=>c.kind==='claim'))D.calculators=[...structuredClone(O.calculators.filter(c=>c.kind==='claim')),...D.calculators];
   D.site.chatbot=D.site.chatbot||structuredClone(O.site?.chatbot||{enabled:false,src:''});
 }
 
 /* ---------- Tłumaczenia ---------- */
 const LN={uk:'Ukraiński',en:'Angielski'};
 // teksty interfejsu strony (index.html) — źródło po polsku
-const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','Zacznij porównywać →','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — dane z panelu admina (niezapisane w repo)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć','Umowy','Analiza umów','Analizuj umowę →','Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.','Przeciągnij plik tutaj lub kliknij, aby wybrać','Obsługiwane formaty:','lub wklej treść umowy','Analizuj','Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.','Wczytywanie pliku…','Ryzyko','niskie','średnie','wysokie','Wysokie ryzyko','Do sprawdzenia','Informacyjnie','Brak zapisu','Wykryte dane','Kwoty','Daty','Okresy','Procenty','Pokaż pełny tekst','Pobierz raport','Nowa analiza','Nie wykryto zapisów z listy kontrolnej.','słów','stron','Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.','Nieobsługiwany format pliku.','Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.','Plik jest za duży. Maksymalny rozmiar:','Raport analizy umowy','Nie udało się wczytać pliku.','Wklej tekst','Zgodność z prawem','Podejrzana treść','Ryzyko zapisów','Podstawowa analiza','Styl i przejrzystość treści','Podstawa:','Nie wykryto naruszeń z listy kontrolnej.','Nie wykryto podejrzanych sygnałów.','Średnia długość zdania:','Długie zdania','Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.','limit:','dobrze','uwaga','źle','Ryzyko prawne','za opóźnienie'];
+const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — dane z panelu admina (niezapisane w repo)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć','Umowy','Analiza umów','Analizuj umowę →','Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.','Przeciągnij plik tutaj lub kliknij, aby wybrać','Obsługiwane formaty:','lub wklej treść umowy','Analizuj','Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.','Wczytywanie pliku…','Ryzyko','niskie','średnie','wysokie','Wysokie ryzyko','Do sprawdzenia','Informacyjnie','Brak zapisu','Wykryte dane','Kwoty','Daty','Okresy','Procenty','Pokaż pełny tekst','Pobierz raport','Nowa analiza','Nie wykryto zapisów z listy kontrolnej.','słów','stron','Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.','Nieobsługiwany format pliku.','Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.','Plik jest za duży. Maksymalny rozmiar:','Raport analizy umowy','Nie udało się wczytać pliku.','Wklej tekst','Zgodność z prawem','Podejrzana treść','Ryzyko zapisów','Podstawowa analiza','Styl i przejrzystość treści','Podstawa:','Nie wykryto naruszeń z listy kontrolnej.','Nie wykryto podejrzanych sygnałów.','Średnia długość zdania:','Długie zdania','Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.','limit:','dobrze','uwaga','źle','Ryzyko prawne','za opóźnienie','Co mi się należy','Sprawdź, co Ci się należy →','Porównaj usługi','Sprawdź, co Ci się należy','Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.','Chcę bezpłatną analizę mojej sprawy →','Bezpłatna analiza Twojej sprawy','Imię i nazwisko','Telefon','E-mail','Krótko o sprawie (opcjonalnie)','Wersja testowa: zgłoszenie zapisze się tylko w tej przeglądarce (podgląd w CRM) i nie zostanie wysłane do kancelarii.','Zapisz zgłoszenie (test)','Wyślij zgłoszenie','Dziękujemy!','Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.','Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.'];
 let TL=[],tlQ='',tlMiss=false;
 function collect(){
   const out=new Map(),add=(s,ctx)=>{s=String(s??'').trim();if(s&&!/^[\d\s.,%+\-*/()]+$/.test(s)&&!out.has(s))out.set(s,ctx)};
-  add(D.site.name,'Strona');add(D.site.tagline,'Strona');add(D.seo.title,'SEO');add(D.seo.description,'SEO');
+  add(D.site.name,'Strona');add(D.leads?.consent,'Formularz zgłoszenia');add(D.site.tagline,'Strona');add(D.seo.title,'SEO');add(D.seo.description,'SEO');
   D.categories.forEach(c=>{const x='Kategoria: '+c.name;add(c.name,x);
     c.fields.forEach(f=>{add(f.label,x);add(f.unit,x)});
     c.items.forEach(it=>{add(it.name,x);add(it.badge,x);c.fields.filter(f=>f.type==='text').forEach(f=>add(it.values[f.key],x))})});
-  D.calculators.forEach(c=>{const x='Kalkulator: '+c.name;add(c.name,x);add(c.description,x);
+  D.calculators.forEach(c=>{const x='Kalkulator: '+c.name;add(c.name,x);add(c.description,x);add(c.note,x);
     c.inputs.forEach(i=>{add(i.label,x);add(i.unit,x)});c.outputs.forEach(o=>{add(o.label,x);add(o.unit,x)})});
   add(D.contracts?.disclaimer,'Analiza umów');(D.contracts?.rules||[]).forEach(r=>{add(r.name,'Analiza umów');add(r.advice,'Analiza umów')});
   (D.contracts?.legal?.rules||[]).forEach(r=>{add(r.name,'Analiza umów — prawo');add(r.advice,'Analiza umów — prawo')});

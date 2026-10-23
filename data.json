@@ -320,6 +320,357 @@
   ],
   "calculators": [
     {
+      "id": "skd",
+      "kind": "claim",
+      "crmCategory": "SKD",
+      "name": "Sankcja kredytu darmowego",
+      "icon": "💳",
+      "description": "Kredyt gotówkowy, ratalny lub karta. Sprawdź, ile odsetek i prowizji możesz odzyskać.",
+      "inputs": [
+        {
+          "key": "kwota",
+          "label": "Kwota wypłacona do ręki",
+          "unit": "zł",
+          "default": 30000,
+          "min": 1000,
+          "max": 255000,
+          "step": 500
+        },
+        {
+          "key": "koszty",
+          "label": "Prowizja, ubezpieczenie i inne opłaty",
+          "unit": "zł",
+          "default": 6000,
+          "min": 0,
+          "max": 100000,
+          "step": 100
+        },
+        {
+          "key": "opr",
+          "label": "Oprocentowanie roczne",
+          "unit": "%",
+          "default": 10,
+          "min": 0,
+          "max": 25,
+          "step": 0.1
+        },
+        {
+          "key": "n",
+          "label": "Liczba wszystkich rat",
+          "unit": "mies.",
+          "default": 60,
+          "min": 6,
+          "max": 180,
+          "step": 1
+        },
+        {
+          "key": "k",
+          "label": "Zapłacone raty",
+          "unit": "mies.",
+          "default": 24,
+          "min": 0,
+          "max": 180,
+          "step": 1
+        }
+      ],
+      "outputs": [
+        {
+          "key": "rata",
+          "label": "Twoja rata teraz",
+          "formula": "(kwota+koszty)*(opr/1200)/(1-pow(1+opr/1200,-n))",
+          "unit": "zł",
+          "decimals": 2
+        },
+        {
+          "key": "rataSKD",
+          "label": "Rata po sankcji (sam kapitał)",
+          "formula": "kwota/n",
+          "unit": "zł",
+          "decimals": 2
+        },
+        {
+          "key": "nadplata",
+          "label": "Do zwrotu za zapłacone raty",
+          "formula": "min(k,n)*max(0,rata-rataSKD)",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "przyszle",
+          "label": "Mniej do zapłaty w przyszłości",
+          "formula": "max(0,n-k)*max(0,rata-rataSKD)",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "razem",
+          "label": "Szacowana korzyść",
+          "formula": "nadplata+przyszle",
+          "unit": "zł",
+          "decimals": 0,
+          "main": true
+        }
+      ],
+      "note": "Dotyczy kredytów konsumenckich, w których bank naruszył obowiązki informacyjne (np. błędne RRSO, odsetki od kredytowanej prowizji). Oświadczenie składa się do roku od wykonania umowy — moment liczenia tego terminu jest sporny i czeka na wyrok TSUE (C-828/25). Szacunek zakłada stałe oprocentowanie i kredytowane koszty."
+    },
+    {
+      "id": "chf",
+      "kind": "claim",
+      "crmCategory": "CHF",
+      "name": "Kredyt frankowy i walutowy",
+      "icon": "🏠",
+      "description": "CHF, EUR, JPY i inne. Sprawdź, ile możesz zyskać na unieważnieniu umowy.",
+      "inputs": [
+        {
+          "key": "kwota",
+          "label": "Kwota wypłacona przez bank",
+          "unit": "zł",
+          "default": 300000,
+          "min": 10000,
+          "max": 3000000,
+          "step": 5000
+        },
+        {
+          "key": "rata",
+          "label": "Średnia rata dotychczas",
+          "unit": "zł",
+          "default": 2500,
+          "min": 100,
+          "max": 30000,
+          "step": 50
+        },
+        {
+          "key": "k",
+          "label": "Zapłacone raty",
+          "unit": "mies.",
+          "default": 180,
+          "min": 1,
+          "max": 480,
+          "step": 1
+        },
+        {
+          "key": "saldo",
+          "label": "Pozostało do spłaty wg banku",
+          "unit": "zł",
+          "default": 250000,
+          "min": 0,
+          "max": 5000000,
+          "step": 5000
+        }
+      ],
+      "outputs": [
+        {
+          "key": "wplaty",
+          "label": "Wpłacone do banku",
+          "formula": "rata*k",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "rozliczenie",
+          "label": "Wpłaty minus wypłacony kapitał",
+          "formula": "wplaty-kwota",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "umorzenie",
+          "label": "Zadłużenie, które przestaje istnieć",
+          "formula": "saldo",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "razem",
+          "label": "Szacowana korzyść z unieważnienia",
+          "formula": "wplaty+saldo-kwota",
+          "unit": "zł",
+          "decimals": 0,
+          "main": true
+        }
+      ],
+      "note": "Po unieważnieniu umowy strony zwracają sobie świadczenia: bank oddaje wpłaty, Ty — wypłacony kapitał, a pozostałe zadłużenie znika. Szacunek nie obejmuje odsetek ustawowych, kosztów procesu ani ewentualnych roszczeń banku; wynik zależy od treści umowy i aktualnego orzecznictwa."
+    },
+    {
+      "id": "wibor",
+      "kind": "claim",
+      "crmCategory": "PLN",
+      "name": "Kredyt złotówkowy (WIBOR)",
+      "icon": "📈",
+      "description": "Ile wynosi część rat wynikająca z WIBOR — maksymalny zakres roszczenia.",
+      "inputs": [
+        {
+          "key": "kwota",
+          "label": "Kwota kredytu",
+          "unit": "zł",
+          "default": 400000,
+          "min": 10000,
+          "max": 3000000,
+          "step": 5000
+        },
+        {
+          "key": "lata",
+          "label": "Okres kredytu",
+          "unit": "lat",
+          "default": 25,
+          "min": 5,
+          "max": 35,
+          "step": 1
+        },
+        {
+          "key": "marza",
+          "label": "Marża banku",
+          "unit": "%",
+          "default": 2,
+          "min": 0.1,
+          "max": 6,
+          "step": 0.05
+        },
+        {
+          "key": "wibor",
+          "label": "Średni WIBOR w okresie spłaty",
+          "unit": "%",
+          "default": 5,
+          "min": 0,
+          "max": 10,
+          "step": 0.05
+        },
+        {
+          "key": "splacone",
+          "label": "Spłacasz już",
+          "unit": "lat",
+          "default": 5,
+          "min": 0,
+          "max": 35,
+          "step": 1
+        }
+      ],
+      "outputs": [
+        {
+          "key": "rata1",
+          "label": "Rata z WIBOR",
+          "formula": "kwota*((marza+wibor)/1200)/(1-pow(1+(marza+wibor)/1200,-lata*12))",
+          "unit": "zł",
+          "decimals": 2
+        },
+        {
+          "key": "rata2",
+          "label": "Rata bez WIBOR (sama marża)",
+          "formula": "kwota*(marza/1200)/(1-pow(1+marza/1200,-lata*12))",
+          "unit": "zł",
+          "decimals": 2
+        },
+        {
+          "key": "nadplata",
+          "label": "Część rat z WIBOR dotychczas",
+          "formula": "(rata1-rata2)*min(splacone*12,lata*12)",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "przyszle",
+          "label": "Część rat z WIBOR do końca umowy",
+          "formula": "(rata1-rata2)*max(0,lata*12-splacone*12)",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "razem",
+          "label": "Maksymalny zakres roszczenia",
+          "formula": "nadplata+przyszle",
+          "unit": "zł",
+          "decimals": 0,
+          "main": true
+        }
+      ],
+      "note": "Uwaga: TSUE w wyroku z 12.02.2026 (C-471/24) uznał, że nie ma podstaw do podważania samego wskaźnika WIBOR, a sądy w większości oddalają takie pozwy. Wynik to górna granica, nie realna wygrana. Kancelaria sprawdzi, czy umowa ma inne wady (np. obowiązki informacyjne, ubezpieczenia, sankcja kredytu darmowego)."
+    },
+    {
+      "id": "rst",
+      "kind": "claim",
+      "crmCategory": "RST",
+      "name": "Restrukturyzacja i oddłużenie",
+      "icon": "🧩",
+      "description": "Masz więcej rat niż możliwości? Sprawdź, jaka część długów może zostać umorzona.",
+      "inputs": [
+        {
+          "key": "dlugi",
+          "label": "Suma wszystkich długów",
+          "unit": "zł",
+          "default": 150000,
+          "min": 1000,
+          "max": 3000000,
+          "step": 1000
+        },
+        {
+          "key": "raty",
+          "label": "Suma rat miesięcznie",
+          "unit": "zł",
+          "default": 3800,
+          "min": 0,
+          "max": 50000,
+          "step": 50
+        },
+        {
+          "key": "dochod",
+          "label": "Dochód netto miesięcznie",
+          "unit": "zł",
+          "default": 4500,
+          "min": 0,
+          "max": 50000,
+          "step": 50
+        },
+        {
+          "key": "koszty",
+          "label": "Niezbędne koszty życia miesięcznie",
+          "unit": "zł",
+          "default": 3000,
+          "min": 0,
+          "max": 30000,
+          "step": 50
+        }
+      ],
+      "outputs": [
+        {
+          "key": "obciazenie",
+          "label": "Raty jako % dochodu",
+          "formula": "dochod>0?raty/dochod*100:0",
+          "unit": "%",
+          "decimals": 0
+        },
+        {
+          "key": "nadwyzka",
+          "label": "Możliwa spłata miesięcznie w planie",
+          "formula": "max(0,dochod-koszty)",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "plan",
+          "label": "Spłata w planie (36 mies.)",
+          "formula": "nadwyzka*36",
+          "unit": "zł",
+          "decimals": 0
+        },
+        {
+          "key": "procent",
+          "label": "Umorzona część długów",
+          "formula": "dlugi>0?max(0,dlugi-plan)/dlugi*100:0",
+          "unit": "%",
+          "decimals": 0
+        },
+        {
+          "key": "umorzenie",
+          "label": "Szacowane umorzenie",
+          "formula": "max(0,dlugi-plan)",
+          "unit": "zł",
+          "decimals": 0,
+          "main": true
+        }
+      ],
+      "note": "Szacunek dla upadłości konsumenckiej: sąd ustala plan spłaty zwykle do 36 miesięcy, a resztę długów umarza. Nie wszystkie długi podlegają umorzeniu (np. alimenty, grzywny), a o dopuszczalności i długości planu decyduje sąd. Dla firm kancelaria oceni postępowania restrukturyzacyjne."
+    },
+    {
       "id": "odsetki",
       "name": "Odsetki ustawowe",
       "icon": "📅",
@@ -1106,7 +1457,72 @@
       "Kara ponad 10% wartości": "Штраф понад 10% вартості",
       "Porównuj usługi prawne, licz koszty sądowe i odsetki, sprawdzaj umowy — w jednym miejscu.": "Порівнюйте юридичні послуги, рахуйте судові витрати й відсотки, перевіряйте договори — в одному місці.",
       "Porównaj.to — porady prawne, kalkulatory prawne i analiza umów": "Porównaj.to — юридичні консультації, калькулятори та аналіз договорів",
-      "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.": "Порівняйте онлайн-консультації, юридичні фірми та медіацію. Розрахуйте відсотки, судовий збір і витрати на представництво. Перевірте договір безкоштовно."
+      "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.": "Порівняйте онлайн-консультації, юридичні фірми та медіацію. Розрахуйте відсотки, судовий збір і витрати на представництво. Перевірте договір безкоштовно.",
+      "mies.": "міс.",
+      "Sankcja kredytu darmowego": "Санкція безкоштовного кредиту",
+      "Kredyt gotówkowy, ratalny lub karta. Sprawdź, ile odsetek i prowizji możesz odzyskać.": "Готівковий кредит, розстрочка чи картка. Перевірте, скільки відсотків і комісій можна повернути.",
+      "Kwota wypłacona do ręki": "Сума, видана на руки",
+      "Prowizja, ubezpieczenie i inne opłaty": "Комісія, страховка та інші платежі",
+      "Oprocentowanie roczne": "Річна процентна ставка",
+      "Liczba wszystkich rat": "Загальна кількість платежів",
+      "Zapłacone raty": "Сплачені платежі",
+      "Twoja rata teraz": "Ваш платіж зараз",
+      "Rata po sankcji (sam kapitał)": "Платіж після санкції (лише капітал)",
+      "Do zwrotu za zapłacone raty": "До повернення за сплачені платежі",
+      "Mniej do zapłaty w przyszłości": "Менше сплачувати в майбутньому",
+      "Szacowana korzyść": "Орієнтовна вигода",
+      "Dotyczy kredytów konsumenckich, w których bank naruszył obowiązki informacyjne (np. błędne RRSO, odsetki od kredytowanej prowizji). Oświadczenie składa się do roku od wykonania umowy — moment liczenia tego terminu jest sporny i czeka na wyrok TSUE (C-828/25). Szacunek zakłada stałe oprocentowanie i kredytowane koszty.": "Стосується споживчих кредитів, де банк порушив інформаційні обов'язки (напр. неправильна РРСО, відсотки на кредитовану комісію). Заяву подають протягом року від виконання договору — момент відліку цього строку спірний і очікує рішення ТСЄС (C-828/25). Розрахунок передбачає фіксовану ставку та кредитовані витрати.",
+      "Kredyt frankowy i walutowy": "Франковий і валютний кредит",
+      "CHF, EUR, JPY i inne. Sprawdź, ile możesz zyskać na unieważnieniu umowy.": "CHF, EUR, JPY та інші. Перевірте, скільки можна виграти від визнання договору недійсним.",
+      "Kwota wypłacona przez bank": "Сума, видана банком",
+      "Średnia rata dotychczas": "Середній платіж досі",
+      "Pozostało do spłaty wg banku": "Залишок боргу за даними банку",
+      "Wpłacone do banku": "Сплачено банку",
+      "Wpłaty minus wypłacony kapitał": "Платежі мінус виданий капітал",
+      "Zadłużenie, które przestaje istnieć": "Борг, який перестає існувати",
+      "Szacowana korzyść z unieważnienia": "Орієнтовна вигода від недійсності",
+      "Po unieważnieniu umowy strony zwracają sobie świadczenia: bank oddaje wpłaty, Ty — wypłacony kapitał, a pozostałe zadłużenie znika. Szacunek nie obejmuje odsetek ustawowych, kosztów procesu ani ewentualnych roszczeń banku; wynik zależy od treści umowy i aktualnego orzecznictwa.": "Після визнання договору недійсним сторони повертають одна одній отримане: банк — ваші платежі, ви — виданий капітал, а залишок боргу зникає. Розрахунок не включає законних відсотків, судових витрат чи можливих вимог банку; результат залежить від змісту договору та актуальної судової практики.",
+      "Kredyt złotówkowy (WIBOR)": "Кредит у злотих (WIBOR)",
+      "Ile wynosi część rat wynikająca z WIBOR — maksymalny zakres roszczenia.": "Яку частину платежів становить WIBOR — максимальний обсяг вимоги.",
+      "Kwota kredytu": "Сума кредиту",
+      "Okres kredytu": "Строк кредиту",
+      "Marża banku": "Маржа банку",
+      "Średni WIBOR w okresie spłaty": "Середній WIBOR за період сплати",
+      "Spłacasz już": "Ви вже сплачуєте",
+      "Rata z WIBOR": "Платіж із WIBOR",
+      "Rata bez WIBOR (sama marża)": "Платіж без WIBOR (лише маржа)",
+      "Część rat z WIBOR dotychczas": "Частина платежів через WIBOR досі",
+      "Część rat z WIBOR do końca umowy": "Частина платежів через WIBOR до кінця договору",
+      "Maksymalny zakres roszczenia": "Максимальний обсяг вимоги",
+      "Uwaga: TSUE w wyroku z 12.02.2026 (C-471/24) uznał, że nie ma podstaw do podważania samego wskaźnika WIBOR, a sądy w większości oddalają takie pozwy. Wynik to górna granica, nie realna wygrana. Kancelaria sprawdzi, czy umowa ma inne wady (np. obowiązki informacyjne, ubezpieczenia, sankcja kredytu darmowego).": "Увага: ТСЄС у рішенні від 12.02.2026 (C-471/24) визнав, що немає підстав оскаржувати сам індекс WIBOR, і суди здебільшого відхиляють такі позови. Результат — верхня межа, а не реальний виграш. Юридична фірма перевірить, чи має договір інші вади (напр. інформаційні обов'язки, страхування, санкція безкоштовного кредиту).",
+      "Restrukturyzacja i oddłużenie": "Реструктуризація та звільнення від боргів",
+      "Masz więcej rat niż możliwości? Sprawdź, jaka część długów może zostać umorzona.": "Платежів більше, ніж можливостей? Перевірте, яку частину боргів можуть списати.",
+      "Suma wszystkich długów": "Сума всіх боргів",
+      "Suma rat miesięcznie": "Сума платежів на місяць",
+      "Dochód netto miesięcznie": "Чистий дохід на місяць",
+      "Niezbędne koszty życia miesięcznie": "Необхідні витрати на життя на місяць",
+      "Raty jako % dochodu": "Платежі у % від доходу",
+      "Możliwa spłata miesięcznie w planie": "Можлива сплата на місяць за планом",
+      "Spłata w planie (36 mies.)": "Сплата за планом (36 міс.)",
+      "Umorzona część długów": "Списана частина боргів",
+      "Szacowane umorzenie": "Орієнтовне списання",
+      "Szacunek dla upadłości konsumenckiej: sąd ustala plan spłaty zwykle do 36 miesięcy, a resztę długów umarza. Nie wszystkie długi podlegają umorzeniu (np. alimenty, grzywny), a o dopuszczalności i długości planu decyduje sąd. Dla firm kancelaria oceni postępowania restrukturyzacyjne.": "Розрахунок для споживчого банкрутства: суд зазвичай встановлює план сплати до 36 місяців, а решту боргів списує. Не всі борги підлягають списанню (напр. аліменти, штрафи), а про допустимість і тривалість плану вирішує суд. Для бізнесу юридична фірма оцінить процедури реструктуризації.",
+      "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili.": "Я погоджуюся на обробку моїх персональних даних юридичною фірмою з метою контакту та попереднього аналізу моєї справи. Згоду можна відкликати в будь-який момент.",
+      "Co mi się należy": "Що мені належить",
+      "Sprawdź, co Ci się należy →": "Перевірте, що вам належить →",
+      "Porównaj usługi": "Порівняти послуги",
+      "Sprawdź, co Ci się należy": "Перевірте, що вам належить",
+      "Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.": "Попередній розрахунок за кілька хвилин. Точний аналіз вашої справи підготує юридична фірма.",
+      "Chcę bezpłatną analizę mojej sprawy →": "Хочу безкоштовний аналіз моєї справи →",
+      "Bezpłatna analiza Twojej sprawy": "Безкоштовний аналіз вашої справи",
+      "Imię i nazwisko": "Ім'я та прізвище",
+      "Krótko o sprawie (opcjonalnie)": "Коротко про справу (необов'язково)",
+      "Wersja testowa: zgłoszenie zapisze się tylko w tej przeglądarce (podgląd w CRM) i nie zostanie wysłane do kancelarii.": "Тестова версія: заявка збережеться лише в цьому браузері (перегляд у CRM) і не буде надіслана до фірми.",
+      "Zapisz zgłoszenie (test)": "Зберегти заявку (тест)",
+      "Wyślij zgłoszenie": "Надіслати заявку",
+      "Dziękujemy!": "Дякуємо!",
+      "Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.": "Тестову заявку збережено. Ви побачите її в CRM у вкладці «Нові справи».",
+      "Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.": "Ми відкрили вашу поштову програму з готовим листом — надішліть його, і фірма зв'яжеться з вами."
     },
     "en": {
       "Porównaj": "Compare",
@@ -1320,7 +1736,78 @@
       "Kara ponad 10% wartości": "Penalty above 10% of value",
       "Porównuj usługi prawne, licz koszty sądowe i odsetki, sprawdzaj umowy — w jednym miejscu.": "Compare legal services, calculate court costs and interest, check contracts — all in one place.",
       "Porównaj.to — porady prawne, kalkulatory prawne i analiza umów": "Porównaj.to — legal advice, legal calculators and contract analysis",
-      "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.": "Compare online legal advice, law firms and mediation. Calculate statutory interest, court fees and representation costs. Check your contract for free."
+      "Porównaj porady prawne online, kancelarie i mediacje. Policz odsetki ustawowe, opłatę sądową i koszty zastępstwa. Sprawdź umowę za darmo.": "Compare online legal advice, law firms and mediation. Calculate statutory interest, court fees and representation costs. Check your contract for free.",
+      "mies.": "mo",
+      "Sankcja kredytu darmowego": "Free credit sanction",
+      "Kredyt gotówkowy, ratalny lub karta. Sprawdź, ile odsetek i prowizji możesz odzyskać.": "Cash loan, instalment loan or card. See how much interest and fees you could recover.",
+      "Kwota wypłacona do ręki": "Amount paid out to you",
+      "Prowizja, ubezpieczenie i inne opłaty": "Commission, insurance and other fees",
+      "Oprocentowanie roczne": "Annual interest rate",
+      "Liczba wszystkich rat": "Total number of instalments",
+      "Zapłacone raty": "Instalments paid",
+      "Twoja rata teraz": "Your current instalment",
+      "Rata po sankcji (sam kapitał)": "Instalment after sanction (principal only)",
+      "Do zwrotu za zapłacone raty": "Refund for instalments paid",
+      "Mniej do zapłaty w przyszłości": "Less to pay in future",
+      "Szacowana korzyść": "Estimated benefit",
+      "Dotyczy kredytów konsumenckich, w których bank naruszył obowiązki informacyjne (np. błędne RRSO, odsetki od kredytowanej prowizji). Oświadczenie składa się do roku od wykonania umowy — moment liczenia tego terminu jest sporny i czeka na wyrok TSUE (C-828/25). Szacunek zakłada stałe oprocentowanie i kredytowane koszty.": "Applies to consumer loans where the bank breached its information duties (e.g. wrong APR, interest charged on financed fees). The declaration must be made within one year of performance of the contract — when that period starts is disputed and awaits a CJEU ruling (C-828/25). Estimate assumes a fixed rate and financed costs.",
+      "Kredyt frankowy i walutowy": "CHF and FX mortgage",
+      "CHF, EUR, JPY i inne. Sprawdź, ile możesz zyskać na unieważnieniu umowy.": "CHF, EUR, JPY and others. See what you could gain if the contract is declared invalid.",
+      "Kwota wypłacona przez bank": "Amount disbursed by the bank",
+      "Średnia rata dotychczas": "Average instalment so far",
+      "Pozostało do spłaty wg banku": "Outstanding balance per bank",
+      "Wpłacone do banku": "Paid to the bank",
+      "Wpłaty minus wypłacony kapitał": "Payments minus principal received",
+      "Zadłużenie, które przestaje istnieć": "Debt that ceases to exist",
+      "Szacowana korzyść z unieważnienia": "Estimated benefit of invalidity",
+      "Po unieważnieniu umowy strony zwracają sobie świadczenia: bank oddaje wpłaty, Ty — wypłacony kapitał, a pozostałe zadłużenie znika. Szacunek nie obejmuje odsetek ustawowych, kosztów procesu ani ewentualnych roszczeń banku; wynik zależy od treści umowy i aktualnego orzecznictwa.": "Once the contract is invalidated, the parties return what they received: the bank repays your payments, you repay the principal, and the remaining debt disappears. The estimate excludes statutory interest, litigation costs and possible bank claims; the outcome depends on the contract and current case law.",
+      "Kredyt złotówkowy (WIBOR)": "PLN mortgage (WIBOR)",
+      "Ile wynosi część rat wynikająca z WIBOR — maksymalny zakres roszczenia.": "How much of your instalments comes from WIBOR — the maximum scope of a claim.",
+      "Kwota kredytu": "Loan amount",
+      "Okres kredytu": "Loan term",
+      "Marża banku": "Bank margin",
+      "Średni WIBOR w okresie spłaty": "Average WIBOR during repayment",
+      "Spłacasz już": "Repaying for",
+      "Rata z WIBOR": "Instalment with WIBOR",
+      "Rata bez WIBOR (sama marża)": "Instalment without WIBOR (margin only)",
+      "Część rat z WIBOR dotychczas": "WIBOR share of instalments so far",
+      "Część rat z WIBOR do końca umowy": "WIBOR share until the end",
+      "Maksymalny zakres roszczenia": "Maximum scope of claim",
+      "Uwaga: TSUE w wyroku z 12.02.2026 (C-471/24) uznał, że nie ma podstaw do podważania samego wskaźnika WIBOR, a sądy w większości oddalają takie pozwy. Wynik to górna granica, nie realna wygrana. Kancelaria sprawdzi, czy umowa ma inne wady (np. obowiązki informacyjne, ubezpieczenia, sankcja kredytu darmowego).": "Note: in its judgment of 12 Feb 2026 (C-471/24) the CJEU found no grounds to challenge the WIBOR index itself, and courts mostly dismiss such claims. The result is an upper bound, not a likely award. The firm will check the contract for other defects (e.g. information duties, insurance, free credit sanction).",
+      "Restrukturyzacja i oddłużenie": "Debt restructuring and relief",
+      "Masz więcej rat niż możliwości? Sprawdź, jaka część długów może zostać umorzona.": "More instalments than you can pay? See what share of your debt could be written off.",
+      "Suma wszystkich długów": "Total debt",
+      "Suma rat miesięcznie": "Total monthly instalments",
+      "Dochód netto miesięcznie": "Net monthly income",
+      "Niezbędne koszty życia miesięcznie": "Essential monthly living costs",
+      "Raty jako % dochodu": "Instalments as % of income",
+      "Możliwa spłata miesięcznie w planie": "Possible monthly repayment in plan",
+      "Spłata w planie (36 mies.)": "Repaid in plan (36 months)",
+      "Umorzona część długów": "Share of debt written off",
+      "Szacowane umorzenie": "Estimated write-off",
+      "Szacunek dla upadłości konsumenckiej: sąd ustala plan spłaty zwykle do 36 miesięcy, a resztę długów umarza. Nie wszystkie długi podlegają umorzeniu (np. alimenty, grzywny), a o dopuszczalności i długości planu decyduje sąd. Dla firm kancelaria oceni postępowania restrukturyzacyjne.": "Estimate for consumer bankruptcy: the court usually sets a repayment plan of up to 36 months and writes off the rest. Not all debts can be discharged (e.g. maintenance, fines), and the court decides on eligibility and plan length. For businesses the firm will assess restructuring proceedings.",
+      "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili.": "I consent to the law firm processing my personal data to contact me and pre-assess my case. I can withdraw consent at any time.",
+      "Co mi się należy": "What am I owed",
+      "Sprawdź, co Ci się należy →": "Check what you're owed →",
+      "Porównaj usługi": "Compare services",
+      "Sprawdź, co Ci się należy": "Check what you're owed",
+      "Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.": "A preliminary estimate in minutes. The firm will prepare a detailed analysis of your case.",
+      "Chcę bezpłatną analizę mojej sprawy →": "I want a free analysis of my case →",
+      "Bezpłatna analiza Twojej sprawy": "Free analysis of your case",
+      "Imię i nazwisko": "Full name",
+      "Krótko o sprawie (opcjonalnie)": "Briefly about your case (optional)",
+      "Wersja testowa: zgłoszenie zapisze się tylko w tej przeglądarce (podgląd w CRM) i nie zostanie wysłane do kancelarii.": "Test version: the request is saved only in this browser (CRM preview) and will not be sent to the firm.",
+      "Zapisz zgłoszenie (test)": "Save request (test)",
+      "Wyślij zgłoszenie": "Send request",
+      "Dziękujemy!": "Thank you!",
+      "Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.": "Test request saved. You will see it in the CRM under “New cases”.",
+      "Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.": "We opened your email app with a ready message — send it and the firm will contact you."
     }
+  },
+  "leads": {
+    "enabled": true,
+    "mode": "demo",
+    "email": "",
+    "consent": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili."
   }
 }

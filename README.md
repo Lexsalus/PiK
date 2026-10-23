@@ -10,6 +10,7 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 ## Funkcje
 
 **Strona publiczna**
+- „Co mi się należy”: kalkulatory roszczeń SKD, CHF/FX, WIBOR, restrukturyzacja + formularz zgłoszenia sprawy (z wynikiem i zgodą RODO)
 - Porównywarka: kategorie, wyszukiwarka, sortowanie, ★ przy najlepszej wartości, porównanie do 4 ofert w tabeli
 - Kalkulatory z suwakami, wyniki na żywo
 - Analiza umów (PDF, Word, ODT, RTF, TXT, HTML) w przeglądarce: ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
