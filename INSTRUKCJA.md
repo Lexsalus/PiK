@@ -81,6 +81,26 @@ Kalkulatory mają stawki wpisane we wzorach (Panel → Kalkulatory → Wyniki). 
 
 To samo dotyczy limitów odsetek w Analizie umów (pkt 6).
 
+## 5b. „Co mi się należy” — kalkulatory dla klienta
+
+Sekcja na górze strony: wstępny szacunek roszczenia w czterech kategoriach.
+
+| Kalkulator | Kategoria CRM | Co liczy |
+|------------|---------------|----------|
+| Sankcja kredytu darmowego | SKD | całkowity koszt kredytu: zwrot za zapłacone raty + mniej do zapłaty w przyszłości |
+| Kredyt frankowy i walutowy | CHF | wpłaty + pozostałe saldo − wypłacony kapitał (skutek unieważnienia) |
+| Kredyt złotówkowy (WIBOR) | PLN | część rat wynikająca z WIBOR — górna granica; po wyroku TSUE C-471/24 (12.02.2026) takie roszczenia są trudne |
+| Restrukturyzacja i oddłużenie | RST | plan spłaty 36 mies. z nadwyżki dochodu, reszta jako szacowane umorzenie |
+
+Pod wynikiem jest przycisk **Chcę bezpłatną analizę mojej sprawy** → formularz (imię, telefon, e-mail, opis, zgoda RODO). Zgłoszenie zawiera kategorię, wpisane wartości i wynik.
+
+**Panel → Ustawienia → Formularz zgłoszenia sprawy:**
+- **Test** — zgłoszenie zapisuje się tylko w przeglądarce, w której je wysłano (do prezentacji CRM); klient widzi komunikat o wersji testowej,
+- **E-mail kancelarii** — otwiera program pocztowy klienta z gotową wiadomością; trzeba podać adres kancelarii,
+- docelowo zgłoszenia trafią prosto do CRM (Supabase).
+
+**Panel → Kalkulatory:** pole *Gdzie na stronie* (Co mi się należy / Kalkulatory prawne), *Kategoria sprawy w CRM* i *Uwaga pod polami* (zastrzeżenia — **teksty uwag zweryfikuje prawnik przed startem**).
+
 ## 6. Analiza umów
 
 Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Plik nie opuszcza przeglądarki** — analiza działa lokalnie, bez serwera.

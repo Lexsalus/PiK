@@ -109,6 +109,23 @@ td.best{color:var(--good);font-weight:700}
 .ccard:hover,.ccard.on{border-color:var(--accent);transform:translateY(-3px)}
 .ccard .ic{font-size:1.6rem;width:48px;height:48px;border-radius:14px;background:var(--card2);display:grid;place-items:center;margin-bottom:12px}
 .ccard p{color:var(--mut);font-size:.88rem}
+.claims-sec{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 7%,transparent),transparent 70%)}
+.ccard.claim{position:relative;overflow:hidden}
+.ccard.claim::after{content:"→";position:absolute;right:18px;bottom:16px;color:var(--accent);font-weight:800;font-size:1.2rem;transition:.2s}
+.ccard.claim:hover::after{transform:translateX(4px)}
+.cnote{margin-top:14px;font-size:.84rem;color:var(--mut);background:var(--bg2);border-left:3px solid #f5b84a;border-radius:8px;padding:10px 12px;line-height:1.5}
+.lead-cta{margin-top:18px;width:100%;justify-content:center}
+.lform{display:grid;gap:12px}
+.lform label{display:grid;gap:6px;font-weight:600;font-size:.9rem}
+.lform .field{width:100%}
+.lform textarea{min-height:90px;resize:vertical;font:inherit}
+.lform .rodo{display:flex;gap:10px;align-items:flex-start;font-weight:500;font-size:.82rem;color:var(--mut)}
+.lform .rodo input{margin-top:3px;accent-color:var(--accent)}
+.lsum{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.88rem}
+.lsum b{color:var(--good)}
+.lok{text-align:center;padding:20px 10px}
+.lok .big{font-size:2.6rem}
+.demo-flag{font-size:.8rem;background:color-mix(in srgb,#f5b84a 18%,transparent);border:1px solid #f5b84a;border-radius:10px;padding:8px 12px}
 .calc{margin-top:22px;display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
 .inp{margin-bottom:20px}
@@ -178,6 +195,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 <nav><div class="wrap">
   <a class="logo" href="#"><i>◆</i><span id="siteName">…</span><small class="ver-badge notranslate" id="verNav"></small></a>
   <div class="links">
+    <a href="#nalezy" class="nav-claims" data-i18n>Co mi się należy</a>
     <a href="#porownaj" data-i18n>Porównaj</a>
     <a href="#kalkulatory" data-i18n>Kalkulatory</a>
     <a href="#umowy" class="nav-umowy" data-i18n>Umowy</a>
@@ -191,12 +209,19 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <h1><span data-i18n>Porównuj mądrzej.</span><br><span class="grad" data-i18n>Licz szybciej.</span></h1>
   <p id="tagline"></p>
   <div class="cta">
-    <a class="btn pri" href="#porownaj" data-i18n>Zacznij porównywać →</a>
+    <a class="btn pri nav-claims" href="#nalezy" data-i18n>Sprawdź, co Ci się należy →</a>
+    <a class="btn" href="#porownaj" data-i18n>Porównaj usługi</a>
     <a class="btn" href="#kalkulatory" data-i18n>Kalkulatory</a>
     <a class="btn nav-umowy" href="#umowy" data-i18n>Analizuj umowę →</a>
   </div>
   <div class="stats"><div><b id="stCat">0</b><span data-i18n>kategorii</span></div><div><b id="stItem">0</b><span data-i18n>ofert</span></div><div><b id="stCalc">0</b><span data-i18n>kalkulatorów</span></div></div>
 </div></header>
+
+<section id="nalezy" class="claims-sec"><div class="wrap">
+  <div class="sec-h"><div><h2 data-i18n>Sprawdź, co Ci się należy</h2><p data-i18n>Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.</p></div></div>
+  <div class="cgrid" id="ncalcs"></div>
+  <div class="calc" id="ncalc"></div>
+</div></section>
 
 <section id="porownaj"><div class="wrap">
   <div class="sec-h"><div><h2 data-i18n>Porównywarka</h2><p data-i18n>Zaznacz do 4 ofert, aby zestawić je obok siebie.</p></div></div>
@@ -230,6 +255,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
 <div class="cbar" id="cbar"><span id="cbarTxt"></span><button class="btn" id="cClear" data-i18n>Wyczyść</button><button class="btn pri" id="cGo" data-i18n>Porównaj</button></div>
 <div class="modal" id="modal"><div class="mbox"><div class="mhead"><h3 data-i18n>Porównanie</h3><button class="icon-btn" id="mClose">✕</button></div><div id="mBody" style="overflow-x:auto"></div></div></div>
+<div class="modal" id="lead"><div class="mbox" style="max-width:560px"><div class="mhead"><h3 data-i18n>Bezpłatna analiza Twojej sprawy</h3><button class="icon-btn" id="lClose">✕</button></div><div id="lBody"></div></div></div>
 <div class="consent" id="consent"><span data-i18n>Używamy plików cookie do analityki.</span><div><button class="btn pri" id="cYes" data-i18n>Akceptuję</button><button class="btn" id="cNo" data-i18n>Odrzuć</button></div></div>
 <div id="gt"></div>
 
@@ -288,13 +314,14 @@ function applyLang(keep){
   $('#siteName').textContent=$('#fName').textContent=t(D.site.name)||'';
   $('#tagline').textContent=t(D.site.tagline)||'';
   // zachowaj wybraną kategorię i wartości kalkulatora przy zmianie języka
-  const catId=cat?.id,calcId=curCalc?.id,vals={};
-  if(keep)document.querySelectorAll('#calc input[type=number]').forEach(i=>vals[i.dataset.k]=i.value);
+  const catId=cat?.id;
   renderTabs();setCat(catId||D.categories[0]?.id);
   renderCalcs();
   initContracts();
-  if(calcId||D.calculators[0]){openCalc(calcId||D.calculators[0].id,false);
-    if(keep){Object.entries(vals).forEach(([k,v])=>document.querySelectorAll(`#calc [data-k="${k}"]`).forEach(x=>x.value=v));calc()}}
+  Object.entries(BOX).forEach(([k,b])=>{
+    const first=b.cur||D.calculators.find(c=>kindOf(c)===k);if(!first)return;
+    openCalc(first.id,false,keep&&b.cur?readVals($(b.panel)):null);
+  });
 }
 
 /* ---------- motyw ---------- */
@@ -396,9 +423,18 @@ $('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('s
 addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').classList.remove('show')});
 
 /* ---------- kalkulatory ---------- */
+// dwie grupy: „Co mi się należy” (kind:'claim') i narzędzia prawne (pozostałe)
+const BOX={claim:{grid:'#ncalcs',panel:'#ncalc',cur:null},tool:{grid:'#calcs',panel:'#calc',cur:null}};
+const kindOf=c=>c.kind==='claim'?'claim':'tool';
 function renderCalcs(){
-  $('#calcs').innerHTML=D.calculators.map(c=>`<div class="ccard" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(t(c.name))}</h3><p>${esc(t(c.description||''))}</p></div>`).join('');
-  $('#calcs').onclick=e=>{const c=e.target.closest('.ccard');if(c)openCalc(c.dataset.id,true)};
+  Object.entries(BOX).forEach(([k,b])=>{
+    const list=D.calculators.filter(c=>kindOf(c)===k);
+    $(b.grid).innerHTML=list.map(c=>`<div class="ccard ${k==='claim'?'claim':''}" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(t(c.name))}</h3><p>${esc(t(c.description||''))}</p></div>`).join('');
+    $(b.grid).onclick=e=>{const c=e.target.closest('.ccard');if(c)openCalc(c.dataset.id,true)};
+  });
+  const hasClaims=D.calculators.some(c=>kindOf(c)==='claim');
+  $('#nalezy').style.display=hasClaims?'':'none';document.querySelectorAll('.nav-claims').forEach(e=>e.style.display=hasClaims?'':'none');
+  $('#kalkulatory').style.display=D.calculators.some(c=>kindOf(c)==='tool')?'':'none';
 }
 function compute(c,vals){
   const scope={...vals};
@@ -408,22 +444,57 @@ function compute(c,vals){
     scope[o.key]=v;return{...o,v};
   });
 }
-function openCalc(id,scroll){
-  curCalc=D.calculators.find(c=>c.id===id);if(!curCalc)return;
-  document.querySelectorAll('.ccard').forEach(c=>c.classList.toggle('on',c.dataset.id===id));
-  $('#calc').innerHTML=`<div class="panel fade"><h3 style="margin-bottom:18px">${esc(curCalc.icon||'')} ${esc(t(curCalc.name))}</h3>
-    ${curCalc.inputs.map(i=>`<div class="inp"><label>${esc(t(i.label))}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${i.default}" step="${i.step||1}"> ${esc(t(i.unit||''))}</span></label>
-    <input type="range" data-k="${esc(i.key)}" min="${i.min}" max="${i.max}" step="${i.step||1}" value="${i.default}"></div>`).join('')}</div>
-    <div class="panel res fade" id="res"></div>`;
-  $('#calc').oninput=e=>{const k=e.target.dataset.k;if(!k)return;$('#calc').querySelectorAll(`[data-k="${k}"]`).forEach(x=>{if(x!==e.target)x.value=e.target.value});calc()};
-  calc();if(scroll)$('#calc').scrollIntoView({behavior:'smooth',block:'nearest'});
+function openCalc(id,scroll,vals){
+  const c=D.calculators.find(x=>x.id===id);if(!c)return;
+  const k=kindOf(c),b=BOX[k],P=$(b.panel);b.cur=c;if(k==='tool')curCalc=c;
+  $(b.grid).querySelectorAll('.ccard').forEach(x=>x.classList.toggle('on',x.dataset.id===id));
+  P.innerHTML=`<div class="panel fade"><h3 style="margin-bottom:18px">${esc(c.icon||'')} ${esc(t(c.name))}</h3>
+    ${c.inputs.map(i=>{const v=vals?.[i.key]??i.default;return `<div class="inp"><label>${esc(t(i.label))}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${v}" step="${i.step||1}"> ${esc(t(i.unit||''))}</span></label>
+    <input type="range" data-k="${esc(i.key)}" min="${i.min}" max="${i.max}" step="${i.step||1}" value="${v}"></div>`}).join('')}
+    ${c.note?`<div class="cnote">${esc(t(c.note))}</div>`:''}</div>
+    <div class="panel res fade"><div class="resv"></div>${k==='claim'&&D.leads?.enabled?`<button class="btn pri lead-cta">${esc(t('Chcę bezpłatną analizę mojej sprawy →'))}</button>`:''}</div>`;
+  P.oninput=e=>{const kk=e.target.dataset.k;if(!kk)return;P.querySelectorAll(`[data-k="${kk}"]`).forEach(x=>{if(x!==e.target)x.value=e.target.value});calcBox(k)};
+  const cta=P.querySelector('.lead-cta');if(cta)cta.onclick=()=>openLead(c,readVals(P));
+  calcBox(k);if(scroll)P.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function calc(){
-  const vals={};$('#calc').querySelectorAll('input[type=range]').forEach(r=>{const n=$('#calc').querySelector(`input[type=number][data-k="${r.dataset.k}"]`);vals[r.dataset.k]=parseFloat(n.value)||0});
-  const out=compute(curCalc,vals),main=out.find(o=>o.main)||out[0];
-  $('#res').innerHTML=main?`<span style="color:var(--mut)">${esc(t(main.label))}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</div>
+function readVals(P){const v={};P.querySelectorAll('input[type=range]').forEach(r=>{const n=P.querySelector(`input[type=number][data-k="${r.dataset.k}"]`);v[r.dataset.k]=parseFloat(n.value)||0});return v}
+function calcBox(k){
+  const b=BOX[k],P=$(b.panel);if(!b.cur||!P.querySelector('.resv'))return;
+  const out=compute(b.cur,readVals(P)),main=out.find(o=>o.main)||out[0];
+  P.querySelector('.resv').innerHTML=main?`<span style="color:var(--mut)">${esc(t(main.label))}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</div>
    ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(t(o.label))}</span><b>${fmt(o.v,o.decimals)} ${esc(t(o.unit||''))}</b></div>`).join('')}`:'';
 }
+const calc=()=>calcBox('tool');
+
+/* ---------- zgłoszenie sprawy (lead) ---------- */
+function openLead(c,vals){
+  const L=D.leads||{},out=compute(c,vals),main=out.find(o=>o.main)||out[0];
+  const demo=L.mode!=='email'||!L.email;
+  $('#lBody').innerHTML=`<form class="lform" id="lForm">
+    <div class="lsum">${esc(c.icon||'')} <b style="color:var(--txt)">${esc(t(c.name))}</b><br>${esc(t(main.label))}: <b>${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</b></div>
+    <label>${esc(t('Imię i nazwisko'))}<input class="field" name="name" required autocomplete="name"></label>
+    <label>${esc(t('Telefon'))}<input class="field" name="phone" type="tel" required autocomplete="tel"></label>
+    <label>${esc(t('E-mail'))}<input class="field" name="email" type="email" autocomplete="email"></label>
+    <label>${esc(t('Krótko o sprawie (opcjonalnie)'))}<textarea class="field" name="msg"></textarea></label>
+    <label class="rodo"><input type="checkbox" name="rodo" required><span>${esc(t(L.consent||''))}</span></label>
+    ${demo?`<div class="demo-flag">${esc(t('Wersja testowa: zgłoszenie zapisze się tylko w tej przeglądarce (podgląd w CRM) i nie zostanie wysłane do kancelarii.'))}</div>`:''}
+    <button class="btn pri" style="justify-content:center">${esc(t(demo?'Zapisz zgłoszenie (test)':'Wyślij zgłoszenie'))}</button></form>`;
+  $('#lead').classList.add('show');
+  $('#lForm').onsubmit=e=>{
+    e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
+    const lead={id:'L'+Date.now().toString(36),created:new Date().toISOString(),lang,category:c.crmCategory||'INNE',calc:{id:c.id,name:c.name,inputs:c.inputs.map(i=>({label:i.label,unit:i.unit,value:vals[i.key]})),outputs:out.map(o=>({label:o.label,unit:o.unit,value:Number.isFinite(o.v)?Math.round(o.v*100)/100:null,main:!!o.main}))},
+      client:{name:f.name.trim(),phone:f.phone.trim(),email:(f.email||'').trim()},message:(f.msg||'').trim(),consent:true,status:'nowe'};
+    if(demo){try{const a=JSON.parse(localStorage.getItem('pk_leads')||'[]');a.unshift(lead);localStorage.setItem('pk_leads',JSON.stringify(a))}catch(err){}}
+    else{
+      const lines=[`${c.name} — ${main.label}: ${fmt(main.v,main.decimals)} ${main.unit||''}`,'',...lead.calc.inputs.map(i=>`${i.label}: ${i.value} ${i.unit||''}`),'',...lead.calc.outputs.map(o=>`${o.label}: ${o.value??'—'} ${o.unit||''}`),'',`Imię i nazwisko: ${lead.client.name}`,`Telefon: ${lead.client.phone}`,`E-mail: ${lead.client.email}`,'',lead.message];
+      location.href=`mailto:${encodeURIComponent(L.email)}?subject=${encodeURIComponent('Zgłoszenie: '+c.name+' ('+(c.crmCategory||'')+')')}&body=${encodeURIComponent(lines.join('\n'))}`;
+    }
+    $('#lBody').innerHTML=`<div class="lok"><div class="big">✅</div><h3>${esc(t('Dziękujemy!'))}</h3><p style="color:var(--mut);margin-top:8px">${esc(t(demo?'Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.':'Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.'))}</p></div>`;
+  };
+}
+$('#lClose').onclick=()=>$('#lead').classList.remove('show');
+$('#lead').onclick=e=>{if(e.target.id==='lead')$('#lead').classList.remove('show')};
+addEventListener('keydown',e=>{if(e.key==='Escape')$('#lead').classList.remove('show')});
 
 /* ---------- analiza umów ---------- */
 const LIB={
