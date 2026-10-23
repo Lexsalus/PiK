@@ -2,6 +2,13 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.7.0] — 2026-10-23
+- Baza CRM dla Supabase: supabase/schema.sql z RLS, audytem i testami; formularz może zapisywać zgłoszenia w bazie
+- Schemat: wszystkie tabele ze specyfikacji, funkcje uprawnień, polityki RLS, numeracja w transakcji, blokada etapów, wersje wpisów i terminów, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia (pg_cron)
+- Anonimowy formularz: tylko INSERT do `leads` (bez odczytu); test 62/62 kryteriów na PostgreSQL (PGlite)
+- Panel: tryb formularza „Baza CRM (Supabase)”, adres i klucz publiczny; blokada wpisania klucza secret
+- Dokumentacja wdrożenia: SUPABASE.md
+
 ## [1.6.0] — 2026-10-23
 - Prototyp CRM kancelarii (crm.html) wg specyfikacji v1.1 — zaplecze dla adwokatów i pracowników
 - Role (Administrator, Pełnomocnik, Aplikant, Biuro, Obsługa techniczna), menu z uprawnień, 403, nadania z ważnością i uzasadnieniem

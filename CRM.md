@@ -57,7 +57,7 @@ Prototyp pokazuje ekrany i reguły. W wersji produkcyjnej te same reguły musi e
 | zadanie przypomnień w przeglądarce | zadanie cykliczne co 15 min (pg_cron / Edge Function) + e-mail / SMS |
 | zgłoszenia z formularza w localStorage | INSERT do tabeli `leads` (tylko zapis, bez odczytu dla anonimowych) |
 
-**Do zrobienia po Twojej stronie:** założyć projekt Supabase w regionie UE i przekazać adres projektu oraz klucz publiczny (anon). Schemat bazy z politykami RLS przygotuję na podstawie tabel ze specyfikacji.
+**Stan:** projekt Supabase założony; schemat bazy z RLS gotowy w `supabase/schema.sql` (62 testy kryteriów akceptacji). Wdrożenie krok po kroku: **[SUPABASE.md](SUPABASE.md)**.
 
 ## Decyzje do podjęcia przed startem (ze specyfikacji)
 
