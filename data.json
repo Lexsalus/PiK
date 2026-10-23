@@ -1522,7 +1522,10 @@
       "Wyślij zgłoszenie": "Надіслати заявку",
       "Dziękujemy!": "Дякуємо!",
       "Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.": "Тестову заявку збережено. Ви побачите її в CRM у вкладці «Нові справи».",
-      "Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.": "Ми відкрили вашу поштову програму з готовим листом — надішліть його, і фірма зв'яжеться з вами."
+      "Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.": "Ми відкрили вашу поштову програму з готовим листом — надішліть його, і фірма зв'яжеться з вами.",
+      "Wysyłanie…": "Надсилання…",
+      "Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.": "Не вдалося надіслати заявку. Спробуйте ще раз або зателефонуйте до фірми.",
+      "Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.": "Заявку надіслано. Юридична фірма зв'яжеться з вами — зазвичай протягом 1 робочого дня."
     },
     "en": {
       "Porównaj": "Compare",
@@ -1801,13 +1804,18 @@
       "Wyślij zgłoszenie": "Send request",
       "Dziękujemy!": "Thank you!",
       "Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.": "Test request saved. You will see it in the CRM under “New cases”.",
-      "Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.": "We opened your email app with a ready message — send it and the firm will contact you."
+      "Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.": "We opened your email app with a ready message — send it and the firm will contact you.",
+      "Wysyłanie…": "Sending…",
+      "Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.": "Could not send the request. Please try again shortly or call the firm.",
+      "Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.": "Request sent. The firm will contact you — usually within 1 business day."
     }
   },
   "leads": {
     "enabled": true,
     "mode": "demo",
     "email": "",
-    "consent": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili."
+    "consent": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili.",
+    "supabaseUrl": "https://ixlhfhzgzotukstoezcj.supabase.co",
+    "supabaseKey": "sb_publishable_RyhhD3X6ZQ2broLW8CHc6w_PRz15jd4"
   }
 }

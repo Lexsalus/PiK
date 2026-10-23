@@ -4,6 +4,7 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 
 🌐 **Strona:** https://lexsalus.github.io/PiK/
 🔐 **Panel treści:** https://lexsalus.github.io/PiK/admin.html
+🗄️ **Baza CRM (Supabase):** wdrożenie — **[SUPABASE.md](SUPABASE.md)**
 ⚖️ **CRM kancelarii (prototyp):** https://lexsalus.github.io/PiK/crm.html — opis: **[CRM.md](CRM.md)**
 
 📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
@@ -42,6 +43,7 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 index.html      strona publiczna
 admin.html      panel administracyjny (treść strony)
 crm.html        CRM kancelarii — prototyp (CRM.md)
+supabase/       schemat bazy CRM z RLS + testy (SUPABASE.md)
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
 version.json    aktualna wersja
 CHANGELOG.md    historia wersji
