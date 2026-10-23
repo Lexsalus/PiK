@@ -2,6 +2,15 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.6.0] — 2026-10-23
+- Prototyp CRM kancelarii (crm.html) wg specyfikacji v1.1 — zaplecze dla adwokatów i pracowników
+- Role (Administrator, Pełnomocnik, Aplikant, Biuro, Obsługa techniczna), menu z uprawnień, 403, nadania z ważnością i uzasadnieniem
+- Sprawy: 8 kategorii, numeracja KOD-ROK-NNNN, karta sprawy, PESEL maskowany, etapy z blokadą, korekty, soft delete, dokumenty z wersjami i SHA-256, zespół sprawy
+- Terminy: kalkulator (KC, święta stałe i ruchome), druga osoba, T-14/7/3/1/0, eskalacja, zamknięcie z dowodem, .ics
+- Finanse: wpływy, podział z bilansem 0 zł, widok pełnomocnika; raporty z CSV; powiadomienia; audyt z łańcuchem skrótów; dostęp awaryjny
+- Zgłoszenia z formularza „Co mi się należy” → Nowe sprawy → sprawa z wynikiem kalkulatora (zakładka Analiza)
+- crm.html wyłączony z indeksowania (robots.txt); link do CRM w panelu treści; dokumentacja CRM.md
+
 ## [1.5.0] — 2026-10-23
 - „Co mi się należy”: kalkulatory roszczeń SKD, CHF/FX, WIBOR, restrukturyzacja + formularz zgłoszenia
 - Zgłoszenie zawiera kategorię CRM, wpisane wartości i wynik; tryb test (podgląd w CRM) lub e-mail kancelarii; zgoda RODO

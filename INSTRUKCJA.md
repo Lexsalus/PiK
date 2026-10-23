@@ -6,6 +6,7 @@
 |----|-------|
 | Strona | `https://lexsalus.github.io/PiK/` |
 | Panel admina | `https://lexsalus.github.io/PiK/admin.html` |
+| CRM kancelarii (prototyp) | `https://lexsalus.github.io/PiK/crm.html` — opis w `CRM.md` |
 | Podgląd szkicu | `https://lexsalus.github.io/PiK/index.html?preview` |
 
 Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi też przycisk **⚙️ Panel** w prawym górnym rogu strony.

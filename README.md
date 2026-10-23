@@ -3,7 +3,8 @@
 Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
 
 🌐 **Strona:** https://lexsalus.github.io/PiK/
-🔐 **Panel:** https://lexsalus.github.io/PiK/admin.html
+🔐 **Panel treści:** https://lexsalus.github.io/PiK/admin.html
+⚖️ **CRM kancelarii (prototyp):** https://lexsalus.github.io/PiK/crm.html — opis: **[CRM.md](CRM.md)**
 
 📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
 
@@ -19,7 +20,13 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
 - Przycisk panelu w górnym pasku
 
-**Panel administracyjny**
+**CRM kancelarii — prototyp** (zaplecze dla adwokatów i pracowników, wg specyfikacji v1.1)
+- Sprawy z kategoriami i numeracją, karta sprawy, etapy z blokadą i korektami, dokumenty z wersjami, zespół sprawy
+- Terminy procesowe: kalkulator ze świętami, druga osoba, przypomnienia i eskalacja
+- Finanse (podział wpłat, wynagrodzenie pełnomocnika), raporty, powiadomienia
+- Role i uprawnienia, dziennik audytu z łańcuchem skrótów; zgłoszenia z formularza → „Nowe sprawy”
+
+**Panel administracyjny (treść strony)**
 - Ustawienia strony (nazwa, kolor akcentu, podtytuł, hasło)
 - Kategorie z dowolnymi parametrami (liczba / tekst / tak-nie) i ofertami
 - Kalkulatory z własnymi wzorami i testem na żywo
@@ -33,7 +40,8 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 
 ```
 index.html      strona publiczna
-admin.html      panel administracyjny
+admin.html      panel administracyjny (treść strony)
+crm.html        CRM kancelarii — prototyp (CRM.md)
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
 version.json    aktualna wersja
 CHANGELOG.md    historia wersji
