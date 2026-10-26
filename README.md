@@ -20,7 +20,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Wersje językowe PL / UA / EN (własne tłumaczenia lub Google Translate)
 - Chatbot Ilona osadzony na stronie
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
-- Przycisk ⚙️ Panel w górnym pasku i link w stopce prowadzą do CRM
+- Przycisk ⚙️ Panel w górnym pasku i link w stopce
 
 **CRM kancelarii** (zaplecze dla adwokatów i pracowników, wg specyfikacji v1.1; dane w Supabase)
 - Logowanie e-mail + hasło, 2FA (TOTP) obowiązkowe dla Administratora, pełnomocników i obsługi technicznej — egzekwowane w bazie
