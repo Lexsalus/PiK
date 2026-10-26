@@ -11,6 +11,12 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Krok 3 — Administrator: `biuro@lekarzeiterapeuci.pl` (nazwa wyświetlana „Admin”), aktywny, wpis w audycie
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
 - ✅ Krok 5 — formularz na stronie zapisuje zgłoszenia w tabeli `leads`
+- ✅ Migracja `002_crm_live.sql` — 2FA egzekwowane w bazie (aal2 dla admin/att/tech), magazyn akt `akta` z regułami per sprawa
+- ✅ Migracja `003_audit_events.sql` — audyt eksportów, pobrań, logowań; audyt zmian kategorii/statusu sprawy
+
+## Migracje
+
+Nowe zmiany bazy: plik `supabase/migrations/00N_opis.sql` (uruchamiany raz w SQL Editor). Świeża instalacja: `schema.sql`, potem wszystkie migracje po kolei.
 
 ## Krok 1 — uruchom schemat (raz)
 
