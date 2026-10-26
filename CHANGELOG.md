@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.10.2] — 2026-10-26
+- INSTRUKCJA: poprawny adres Administratora
+
 ## [1.10.1] — 2026-10-26
 - Administrator nowej bazy aktywny (biuro@lekarzeifarmaceuci.pl); dokumentacja
 
