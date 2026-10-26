@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.11.2] — 2026-10-26
+- Dokumentacja: nowe nazwy projektów Supabase — Porównywarka (PiK) i CRM Pielęgniarki
+
 ## [1.11.1] — 2026-10-26
 - Dokumentacja: migracja 004 czeka na wdrożenie; liczba testów bazy 89
 

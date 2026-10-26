@@ -1,8 +1,8 @@
 # Wdrożenie bazy CRM w Supabase
 
-Projekt: **Piel** `eamobnucjsavahpxilrt` (UE, Irlandia) · adres: `https://eamobnucjsavahpxilrt.supabase.co`
+Projekt: **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt` (UE, Irlandia) · adres: `https://eamobnucjsavahpxilrt.supabase.co`
 
-> Od 26.10.2026 PiK (strona + CRM kancelarii) ma własną bazę. Poprzedni projekt **CRMKP** (`ixlhfhzgzotukstoezcj`) należy teraz do panelu pielęgniarek (repo `Lexsalus/Pielegniarki`).
+> Od 26.10.2026 PiK (strona + CRM kancelarii) ma własną bazę. Poprzedni projekt **CRM Pielęgniarki** (dawniej „CRMKP”, `ixlhfhzgzotukstoezcj`) należy teraz do panelu pielęgniarek (repo `Lexsalus/Pielegniarki`).
 
 Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Razem z migracjami przechodzi 74 testy reguł na PostgreSQL (`supabase/test/schema.test.mjs`).
 
