@@ -224,13 +224,13 @@ const COLORS=['#7c5cff','#2fd6a0','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8
 /* --- SHA-256 (synchronicznie, do łańcucha audytu) --- */
 
 /* --- Role i uprawnienia (specyfikacja §9) --- */
-const ROLES={admin:'Administrator',att:'Pełnomocnik',app:'Aplikant',office:'Biuro',tech:'Obsługa techniczna',nurse:'Pielęgniarka'};
+const ROLES={admin:'Administrator',att:'Pełnomocnik',app:'Aplikant',office:'Biuro',tech:'Obsługa techniczna'};
 const PERMS=[
   ['cases_all','Wszystkie sprawy'],['client','Dane klienta'],['pesel','Pełny PESEL (odsłonięcie)'],['documents','Dokumenty i akta'],
   ['entries','Notatki i czynności'],['deadlines','Terminy i zadania'],['deadlines_close','Terminy procesowe — zamykanie'],
   ['initial_fee','Opłata wstępna / wpłata klienta'],['attorney_fee','Wynagrodzenie pełnomocnika'],['success_fee','Success fee'],
   ['allocations','Podział środków kancelarii'],['delete','Usuwanie wpisów i czynności'],['new_cases','Nowe sprawy (zgłoszenia)'],
-  ['reports','Raporty'],['users','Nadawanie uprawnień, użytkownicy'],['config','Konfiguracja systemu, kopie zapasowe'],['audit','Dziennik audytu — podgląd'],['nurses','Pielęgniarki (rewiry, terminarz, zlecenia)']];
+  ['reports','Raporty'],['users','Nadawanie uprawnień, użytkownicy'],['config','Konfiguracja systemu, kopie zapasowe'],['audit','Dziennik audytu — podgląd']];
 const PERM_NAME=Object.fromEntries(PERMS);
 // wartości: 2 = pełny dostęp, 1 = zakres ograniczony (przypisane sprawy / własne dane), 0 = brak
 const ROLE_DEF={
@@ -238,8 +238,7 @@ const ROLE_DEF={
   att:{client:1,documents:1,entries:1,deadlines:1,deadlines_close:1,attorney_fee:1,success_fee:1,reports:1},
   app:{client:1,documents:1,entries:1,deadlines:1},
   office:{client:1,documents:1,deadlines:1,new_cases:2,reports:1},
-  tech:{config:1},
-  nurse:{nurses:1}};
+  tech:{config:1}};
 
 /* --- Dane (wczytywane z bazy przez reload()) --- */
 let DB=null,ME=null;
@@ -283,7 +282,7 @@ const can=(p,u=ME)=>permLevel(p,u)>0;
 const isAdmin=(u=ME)=>u?.role==='admin';
 function activeMember(c,u=ME){return DB.members.find(m=>m.caseId===c.id&&m.userId===u.id&&!m.revokedAt&&(!m.endDate||m.endDate>=iso(today())))}
 const emergencyActive=(u=ME)=>!!(u&&DB.emergency&&DB.emergency.status==='granted'&&DB.emergency.by===u.id&&DB.emergency.until>Date.now());
-const seesCases=(u=ME)=>u&&(!['tech','nurse'].includes(u.role)||emergencyActive(u));
+const seesCases=(u=ME)=>u&&(u.role!=='tech'||emergencyActive(u));
 function canCase(c,u=ME){if(!c||c.deleted)return false;if(isAdmin(u)||permLevel('cases_all',u)===2)return true;if(u.role==='tech')return emergencyActive(u);return !!activeMember(c,u)}
 function caseFlags(c,u=ME){
   if(isAdmin(u))return{docs:true,actions:true,finance:true,approve:true,lead:false};
@@ -352,7 +351,7 @@ function menuItems(){
     can('new_cases')&&['nowe','📥','Nowe sprawy',newLeads,'n'],
     can('deadlines')&&['terminy','📅','Terminy',myDl],
     r!=='tech'&&['powiadomienia','🔔','Powiadomienia',unread,'n'],
-    !['tech','nurse'].includes(r)&&['zespol','👥','Zespół'],
+    r!=='tech'&&['zespol','👥','Zespół'],
     (can('initial_fee')||can('attorney_fee')||can('allocations'))&&['finanse','💰','Finanse'],
     can('reports')&&['raporty','📊','Raporty'],
     ['ustawienia','⚙️','Ustawienia']].filter(Boolean);
@@ -360,7 +359,7 @@ function menuItems(){
 function renderShell(){
   const cur=(location.hash.split('/')[1]||'pulpit').replace('sprawa','sprawy');
   $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM</div>`+menuItems().map(([k,ic,l,cnt,cl])=>`<a class="nav ${cur===k?'on':''}" href="#/${k}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`).join('')+
-    `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>${can('nurses')?'<a class="nav" href="https://lexsalus.github.io/Pielegniarki/" target="_blank">🩺 Panel pielęgniarek</a>':''}${isAdmin()?'<a class="nav" href="admin.html" target="_blank">✏️ Treść strony</a>':''}`;
+    `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>${isAdmin()?'<a class="nav" href="admin.html" target="_blank">✏️ Treść strony</a>':''}`;
   $('#meBox').innerHTML=`${av(ME.id)}<div><b>${esc(ME.name)}</b><small>${esc(ROLES[ME.role])}</small></div>`;
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;
   $('#bell').innerHTML='🔔'+(unread?`<span class="dot">${unread}</span>`:'');$('#bell').style.display=ME.role==='tech'?'none':'';
@@ -843,8 +842,8 @@ SET.konto=()=>`<div class="card" style="max-width:560px"><h3>Moje konto</h3><dl 
    Dane i reguły w bazie (RLS + funkcje).
    Każda operacja idzie do bazy, po niej odświeżamy dane (reload).
    ===================================================================== */
-const SB_URL='https://ixlhfhzgzotukstoezcj.supabase.co';
-const SB_KEY='sb_publishable_RyhhD3X6ZQ2broLW8CHc6w_PRz15jd4';               // klucz publiczny (publishable) — może być jawny
+const SB_URL='https://eamobnucjsavahpxilrt.supabase.co';
+const SB_KEY='sb_publishable_jwyxht3egYyB_dAPrWHkRw_68bmBctB';               // klucz publiczny (publishable) — może być jawny
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const NEED_2FA=['admin','att','tech'];
 const errMsg=e=>{const m=e?.message||String(e||'Błąd');return m.replace(/^.*?ERROR:\s*/,'').replace(/\s*\(SQLSTATE.*$/,'')};
@@ -966,7 +965,6 @@ async function afterSignIn(){
   ME={id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color};
   try{await reload()}catch(e){console.error(e);return toast('Nie udało się wczytać danych: '+errMsg(e),true)}
   if(!sessionStorage.getItem('crm_logged_'+p.id)){sessionStorage.setItem('crm_logged_'+p.id,1);sb.rpc('log_login',{p_action:'logowanie'})}
-  if(ME.role==='nurse'){location.href='https://lexsalus.github.io/Pielegniarki/';return}   // panel pielęgniarek jest osobną aplikacją (ta sama baza)
   $('#login').style.display='none';$('#app').style.display='grid';
   if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
 }
@@ -1176,7 +1174,7 @@ function exportCsv(){
 
 /* --- powiadomienia --- */
 function openNt(id){const n=DB.notifications.find(x=>x.id===id);if(!n.read)sb.from('notifications').update({read_at:new Date().toISOString()}).eq('id',id).then(()=>{n.read=nowISO();renderShell()});
-  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else if(/^(order|nurse)\./.test(n.type))window.open('https://lexsalus.github.io/Pielegniarki/#/pielegniarki'+(n.type==='order.dispatch'?'/zlecenia':''),'_blank');else rerender()}
+  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else rerender()}
 function markAllRead(){actSafe(async()=>chk(await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',ME.id).is('read_at',null)))}
 
 /* --- finanse --- */
@@ -1238,7 +1236,7 @@ function delHoliday(id){actSafe(async()=>chk(await sb.from('holidays').delete().
 function userModal(id){
   const u=id&&U(id);
   if(!u)return modal('Nowy użytkownik',`<ol class="small" style="padding-left:18px;line-height:1.8">
-    <li>Otwórz <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/auth/users" target="_blank" style="color:var(--accent)">Supabase → Authentication → Users</a> → <b>Add user</b> → <b>Create new user</b> (zaznacz <i>Auto Confirm User</i>) albo <b>Send invitation</b>.</li>
+    <li>Otwórz <a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/auth/users" target="_blank" style="color:var(--accent)">Supabase → Authentication → Users</a> → <b>Add user</b> → <b>Create new user</b> (zaznacz <i>Auto Confirm User</i>) albo <b>Send invitation</b>.</li>
     <li>Wróć tutaj i odśwież — konto pojawi się na liście jako <b>nieaktywne</b>.</li><li>Ustaw rolę, nazwę i aktywuj konto przyciskiem „Rola / konto”.</li></ol>
     <p class="hint">Konta zakłada tylko Administrator; samodzielna rejestracja jest wyłączona. Pełnomocnik, Administrator i Obsługa techniczna przy pierwszym logowaniu skonfigurują 2FA.</p>`,{ok:'Odśwież listę',onOk:()=>act(async()=>{})});
   modal(`Konto — ${u.name}`,`<div class="form"><label>Imię i nazwisko<input class="f" name="name" required value="${esc(u.name||'')}"></label><label>E-mail<input class="f" value="${esc(u.email||'')}" disabled></label>
@@ -1258,15 +1256,15 @@ function userModal(id){
 SET.system=()=>{
   const em=DB.emergency;
   return `<div class="grid g3" style="margin-bottom:14px"><div class="tile"><span>Baza</span><b style="color:var(--good);font-size:1.3rem">Supabase · UE</b><small class="mut">PostgreSQL 17 · RLS · 2FA</small></div>
-    <div class="tile"><span>Kopie zapasowe</span><b style="font-size:1.1rem">wg planu Supabase</b><small><a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/database/backups/scheduled" target="_blank" style="color:var(--accent)">Database → Backups</a></small></div>
+    <div class="tile"><span>Kopie zapasowe</span><b style="font-size:1.1rem">wg planu Supabase</b><small><a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/database/backups/scheduled" target="_blank" style="color:var(--accent)">Database → Backups</a></small></div>
     <div class="tile"><span>Przypomnienia o terminach</span><b style="font-size:1.1rem">co 15 min</b><small class="mut">pg_cron · run_deadline_reminders()</small></div></div>
   <div class="grid g2" style="align-items:start"><div class="card"><h3>Dostęp awaryjny</h3>${ME.role==='tech'?(em&&em.status==='granted'&&em.until>Date.now()?`<div class="note info">Aktywny do ${fDT(new Date(em.until).toISOString())}</div>`:em&&em.status==='pending'?'<div class="note">Wniosek czeka na zgodę Administratora</div>':`<button class="btn" onclick="askReason('Wniosek o dostęp awaryjny','Powód (np. awaria, której nie da się zdiagnozować bez wglądu)',r=>act(async()=>chk(await sb.from('emergency_access').insert({reason:r})),'Wniosek wysłany'),{ok:'Wyślij',danger:false})">Złóż wniosek</button>`):
       em&&em.status==='pending'?`<div class="note">${esc(U(em.by).name)}: ${esc(em.reason)}</div><div style="margin-top:10px;display:flex;gap:8px"><button class="btn pri sm" onclick="actSafe(async()=>chk(await sb.from('emergency_access').update({status:'granted',decided_by:ME.id,valid_until:new Date(Date.now()+59*60000).toISOString()}).eq('id','${em.id}')),'Zgoda na 60 min')">Zgoda na 60 min</button><button class="btn sm del" onclick="actSafe(async()=>chk(await sb.from('emergency_access').update({status:'rejected',decided_by:ME.id}).eq('id','${em.id}')),'Odmówiono')">Odmów</button></div>`:'<p class="mut">Brak wniosków.</p>'}
     <p class="hint">Wniosek → zgoda Administratora → dostęp czasowy (60 min) → zapis w audycie. Poza tym obsługa techniczna nie odczyta żadnej sprawy, dokumentu ani rozliczenia — pilnuje tego baza.</p></div>
   <div class="card"><h3>Konfiguracja</h3><div class="small" style="line-height:1.9">
-    <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/auth/users" target="_blank" style="color:var(--accent)">Użytkownicy (Supabase Auth)</a><br>
-    <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/logs/explorer" target="_blank" style="color:var(--accent)">Logi techniczne</a><br>
-    <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/storage/buckets/akta" target="_blank" style="color:var(--accent)">Magazyn akt</a></div>
+    <a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/auth/users" target="_blank" style="color:var(--accent)">Użytkownicy (Supabase Auth)</a><br>
+    <a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/logs/explorer" target="_blank" style="color:var(--accent)">Logi techniczne</a><br>
+    <a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/storage/buckets/akta" target="_blank" style="color:var(--accent)">Magazyn akt</a></div>
     <p class="hint">Test odtwarzania kopii: co kwartał na osobnym projekcie testowym (procedura w SUPABASE.md).</p></div></div>`;
 };
 {const orig=SET.audyt;SET.audyt=()=>orig().replace(/onclick="const r=verifyAudit\(\);[^"]*"/,`onclick="verifyAuditLive()"`).replace(/<button class="btn sm" onclick="toast\('UPDATE\/DELETE odrzucone[^"]*">Test: edytuj wpis<\/button>/,`<button class="btn sm" onclick="tryEditAudit()">Test: edytuj wpis</button>`)}

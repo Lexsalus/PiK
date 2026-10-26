@@ -1,17 +1,17 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **26.10.2026**, wersja **1.9.3**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **26.10.2026**, wersja **1.10.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
-Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (zaplecze dla adwokatów i pracowników) według specyfikacji `CRM_Kancelarii_Specyfikacja_v1.1.pdf` (22.10.2026, 12 modułów) ; panel **Pielęgniarki** według projektu `Zakladka_Pielegniarki_projekt.pdf` (23.10.2026) wydzielony do repo `Lexsalus/Pielegniarki` — wspólna baza.
+Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (zaplecze dla adwokatów i pracowników) według specyfikacji `CRM_Kancelarii_Specyfikacja_v1.1.pdf` (22.10.2026, 12 modułów) . Panel **Pielęgniarki** (projekt 23.10.2026) jest osobnym projektem: repo `Lexsalus/Pielegniarki`, baza CRMKP.
 
 | Element | Adres | Stan |
 |---------|-------|------|
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Panel treści strony | `admin.html` (przycisk ⚙️ Panel na stronie + link w stopce) | działa (dane w `data.json`); logowanie tylko hasłem w przeglądarce, domyślnie `admin` — zmienić |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **CRMKP** `ixlhfhzgzotukstoezcj`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–004 wdrożone (004 Pielęgniarki: 26.10.2026, + pg_cron `zlecenia-limit-czasu`) |
+| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026; Administrator do założenia |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
@@ -35,7 +35,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (120 testów reguł bazy) i `supabase/test/e2e/` (36 kroków przez interfejs CRM + 42 kroki zakładki Pielęgniarki, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (72 testy reguł bazy) i `supabase/test/e2e/` (36 kroków przez interfejs CRM, lokalna kopia bazy).
 
 ## Zrobione
 
@@ -50,17 +50,16 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - 1.8.3 → 1.8.4 — próba przekierowania przycisku ⚙️ Panel do CRM, **cofnięta na prośbę właściciela**; przycisk prowadzi do `admin.html`.
 - 1.9.0 — zakładka **Pielęgniarki** w CRM (`crm-pielegniarki.js`) + migracja `004_pielegniarki.sql` (rola „Pielęgniarka”, uprawnienie `nurses`). Migracja 004 wdrożona (1.9.1).
 - 1.9.2 → 1.9.3 — panel wydzielony do repo `Lexsalus/Pielegniarki` (https://lexsalus.github.io/Pielegniarki/), zakładka zdjęta z CRM.
+- 1.10.0 — PiK na własnej bazie: projekt **Piel** `eamobnucjsavahpxilrt` (schemat + 002–003). CRMKP zostaje dla pielęgniarek. Z CRM usunięta rola „Pielęgniarka”, migracja 004 i jej testy (są w repo Pielegniarki).
 
 ## Otwarte sprawy
 
-- **Pielęgniarki — osobna aplikacja:** https://lexsalus.github.io/Pielegniarki/ (repo `Lexsalus/Pielegniarki`, ta sama baza CRMKP; tabele 004 zostają w CRMKP). Zakładka zdjęta z `crm.html` w 1.9.3; w CRM zostały rola, uprawnienie i link do panelu. Supabase Auth: dodany adres przekierowań panelu.
-- **Pielęgniarki — start:** CRM → Pielęgniarki → Ustawienia: usługi, cennik stref miasta, import granic dzielnic; potem pielęgniarki, obszary, wzorce, reguły przydziału.
-- **Pielęgniarki — przyjęte rozstrzygnięcia tam, gdzie projekt milczy** (do potwierdzenia albo zmiany): brak reguły przydziału dla miasta/dzielnicy → zlecenie do dyspozytora; cena dojazdu dla klienta ustalana przy zakładaniu zlecenia = najniższa strefa wśród pielęgniarek dostępnych w wybranym terminie (wypłata i strefa zapisywane dla osoby, która dostanie propozycję); zgłoszenie odrzucone przez Administratora wraca do szkicu z uwagą; wyjątki w terminarzu (urlop) pielęgniarka może zgłaszać od dziś, wzorzec — od następnego tygodnia; pielęgniarka widzi dane klienta dopiero po przyjęciu zlecenia (wcześniej adres i termin).
-- **Pielęgniarki — propozycje (niewdrożone, decyzja właściciela):** formularz „Zamów badania w domu” dla klientów (strona 8 projektu; teraz zlecenia zakłada Administrator/dyspozytor w CRM); 2FA obowiązkowe dla roli Pielęgniarka (dane zdrowotne, RODO); anulowanie zlecenia (brak takiego statusu w projekcie); powiadomienia SMS/e-mail o propozycji zlecenia.
 
 - **Logowanie panelu treści:** `admin.html` ma tylko hasło sprawdzane w przeglądarce (bez e-maila i 2FA). Opcje do decyzji właściciela: zabrać przycisk ze strony publicznej, przenieść logowanie panelu na Supabase (ten sam e-mail + 2FA, tylko Administrator) albo wbudować panel w CRM. Na razie bez zmian.
 
 ## Do zrobienia po stronie właściciela
+
+- **Administrator w nowej bazie:** https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/auth/users → Add user (Auto Confirm), potem aktywacja roli `admin` (SUPABASE.md, krok 3).
 
 - Pierwsze logowanie Administratora do `crm.html` i konfiguracja 2FA (jeszcze nie sprawdzone na żywo).
 - Usunąć token API w Supabase (Account → Access Tokens) oraz z pulpitu: `tok.txt`, `crmkp.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
