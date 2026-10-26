@@ -1,11 +1,12 @@
 # PiK — Porównywarka, Kalkulatory i analiza umów
 
-Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów i panel administracyjny. Bez serwera i bez bazy — wszystkie dane są w jednym pliku `data.json`.
+Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów i panel administracyjny. Treść strony w `data.json`; zgłoszenia i dane CRM w bazie Supabase.
 
 🌐 **Strona:** https://lexsalus.github.io/PiK/
 🔐 **Panel treści:** https://lexsalus.github.io/PiK/admin.html
 🗄️ **Baza CRM (Supabase):** wdrożenie — **[SUPABASE.md](SUPABASE.md)**
-⚖️ **CRM kancelarii (prototyp):** https://lexsalus.github.io/PiK/crm.html — opis: **[CRM.md](CRM.md)**
+⚖️ **CRM kancelarii:** https://lexsalus.github.io/PiK/crm.html (logowanie + 2FA) · wersja demo: `crm-demo.html` — opis: **[CRM.md](CRM.md)**
+🧭 **Stan projektu i kontynuacja:** **[STAN.md](STAN.md)**
 
 📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
 
@@ -21,7 +22,8 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
 - Przycisk panelu w górnym pasku
 
-**CRM kancelarii — prototyp** (zaplecze dla adwokatów i pracowników, wg specyfikacji v1.1)
+**CRM kancelarii** (zaplecze dla adwokatów i pracowników, wg specyfikacji v1.1; dane w Supabase)
+- Logowanie e-mail + hasło, 2FA (TOTP) obowiązkowe dla Administratora, pełnomocników i obsługi technicznej — egzekwowane w bazie
 - Sprawy z kategoriami i numeracją, karta sprawy, etapy z blokadą i korektami, dokumenty z wersjami, zespół sprawy
 - Terminy procesowe: kalkulator ze świętami, druga osoba, przypomnienia i eskalacja
 - Finanse (podział wpłat, wynagrodzenie pełnomocnika), raporty, powiadomienia
@@ -42,7 +44,9 @@ Statyczna strona prawnicza na GitHub Pages: porównywarka usług prawnych (porad
 ```
 index.html      strona publiczna
 admin.html      panel administracyjny (treść strony)
-crm.html        CRM kancelarii — prototyp (CRM.md)
+crm.html        CRM kancelarii na żywo (Supabase)
+crm-demo.html   CRM — prototyp na danych przykładowych
+STAN.md         stan projektu, zasady, następne kroki
 supabase/       schemat bazy CRM z RLS + testy (SUPABASE.md)
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
 version.json    aktualna wersja

@@ -1,0 +1,106 @@
+import asyncio, json, sys
+from playwright.async_api import async_playwright
+import os
+HERE=os.path.dirname(os.path.abspath(__file__))+'/'
+U='http://localhost:8765/crm.html';SH=HERE+'shim.js';SC=HERE
+res=[];ok=lambda c,m:(res.append(c),print(('✅ ' if c else '❌ ')+m))
+async def main():
+  async with async_playwright() as p:
+    b=await p.chromium.launch(); c=await b.new_context(locale='pl-PL',viewport={'width':1360,'height':900}); errs=[]
+    async def rt(r):
+      u=r.request.url
+      if 'supabase-js' in u: return await r.fulfill(path=SH,content_type='application/javascript')
+      if 'localhost' in u: return await r.continue_()
+      await r.abort()
+    await c.route('**/*',rt)
+    pg=await c.new_page(); pg.on('pageerror',lambda e:errs.append(str(e))); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
+    pg.on('console',lambda m: errs.append('console: '+m.text) if m.type=='error' else None)
+    T=lambda s: pg.inner_text(s)
+    async def login(email,code=True):
+      if await pg.is_visible('#logout'): await pg.click('#logout'); await pg.wait_for_timeout(300)
+      if await pg.is_visible('#lback'): await pg.click('#lback'); await pg.wait_for_timeout(300)
+      await pg.goto(U); await pg.wait_for_timeout(500)
+      await pg.fill('#lf [name=email]',email); await pg.fill('#lf [name=password]','Haslo-testowe-123'); await pg.click('#lf button'); await pg.wait_for_timeout(600)
+      if code and await pg.is_visible('#lf [name=code]'): await pg.fill('#lf [name=code]','123456'); await pg.click('#lf button'); await pg.wait_for_timeout(900)
+    go=lambda h: pg.evaluate(f"location.hash='{h}'")
+    async def nav(h): await go(h); await pg.wait_for_timeout(400)
+    async def submit(): await pg.click('#mform button.pri'); await pg.wait_for_timeout(900)
+    # --- logowanie: złe hasło, potem Admin z konfiguracją 2FA
+    await pg.goto(U); await pg.wait_for_timeout(500)
+    await pg.fill('#lf [name=email]','admin@k.test'); await pg.fill('#lf [name=password]','zle'); await pg.click('#lf button'); await pg.wait_for_timeout(400)
+    ok('Nieprawidłowy' in await T('#lerr'),'złe hasło → komunikat')
+    await pg.fill('#lf [name=password]','Haslo-testowe-123'); await pg.click('#lf button'); await pg.wait_for_timeout(2000)
+    ok(await pg.locator('#login img[alt^="Kod QR"]').count()==1,'Administrator: wymuszona konfiguracja 2FA (kod QR)')
+    await pg.fill('#lf [name=code]','000000'); await pg.click('#lf button'); await pg.wait_for_timeout(400); ok('Nieprawidłowy kod' in await T('#lerr'),'zły kod 2FA → komunikat')
+    await pg.fill('#lf [name=code]','123456'); await pg.click('#lf button'); await pg.wait_for_timeout(1200)
+    ok(await pg.is_visible('#app') and 'Dzień dobry' in await T('#view'),'po 2FA: pulpit')
+    # --- zgłoszenie ze strony → sprawa
+    await nav('#/nowe'); ok('Zofia Testowa' in await T('#view'),'zgłoszenie ze strony widoczne w „Nowe sprawy”')
+    await pg.click('text=Załóż sprawę'); await pg.wait_for_timeout(300)
+    ok('Brak aktywnych' not in await T('#toast') ,'formularz nowej sprawy')
+    await pg.fill('#mform [name=pesel]','80010112345'); await submit(); await pg.wait_for_timeout(500)
+    h1=await T('#view h1'); ok(h1.startswith('SKD-2026-0001'),'sprawa założona przez bazę: '+h1.split()[0])
+    caseid=pg.url.split('/sprawa/')[1].split('/')[0]
+    ok('800101*****' in await T('#view'),'PESEL maskowany (z bazy)')
+    await pg.click('text=Pokaż'); await pg.wait_for_timeout(600); ok('80010112345' in await T('#view'),'Administrator odsłania PESEL (zaszyfrowany w bazie)')
+    await nav(f'#/sprawa/{caseid}/analiza'); await pg.wait_for_timeout(500); ok('Wynik kalkulatora ze zgłoszenia' in await T('#view'),'Analiza: wynik kalkulatora klienta')
+    # --- zespół: aplikantka bez finansów
+    await nav(f'#/sprawa/{caseid}/zespol'); await pg.click('text=+ Dodaj osobę do sprawy'); await pg.wait_for_timeout(300)
+    await pg.select_option('#mmU',label='Anna Kowalska (Aplikant)'); await submit()
+    ok('Anna Kowalska' in await T('#view') and 'Nadano zakres' in await T('#view'),'dołączono aplikantkę (historia z bazy)')
+    # --- wpis z załącznikiem
+    await nav(f'#/sprawa/{caseid}/etapy'); await pg.click('text=+ Wpis'); await pg.wait_for_timeout(300)
+    await pg.fill('#mform [name=title]','Analiza umowy'); await pg.set_input_files('#mform [name=files]',{'name':'umowa.pdf','mimeType':'application/pdf','buffer':b'%PDF-1.4 test'}); await submit()
+    ok('Analiza umowy' in await T('#view') and 'umowa.pdf' in await T('#view'),'wpis z załącznikiem zapisany (plik w magazynie akt)')
+    # --- termin ustawowy bez kontrolera / z kontrolerem
+    await nav('#/terminy'); await pg.click('text=+ Dodaj termin'); await pg.wait_for_timeout(300)
+    await pg.select_option('#dType','statutory'); await pg.fill('#mform [name=title]','Odpowiedź na pozew'); await submit()
+    ok(await pg.is_visible('#mform'),'termin ustawowy bez kontrolera → zatrzymany')
+    await pg.select_option('#mform [name=ctrl]',label='Jan Nowak'); await submit()
+    ok('Odpowiedź na pozew' in await T('#view'),'termin ustawowy z drugą osobą zapisany')
+    # --- finanse
+    await nav(f'#/sprawa/{caseid}/finanse'); await pg.click('text=+ Wpływ'); await pg.wait_for_timeout(300); await pg.fill('#mform [name=amount]','10000'); await submit()
+    ok('Wpływ 10' in await T('#view h1'),'wpływ zapisany')
+    for typ,amt,st in [('sales','3000','approved')]:
+      await pg.click('text=+ Pozycja'); await pg.wait_for_timeout(300); await pg.select_option('#alT',typ); await pg.fill('#mform [name=rec]','Kamil Nowicki'); await pg.fill('#mform [name=amount]',amt); await pg.select_option('#mform [name=status]',st); await submit()
+    ok(await pg.is_visible('#mform') or 'Bilans' in await T('#toast') or 'pełnego podziału' in await T('#toast'),'zatwierdzenie bez pełnego podziału → odrzucone przez bazę: '+(await T('#toast'))[:70])
+    await pg.select_option('#mform [name=status]','planned'); await submit()
+    await pg.click('text=+ Pozycja'); await pg.wait_for_timeout(300); await pg.select_option('#alT','attorney'); await pg.fill('#mform [name=amount]','1000'); await submit()
+    await pg.click('text=+ Pozycja'); await pg.wait_for_timeout(300); await pg.select_option('#alT','company'); await pg.fill('#mform [name=amount]','6000'); await submit()
+    ok('Bilans 0 zł' in await T('#view'),'podział 3000+1000+6000 → Bilans 0 zł')
+    # --- uprawnienia, audyt
+    await nav('#/ustawienia/audyt'); await pg.click('text=Sprawdź łańcuch skrótów'); await pg.wait_for_timeout(600); ok('poprawny' in await T('#toast'),'audyt: '+await T('#toast'))
+    await pg.click('text=Test: edytuj wpis'); await pg.wait_for_timeout(500); ok('odrzuciła' in await T('#toast'),'edycja audytu odrzucona przez bazę')
+    a=await T('#view'); ok('pesel.odsloniecie' in a and 'odczyt.akt' in a and 'sprawa.utworzona' in a,'audyt: odsłonięcie PESEL, odczyt akt, utworzenie sprawy')
+    await nav('#/ustawienia/kategorie'); await pg.fill('form [name=c]','CZK'); await pg.press('form [name=c]','Enter'); await pg.wait_for_timeout(700); ok('CZK' in await T('#view'),'waluta dodana w bazie')
+    await nav('#/ustawienia/uzytkownicy'); ok('Konto nieaktywne' not in await T('#view'),'lista użytkowników')
+    # --- aplikantka
+    await login('anna@k.test')
+    m=await pg.eval_on_selector_all('#side a.nav','e=>e.map(x=>x.innerText)'); ok(not any('Finanse' in x for x in m),'aplikantka (bez 2FA): brak Finansów w menu')
+    await nav(f'#/sprawa/{caseid}'); ok('Finanse' not in await T('.tabs') and 'Opłata wstępna' not in await T('#view'),'aplikantka: karta sprawy bez finansów (baza nie zwraca danych)')
+    await nav(f'#/sprawa/{caseid}/etapy'); 
+    ok('Usuń' not in await T('.entry .ea'),'aplikantka: brak przycisku usuwania')
+    await pg.click('text=+ Wpis'); await pg.wait_for_timeout(300); await pg.fill('#mform [name=title]','Notatka aplikantki'); await submit()
+    await pg.locator('.entry',has_text='Notatka aplikantki').locator('text=Edytuj (zapis wersji)').click(); await pg.wait_for_timeout(300); await pg.fill('#mform [name=desc]','poprawiony opis'); await submit(); ok('Historia korekt (1)' in await T('#view'),'edycja własnego wpisu → wersja')
+    # --- pełnomocnik Piotr (spoza sprawy), z 2FA
+    await login('piotr@k.test'); await nav(f'#/sprawa/{caseid}'); ok(await pg.is_visible('.forbid'),'pełnomocnik spoza sprawy → 403')
+    # --- Jan — prowadzący: zatwierdza etap, widzi swoje 1000 zł
+    await login('jan@k.test'); await nav(f'#/sprawa/{caseid}/etapy')
+    ok('Zatwierdź etap' in await T('#view'),'prowadzący widzi „Zatwierdź etap”')
+    await pg.click('text=Zatwierdź etap'); await pg.wait_for_timeout(1000); ok('zatwierdzony' in await T('.stages'),'etap zatwierdzony przez bazę (wpisy zablokowane)')
+    await nav('#/finanse'); t=await T('#view'); ok('Moje rozliczenia' in t and 'Kamil' not in t,'pełnomocnik: tylko własne rozliczenie')
+    await nav('#/terminy'); ok('Potwierdzam poprawność daty' in await T('#view'),'kontroler widzi „Potwierdzam poprawność daty”')
+    await pg.click('text=Potwierdzam poprawność daty'); await pg.wait_for_timeout(800); ok('czeka na kontrolę' not in await T('#view'),'data potwierdzona przez kontrolera')
+    # --- aplikantka po zatwierdzeniu: zmiana zablokowana
+    await login('anna@k.test'); await nav(f'#/sprawa/{caseid}/etapy'); await pg.click('.stg >> nth=0'); await pg.wait_for_timeout(300)
+    ok('Wniosek o korektę' in await T('#view') and 'Edytuj (zapis wersji)' not in await T('#view'),'po zatwierdzeniu: tylko wniosek o korektę')
+    # --- obsługa techniczna
+    await login('tech@k.test'); m=await pg.eval_on_selector_all('#side a.nav','e=>e.map(x=>x.innerText)'); ok(not any('Sprawy' in x for x in m),'obsługa techniczna: bez spraw')
+    await nav(f'#/sprawa/{caseid}'); ok(await pg.is_visible('.forbid'),'tech: karta sprawy → 403')
+    # --- konto nieaktywne
+    await login('nowy@k.test'); ok('nie jest jeszcze aktywne' in await T('#login'),'nowe konto: „nieaktywne — poproś Administratora”')
+    await pg.screenshot(path=SC+'login.png')
+    await login('admin@k.test'); await nav(f'#/sprawa/{caseid}/klient'); await pg.screenshot(path=SC+'karta.png')
+    print('ERR',[e for e in errs if 'favicon' not in e]); print(f'WYNIK: {sum(res)}/{len(res)}')
+    await b.close()
+asyncio.run(main())
