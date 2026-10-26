@@ -11,3 +11,5 @@ python3 e2e/run.py                          # wymaga: pip install playwright
 ```
 Dane i konta są fikcyjne, tylko w lokalnej bazie (hasło `Haslo-testowe-123`, kod 2FA `123456`): admin@k.test, jan@k.test, piotr@k.test (pełnomocnicy), anna@k.test (aplikant), kasia@k.test (biuro), tech@k.test, nowy@k.test (nieaktywne).
 Wynik 26.10.2026: 36/36.
+
+Zakładka Pielęgniarki: `python3 e2e/run_pielegniarki.py` (na świeżo uruchomionym `server.mjs`; Leaflet z `node_modules` — `npm i leaflet@1.9.4`). Konta pielęgniarek: nowak@k.test, kowal@k.test. Wynik 26.10.2026: 42/42.

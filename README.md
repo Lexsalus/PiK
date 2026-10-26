@@ -28,6 +28,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Terminy procesowe: kalkulator ze świętami, druga osoba, przypomnienia i eskalacja
 - Finanse (podział wpłat, wynagrodzenie pełnomocnika), raporty, powiadomienia
 - Role i uprawnienia, dziennik audytu z łańcuchem skrótów; zgłoszenia z formularza → „Nowe sprawy”
+- Zakładka Pielęgniarki: rewiry na mapie, dostępność, strefy i stawki, przydział zleceń z akceptacją pielęgniarki (migracja 004)
 
 **Panel administracyjny (treść strony)**
 - Ustawienia strony (nazwa, kolor akcentu, podtytuł, hasło)
@@ -45,8 +46,9 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 index.html      strona publiczna
 admin.html      panel administracyjny (treść strony)
 crm.html        CRM kancelarii na żywo (Supabase)
+crm-pielegniarki.js  zakładka Pielęgniarki w CRM
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002, 003), test/ — testy bazy 74/74 i e2e 36/36 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–004), test/ — testy bazy 120/120, e2e 36/36 i 42/42 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
