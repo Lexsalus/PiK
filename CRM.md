@@ -1,15 +1,30 @@
-# CRM Kancelarii — prototyp
+# CRM Kancelarii
 
 Klikalny prototyp backendu dla pracowników kancelarii, zbudowany według **specyfikacji v1.1 (22.10.2026)**.
-Strona dla klienta (`index.html`) to front; CRM (`crm.html`) to zaplecze, w którym adwokaci i pracownicy analizują sprawy.
+Strona dla klienta (`index.html`) to front; CRM to zaplecze, w którym adwokaci i pracownicy analizują sprawy.
 
-🔗 **Adres:** https://lexsalus.github.io/PiK/crm.html (wyłączony z indeksowania Google)
+🔗 **CRM na żywo:** https://lexsalus.github.io/PiK/crm.html — logowanie kontem z Supabase, 2FA, dane w bazie.
+🧪 **Wersja demonstracyjna:** https://lexsalus.github.io/PiK/crm-demo.html — opis poniżej (dane przykładowe w przeglądarce).
+
+## CRM na żywo
+
+- **Logowanie:** e-mail + hasło. Administrator, pełnomocnicy i obsługa techniczna przy pierwszym logowaniu skanują kod QR aplikacją (Google/Microsoft Authenticator) i odtąd podają 6-cyfrowy kod. Bez 2FA baza nie zwraca im żadnych danych.
+- **Nie pamiętam hasła:** link na ekranie logowania → e-mail z linkiem → nowe hasło.
+- **Konta:** zakłada Administrator w Supabase (Authentication → Users); w CRM → Ustawienia → Użytkownicy nadaje rolę i aktywuje.
+- **Wszystkie operacje idą przez bazę** — to baza decyduje, co wolno (np. aplikant nie dostaje danych finansowych, usuwa tylko Administrator, zatwierdzony etap jest zablokowany). Komunikat błędu w CRM to odpowiedź bazy.
+- **Dokumenty** trafiają do prywatnego magazynu „akta”; pobranie przez link ważny 60 s, zapisywane w audycie.
+- **Zgłoszenia ze strony** (formularz „Co mi się należy”) od razu w „Nowe sprawy”.
+- Test end-to-end: `supabase/test/e2e/` (36/36).
+
+---
+
+## Wersja demonstracyjna (prototyp)
 
 > ⚠️ **To jest prototyp.** Dane przykładowe zapisują się tylko w przeglądarce (localStorage), logowanie odbywa się bez hasła, a reguły dostępu sprawdza przeglądarka. **Nie wpisuj prawdziwych danych klientów.** Wersja produkcyjna powstanie na Supabase (patrz niżej).
 
 ## Jak przetestować
 
-1. Otwórz `crm.html` i wybierz osobę. Każda ma inną rolę:
+1. Otwórz `crm-demo.html` i wybierz osobę. Każda ma inną rolę:
 
 | Osoba | Rola | Co warto sprawdzić |
 |-------|------|--------------------|
