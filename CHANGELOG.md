@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.10.3] — 2026-10-26
+- Poprawny adres Administratora (biuro@lekarzeiterapeuci.pl); konto z błędnym adresem tymczasowe, do usunięcia
+
 ## [1.10.2] — 2026-10-26
 - INSTRUKCJA: poprawny adres Administratora
 
