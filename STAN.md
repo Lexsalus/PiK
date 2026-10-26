@@ -11,7 +11,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Panel treści strony | `admin.html` (przycisk ⚙️ Panel na stronie + link w stopce) | działa (dane w `data.json`); logowanie tylko hasłem w przeglądarce, domyślnie `admin` — zmienić |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026; Administrator: przeniesienie na właściwy adres w toku (SUPABASE.md, krok 3) |
+| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
