@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **26.10.2026**, wersja **1.8.1**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **26.10.2026**, wersja **1.8.2**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -27,7 +27,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 - **Jedna wersja, bez demo:** pracujemy na oryginale; w razie problemu cofamy przez historię gita (`git revert` / poprzednia wersja z `CHANGELOG.md`).
 
-- **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.1 …”).
+- **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.2 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
 - Testy: `supabase/test/schema.test.mjs` (74 testy reguł bazy) i `supabase/test/e2e/` (36 kroków przez interfejs CRM, lokalna kopia bazy).
@@ -38,9 +38,16 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Baza: 29 tabel z RLS, 60+ reguł, numeracja spraw, blokada etapów, wersje, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia o terminach co 15 min (pg_cron), 2FA egzekwowane w bazie (aal2 dla Administratora, pełnomocnika, obsługi technicznej), prywatny magazyn akt `akta`.
 - CRM na żywo: wszystkie moduły specyfikacji podłączone do bazy (sprawy, zgłoszenia, karta, etapy, wpisy, korekty, dokumenty w Storage, zespół, terminy, powiadomienia, finanse, raporty, uprawnienia, kategorie, święta, audyt, dostęp awaryjny).
 
+## Do zrobienia po stronie właściciela
+
+- Pierwsze logowanie Administratora do `crm.html` i konfiguracja 2FA (jeszcze nie sprawdzone na żywo).
+- Usunąć token API w Supabase (Account → Access Tokens) oraz z pulpitu: `tok.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
+- Zmienić domyślne hasło panelu treści (`admin`).
+- Podmienić przykładowe (fikcyjne) oferty w porównywarce na prawdziwe.
+
 ## Następne kroki (propozycja)
 
-1. Pierwsze logowanie Administratora na żywo i konfiguracja 2FA; założenie kont pracowników.
+1. Założenie kont pracowników i test ról na żywo.
 2. Powiadomienia e-mail/SMS (Edge Function + dostawca — decyzja kancelarii).
 3. Zakładanie kont pracowników z poziomu CRM (Edge Function z kluczem secret po stronie serwera).
 4. Generowanie pism z szablonów (PDF/DOCX).

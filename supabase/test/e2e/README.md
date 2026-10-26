@@ -9,5 +9,5 @@ node e2e/server.mjs &                       # lokalna baza: http://localhost:990
 python3 -m http.server 8765 &               # z katalogu głównego repo
 python3 e2e/run.py                          # wymaga: pip install playwright
 ```
-Konta testowe (hasło `Haslo-testowe-123`, kod 2FA `123456`): admin@k.test, jan@k.test, piotr@k.test (pełnomocnicy), anna@k.test (aplikant), kasia@k.test (biuro), tech@k.test, nowy@k.test (nieaktywne).
+Dane i konta są fikcyjne, tylko w lokalnej bazie (hasło `Haslo-testowe-123`, kod 2FA `123456`): admin@k.test, jan@k.test, piotr@k.test (pełnomocnicy), anna@k.test (aplikant), kasia@k.test (biuro), tech@k.test, nowy@k.test (nieaktywne).
 Wynik 26.10.2026: 36/36.

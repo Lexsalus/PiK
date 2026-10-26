@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.8.2] — 2026-10-26
+- Aktualizacja dokumentacji: README, INSTRUKCJA (sekcja CRM, problemy), SUPABASE, STAN, e2e
+
 ## [1.8.1] — 2026-10-26
 - Usunięta wersja demo CRM (crm-demo.html), tryb testowy formularza i dane przykładowe z kodu CRM; pracujemy na jednej wersji
 

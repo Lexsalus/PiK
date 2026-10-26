@@ -20,7 +20,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Wersje językowe PL / UA / EN (własne tłumaczenia lub Google Translate)
 - Chatbot Ilona osadzony na stronie
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
-- Przycisk panelu w górnym pasku
+- Przycisk ⚙️ Panel w górnym pasku i link w stopce
 
 **CRM kancelarii** (zaplecze dla adwokatów i pracowników, wg specyfikacji v1.1; dane w Supabase)
 - Logowanie e-mail + hasło, 2FA (TOTP) obowiązkowe dla Administratora, pełnomocników i obsługi technicznej — egzekwowane w bazie
@@ -46,7 +46,9 @@ index.html      strona publiczna
 admin.html      panel administracyjny (treść strony)
 crm.html        CRM kancelarii na żywo (Supabase)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schemat bazy CRM z RLS + testy (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002, 003), test/ — testy bazy 74/74 i e2e 36/36 (SUPABASE.md)
+CRM.md          opis CRM: role, moduły, decyzje
+SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
 version.json    aktualna wersja
 CHANGELOG.md    historia wersji
@@ -58,9 +60,15 @@ INSTRUKCJA.md   instrukcja obsługi
 
 ## Jak to działa
 
+**Treść strony**
 1. Panel wczytuje `data.json`, zmiany trzyma jako szkic w przeglądarce.
 2. Admin pobiera gotowy `data.json` i wrzuca go do repo.
 3. Push na `main` → GitHub Actions uruchamia `build_seo.py` i publikuje stronę.
+
+**Zgłoszenia i CRM**
+1. Klient liczy roszczenie w „Co mi się należy” i wysyła formularz → wiersz w tabeli `leads` (klucz publiczny pozwala tylko dodać zgłoszenie).
+2. Pracownik loguje się do `crm.html` (hasło + 2FA) → zgłoszenie widać w „Nowe sprawy”, można z niego założyć sprawę.
+3. O dostępie do danych decyduje baza (RLS); CRM nie przechowuje danych w przeglądarce.
 
 ## Wersjonowanie
 
@@ -83,4 +91,6 @@ py -m http.server 8000
 
 ## Bezpieczeństwo
 
-Hasło panelu to bramka w interfejsie (skrót SHA-256 w `data.json`), nie zabezpieczenie serwerowe. Dane chroni dostęp do zapisu w repozytorium.
+- **Panel treści:** hasło to bramka w interfejsie (skrót SHA-256 w `data.json`), nie zabezpieczenie serwerowe. Treść chroni dostęp do zapisu w repozytorium.
+- **CRM:** dane klientów są w Supabase (UE), chronione regułami RLS w bazie, 2FA egzekwowanym w bazie, szyfrowaniem PESEL i dziennikiem audytu. W kodzie strony jest tylko klucz publiczny `sb_publishable_…`; klucza `sb_secret_…` nie umieszcza się nigdzie w repo.
+- `admin.html` i `crm.html` są wyłączone z indeksowania (`robots.txt`).
