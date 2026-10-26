@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **26.10.2026**, wersja **1.8.4**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **26.10.2026**, wersja **1.8.5**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -9,7 +9,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Element | Adres | Stan |
 |---------|-------|------|
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
-| Panel treści strony | `admin.html` | działa (dane w `data.json`, hasło domyślne `admin` — zmienić) |
+| Panel treści strony | `admin.html` (przycisk ⚙️ Panel na stronie + link w stopce) | działa (dane w `data.json`); logowanie tylko hasłem w przeglądarce, domyślnie `admin` — zmienić |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
 | Baza | Supabase, projekt **CRMKP** `ixlhfhzgzotukstoezcj`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
@@ -23,11 +23,16 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Klucz publiczny (`sb_publishable_…`) jest w `crm.html` i `data.json` — może być jawny. **Nigdy** nie umieszczać klucza `sb_secret_…`.
 - Zmiany w bazie (SQL) wykonuje się w Supabase SQL Editor albo przez API zarządzania z tokenem osobistym ograniczonym do projektu (Database read-write, krótka ważność, usunąć po użyciu).
 
+## Jak zacząć w nowej sesji
+
+1. Sklonuj `Lexsalus/PiK`, przeczytaj ten plik, potem w razie potrzeby `CRM.md`, `SUPABASE.md`, `CHANGELOG.md`.
+2. Właściciel pracuje na Windows (PowerShell, `py`); repo lokalnie w `C:\Users\micha\vsrepos\`.
+3. Zmiany w bazie produkcyjnej tylko po uzgodnieniu z właścicielem (nowy token, migracja, testy przed uruchomieniem).
+
 ## Zasady pracy
 
-- **Jedna wersja, bez demo:** pracujemy na oryginale; w razie problemu cofamy przez historię gita (`git revert` / poprzednia wersja z `CHANGELOG.md`).
-
-- **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.4 …”).
+- **Jedna wersja, bez demo:** pracujemy na oryginale; w razie problemu cofamy przez historię gita (`git revert` / poprzednia wersja z `CHANGELOG.md`). Cofnięcie to też nowa wersja.
+- **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
 - Testy: `supabase/test/schema.test.mjs` (74 testy reguł bazy) i `supabase/test/e2e/` (36 kroków przez interfejs CRM, lokalna kopia bazy).
@@ -37,6 +42,16 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Front: porównywarka (porady, kancelarie, mediacje), kalkulatory prawne, „Co mi się należy” (SKD, CHF/FX, WIBOR, restrukturyzacja) z formularzem → baza, analiza umów (prawo + podejrzana treść), PL/UA/EN, SEO, chatbot.
 - Baza: 29 tabel z RLS, 60+ reguł, numeracja spraw, blokada etapów, wersje, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia o terminach co 15 min (pg_cron), 2FA egzekwowane w bazie (aal2 dla Administratora, pełnomocnika, obsługi technicznej), prywatny magazyn akt `akta`.
 - CRM na żywo: wszystkie moduły specyfikacji podłączone do bazy (sprawy, zgłoszenia, karta, etapy, wpisy, korekty, dokumenty w Storage, zespół, terminy, powiadomienia, finanse, raporty, uprawnienia, kategorie, święta, audyt, dostęp awaryjny).
+
+## Ostatnie zmiany (26.10.2026)
+
+- 1.8.1 — usunięte demo CRM i tryb testowy formularza.
+- 1.8.2 — aktualizacja całej dokumentacji.
+- 1.8.3 → 1.8.4 — próba przekierowania przycisku ⚙️ Panel do CRM, **cofnięta na prośbę właściciela**; przycisk prowadzi do `admin.html`.
+
+## Otwarte sprawy
+
+- **Logowanie panelu treści:** `admin.html` ma tylko hasło sprawdzane w przeglądarce (bez e-maila i 2FA). Opcje do decyzji właściciela: zabrać przycisk ze strony publicznej, przenieść logowanie panelu na Supabase (ten sam e-mail + 2FA, tylko Administrator) albo wbudować panel w CRM. Na razie bez zmian.
 
 ## Do zrobienia po stronie właściciela
 

@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.8.5] — 2026-10-26
+- STAN.md: stan na koniec sesji, otwarte sprawy, start w nowej sesji
+
 ## [1.8.4] — 2026-10-26
 - Cofnięcie 1.8.3: przycisk Panel znowu prowadzi do panelu treści (admin.html)
 
