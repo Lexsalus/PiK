@@ -24,7 +24,7 @@ const USERS={'admin@k.test':['11111111-1111-1111-1111-111111111111','admin','Adm
 for(const [e,[id]] of Object.entries(USERS))await db.query('insert into auth.users(id,email) values($1,$2)',[id,e]);
 for(const [e,[id,role,name]] of Object.entries(USERS))if(role)await db.query('update public.profiles set role=$2,active=true,full_name=$3 where id=$1',[id,role,name]);
 // zgłoszenie ze strony (anon)
-const asRole=async(sub,aal,fn)=>{await db.exec('begin');try{await db.exec(`set local role ${sub?'authenticated':'anon'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,true),set_config('request.jwt.claims',$2,true)`,[sub||'',JSON.stringify({aal})]);const r=await fn();await db.exec('commit');return r}catch(e){await db.exec('rollback');throw e}};
+const asRole=async(sub,aal,fn,amr=[])=>{await db.exec('begin');try{await db.exec(`set local role ${sub?'authenticated':'anon'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,true),set_config('request.jwt.claims',$2,true)`,[sub||'',JSON.stringify({aal,amr})]);const r=await fn();await db.exec('commit');return r}catch(e){await db.exec('rollback');throw e}};
 await asRole(null,'aal1',()=>db.query(`insert into public.leads(category,calc,client_name,phone,email,message,consent) values('SKD',$1,'Zofia Testowa','500100200','z@test.pl','Kredyt gotówkowy z 2023',true)`,[JSON.stringify({name:'Sankcja kredytu darmowego',inputs:[{label:'Kwota wypłacona do ręki',value:30000,unit:'zł'}],outputs:[{label:'Szacowana korzyść',value:15894,unit:'zł',main:true}]})]));
 const PK={permission_overrides:['user_id','perm'],currencies:['code'],case_categories:['code']};
 const ident=s=>{if(!/^[a-z_][a-z0-9_]*$/.test(s))throw new Error('bad ident '+s);return s};
@@ -34,7 +34,7 @@ async function handle(q){
       const r=await db.query(`select * from public.${ident(q.name)}(${p})`,keys.map(k=>q.args[k]!==null&&typeof q.args[k]==='object'?JSON.stringify(q.args[k]):q.args[k]));
       if(r.fields.length===1&&r.fields[0].name===q.name)return r.rows[0]?.[q.name]??null;return r.rows}
     if(q.kind==='storage'){await db.query(`insert into storage.objects(bucket_id,name) values($1,$2)`,[q.bucket,q.path]);return {path:q.path}}
-    const T='public.'+ident(q.table),params=[],ph=v=>{params.push(v!==null&&typeof v==='object'?JSON.stringify(v):v);return '$'+params.length};
+    const T='public.'+ident(q.table),params=[],ph=v=>{params.push(Array.isArray(v)&&v.every(x=>x===null||typeof x!=='object')?'{'+v.map(x=>JSON.stringify(String(x))).join(',')+'}':v!==null&&typeof v==='object'?JSON.stringify(v):v);return '$'+params.length};
     const where=(q.filters||[]).map(([op,c,v])=>op==='eq'?`${ident(c)} = ${ph(v)}`:op==='is'?`${ident(c)} is ${v===null?'null':v}`:'true').join(' and ')||'true';
     if(q.op==='select'){let sql=`select * from ${T} where ${where}`;if(q.order)sql+=` order by ${ident(q.order[0])} ${q.order[1]?'asc':'desc'}`;if(q.limit)sql+=` limit ${+q.limit}`;const r=await db.query(sql,params);return r.rows}
     const rows=Array.isArray(q.values)?q.values:[q.values];
@@ -43,7 +43,7 @@ async function handle(q){
       if(q.returning)sql+=' returning *';const r=await db.query(sql,params);out.push(...r.rows)}return out}
     if(q.op==='update'){const row=q.values,set=Object.keys(row).map(c=>`${ident(c)} = ${ph(row[c])}`).join(',');const r=await db.query(`update ${T} set ${set} where ${where} returning *`,params);return q.returning?r.rows:(r.rows.length?[]:[])}
     if(q.op==='delete'){await db.query(`delete from ${T} where ${where}`,params);return []}
-  });
+  },q.amr||[]);
 }
 http.createServer(async(req,res)=>{
   res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Headers','*');res.setHeader('Content-Type','application/json');

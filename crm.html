@@ -176,6 +176,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--card2)}
 .res .sub{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.88rem}
 .svgchart text{fill:var(--mut);font-size:11px;font-family:inherit}
 @media(max-width:980px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3,.g2,.calcbox{grid-template-columns:1fr}}
+@media print{aside,.top,.toolbar,.noprint,.toast,.modal{display:none!important}#app{display:block!important}body{background:#fff;color:#000}.card,.tile{break-inside:avoid;border-color:#ccc}}
 @media(max-width:760px){#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.brand{width:100%}aside .sp,.me small{display:none}.content{padding:16px}.top{padding:10px 16px}.kv{grid-template-columns:1fr}}
 </style>
 </head>
@@ -713,16 +714,17 @@ let rep=null;
 ROUTES.raporty=()=>{
   need(can('reports'),'Brak dostępu do raportów.');
   const t=today();rep=rep||{from:iso(new Date(t.getFullYear(),t.getMonth(),1)),to:iso(new Date(t.getFullYear(),t.getMonth()+1,0)),cat:'',att:''};
-  const scope=myCases().filter(c=>(!rep.cat||c.category===rep.cat)&&(!rep.att||leadOf(c)?.userId===rep.att));
+  const scope=myCases().filter(c=>(!rep.cat||c.category===rep.cat)&&(!rep.att||leadOf(c)?.userId===rep.att)&&(!rep.st||c.status===rep.st));
   const inR=d=>d&&d>=rep.from&&d<=rep.to;
   const st=k=>scope.filter(c=>c.status===k).length,closedIn=scope.filter(c=>c.status==='closed'&&inR(c.closedAt)).length;
   const dls=DB.deadlines.filter(d=>!d.deleted&&scope.some(c=>c.id===d.caseId)&&inR(d.final)),ok=dls.filter(d=>d.status==='done'&&d.doneAt<=d.final).length,over=dls.filter(d=>dlStatus(d).k==='overdue'||(d.status==='done'&&d.doneAt>d.final)).length;
   const showFin=isAdmin()||can('initial_fee'),pays=showFin?DB.payments.filter(p=>scope.some(c=>c.id===p.caseId)&&inR(p.receivedOn)):[];
   const cats=[...DB.categories].sort((a,b)=>a.order-b.order),byCat=cats.map(c=>[c,scope.filter(x=>x.category===c.code).length]),mx=Math.max(1,...byCat.map(x=>x[1]));
   const W=560,Hh=190,bw=W/cats.length;
-  return `<div class="ph"><div><h1>Raporty i analizy</h1><p>${isAdmin()?'Całość kancelarii':ME.role==='att'?'Twoje sprawy i Twoje rozliczenia':'Raporty operacyjne wg uprawnień'}</p></div><button class="btn" onclick="exportCsv()">⬇ Eksport CSV</button></div>
+  return `<div class="ph"><div><h1>Raporty i analizy</h1><p>${isAdmin()?'Całość kancelarii':ME.role==='att'?'Twoje sprawy i Twoje rozliczenia':'Raporty operacyjne wg uprawnień'}</p></div><span class="noprint" style="display:flex;gap:8px"><button class="btn" onclick="exportCsv()">⬇ CSV</button><button class="btn" onclick="exportXlsx()">⬇ XLSX</button><button class="btn" onclick="exportPdf()">⬇ PDF</button></span></div>
   <div class="toolbar"><label class="fl">Od<input class="f" type="date" value="${rep.from}" onchange="rep.from=this.value;rerender()"></label><label class="fl">Do<input class="f" type="date" value="${rep.to}" onchange="rep.to=this.value;rerender()"></label>
     <label class="fl">Kategoria<select class="f" onchange="rep.cat=this.value;rerender()"><option value="">wszystkie</option>${cats.map(c=>`<option ${rep.cat===c.code?'selected':''}>${c.code}</option>`).join('')}</select></label>
+    <label class="fl">Status<select class="f" onchange="rep.st=this.value;rerender()"><option value="">wszystkie</option>${Object.entries(CASE_STATUS).map(([k,l])=>`<option value="${k}" ${rep.st===k?'selected':''}>${l}</option>`).join('')}</select></label>
     ${isAdmin()?`<label class="fl">Pełnomocnik<select class="f" onchange="rep.att=this.value;rerender()"><option value="">wszyscy</option>${DB.users.filter(u=>u.role==='att').map(u=>`<option value="${u.id}" ${rep.att===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>`:''}</div>
   <div class="grid g4" style="margin-bottom:14px"><div class="tile"><span>Liczba spraw</span><b>${scope.length}</b></div><div class="tile"><span>Zakończone w okresie</span><b>${closedIn}</b></div>
     <div class="tile"><span>Wpłaty klientów</span><b>${showFin?money(pays.reduce((s,p)=>s+p.amount,0)):'—'}</b>${showFin?'':'<small class="mut">brak uprawnienia</small>'}</div><div class="tile"><span>Terminy przekroczone</span><b class="${over?'st-overdue':''}">${over}</b></div></div>
@@ -730,7 +732,7 @@ ROUTES.raporty=()=>{
     <div class="card"><h3>Sprawy według kategorii</h3><svg class="svgchart" viewBox="0 0 ${W} ${Hh+30}" style="width:100%;height:auto">${byCat.map(([c,n],i)=>{const h=n/mx*(Hh-24);return `<rect x="${i*bw+bw*.18}" y="${Hh-h}" width="${bw*.64}" height="${h}" rx="5" fill="${c.color}"><title>${c.code}: ${n}</title></rect><text x="${i*bw+bw/2}" y="${Hh-h-6}" text-anchor="middle" style="fill:var(--txt);font-weight:700">${n}</text><text x="${i*bw+bw/2}" y="${Hh+18}" text-anchor="middle">${c.code}</text>`}).join('')}</svg></div>
     <div class="card"><h3>Status spraw</h3>${Object.entries(CASE_STATUS).map(([k,l])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span>${l}</span><b>${st(k)}</b></div>`).join('')}
       <h3 style="margin-top:16px">Terminy w okresie</h3><p>${dls.length} łącznie · <span class="st-done">${ok} w terminie</span> · <span class="st-overdue">${over} przekroczone</span> · ${dls.filter(d=>d.status!=='done'&&dlStatus(d).k!=='overdue').length} otwarte</p>
-      <p class="hint">${isAdmin()?'Raport finansowy kancelarii (alokacje): w module Finanse.':'Raport finansowy kancelarii: tylko Administrator.'}</p></div></div>`;
+      <p class="hint">${isAdmin()?'Raport finansowy kancelarii (alokacje): w module Finanse.':'Raport finansowy kancelarii: tylko Administrator.'}</p></div></div>${ME.role==='app'?ownReport(inR):''}`;
 };
 
 /* ===================== ANALIZA (kalkulatory na danych sprawy) ===================== */
@@ -1166,8 +1168,8 @@ function exportIcs(){
   sb.rpc('log_event',{p_action:'eksport.ics',p_target:'Terminy',p_details:`${ev.length} terminów`});
 }
 function exportCsv(){
-  const rows=[['Nr sprawy','Kategoria','Klient','Status','Pełnomocnik','Data przyjęcia','Wartość sporu']].concat(myCases().filter(c=>(!rep.cat||c.category===rep.cat)).map(c=>[c.number,c.category,clientName(c),CASE_STATUS[c.status],U(leadOf(c)?.userId).name,c.openedAt,c.value]));
-  const csv='﻿'+rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const rows=reportRows();
+  const csv='\ufeff'+rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`raport-spraw-${rep.from}_${rep.to}.csv`;a.click();
   sb.rpc('log_event',{p_action:'eksport.raport',p_target:'CSV',p_details:`${rows.length-1} spraw · ${rep.from}–${rep.to}`});toast('Eksport zapisany w audycie');
 }
@@ -1242,7 +1244,7 @@ function userModal(id){
   modal(`Konto — ${u.name}`,`<div class="form"><label>Imię i nazwisko<input class="f" name="name" required value="${esc(u.name||'')}"></label><label>E-mail<input class="f" value="${esc(u.email||'')}" disabled></label>
     <label>Rola<select class="f" name="role">${Object.entries(ROLES).map(([k,l])=>`<option value="${k}" ${u.role===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class="chk" style="align-self:end"><input type="checkbox" name="active" ${u.active!==false?'checked':''}>Konto aktywne</label></div><p class="hint">W systemie musi zostać co najmniej jeden aktywny Administrator (pilnuje tego baza). Zmiana trafia do audytu.</p>`,
-  {onOk:v=>act(async()=>chk(await sb.from('profiles').update({full_name:v.name.trim(),role:v.role,active:!!v.active}).eq('id',u.id)),'Zapisano konto')});
+  {onOk:async v=>{if((u.role==='admin'||v.role==='admin')&&(v.role!==u.role||!!v.active!==(u.active!==false))&&!await reauth())return false;return act(async()=>chk(await sb.from('profiles').update({full_name:v.name.trim(),role:v.role,active:!!v.active}).eq('id',u.id)),'Zapisano konto')}});
 }
 {const after=ROUTES.ustawienia.after;ROUTES.ustawienia.after=sub=>{after?.(sub);const f=$('#permForm');if(!f)return;
   f.onsubmit=async e=>{e.preventDefault();const u=U(selUser),v=Object.fromEntries(new FormData(f)),ov=DB.overrides[u.id]||{},ups=[],dels=[];
@@ -1250,6 +1252,7 @@ function userModal(id){
       if(nv===null&&o)dels.push(k);else if(nv!==null&&(!o||o.value!==nv||(o.until||null)!==until))ups.push({user_id:u.id,perm:k,level:nv,valid_until:until,reason:(v.reason||'').trim(),granted_by:ME.id,granted_at:new Date().toISOString()})});
     if(!ups.length&&!dels.length)return toast('Brak zmian');
     if((v.reason||'').trim().length<5)return toast('Podaj uzasadnienie zmiany',true);
+    if(u.role==='admin'&&!await reauth())return;
     actSafe(async()=>{if(ups.length)chk(await sb.from('permission_overrides').upsert(ups));for(const k of dels)chk(await sb.from('permission_overrides').delete().eq('user_id',u.id).eq('perm',k))},`Zapisano ${ups.length+dels.length} zmian — działa od razu`)}}}
 
 /* --- system i audyt (wersja na żywo) --- */
@@ -1271,6 +1274,74 @@ SET.system=()=>{
 async function verifyAuditLive(){try{const r=chk(await sb.rpc('verify_audit_chain'))[0];toast(r.ok?`Łańcuch skrótów poprawny (${r.checked} wpisów)`:`Wykryto manipulację przy wpisie #${r.broken_at}`,!r.ok)}catch(e){toast(errMsg(e),true)}}
 async function tryEditAudit(){const r=await sb.from('audit_log').update({details:'test'}).eq('id',1).select('id');toast(r.error?'Baza odrzuciła zmianę: '+errMsg(r.error):(r.data?.length?'UWAGA: zmiana przeszła!':'Baza odrzuciła zmianę — dziennik przyjmuje tylko dopisywanie'),!r.error&&r.data?.length)}
 
+/* =====================================================================
+   UZUPEŁNIENIA SPECYFIKACJI (migracja 004): reguły powiadomień, zastępstwa,
+   harmonogram przypomnień, potwierdzenie hasłem i 2FA, raporty, wylogowanie
+   po bezczynności, kolejność kategorii przeciąganiem
+   ===================================================================== */
+{const base=reload;reload=async()=>{await base();const [nr,us,rr]=await Promise.all(['notification_rules','user_substitutes','deadline_reminder_rules'].map(t=>fetchAll(t)));DB.notifRules=nr;DB.substitutes=us;DB.reminderRules=rr}}
+SET_TABS.splice(SET_TABS.findIndex(t=>t[0]==='system'),0,['powiadomienia','Powiadomienia',()=>isAdmin()],['przypomnienia','Przypomnienia o terminach',()=>isAdmin()]);
+const NR_ORDER=['case.new','lead.new','team.change','deadline.new','deadline.approaching','deadline.overdue','document.new','correction.request','correction.decided','payment.new','fee.success','fee.change','case.closed','perm.change'];
+const NR_GROUPS={admin:'Administrator',team:'Zespół sprawy',lead:'Pełnomocnik prowadzący',finance:'Uprawnieni do finansów',new_cases:'Obsługa zgłoszeń'};
+SET.powiadomienia=()=>{
+  const L=(DB.notifRules||[]).slice().sort((a,b)=>NR_ORDER.indexOf(a.event_type)-NR_ORDER.indexOf(b.event_type));
+  return `<div class="card"><h3>Reguły powiadomień</h3>${L.length?`<div class="tw"><table><tr><th>Zdarzenie</th><th>Odbiorcy z ról i przypisań</th><th>Dodatkowi odbiorcy</th><th>Kanały</th><th>Włączone</th></tr>
+    ${L.map(r=>`<tr><td><b>${esc(r.label)}</b><br><small class="mut">${esc(r.event_type)}</small></td><td class="small">${esc(r.default_recipients)}</td>
+      <td>${Object.entries(NR_GROUPS).map(([g,l])=>`<label class="chk" style="font-size:.8rem!important;margin:2px 0"><input type="checkbox" ${r.extra_groups.includes(g)?'checked':''} onchange="nrGroup('${r.event_type}','${g}',this.checked)">${l}</label>`).join('')}</td>
+      <td class="small">w CRM<br><span class="mut">e-mail / SMS: po wyborze dostawcy</span></td>
+      <td>${r.locked?'<span class="badge b-good" title="Powiadomień o terminach nie można wyłączyć">zawsze</span>':`<label class="chk"><input type="checkbox" ${r.enabled?'checked':''} onchange="nrToggle('${r.event_type}',this.checked)">tak</label>`}</td></tr>`).join('')}</table></div>`
+    :'<div class="note">Brak reguł w bazie — wdróż migrację 004.</div>'}
+    <p class="hint">Odbiorca dostaje tylko powiadomienia ze spraw, do których ma dostęp. Powiadomień o terminach nie można wyłączyć. Każda zmiana reguły trafia do audytu.</p></div>`;
+};
+const nrGroup=(ev,g,on)=>{const r=DB.notifRules.find(x=>x.event_type===ev),gs=on?[...new Set([...r.extra_groups,g])]:r.extra_groups.filter(x=>x!==g);actSafe(async()=>chk(await sb.from('notification_rules').update({extra_groups:gs}).eq('event_type',ev)),'Zapisano regułę')};
+const nrToggle=(ev,on)=>actSafe(async()=>chk(await sb.from('notification_rules').update({enabled:on}).eq('event_type',ev)),on?'Włączono powiadomienia':'Wyłączono powiadomienia');
+SET.przypomnienia=()=>`<div class="card" style="max-width:900px"><h3>Harmonogram przypomnień o terminach</h3>${(DB.reminderRules||[]).length?`<form id="rrForm"><div class="tw"><table><tr><th>Typ terminu</th><th>Przypomnienia (dni przed terminem)</th><th>Kontroler od</th><th>Pełnomocnik prowadzący od</th></tr>
+  ${['statutory','court','internal'].map(t=>{const r=DB.reminderRules.find(x=>x.type===t)||{offsets:[14,7,3,1,0],controller_from:7,lead_from:3};return `<tr><td><b>${DL_TYPES[t]}</b></td><td><input class="f" name="o_${t}" value="${r.offsets.join(', ')}" required></td><td><input class="f" type="number" min="0" max="60" name="c_${t}" value="${r.controller_from}" style="width:80px"> dni</td><td><input class="f" type="number" min="0" max="60" name="l_${t}" value="${r.lead_from}" style="width:80px"> dni</td></tr>`}).join('')}</table></div>
+  <div class="mfoot"><button class="btn pri">Zapisz harmonogram</button></div></form>`:'<div class="note">Brak harmonogramu w bazie — wdróż migrację 004.</div>'}
+  <p class="hint">Liczby oddzielone przecinkami, np. 14, 7, 3, 1, 0 (0 = dzień terminu). Odpowiedzialny dostaje każde przypomnienie, kontroler i pełnomocnik prowadzący — od wskazanego progu. Po terminie: codzienna eskalacja do odpowiedzialnego, prowadzącego i Administratora, aż do oznaczenia „Wykonano”. Zmiana działa od następnego sprawdzenia (co 15 min).</p></div>`;
+{const orig=SET.uzytkownicy;SET.uzytkownicy=()=>{const h=orig();if(!isAdmin()||!DB.substitutes)return h;const u=U(selUser),list=DB.substitutes.filter(x=>x.user_id===u.id||x.substitute_id===u.id).sort((a,b)=>b.date_from.localeCompare(a.date_from));
+  return h+`<div class="card" style="margin-top:14px"><h3>Zastępstwa · ${esc(u.name)} <button class="btn sm" onclick="subModal('${u.id}')">+ Zastępstwo</button></h3>
+    ${list.map(x=>`<div class="dl"><div class="when">${fD(x.date_from)} – ${fD(x.date_to)}</div><div class="what"><b>${x.user_id===u.id?'Zastępca: '+esc(U(x.substitute_id).name):'Zastępuje: '+esc(U(x.user_id).name)}</b><small>${esc(x.reason||'')}${x.date_to<iso(today())?' · zakończone':''}</small></div><button class="btn sm del" onclick="subDel('${x.id}')">✕</button></div>`).join('')||'<p class="mut small">Brak zastępstw.</p>'}
+    <p class="hint">W okresie zastępstwa powiadomienia tej osoby trafiają też do zastępcy (z dopiskiem „Zastępstwo za”). Zastępca otwiera sprawy tylko z własnym dostępem — w razie potrzeby dodaj go do zespołu sprawy.</p></div>`}}
+function subModal(uid){modal('Nowe zastępstwo · '+U(uid).name,`<div class="form"><label>Zastępca<select class="f" name="s" required>${DB.users.filter(x=>x.id!==uid&&x.active!==false&&x.role!=='tech').map(x=>`<option value="${x.id}">${esc(x.name)} (${esc(ROLES[x.role]||x.role)})</option>`).join('')}</select></label>
+  <label>Od<input class="f" type="date" name="f" value="${iso(today())}" required></label><label>Do<input class="f" type="date" name="t" required></label><label class="full">Powód<input class="f" name="r" placeholder="np. urlop"></label></div>`,
+  {onOk:v=>act(async()=>chk(await sb.from('user_substitutes').insert({user_id:uid,substitute_id:v.s,date_from:v.f,date_to:v.t,reason:v.r||''})),'Dodano zastępstwo')})}
+const subDel=id=>{if(confirm('Usunąć zastępstwo?'))actSafe(async()=>chk(await sb.from('user_substitutes').delete().eq('id',id)),'Usunięto zastępstwo')};
+/* ponowne potwierdzenie hasłem i 2FA (zmiana uprawnień Administratora; baza sprawdza świeżość) */
+function reauth(){return new Promise(res=>{modal('Potwierdź hasłem i 2FA',`<p class="small mut" style="margin-bottom:10px">Zmiana uprawnień Administratora wymaga ponownego potwierdzenia hasłem i kodem z aplikacji (ważne 5 minut).</p>
+  <div class="form"><label>Hasło<input class="f" type="password" name="pw" required autocomplete="current-password"></label><label>Kod 2FA<input class="f" name="code" required pattern="\\d{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label></div>`,
+  {ok:'Potwierdź',onOk:async v=>{const r=await sb.auth.signInWithPassword({email:ME.email,password:v.pw});if(r.error)throw new Error('Nieprawidłowe hasło');
+    const f=(await sb.auth.mfa.listFactors()).data,t=(f?.totp||[]).find(x=>x.status==='verified');if(!t)throw new Error('Brak skonfigurowanego 2FA');
+    const m=await sb.auth.mfa.challengeAndVerify({factorId:t.id,code:v.code});if(m.error)throw new Error('Nieprawidłowy kod 2FA');setTimeout(()=>res(true),30)}})})}
+/* raporty: wiersze, XLSX, PDF, widok aplikanta */
+function reportRows(){return [['Nr sprawy','Kategoria','Klient','Status','Pełnomocnik','Data przyjęcia','Wartość sporu']].concat(myCases().filter(c=>(!rep.cat||c.category===rep.cat)&&(!rep.att||leadOf(c)?.userId===rep.att)&&(!rep.st||c.status===rep.st)).map(c=>[c.number,c.category,clientName(c),CASE_STATUS[c.status],U(leadOf(c)?.userId).name,c.openedAt,c.value]))}
+async function exportXlsx(){try{
+  if(!window.XLSX)await new Promise((ok,no)=>{const x=document.createElement('script');x.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';x.onload=ok;x.onerror=()=>no(new Error('Nie udało się wczytać biblioteki XLSX'));document.head.appendChild(x)});
+  const rows=reportRows(),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Sprawy');
+  const dl=[['Termin','Sprawa','Typ','Data','Status']].concat(DB.deadlines.filter(d=>!d.deleted&&d.final>=rep.from&&d.final<=rep.to&&canCase(CASE(d.caseId))).map(d=>[d.title,CASE(d.caseId)?.number||'',DL_TYPES[d.type],d.final,dlStatus(d).label]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(dl),'Terminy');XLSX.writeFile(wb,`raport-${rep.from}_${rep.to}.xlsx`);
+  sb.rpc('log_event',{p_action:'eksport.raport',p_target:'XLSX',p_details:`${rows.length-1} spraw · ${rep.from}–${rep.to}`});toast('Eksport zapisany w audycie')}catch(e){toast(errMsg(e),true)}}
+function exportPdf(){sb.rpc('log_event',{p_action:'eksport.raport',p_target:'PDF',p_details:`${rep.from}–${rep.to}`});toast('W oknie drukowania wybierz „Zapisz jako PDF”');setTimeout(()=>window.print(),400)}
+function ownReport(inR){
+  const es=DB.entries.filter(e=>!e.deleted&&e.performedBy===ME.id&&inR(String(e.performedOn||e.created||'').slice(0,10))),ds=DB.deadlines.filter(d=>!d.deleted&&d.responsible===ME.id&&inR(d.final));
+  return `<div class="grid g2" style="margin-top:14px;align-items:start"><div class="card"><h3>Moje czynności w okresie (${es.length})</h3>${es.map(e=>`<div class="dl"><div class="when">${fD(e.performedOn||e.created)}</div><div class="what"><b>${esc(e.title)}</b><small>${esc(CASE(e.caseId)?.number||'')} · ${esc(e.kind||e.type||'')}</small></div></div>`).join('')||'<p class="mut small">brak</p>'}</div>
+    <div class="card"><h3>Moje terminy w okresie (${ds.length})</h3>${ds.map(dlRow).join('')||'<p class="mut small">brak</p>'}</div></div>`;
+}
+/* ustawienia: zapis harmonogramu, przeciąganie kategorii */
+{const after=ROUTES.ustawienia.after;ROUTES.ustawienia.after=sub=>{after?.(sub);
+  const f=$('#rrForm');if(f)f.onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(f)),ups=[];
+    for(const t of ['statutory','court','internal']){const o=[...new Set(String(v['o_'+t]).split(/[\s,;]+/).filter(Boolean).map(Number))].filter(n=>Number.isInteger(n)&&n>=0&&n<=60).sort((a,b)=>b-a);
+      if(!o.length)return toast('Podaj co najmniej jedno przypomnienie: '+DL_TYPES[t],true);ups.push([t,{offsets:o,controller_from:+v['c_'+t]||0,lead_from:+v['l_'+t]||0}])}
+    actSafe(async()=>{for(const [t,r] of ups)chk(await sb.from('deadline_reminder_rules').update(r).eq('type',t))},'Zapisano harmonogram')};
+  if((sub||'kategorie')==='kategorie'&&isAdmin())$$('.content tr').forEach(tr=>{const b=tr.querySelector('[onclick^="catModal(\'"]');if(!b)return;const code=b.getAttribute('onclick').match(/catModal\('([^']+)'/)[1];
+    tr.draggable=true;tr.style.cursor='grab';tr.title='Przeciągnij, aby zmienić kolejność';tr.ondragstart=e=>e.dataTransfer.setData('text/plain',code);tr.ondragover=e=>e.preventDefault();tr.ondrop=e=>{e.preventDefault();catDrop(e.dataTransfer.getData('text/plain'),code)}});
+}}
+function catDrop(from,to){if(!from||from===to)return;const cs=[...DB.categories].sort((a,b)=>a.order-b.order).map(c=>c.code),i=cs.indexOf(from),j=cs.indexOf(to);cs.splice(i,1);cs.splice(cs.indexOf(to)+(i<j?1:0),0,from);
+  actSafe(async()=>{for(const [k,code] of cs.entries())if(CAT(code).order!==k+1)chk(await sb.from('case_categories').update({sort_order:k+1}).eq('code',code))},'Zmieniono kolejność kategorii')}
+/* wylogowanie po bezczynności (§12: wygasanie sesji) */
+const IDLE_MIN=30;let idleAt=Date.now();['mousemove','keydown','click','scroll','touchstart'].forEach(ev=>addEventListener(ev,()=>{idleAt=Date.now()},{passive:true}));
+setInterval(()=>{if(ME&&Date.now()-idleAt>IDLE_MIN*60000){idleAt=Date.now();$('#logout').click();setTimeout(()=>toast(`Wylogowano po ${IDLE_MIN} min bezczynności`),500)}},30000);
+
 /* --- start --- */
 let startedOnce=false;
 sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){$('#login').style.display='grid';$('#app').style.display='none';loginView('newpass')}});
@@ -1279,7 +1350,7 @@ addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skry
   const {data:{session}}=await sb.auth.getSession();
   if(session)await afterSignIn();else loginView('password');
 });
-setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();renderShell()}}},30000); // liczniki „na żywo”
+setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();if(ME&&DB)renderShell()}}},30000); // liczniki „na żywo”
 
 </script>
 </body>

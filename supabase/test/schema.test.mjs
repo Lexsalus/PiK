@@ -24,8 +24,8 @@ const U={admin:'11111111-1111-1111-1111-111111111111',jan:'22222222-2222-2222-22
 for(const [k,id] of Object.entries(U))await db.query(`insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)`,[id,k+'@k.test',{full_name:k}]);
 R((await db.query('select count(*)::int n from public.profiles where not active')).rows[0].n===6,'trigger: 6 profili, nieaktywne do zatwierdzenia');
 await db.exec(`update public.profiles set active=true, role=case email when 'admin@k.test' then 'admin' when 'jan@k.test' then 'att' when 'piotr@k.test' then 'att' when 'anna@k.test' then 'app' when 'kasia@k.test' then 'office' else 'tech' end`);
-let AAL='aal2';
-const as=async(who,sql,params=[])=>{await db.exec(`set role ${who==='anon'?'anon':'authenticated'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,false), set_config('request.jwt.claims',$2,false)`,[who==='anon'?'':U[who],JSON.stringify({aal:AAL})]);try{return await db.query(sql,params)}finally{await db.exec('reset role')}};
+let AAL='aal2',AMR=[];
+const as=async(who,sql,params=[])=>{await db.exec(`set role ${who==='anon'?'anon':'authenticated'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,false), set_config('request.jwt.claims',$2,false)`,[who==='anon'?'':U[who],JSON.stringify({aal:AAL,amr:AMR})]);try{return await db.query(sql,params)}finally{await db.exec('reset role')}};
 const fails=async(who,sql,params=[])=>{try{await as(who,sql,params);return null}catch(e){return e.message}};
 // --- sprawy i numeracja
 const c1=(await as('admin',`select public.create_case('SKD','Jan','Kowalski',$1,'80010112345','123','j@k.pl','Warszawa',250000,5000,10) id`,[U.jan])).rows[0].id;
@@ -156,4 +156,52 @@ R((await as('jan',`select * from storage.objects`)).rows.length===0,'pełnomocni
 R((await as('piotr',`select * from storage.objects`)).rows.length===1,'pełnomocnik prowadzący widzi plik w aktach');
 R(!!await fails('anna',`insert into storage.objects(bucket_id,name) values('akta','zla-sciezka/plik.pdf')`),'zła ścieżka pliku odrzucona');
 await fails('admin',`delete from storage.objects`);R((await db.query('select count(*)::int n from storage.objects')).rows[0].n===1,'pliki w aktach bez kasowania (DELETE nic nie usuwa)');
+
+// --- migracja 004: uzupełnienia specyfikacji
+const N=async(who,ev)=>(await as(who,`select * from public.notifications where event_type=$1`,[ev])).rows;
+db.exec("delete from public.notifications");
+const c3=(await as('admin',`select public.create_case('CIV','Ola','Nowa',$1) id`,[U.jan])).rows[0].id;
+R((await N('admin','case.new')).length===1&&(await N('jan','case.new')).length===1,'nowa sprawa → Administrator i zespół sprawy');
+await as('anon',`insert into public.leads(category,calc,client_name,phone,consent) values('SKD','{}','Lena Test','500100200',true)`);
+R((await N('kasia','lead.new')).length===1&&(await N('anna','lead.new')).length===0,'zgłoszenie ze strony → Biuro (Nowe sprawy), nie aplikant');
+const dc=(await as('jan',`insert into public.documents(case_id,name) values($1,'pozew.pdf') returning id`,[c3])).rows[0].id;
+await as('jan',`insert into public.document_versions(document_id,version,storage_path,size_bytes,sha256) values($1,1,'x',1,repeat('a',64))`,[dc]);
+R((await N('jan','document.new')).length===1,'dodanie dokumentu → zespół sprawy');
+await as('admin',`update public.cases set status='closed',closed_at=current_date where id=$1`,[c3]);
+R((await N('jan','case.closed')).length===1&&(await N('admin','case.closed')).length===1,'zakończenie sprawy → prowadzący i Administrator');
+await as('admin',`update public.attorney_fees set sf_status='spełniony' where case_id=$1`,[c3]);
+R((await N('jan','fee.success')).length===1&&(await N('admin','fee.success')).length===1&&(await N('anna','fee.success')).length===0,'success fee → pełnomocnik i Administrator, nie aplikant');
+// reguły: wyłączenie i blokada terminów
+await as('admin',`update public.notification_rules set enabled=false where event_type='document.new'`);
+const dc2=(await as('jan',`insert into public.documents(case_id,name) values($1,'b.pdf') returning id`,[c3])).rows[0].id;
+await as('jan',`insert into public.document_versions(document_id,version,storage_path,size_bytes,sha256) values($1,1,'y',1,repeat('b',64))`,[dc2]).catch(()=>{});
+R((await N('jan','document.new')).length===1,'wyłączona reguła → brak nowych powiadomień');
+R(!!await fails('admin',`update public.notification_rules set enabled=false where event_type='deadline.overdue'`),'powiadomień o terminach nie można wyłączyć');
+R(!!await fails('jan',`update public.notification_rules set enabled=true where event_type='document.new'`)||(await db.query(`select enabled from public.notification_rules where event_type='document.new'`)).rows[0].enabled===false,'reguły zmienia tylko Administrator');
+// zastępstwo
+db.exec("delete from public.notifications");
+await as('admin',`insert into public.user_substitutes(user_id,substitute_id,date_from,date_to,reason) values($1,$2,current_date,current_date+5,'urlop')`,[U.jan,U.piotr]);
+R(!!await fails('jan',`insert into public.user_substitutes(user_id,substitute_id,date_from,date_to) values($1,$2,current_date,current_date)`,[U.jan,U.anna]),'zastępstwo ustawia tylko Administrator');
+await as('admin',`insert into public.deadlines(case_id,type,title,final_due_date,responsible_user_id) values($1,'internal','Pismo z zastępstwem',current_date+3,$2)`,[c1,U.jan]);
+await db.query('select public.run_deadline_reminders()');
+const sub=(await as('piotr',`select body from public.notifications where event_type='deadline.approaching'`)).rows;
+R(sub.length>=1&&sub[0].body.startsWith('Zastępstwo za'),'przypomnienie trafia też do zastępcy (z dopiskiem)');
+// harmonogram per typ
+db.exec("delete from public.notifications");
+await as('admin',`update public.deadline_reminder_rules set offsets='{2}' where type='internal'`);
+await db.query('select public.run_deadline_reminders()');
+R((await as('jan',`select * from public.notifications where event_type='deadline.approaching' and title like '%Pismo z zastępstwem%'`)).rows.length===0,'harmonogram per typ: T-2 dla wewnętrznych → przy 3 dniach brak przypomnienia');
+await as('admin',`update public.deadline_reminder_rules set offsets='{14,7,3,1,0}' where type='internal'`);
+// uprawnienia Administratora: świeże hasło + 2FA
+R(!!await fails('admin',`insert into public.permission_overrides(user_id,perm,level,reason) values($1,'audit',0,'test zmiany admina')`,[U.admin]),'zmiana uprawnień Administratora bez ponownego potwierdzenia → odmowa');
+R(!!await fails('admin',`update public.profiles set role='admin' where id=$1`,[U.kasia]),'nadanie roli Administratora bez potwierdzenia → odmowa');
+const now=Math.floor(Date.now()/1000);AMR=[{method:'password',timestamp:now},{method:'totp',timestamp:now}];
+R(!await fails('admin',`update public.profiles set role='admin' where id=$1`,[U.kasia]),'po potwierdzeniu hasłem i 2FA → zmiana przechodzi');
+await as('admin',`update public.profiles set role='office' where id=$1`,[U.kasia]);
+AMR=[{method:'password',timestamp:now-900},{method:'totp',timestamp:now-900}];
+R(!!await fails('admin',`update public.profiles set role='admin' where id=$1`,[U.kasia]),'potwierdzenie starsze niż 5 min → odmowa');
+AMR=[];
+R(!await fails('admin',`insert into public.permission_overrides(user_id,perm,level,reason) values($1,'initial_fee',1,'zwykła zmiana')`,[U.piotr]),'uprawnienia innych ról bez ponownego potwierdzenia');
+// raporty aplikanta
+R((await db.query(`select level from public.role_permissions where role='app' and perm='reports'`)).rows[0]?.level===1,'aplikant ma raporty (zakres: własne dane)');
 

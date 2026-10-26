@@ -38,7 +38,16 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 | 12 | Bezpieczeństwo | 2FA egzekwowane w bazie, dziennik audytu tylko do dopisywania z łańcuchem SHA-256 i weryfikacją, dostęp awaryjny |
 | + | Analiza | kalkulatory ze strony na danych sprawy, wynik zgłoszenia klienta, zapis jako czynność |
 
-**Testy:** reguły bazy 72/72 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 36/36 (`supabase/test/e2e/`).
+## Uzupełnienia specyfikacji (migracja 004, 26.10.2026)
+
+- **Reguły powiadomień** (Ustawienia → Powiadomienia): dla każdego zdarzenia dodatkowe grupy odbiorców (Administrator, zespół sprawy, prowadzący, uprawnieni do finansów, obsługa zgłoszeń) i włączenie/wyłączenie; powiadomień o terminach nie można wyłączyć. Nowe zdarzenia: nowa sprawa, zgłoszenie ze strony, dodanie dokumentu, zakończenie sprawy, naliczenie success fee.
+- **Zastępstwa** (Ustawienia → Użytkownicy): w okresie zastępstwa powiadomienia trafiają też do zastępcy (z dopiskiem); sprawę zastępca otwiera tylko z własnym dostępem.
+- **Harmonogram przypomnień** (Ustawienia → Przypomnienia o terminach): dni przed terminem oraz progi dla kontrolera i prowadzącego — osobno dla każdego typu terminu.
+- **Zmiana uprawnień Administratora** wymaga ponownego podania hasła i kodu 2FA (ważne 5 min) — sprawdza baza.
+- **Raporty:** filtr statusu, eksport CSV / XLSX / PDF (drukowanie do pliku), każdy w audycie; aplikant widzi własne czynności i terminy.
+- **Wylogowanie po 30 min bezczynności**; kolejność kategorii także przeciąganiem.
+
+**Testy:** reguły bazy 90/90 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 51/51 (`supabase/test/e2e/`).
 
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
