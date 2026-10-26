@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.10.0] — 2026-10-26
+- PiK na własnej bazie Supabase (projekt Piel, eamobnucjsavahpxilrt): schemat + migracje 002–003 wdrożone, CRM i formularz strony przepięte; z CRM usunięta rola Pielęgniarka, migracja 004 i jej testy (przeniesione do Lexsalus/Pielegniarki); dokumentacja
+
 ## [1.9.3] — 2026-10-26
 - Zakładka Pielęgniarki zdjęta z CRM — panel to osobna aplikacja (Lexsalus/Pielegniarki); w CRM link do panelu, przekierowanie roli Pielęgniarka; dokumentacja
 

@@ -20,14 +20,13 @@ alter table storage.objects enable row level security; grant select, insert on s
 await db.exec(fs.readFileSync(ROOT+'schema.sql','utf8'));
 for(const m of fs.readdirSync(ROOT+'migrations').sort())await db.exec(fs.readFileSync(ROOT+'migrations/'+m,'utf8'));
 const USERS={'admin@k.test':['11111111-1111-1111-1111-111111111111','admin','Admin'],'jan@k.test':['22222222-2222-2222-2222-222222222222','att','Jan Nowak'],'piotr@k.test':['33333333-3333-3333-3333-333333333333','att','Piotr Wiśniewski'],
- 'anna@k.test':['44444444-4444-4444-4444-444444444444','app','Anna Kowalska'],'kasia@k.test':['55555555-5555-5555-5555-555555555555','office','Katarzyna Lis'],'tech@k.test':['66666666-6666-6666-6666-666666666666','tech','Tomasz Kamiński'],'nowy@k.test':['77777777-7777-7777-7777-777777777777',null,''],
- 'nowak@k.test':['aaaaaaaa-0000-0000-0000-000000000001','nurse','Anna Nowak'],'kowal@k.test':['aaaaaaaa-0000-0000-0000-000000000002','nurse','Anna Kowalska']};
+ 'anna@k.test':['44444444-4444-4444-4444-444444444444','app','Anna Kowalska'],'kasia@k.test':['55555555-5555-5555-5555-555555555555','office','Katarzyna Lis'],'tech@k.test':['66666666-6666-6666-6666-666666666666','tech','Tomasz Kamiński'],'nowy@k.test':['77777777-7777-7777-7777-777777777777',null,'']};
 for(const [e,[id]] of Object.entries(USERS))await db.query('insert into auth.users(id,email) values($1,$2)',[id,e]);
 for(const [e,[id,role,name]] of Object.entries(USERS))if(role)await db.query('update public.profiles set role=$2,active=true,full_name=$3 where id=$1',[id,role,name]);
 // zgłoszenie ze strony (anon)
 const asRole=async(sub,aal,fn)=>{await db.exec('begin');try{await db.exec(`set local role ${sub?'authenticated':'anon'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,true),set_config('request.jwt.claims',$2,true)`,[sub||'',JSON.stringify({aal})]);const r=await fn();await db.exec('commit');return r}catch(e){await db.exec('rollback');throw e}};
 await asRole(null,'aal1',()=>db.query(`insert into public.leads(category,calc,client_name,phone,email,message,consent) values('SKD',$1,'Zofia Testowa','500100200','z@test.pl','Kredyt gotówkowy z 2023',true)`,[JSON.stringify({name:'Sankcja kredytu darmowego',inputs:[{label:'Kwota wypłacona do ręki',value:30000,unit:'zł'}],outputs:[{label:'Szacowana korzyść',value:15894,unit:'zł',main:true}]})]));
-const PK={permission_overrides:['user_id','perm'],currencies:['code'],case_categories:['code'],assignment_pool:['rule_id','nurse_id'],nurse_service_links:['nurse_id','service_id'],nurse_settings:['id']};
+const PK={permission_overrides:['user_id','perm'],currencies:['code'],case_categories:['code']};
 const ident=s=>{if(!/^[a-z_][a-z0-9_]*$/.test(s))throw new Error('bad ident '+s);return s};
 async function handle(q){
   return asRole(q.sub,q.aal||'aal1',async()=>{

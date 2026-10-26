@@ -1,21 +1,19 @@
 # Wdrożenie bazy CRM w Supabase
 
-Projekt: **ixlhfhzgzotukstoezcj** · adres: `https://ixlhfhzgzotukstoezcj.supabase.co`
+Projekt: **Piel** `eamobnucjsavahpxilrt` (UE, Irlandia) · adres: `https://eamobnucjsavahpxilrt.supabase.co`
+
+> Od 26.10.2026 PiK (strona + CRM kancelarii) ma własną bazę. Poprzedni projekt **CRMKP** (`ixlhfhzgzotukstoezcj`) należy teraz do panelu pielęgniarek (repo `Lexsalus/Pielegniarki`).
 
 Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Razem z migracjami przechodzi 74 testy reguł na PostgreSQL (`supabase/test/schema.test.mjs`).
 
-## Stan wdrożenia (26.10.2026) — wszystko wdrożone
+## Stan wdrożenia (26.10.2026, nowy projekt `eamobnucjsavahpxilrt`)
 
-- ✅ Krok 1 — schemat uruchomiony (29 tabel z RLS, 60 reguł dostępu); sprawdzono z zewnątrz: anonimowy może tylko dodać zgłoszenie
-- ✅ Krok 2 — samodzielna rejestracja wyłączona (sprawdzone: „Signups not allowed”); adres linków w e-mailach: `https://lexsalus.github.io/PiK/crm.html`; 2FA (TOTP) włączone w projekcie
-- ✅ Krok 3 — Administrator: `biuro@lekarzeiterapeuci.pl` (nazwa wyświetlana „Admin”), aktywny, wpis w audycie
+- ✅ Krok 1 — schemat + migracje 002–003 (29 tabel z RLS, 60 polityk, 8 kategorii, magazyn `akta`)
+- ✅ Krok 2 — rejestracja wyłączona; adres logowania i przekierowań: `https://lexsalus.github.io/PiK/crm.html` (`/PiK/**`); 2FA (TOTP) włączone
+- ⏳ Krok 3 — pierwszy Administrator: konto w Authentication → Users, potem aktywacja (SQL poniżej)
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
-- ✅ Krok 5 — formularz na stronie zapisuje zgłoszenia w tabeli `leads`
-- ✅ Migracja `002_crm_live.sql` — 2FA egzekwowane w bazie (aal2 dla admin/att/tech), magazyn akt `akta` z regułami per sprawa
-- ✅ Migracja `003_audit_events.sql` — audyt eksportów, pobrań, logowań; audyt zmian kategorii/statusu sprawy
-- ✅ Migracja `004_pielegniarki.sql` — zakładka Pielęgniarki (26.10.2026: 15 tabel z RLS, uprawnienie `nurses`, magazyn `pielegniarki`); pg_cron: zadanie `zlecenia-limit-czasu` co minutę
-- ⏳ Pierwsze logowanie Administratora do CRM i konfiguracja 2FA — do zrobienia przez Administratora
-- ⏳ Po wdrożeniu: usunąć token API (Supabase → Account → Access Tokens) i pliki SQL / `tok.txt` z pulpitu
+- ✅ Krok 5 — formularz na stronie i CRM wskazują nowy projekt (`data.json`, `crm.html`)
+- ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).
 
@@ -23,23 +21,9 @@ Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie
 
 Nowe zmiany bazy: plik `supabase/migrations/00N_opis.sql` (uruchamiany raz w SQL Editor). Świeża instalacja: `schema.sql`, potem wszystkie migracje po kolei.
 
-## Migracja 004 — Pielęgniarki (wdrożona 26.10.2026; kroki dla świeżej instalacji)
-
-1. SQL Editor → wklej całą zawartość `supabase/migrations/004_pielegniarki.sql` → **Run** (raz).
-2. Limit czasu na przyjęcie zlecenia (co minutę, wymaga pg_cron):
-
-```sql
-select cron.schedule('zlecenia-limit-czasu','* * * * *','select public.run_order_timeouts()');
-```
-
-3. CRM → Pielęgniarki → Ustawienia: usługi, cennik stref miasta, granice dzielnic (import z OpenStreetMap).
-4. Konto pielęgniarki: Authentication → Users → Add user, potem CRM → Ustawienia → Użytkownicy → rola „Pielęgniarka” + aktywacja, a w karcie pielęgniarki → Dane i usługi → Konto.
-
-Bez kroku 2 CRM i tak przekazuje przeterminowane propozycje dalej przy otwarciu zakładki, ale bez pg_cron nie dzieje się to samo z siebie.
-
 ## Krok 1 — uruchom schemat (raz)
 
-1. Otwórz **SQL Editor**: https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/sql/new
+1. Otwórz **SQL Editor**: https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/sql/new
 2. Wklej całą zawartość pliku `supabase/schema.sql` → **Run**.
 3. Na końcu powinno pojawić się „Success. No rows returned”.
 
@@ -54,7 +38,7 @@ Konta zakłada wyłącznie Administrator.
 
 ## Krok 3 — pierwszy Administrator
 
-1. **Authentication → Users → Add user → Create new user**: https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/auth/users
+1. **Authentication → Users → Add user → Create new user**: https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/auth/users
    Wpisz swój e-mail i hasło, zaznacz *Auto Confirm User*.
 2. W SQL Editor uruchom (podmień e-mail i imię):
 
@@ -67,7 +51,7 @@ Kolejnych pracowników dodajesz tak samo (Add user), a rolę ustawiasz w CRM →
 
 ## Krok 4 — przypomnienia o terminach co 15 minut
 
-1. **Database → Extensions** → wyszukaj **pg_cron** → włącz: https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/database/extensions
+1. **Database → Extensions** → wyszukaj **pg_cron** → włącz: https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/database/extensions
 2. W SQL Editor:
 
 ```sql

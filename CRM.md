@@ -17,7 +17,6 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 | Aplikant | przypisane sprawy bez finansów; nie usuwa wpisów |
 | Biuro | zgłoszenia ze strony („Nowe sprawy”), zakładanie spraw, przypisane sprawy |
 | Obsługa techniczna | tylko Ustawienia → System; wgląd w sprawy wyłącznie w dostępie awaryjnym (60 min, zgoda Administratora) |
-| Pielęgniarka | konto w tej samej bazie; pracuje w osobnym panelu pielęgniarek (po zalogowaniu do CRM przekierowanie); bez spraw kancelarii |
 
 **Wszystkie operacje idą przez bazę** — to ona decyduje, co wolno. Komunikat błędu w CRM to odpowiedź bazy (np. „Usuwa tylko Administrator”).
 
@@ -38,13 +37,8 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 | 11 | Raporty | KPI, sprawy wg kategorii, statusy, terminy; eksport CSV zapisywany w audycie |
 | 12 | Bezpieczeństwo | 2FA egzekwowane w bazie, dziennik audytu tylko do dopisywania z łańcuchem SHA-256 i weryfikacją, dostęp awaryjny |
 | + | Analiza | kalkulatory ze strony na danych sprawy, wynik zgłoszenia klienta, zapis jako czynność |
-| + | Pielęgniarki | osobna aplikacja (https://lexsalus.github.io/Pielegniarki/) — opis niżej |
 
-## Pielęgniarki — osobna aplikacja
-
-Panel pielęgniarek (projekt 23.10.2026) jest osobną aplikacją: repo `Lexsalus/Pielegniarki`, adres https://lexsalus.github.io/Pielegniarki/. Korzysta z tej samej bazy CRMKP (migracja 004) i tych samych kont. W CRM zostają: rola „Pielęgniarka” i uprawnienie „Pielęgniarki” (Ustawienia → Użytkownicy) oraz link „Panel pielęgniarek” w menu dla osób z tym uprawnieniem. Pielęgniarka logująca się do CRM jest przekierowana do panelu; powiadomienia o zleceniach otwierają panel.
-
-**Testy:** reguły bazy 120/120 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 36/36 (`supabase/test/e2e/`); panel pielęgniarek: `run_pielegniarki.py` (repo Pielegniarki serwowane na porcie 8766).
+**Testy:** reguły bazy 72/72 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 36/36 (`supabase/test/e2e/`).
 
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
