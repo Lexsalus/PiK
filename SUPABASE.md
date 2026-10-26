@@ -2,9 +2,9 @@
 
 Projekt: **ixlhfhzgzotukstoezcj** · adres: `https://ixlhfhzgzotukstoezcj.supabase.co`
 
-Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Przeszedł 62 testy kryteriów akceptacji na PostgreSQL (`supabase/test/schema.test.mjs`).
+Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Razem z migracjami przechodzi 74 testy reguł na PostgreSQL (`supabase/test/schema.test.mjs`).
 
-## Stan wdrożenia (26.10.2026)
+## Stan wdrożenia (26.10.2026) — wszystko wdrożone
 
 - ✅ Krok 1 — schemat uruchomiony (29 tabel z RLS, 60 reguł dostępu); sprawdzono z zewnątrz: anonimowy może tylko dodać zgłoszenie
 - ✅ Krok 2 — samodzielna rejestracja wyłączona (sprawdzone: „Signups not allowed”); adres linków w e-mailach: `https://lexsalus.github.io/PiK/crm.html`; 2FA (TOTP) włączone w projekcie
@@ -13,6 +13,10 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Krok 5 — formularz na stronie zapisuje zgłoszenia w tabeli `leads`
 - ✅ Migracja `002_crm_live.sql` — 2FA egzekwowane w bazie (aal2 dla admin/att/tech), magazyn akt `akta` z regułami per sprawa
 - ✅ Migracja `003_audit_events.sql` — audyt eksportów, pobrań, logowań; audyt zmian kategorii/statusu sprawy
+- ⏳ Pierwsze logowanie Administratora do CRM i konfiguracja 2FA — do zrobienia przez Administratora
+- ⏳ Po wdrożeniu: usunąć token API (Supabase → Account → Access Tokens) i pliki SQL / `tok.txt` z pulpitu
+
+Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).
 
 ## Migracje
 
@@ -44,7 +48,7 @@ update public.profiles set role='admin', active=true, full_name='Imię Nazwisko'
 where email='twoj@email.pl';
 ```
 
-Kolejnych pracowników dodajesz tak samo (Add user), a rolę ustawiasz w CRM → Ustawienia → Użytkownicy (po podłączeniu CRM do bazy) albo poleceniem `update` jak wyżej (`role` = `att` pełnomocnik, `app` aplikant, `office` biuro, `tech` obsługa techniczna).
+Kolejnych pracowników dodajesz tak samo (Add user), a rolę ustawiasz w CRM → Ustawienia → Użytkownicy albo poleceniem `update` jak wyżej (`role` = `att` pełnomocnik, `app` aplikant, `office` biuro, `tech` obsługa techniczna).
 
 ## Krok 4 — przypomnienia o terminach co 15 minut
 
@@ -57,8 +61,8 @@ select cron.schedule('przypomnienia-terminy','*/15 * * * *','select public.run_d
 
 ## Krok 5 — formularz na stronie zapisuje zgłoszenia w bazie
 
-Panel treści (`admin.html`) → **Ustawienia → Formularz zgłoszenia sprawy** → *Gdzie trafia zgłoszenie*: **Baza CRM (Supabase)**.
-Adres i klucz publiczny są już wpisane. Potem **Publikacja → Pobierz data.json** i wrzuć do repo (albo napisz mi, że krok 1 jest zrobiony — przełączę i wyślę).
+Panel treści (`admin.html`) → **Ustawienia → Formularz zgłoszenia sprawy** → *Gdzie trafia zgłoszenie*: **Baza CRM (Supabase)** (ustawione domyślnie) + adres projektu i klucz publiczny. Po zmianie: **Publikacja → Pobierz data.json** i wrzuć do repo.
+Przy nowym projekcie Supabase podmień też adres i klucz publiczny w `crm.html` (stałe na początku skryptu).
 
 Sprawdzenie: wyślij zgłoszenie testowe ze strony → **Table Editor → leads** — powinien pojawić się wiersz.
 

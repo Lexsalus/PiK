@@ -9,9 +9,9 @@
 | CRM kancelarii | `https://lexsalus.github.io/PiK/crm.html` — opis w `CRM.md` |
 | Podgląd szkicu | `https://lexsalus.github.io/PiK/index.html?preview` |
 
-Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi też przycisk **⚙️ Panel** w prawym górnym rogu strony.
+Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi przycisk **⚙️ Panel** w prawym górnym rogu strony i link w stopce. Panel ma też link do CRM.
 
-## 2. Pierwsze logowanie
+## 2. Pierwsze logowanie do panelu treści
 
 1. Otwórz panel i zaloguj się hasłem `admin`.
 2. **Ustawienia → Hasło administratora** — ustaw nowe hasło.
@@ -97,7 +97,9 @@ Pod wynikiem jest przycisk **Chcę bezpłatną analizę mojej sprawy** → formu
 
 **Panel → Ustawienia → Formularz zgłoszenia sprawy:**
 - **E-mail kancelarii** — otwiera program pocztowy klienta z gotową wiadomością; trzeba podać adres kancelarii,
-- **Baza CRM** (domyślnie) — zgłoszenie trafia od razu do CRM, zakładka „Nowe sprawy”.
+- **Baza CRM** (domyślnie) — zgłoszenie trafia od razu do CRM, zakładka „Nowe sprawy”. Wymaga adresu projektu Supabase i klucza publicznego `sb_publishable_…` (już wpisane); panel nie przyjmie klucza `sb_secret_…`.
+
+Przycisk zgłoszenia pokazuje się tylko, gdy wybrany sposób jest kompletnie skonfigurowany.
 
 **Panel → Kalkulatory:** pole *Gdzie na stronie* (Co mi się należy / Kalkulatory prawne), *Kategoria sprawy w CRM* i *Uwaga pod polami* (zastrzeżenia — **teksty uwag zweryfikuje prawnik przed startem**).
 
@@ -226,3 +228,23 @@ py bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe
 | Nowe hasło / SEO nie działa na innym komputerze | szkic jest tylko w Twojej przeglądarce — wyeksportuj i opublikuj `data.json` |
 | Tłumaczenie Google nie przełącza się | wyczyść cookies strony lub wybierz PL i ponownie UA/EN |
 | Wynik kalkulatora „—” | błąd we wzorze lub dzielenie przez zero — sprawdź test w panelu |
+| Brak przycisku „Chcę bezpłatną analizę” | panel → Formularz zgłoszenia: uzupełnij adres i klucz Supabase albo e-mail kancelarii |
+| CRM: „Konto nieaktywne” | Administrator aktywuje konto w CRM → Ustawienia → Użytkownicy |
+| CRM: zgubiony telefon z kodami 2FA | Administrator usuwa czynnik w Supabase → Authentication → Users → użytkownik → MFA; przy następnym logowaniu nowy kod QR |
+| CRM: nie pamiętam hasła | „Nie pamiętam hasła” na ekranie logowania → link e-mailem |
+
+## 13. CRM kancelarii
+
+Zaplecze dla adwokatów i pracowników: `https://lexsalus.github.io/PiK/crm.html`. Pełny opis ról i modułów: `CRM.md`; baza: `SUPABASE.md`.
+
+**Pierwsze logowanie (Administrator `biuro@lekarzeiterapeuci.pl`):**
+1. Wpisz e-mail i hasło ustawione w Supabase.
+2. Zeskanuj kod QR aplikacją (Google / Microsoft Authenticator) i wpisz 6-cyfrowy kod.
+3. Kolejne logowania: hasło + kod z aplikacji.
+
+**Nowy pracownik:**
+1. Supabase → Authentication → Users → **Add user** (e-mail, hasło, *Auto Confirm User*).
+2. CRM → Ustawienia → Użytkownicy → nadaj rolę i aktywuj.
+3. Pełnomocnik i obsługa techniczna konfigurują 2FA przy pierwszym logowaniu.
+
+**Zmiany w CRM i bazie** idą tak jak reszta: commit + podbicie wersji. Zmiana bazy = nowy plik `supabase/migrations/00N_*.sql`, testy (`supabase/test/`), potem uruchomienie w Supabase SQL Editor.
