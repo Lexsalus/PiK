@@ -11,7 +11,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Panel treści strony | `admin.html` (przycisk ⚙️ Panel na stronie + link w stopce) | działa (dane w `data.json`); logowanie tylko hasłem w przeglądarce, domyślnie `admin` — zmienić |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **CRMKP** `ixlhfhzgzotukstoezcj`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone; **004 (Pielęgniarki) czeka na wdrożenie** |
+| Baza | Supabase, projekt **CRMKP** `ixlhfhzgzotukstoezcj`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–004 wdrożone (004 Pielęgniarki: 26.10.2026, + pg_cron `zlecenia-limit-czasu`) |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
@@ -52,7 +52,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Otwarte sprawy
 
-- **Wdrożenie migracji 004 (Pielęgniarki)** — po zgodzie właściciela: SQL Editor + zadanie pg_cron `zlecenia-limit-czasu` (SUPABASE.md). Do tego czasu zakładka jest ukryta (brak uprawnienia `nurses` w bazie).
+- **Pielęgniarki — start:** CRM → Pielęgniarki → Ustawienia: usługi, cennik stref miasta, import granic dzielnic; potem pielęgniarki, obszary, wzorce, reguły przydziału.
 - **Pielęgniarki — przyjęte rozstrzygnięcia tam, gdzie projekt milczy** (do potwierdzenia albo zmiany): brak reguły przydziału dla miasta/dzielnicy → zlecenie do dyspozytora; cena dojazdu dla klienta ustalana przy zakładaniu zlecenia = najniższa strefa wśród pielęgniarek dostępnych w wybranym terminie (wypłata i strefa zapisywane dla osoby, która dostanie propozycję); zgłoszenie odrzucone przez Administratora wraca do szkicu z uwagą; wyjątki w terminarzu (urlop) pielęgniarka może zgłaszać od dziś, wzorzec — od następnego tygodnia; pielęgniarka widzi dane klienta dopiero po przyjęciu zlecenia (wcześniej adres i termin).
 - **Pielęgniarki — propozycje (niewdrożone, decyzja właściciela):** formularz „Zamów badania w domu” dla klientów (strona 8 projektu; teraz zlecenia zakłada Administrator/dyspozytor w CRM); 2FA obowiązkowe dla roli Pielęgniarka (dane zdrowotne, RODO); anulowanie zlecenia (brak takiego statusu w projekcie); powiadomienia SMS/e-mail o propozycji zlecenia.
 
@@ -61,7 +61,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 ## Do zrobienia po stronie właściciela
 
 - Pierwsze logowanie Administratora do `crm.html` i konfiguracja 2FA (jeszcze nie sprawdzone na żywo).
-- Usunąć token API w Supabase (Account → Access Tokens) oraz z pulpitu: `tok.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
+- Usunąć token API w Supabase (Account → Access Tokens) oraz z pulpitu: `tok.txt`, `crmkp.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
 - Zmienić domyślne hasło panelu treści (`admin`).
 - Podmienić przykładowe (fikcyjne) oferty w porównywarce na prawdziwe.
 
