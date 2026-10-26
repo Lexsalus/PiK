@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.8.1] — 2026-10-26
+- Usunięta wersja demo CRM (crm-demo.html), tryb testowy formularza i dane przykładowe z kodu CRM; pracujemy na jednej wersji
+
 ## [1.8.0] — 2026-10-26
 - CRM na żywo: logowanie z 2FA, wszystkie dane i operacje przez Supabase; prototyp przeniesiony do crm-demo.html
 - Logowanie e-mail + hasło, reset hasła, 2FA (TOTP) z kodem QR; konta nieaktywne zablokowane
