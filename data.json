@@ -1812,7 +1812,7 @@
   },
   "leads": {
     "enabled": true,
-    "mode": "demo",
+    "mode": "supabase",
     "email": "",
     "consent": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili.",
     "supabaseUrl": "https://ixlhfhzgzotukstoezcj.supabase.co",
