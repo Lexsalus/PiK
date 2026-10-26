@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.9.1] — 2026-10-26
+- Migracja 004 (Pielęgniarki) wdrożona na produkcji + pg_cron zlecenia-limit-czasu; dokumentacja
+
 ## [1.9.0] — 2026-10-26
 - Zakładka Pielęgniarki w CRM (projekt 23.10.2026): rewiry na mapie (Leaflet/OSM lub Google), dostępność z zatwierdzaniem, strefy i stawki z marżą, przydział zleceń (po kolei / proporcjonalnie / kolejka z limitem / ręcznie) z akceptacją pielęgniarki i limitem czasu, panel pielęgniarki, lista oczekujących, ustawienia; migracja 004 (rola Pielęgniarka, uprawnienie nurses) — niewdrożona; testy bazy 120/120, e2e 36/36 + 42/42
 
