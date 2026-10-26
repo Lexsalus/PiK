@@ -9,7 +9,7 @@
 | CRM kancelarii | `https://lexsalus.github.io/PiK/crm.html` — opis w `CRM.md` |
 | Podgląd szkicu | `https://lexsalus.github.io/PiK/index.html?preview` |
 
-Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi przycisk **⚙️ Panel** w prawym górnym rogu strony i link w stopce. Panel ma też link do CRM.
+Numer wersji widać w stopce strony i na dole menu panelu. Przycisk **⚙️ Panel** w prawym górnym rogu strony i link w stopce prowadzą do CRM (logowanie e-mail + 2FA). Panel treści otwiera się z CRM (menu → ✏️ Treść strony, tylko Administrator) albo bezpośrednio pod adresem `admin.html`.
 
 ## 2. Pierwsze logowanie do panelu treści
 

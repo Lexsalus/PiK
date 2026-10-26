@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.8.3] — 2026-10-26
+- Przycisk Panel na stronie prowadzi do CRM (crm.html)
+
 ## [1.8.2] — 2026-10-26
 - Aktualizacja dokumentacji: README, INSTRUKCJA (sekcja CRM, problemy), SUPABASE, STAN, e2e
 
