@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.7.2] — 2026-10-26
+- Supabase: rejestracja wyłączona, adres linków logowania, pierwszy Administrator aktywny
+
 ## [1.7.1] — 2026-10-26
 - Formularz „Co mi się należy” zapisuje zgłoszenia w bazie Supabase (schemat wdrożony, przypomnienia pg_cron aktywne)
 

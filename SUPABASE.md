@@ -7,8 +7,8 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 ## Stan wdrożenia (26.10.2026)
 
 - ✅ Krok 1 — schemat uruchomiony (29 tabel z RLS, 60 reguł dostępu); sprawdzono z zewnątrz: anonimowy może tylko dodać zgłoszenie
-- ⬜ Krok 2 — wyłączenie samodzielnej rejestracji (do zrobienia w panelu)
-- ⬜ Krok 3 — pierwszy Administrator (do zrobienia)
+- ✅ Krok 2 — samodzielna rejestracja wyłączona (sprawdzone: „Signups not allowed”); adres linków w e-mailach: `https://lexsalus.github.io/PiK/crm.html`; 2FA (TOTP) włączone w projekcie
+- ✅ Krok 3 — Administrator: `biuro@lekarzeiterapeuci.pl` (nazwa wyświetlana „Admin”), aktywny, wpis w audycie
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
 - ✅ Krok 5 — formularz na stronie zapisuje zgłoszenia w tabeli `leads`
 
