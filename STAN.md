@@ -1,10 +1,10 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **26.10.2026**, wersja **1.9.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **26.10.2026**, wersja **1.9.3**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
-Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (zaplecze dla adwokatów i pracowników) według specyfikacji `CRM_Kancelarii_Specyfikacja_v1.1.pdf` (22.10.2026, 12 modułów) + zakładka **Pielęgniarki** według projektu `Zakladka_Pielegniarki_projekt.pdf` (23.10.2026; dokument u właściciela, nie w repo).
+Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (zaplecze dla adwokatów i pracowników) według specyfikacji `CRM_Kancelarii_Specyfikacja_v1.1.pdf` (22.10.2026, 12 modułów) ; panel **Pielęgniarki** według projektu `Zakladka_Pielegniarki_projekt.pdf` (23.10.2026) wydzielony do repo `Lexsalus/Pielegniarki` — wspólna baza.
 
 | Element | Adres | Stan |
 |---------|-------|------|
@@ -48,11 +48,12 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - 1.8.1 — usunięte demo CRM i tryb testowy formularza.
 - 1.8.2 — aktualizacja całej dokumentacji.
 - 1.8.3 → 1.8.4 — próba przekierowania przycisku ⚙️ Panel do CRM, **cofnięta na prośbę właściciela**; przycisk prowadzi do `admin.html`.
-- 1.9.0 — zakładka **Pielęgniarki** w CRM (`crm-pielegniarki.js`) + migracja `004_pielegniarki.sql` (rola „Pielęgniarka”, uprawnienie `nurses`). Opis: CRM.md. Na produkcji zakładka pojawi się dopiero po wdrożeniu migracji 004.
+- 1.9.0 — zakładka **Pielęgniarki** w CRM (`crm-pielegniarki.js`) + migracja `004_pielegniarki.sql` (rola „Pielęgniarka”, uprawnienie `nurses`). Migracja 004 wdrożona (1.9.1).
+- 1.9.2 → 1.9.3 — panel wydzielony do repo `Lexsalus/Pielegniarki` (https://lexsalus.github.io/Pielegniarki/), zakładka zdjęta z CRM.
 
 ## Otwarte sprawy
 
-- **Pielęgniarki — osobna aplikacja:** repo `Lexsalus/Pielegniarki` (index.html + pielegniarki.js, ta sama baza CRMKP). Po jej uruchomieniu zakładkę zdejmujemy z `crm.html` (tylko interfejs; tabele 004 zostają w CRMKP, dopóki aplikacja z nich korzysta). Test interfejsu: `NZ_URL=… python3 supabase/test/e2e/run_pielegniarki.py`.
+- **Pielęgniarki — osobna aplikacja:** https://lexsalus.github.io/Pielegniarki/ (repo `Lexsalus/Pielegniarki`, ta sama baza CRMKP; tabele 004 zostają w CRMKP). Zakładka zdjęta z `crm.html` w 1.9.3; w CRM zostały rola, uprawnienie i link do panelu. Supabase Auth: dodany adres przekierowań panelu.
 - **Pielęgniarki — start:** CRM → Pielęgniarki → Ustawienia: usługi, cennik stref miasta, import granic dzielnic; potem pielęgniarki, obszary, wzorce, reguły przydziału.
 - **Pielęgniarki — przyjęte rozstrzygnięcia tam, gdzie projekt milczy** (do potwierdzenia albo zmiany): brak reguły przydziału dla miasta/dzielnicy → zlecenie do dyspozytora; cena dojazdu dla klienta ustalana przy zakładaniu zlecenia = najniższa strefa wśród pielęgniarek dostępnych w wybranym terminie (wypłata i strefa zapisywane dla osoby, która dostanie propozycję); zgłoszenie odrzucone przez Administratora wraca do szkicu z uwagą; wyjątki w terminarzu (urlop) pielęgniarka może zgłaszać od dziś, wzorzec — od następnego tygodnia; pielęgniarka widzi dane klienta dopiero po przyjęciu zlecenia (wcześniej adres i termin).
 - **Pielęgniarki — propozycje (niewdrożone, decyzja właściciela):** formularz „Zamów badania w domu” dla klientów (strona 8 projektu; teraz zlecenia zakłada Administrator/dyspozytor w CRM); 2FA obowiązkowe dla roli Pielęgniarka (dane zdrowotne, RODO); anulowanie zlecenia (brak takiego statusu w projekcie); powiadomienia SMS/e-mail o propozycji zlecenia.

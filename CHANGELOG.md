@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.9.3] — 2026-10-26
+- Zakładka Pielęgniarki zdjęta z CRM — panel to osobna aplikacja (Lexsalus/Pielegniarki); w CRM link do panelu, przekierowanie roli Pielęgniarka; dokumentacja
+
 ## [1.9.2] — 2026-10-26
 - Test zakładki Pielęgniarki obsługuje też osobną aplikację (NZ_URL); STAN: repo Lexsalus/Pielegniarki
 

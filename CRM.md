@@ -17,7 +17,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 | Aplikant | przypisane sprawy bez finansów; nie usuwa wpisów |
 | Biuro | zgłoszenia ze strony („Nowe sprawy”), zakładanie spraw, przypisane sprawy |
 | Obsługa techniczna | tylko Ustawienia → System; wgląd w sprawy wyłącznie w dostępie awaryjnym (60 min, zgoda Administratora) |
-| Pielęgniarka | tylko własny panel w zakładce Pielęgniarki: swoje zlecenia (przyjmij / odrzuć, statusy), obszar i terminarz do zatwierdzenia, własne wypłaty; bez spraw kancelarii |
+| Pielęgniarka | konto w tej samej bazie; pracuje w osobnym panelu pielęgniarek (po zalogowaniu do CRM przekierowanie); bez spraw kancelarii |
 
 **Wszystkie operacje idą przez bazę** — to ona decyduje, co wolno. Komunikat błędu w CRM to odpowiedź bazy (np. „Usuwa tylko Administrator”).
 
@@ -38,26 +38,13 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 | 11 | Raporty | KPI, sprawy wg kategorii, statusy, terminy; eksport CSV zapisywany w audycie |
 | 12 | Bezpieczeństwo | 2FA egzekwowane w bazie, dziennik audytu tylko do dopisywania z łańcuchem SHA-256 i weryfikacją, dostęp awaryjny |
 | + | Analiza | kalkulatory ze strony na danych sprawy, wynik zgłoszenia klienta, zapis jako czynność |
-| + | Pielęgniarki | projekt 23.10.2026 — opis niżej |
+| + | Pielęgniarki | osobna aplikacja (https://lexsalus.github.io/Pielegniarki/) — opis niżej |
 
-## Zakładka „Pielęgniarki” (projekt 23.10.2026, migracja 004)
+## Pielęgniarki — osobna aplikacja
 
-Jedna zakładka, w której widać wszystkie pielęgniarki, ich obszary, terminy, stawki i to, komu trafia które zlecenie. Uprawnienie `nurses` (Administrator: pełne; można nadać innym w Ustawienia → Użytkownicy).
+Panel pielęgniarek (projekt 23.10.2026) jest osobną aplikacją: repo `Lexsalus/Pielegniarki`, adres https://lexsalus.github.io/Pielegniarki/. Korzysta z tej samej bazy CRMKP (migracja 004) i tych samych kont. W CRM zostają: rola „Pielęgniarka” i uprawnienie „Pielęgniarki” (Ustawienia → Użytkownicy) oraz link „Panel pielęgniarek” w menu dla osób z tym uprawnieniem. Pielęgniarka logująca się do CRM jest przekierowana do panelu; powiadomienia o zleceniach otwierają panel.
 
-| Część | Działanie |
-|-------|-----------|
-| Widok główny | lista (filtry: miasto, usługa, status; pasek obciążenia tygodnia), mapa z warstwami Obszary / Strefy cenowe / Obłożenie / Białe plamy, karta (Obszar, Dostępność, Stawki, Zlecenia, Dokumenty), panel przydziału pod spodem; kolor pielęgniarki ten sam wszędzie |
-| Obszar | dzielnice (klik), własny wielokąt, miasto + promień, „całe miasto”; punkt bazowy; szkic → do zatwierdzenia → zatwierdzony (poprzedni archiwizowany) |
-| Dostępność | wzorzec tygodnia + wyjątki (urlop, wolne, dodatkowe godziny); zmiany pielęgniarki od następnego tygodnia, do zatwierdzenia; terminarz z wizytami i buforem na dojazd; dostępność zbiorcza miasta / dzielnicy |
-| Strefy i stawki | szablon stref dla miasta (cena dla klienta, wypłata, marża), nadpisanie dla pielęgniarki; kwoty zapisywane w zleceniu |
-| Przydział | reguła dla miasta lub dzielnicy: po kolei, proporcjonalnie (wagi), kolejka z limitem, ręcznie; pula z limitem dziennym; podgląd 10 zleceń; limit czasu na przyjęcie |
-| Zlecenia | adres (wyszukiwanie lub współrzędne) → badanie → wolne terminy i cena → propozycja wg reguły → pielęgniarka przyjmuje (limit czasu → następna z puli → dyspozytor); statusy Nowe → Zaproponowane → Przyjęte → W drodze → Wykonane → Rozliczone; raport marży miesiąca, CSV |
-| Lista oczekujących | adresy bez pokrycia; warstwa „Białe plamy” |
-| Ustawienia | mapa (Leaflet + OpenStreetMap albo Google z kluczem), nakładające się obszary (reguła / odległość), odległość (linia prosta / po drogach), maks. wizyt dziennie, bufor na dojazd, limit czasu, siatka terminów, horyzont; usługi; cenniki stref; granice dzielnic (import z OpenStreetMap albo rysowanie) |
-
-Baza pilnuje: pielęgniarka widzi tylko siebie i własne zlecenia (bez ceny dla klienta i marży), nie zatwierdza sama obszaru ani terminarza; zlecenia tylko przez funkcje (`create_nurse_order`, `dispatch_order`, `respond_order`, `advance_order`); twarde filtry przed regułą: obszar, wolny termin, usługa, limit dzienny; operacje w audycie.
-
-**Testy:** reguły bazy 120/120 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 36/36 i zakładka Pielęgniarki 42/42 (`supabase/test/e2e/`).
+**Testy:** reguły bazy 120/120 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 36/36 (`supabase/test/e2e/`); panel pielęgniarek: `run_pielegniarki.py` (repo Pielegniarki serwowane na porcie 8766).
 
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 

@@ -353,7 +353,6 @@ function menuItems(){
     can('deadlines')&&['terminy','📅','Terminy',myDl],
     r!=='tech'&&['powiadomienia','🔔','Powiadomienia',unread,'n'],
     !['tech','nurse'].includes(r)&&['zespol','👥','Zespół'],
-    can('nurses')&&['pielegniarki','🩺','Pielęgniarki',typeof nzBadge==='function'?nzBadge():0],
     (can('initial_fee')||can('attorney_fee')||can('allocations'))&&['finanse','💰','Finanse'],
     can('reports')&&['raporty','📊','Raporty'],
     ['ustawienia','⚙️','Ustawienia']].filter(Boolean);
@@ -361,7 +360,7 @@ function menuItems(){
 function renderShell(){
   const cur=(location.hash.split('/')[1]||'pulpit').replace('sprawa','sprawy');
   $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM</div>`+menuItems().map(([k,ic,l,cnt,cl])=>`<a class="nav ${cur===k?'on':''}" href="#/${k}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`).join('')+
-    `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>${isAdmin()?'<a class="nav" href="admin.html" target="_blank">✏️ Treść strony</a>':''}`;
+    `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>${can('nurses')?'<a class="nav" href="https://lexsalus.github.io/Pielegniarki/" target="_blank">🩺 Panel pielęgniarek</a>':''}${isAdmin()?'<a class="nav" href="admin.html" target="_blank">✏️ Treść strony</a>':''}`;
   $('#meBox').innerHTML=`${av(ME.id)}<div><b>${esc(ME.name)}</b><small>${esc(ROLES[ME.role])}</small></div>`;
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;
   $('#bell').innerHTML='🔔'+(unread?`<span class="dot">${unread}</span>`:'');$('#bell').style.display=ME.role==='tech'?'none':'';
@@ -391,7 +390,7 @@ function route(){
     const fn=ROUTES[page];if(!fn)throw new Forbidden('Nie ma takiej strony');
     V.innerHTML=fn(a,b)||'';ROUTES[page].after?.(a,b);
   }catch(e){
-    if(e.code===403){V.innerHTML=`<div class="forbid"><b>403</b><h2>Brak dostępu</h2><p class="mut" style="margin:8px 0 18px">${esc(e.message)}</p><p class="hint">W produkcji odmowę zwraca serwer (polityki RLS w Supabase) — ukrycie przycisku w interfejsie nie wystarcza.</p><a class="btn" href="#/${ME.role==='tech'?'ustawienia/system':ME.role==='nurse'?'pielegniarki':'pulpit'}" style="margin-top:14px">← Wróć</a></div>`;audit('odmowa.dostepu',location.hash,e.message);save()}
+    if(e.code===403){V.innerHTML=`<div class="forbid"><b>403</b><h2>Brak dostępu</h2><p class="mut" style="margin:8px 0 18px">${esc(e.message)}</p><p class="hint">W produkcji odmowę zwraca serwer (polityki RLS w Supabase) — ukrycie przycisku w interfejsie nie wystarcza.</p><a class="btn" href="#/${ME.role==='tech'?'ustawienia/system':'pulpit'}" style="margin-top:14px">← Wróć</a></div>`;audit('odmowa.dostepu',location.hash,e.message);save()}
     else{console.error(e);V.innerHTML=`<div class="empty">Błąd: ${esc(e.message)}</div>`}
   }
 }
@@ -967,8 +966,9 @@ async function afterSignIn(){
   ME={id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color};
   try{await reload()}catch(e){console.error(e);return toast('Nie udało się wczytać danych: '+errMsg(e),true)}
   if(!sessionStorage.getItem('crm_logged_'+p.id)){sessionStorage.setItem('crm_logged_'+p.id,1);sb.rpc('log_login',{p_action:'logowanie'})}
+  if(ME.role==='nurse'){location.href='https://lexsalus.github.io/Pielegniarki/';return}   // panel pielęgniarek jest osobną aplikacją (ta sama baza)
   $('#login').style.display='none';$('#app').style.display='grid';
-  if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':ME.role==='nurse'?'#/pielegniarki':'#/pulpit';else route();
+  if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
 }
 function renderLogin(){loginView('password')}
 $('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
@@ -1176,7 +1176,7 @@ function exportCsv(){
 
 /* --- powiadomienia --- */
 function openNt(id){const n=DB.notifications.find(x=>x.id===id);if(!n.read)sb.from('notifications').update({read_at:new Date().toISOString()}).eq('id',id).then(()=>{n.read=nowISO();renderShell()});
-  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else if(/^(order|nurse)\./.test(n.type))location.hash=n.type==='order.dispatch'?'#/pielegniarki/zlecenia':'#/pielegniarki';else rerender()}
+  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else if(/^(order|nurse)\./.test(n.type))window.open('https://lexsalus.github.io/Pielegniarki/#/pielegniarki'+(n.type==='order.dispatch'?'/zlecenia':''),'_blank');else rerender()}
 function markAllRead(){actSafe(async()=>chk(await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',ME.id).is('read_at',null)))}
 
 /* --- finanse --- */
@@ -1276,7 +1276,7 @@ async function tryEditAudit(){const r=await sb.from('audit_log').update({details
 /* --- start --- */
 let startedOnce=false;
 sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){$('#login').style.display='grid';$('#app').style.display='none';loginView('newpass')}});
-addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skryptów (m.in. crm-pielegniarki.js)
+addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skryptów
   if(/type=recovery/.test(location.hash))return; // obsłuży onAuthStateChange
   const {data:{session}}=await sb.auth.getSession();
   if(session)await afterSignIn();else loginView('password');
@@ -1284,6 +1284,5 @@ addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skry
 setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();renderShell()}}},30000); // liczniki „na żywo”
 
 </script>
-<script src="crm-pielegniarki.js"></script>
 </body>
 </html>
