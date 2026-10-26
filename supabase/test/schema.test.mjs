@@ -156,3 +156,116 @@ R((await as('jan',`select * from storage.objects`)).rows.length===0,'pełnomocni
 R((await as('piotr',`select * from storage.objects`)).rows.length===1,'pełnomocnik prowadzący widzi plik w aktach');
 R(!!await fails('anna',`insert into storage.objects(bucket_id,name) values('akta','zla-sciezka/plik.pdf')`),'zła ścieżka pliku odrzucona');
 await fails('admin',`delete from storage.objects`);R((await db.query('select count(*)::int n from storage.objects')).rows[0].n===1,'pliki w aktach bez kasowania (DELETE nic nie usuwa)');
+
+// =====================================================================
+// --- Pielęgniarki (migracja 004)
+// =====================================================================
+Object.assign(U,{nowak:'aaaaaaaa-0000-0000-0000-000000000001',kowal:'aaaaaaaa-0000-0000-0000-000000000002',kasp:'aaaaaaaa-0000-0000-0000-000000000003'});
+for(const k of ['nowak','kowal','kasp']){await db.query(`insert into auth.users(id,email) values($1,$2)`,[U[k],k+'@k.test']);await db.query(`update public.profiles set role='nurse',active=true,full_name=$2 where id=$1`,[U[k],k])}
+const one=async(who,sql,p=[])=>(await as(who,sql,p)).rows[0];
+const sq=(a1,o1,a2,o2)=>JSON.stringify([[[a1,o1],[a1,o2],[a2,o2],[a2,o1]]]);
+await as('admin',`insert into public.districts(city,name,rings) values('Testowo','A',$1),('Testowo','B',$2)`,[sq(52,21,52.1,21.1),sq(52,21.1,52.1,21.2)]);
+const svc=(await one('admin',`insert into public.nurse_services(name,duration_min,buffer_min,price) values('Morfologia + CRP',15,0,60) returning id`)).id;
+const N={};
+for(const [k,nm,lng] of [['nowak','Anna Nowak',21.02],['kowal','Anna Kowalska',21.06],['kasp','Anna Kasperczak',21.15]]){
+  N[k]=(await one('admin',`insert into public.nurses(user_id,full_name,city,status,base_lat,base_lng) values($1,$2,'Testowo','aktywna',52.05,$3) returning id`,[U[k],nm,lng])).id;
+  await as('admin',`insert into public.nurse_service_links values($1,$2)`,[N[k],svc]);
+}
+await as('admin',`insert into public.price_zones(city,zone_no,km_from,km_to,price_client,payout) values('Testowo',1,0,10,30,10),('Testowo',2,10,20,50,25),('Testowo',3,20,30,70,40)`);
+R((await as('anna',`select * from public.nurses`)).rows.length===0&&!!await fails('anna',`insert into public.nurses(full_name) values('Ktoś Obcy')`),'aplikant: brak dostępu do pielęgniarek');
+R(!!await fails('anon',`select * from public.nurse_orders`)&&!!await fails('anon',`select * from public.nurses`),'anonimowy: brak dostępu do pielęgniarek i zleceń');
+R((await as('kowal',`select full_name from public.nurses`)).rows.map(r=>r.full_name).join()==='Anna Kowalska','pielęgniarka widzi tylko własną kartę');
+// --- obszar: szkic → do zatwierdzenia → zatwierdzony
+const ar1=(await one('nowak',`insert into public.nurse_areas(nurse_id,shapes,base_lat,base_lng,base_label) values($1,'[{"type":"districts","city":"Testowo","names":["A"]}]',52.05,21.02,'A') returning id`,[N.nowak])).id;
+R(!!await fails('nowak',`insert into public.nurse_areas(nurse_id,shapes) values($1,'[]')`,[N.kowal]),'pielęgniarka nie zmieni cudzego obszaru');
+R(!!await fails('nowak',`update public.nurse_areas set status='approved' where id=$1`,[ar1]),'pielęgniarka nie zatwierdzi sama obszaru');
+await as('nowak',`update public.nurse_areas set status='pending' where id=$1`,[ar1]);
+R((await as('admin',`select * from public.notifications where event_type='nurse.area'`)).rows.length===1,'wysłanie do zatwierdzenia → powiadomienie Administratora');
+R(!(await one('admin',`select app.nurse_covers($1,52.05,21.05) v`,[N.nowak])).v,'obszar niezatwierdzony nie działa');
+await as('admin',`update public.nurse_areas set status='approved' where id=$1`,[ar1]);
+R((await one('admin',`select app.nurse_covers($1,52.05,21.05) v`,[N.nowak])).v&&!(await one('admin',`select app.nurse_covers($1,52.05,21.15) v`,[N.nowak])).v,'zatwierdzony obszar: dzielnica A tak, B nie');
+R(!!await fails('admin',`update public.nurse_areas set shapes='[]' where id=$1`,[ar1]),'zatwierdzony obszar niezmienny (zmiana = nowy szkic)');
+await as('admin',`insert into public.nurse_areas(nurse_id,shapes,status) values($1,'[{"type":"city","city":"Testowo"}]','approved'),($2,'[{"type":"polygon","points":[[52,21.1],[52,21.2],[52.1,21.2],[52.1,21.1]]}]','approved')`,[N.kowal,N.kasp]);
+const ar2=(await one('admin',`insert into public.nurse_areas(nurse_id,shapes,status) values($1,'[{"type":"radius","lat":52.05,"lng":21.02,"km":3}]','approved') returning id`,[N.nowak])).id;
+R((await one('admin',`select status from public.nurse_areas where id=$1`,[ar1])).status==='archived','nowy zatwierdzony obszar archiwizuje poprzedni');
+await as('admin',`update public.nurse_areas set status='archived' where id=$1`,[ar2]);await as('admin',`insert into public.nurse_areas(nurse_id,shapes,status) values($1,'[{"type":"districts","city":"Testowo","names":["A"]}]','approved')`,[N.nowak]);
+R((await one('admin',`select app.nurse_covers($1,52.05,21.15) v`,[N.kowal])).v&&(await one('admin',`select app.nurse_covers($1,52.05,21.15) v`,[N.kasp])).v,'obszar „całe miasto” i własny wielokąt');
+// --- terminarz: od następnego tygodnia, do zatwierdzenia
+const MON=(await db.query(`select (date_trunc('week',current_date)+interval '7 days')::date::text d`)).rows[0].d;
+R(!!await fails('nowak',`insert into public.nurse_patterns(nurse_id,dow,time_from,time_to,valid_from) values($1,1,'08:00','11:00',current_date)`,[N.nowak]),'zmiana terminarza w bieżącym tygodniu → odrzucona');
+const pt1=(await one('nowak',`insert into public.nurse_patterns(nurse_id,dow,time_from,time_to,valid_from) values($1,1,'08:00','11:00',$2) returning id`,[N.nowak,MON])).id;
+R(!!await fails('nowak',`update public.nurse_patterns set status='approved' where id=$1`,[pt1]),'pielęgniarka nie zatwierdzi sama terminarza');
+R((await one('admin',`select count(*)::int n from public.nurse_free_windows($1,$2::date,1)`,[N.nowak,MON])).n===0,'wzorzec niezatwierdzony nie daje terminów');
+await as('admin',`update public.nurse_patterns set status='approved' where id=$1`,[pt1]);
+await as('admin',`insert into public.nurse_patterns(nurse_id,dow,time_from,time_to,valid_from,status) values($1,1,'08:00','11:00',$3,'approved'),($2,1,'08:00','11:00',$3,'approved')`,[N.kowal,N.kasp,MON]);
+R(!!await fails('nowak',`update public.nurse_patterns set time_to='12:00' where id=$1`,[pt1]),'zatwierdzony wzorzec: pielęgniarka tylko prosi o zakończenie');
+// --- sloty dla adresu
+const slots=async(lat,lng,extra='')=>(await as('admin',`select * from public.nurse_slots(${lat},${lng},$1,null,$2::date,1${extra})`,[svc,MON])).rows;
+let s1=await slots(52.05,21.07);
+R(s1.length===12&&s1.every(r=>+r.price_travel===30&&+r.zone_no===1),`adres w A: 2 pielęgniarki × 6 terminów 8:00–10:30, strefa 1 / 30 zł (${s1.length})`);
+R((await slots(52.5,21.5)).length===0,'adres poza obszarami → brak terminów');
+R(!!await fails('nowak',`select * from public.nurse_slots(52.05,21.07,$1)`,[svc]),'pielęgniarka nie odpytuje wolnych terminów innych');
+const ex=(await one('admin',`insert into public.nurse_exceptions(nurse_id,date_from,date_to,kind,status) values($1,$2,$2,'urlop','approved') returning id`,[N.kowal,MON])).id;
+R((await slots(52.05,21.07)).length===6,'urlop zdejmuje terminy pielęgniarki');
+await as('admin',`delete from public.nurse_exceptions where id=$1`,[ex]);
+R(!!await fails('kowal',`insert into public.nurse_exceptions(nurse_id,date_from,date_to,kind,status) values($1,$2,$2,'urlop','approved')`,[N.kowal,MON]),'wyjątek pielęgniarki czeka na zatwierdzenie');
+// --- przydział: proporcjonalnie, akceptacja, odrzucenie, limit czasu, dyspozytor
+const rule=(await one('admin',`insert into public.assignment_rules(city,kind) values('Testowo','weighted') returning id`)).id;
+await as('admin',`insert into public.assignment_pool(rule_id,nurse_id,weight,sort_order) values($1,$2,2,1),($1,$3,1,2)`,[rule,N.nowak,N.kowal]);
+const at=h=>`(('${MON}'::date+'${h}'::time) at time zone 'Europe/Warsaw')`;
+const order=async(h,extra={})=>(await one('admin',`select public.create_nurse_order($1) id`,[JSON.stringify({client_name:'Jan Klient',address:'ul. Testowa 1',lat:52.05,lng:21.07,city:'Testowo',service_id:svc,start_at:(await db.query(`select ${at(h)}::text t`)).rows[0].t,...extra})])).id;
+const O=id=>db.query(`select * from public.nurse_orders where id=$1`,[id]).then(r=>r.rows[0]);
+const o1=await order('08:00');let x=await O(o1);
+R(x.status==='zaproponowane'&&x.nurse_id===N.nowak,'nowe zlecenie → propozycja wg wag (Nowak 2 : Kowalska 1)');
+R(+x.price_travel===30&&+x.payout_travel===10&&+x.margin===20&&+x.price_service===60,'kwoty zapisane w zleceniu: dojazd 30 zł, wypłata 10 zł, marża 20 zł');
+R((await as('nowak',`select * from public.notifications where event_type='order.proposed'`)).rows.length===1,'pielęgniarka dostaje powiadomienie o zleceniu');
+R((await as('nowak',`select * from public.nurse_orders`)).rows.length===0&&(await as('nowak',`select * from public.my_orders()`)).rows.length===1,'pielęgniarka: zlecenia tylko przez własny panel');
+R(!('margin' in (await as('nowak',`select * from public.my_orders()`)).rows[0]),'panel pielęgniarki bez ceny dla klienta i marży');
+R((await as('kowal',`select * from public.my_orders()`)).rows.length===0&&!!await fails('kowal',`select public.respond_order($1,true)`,[o1]),'cudzego zlecenia nie widać i nie da się przyjąć');
+await as('nowak',`select public.respond_order($1,false)`,[o1]);x=await O(o1);
+R(x.status==='zaproponowane'&&x.nurse_id===N.kowal,'odrzucenie → następna osoba z puli');
+await as('kowal',`select public.respond_order($1,true)`,[o1]);x=await O(o1);
+R(x.status==='przyjete'&&x.accepted_at,'pielęgniarka przyjmuje zlecenie');
+const o2=await order('08:00');x=await O(o2);
+R(x.nurse_id===N.nowak,'ten sam termin: Kowalska zajęta (wizyta + dojazd) → Nowak');
+await db.query(`update public.nurse_orders set expires_at=now()-interval '1 minute' where id=$1`,[o2]);
+R(!!await fails('nowak',`select public.run_order_timeouts()`),'zadanie limitu czasu niewywoływalne z API');
+await db.query('select public.run_order_timeouts()');x=await O(o2);
+R(x.status==='nowe'&&x.needs_dispatcher&&!x.nurse_id,'brak akceptacji w limicie czasu, brak innych chętnych → dyspozytor');
+R((await db.query(`select result from public.order_attempts where order_id=$1`,[o2])).rows.map(r=>r.result).join()==='brak_odpowiedzi','próba zapisana jako „brak odpowiedzi”');
+R((await as('admin',`select * from public.notifications where event_type='order.dispatch'`)).rows.length>=1,'dyspozytor dostaje powiadomienie');
+R((await as('admin',`select * from public.order_candidates($1)`,[o2])).rows.map(r=>r.nurse_id+':'+r.attempted).join()===N.nowak+':brak_odpowiedzi'&&!!await fails('nowak',`select * from public.order_candidates($1)`,[o2]),'dyspozytor widzi kandydatów (z historią odmów); pielęgniarka nie');
+R(!!await fails('admin',`select public.dispatch_order($1,$2)`,[o2,N.kasp]),'dyspozytor: pielęgniarka spoza obszaru → odrzucone');
+await as('admin',`select public.dispatch_order($1,$2)`,[o2,N.nowak]);x=await O(o2);
+R(x.status==='zaproponowane'&&x.nurse_id===N.nowak,'dyspozytor przydziela ręcznie (nadal wymaga akceptacji)');
+// --- statusy
+R(!!await fails('kowal',`select public.advance_order($1,'rozliczone')`,[o1]),'pielęgniarka nie rozlicza zlecenia');
+await as('kowal',`select public.advance_order($1,'w_drodze')`,[o1]);await as('kowal',`select public.advance_order($1,'wykonane')`,[o1]);await as('admin',`select public.advance_order($1,'rozliczone')`,[o1]);
+R((await O(o1)).status==='rozliczone','statusy: przyjęte → w drodze → wykonane → rozliczone');
+await as('admin',`update public.price_zones set price_client=35 where city='Testowo' and zone_no=1`);
+R(+(await O(o1)).price_travel===30,'zmiana cennika nie zmienia zapisanych zleceń');
+// --- nadpisanie stawki dla pielęgniarki
+await as('admin',`insert into public.price_zones(nurse_id,zone_no,payout) values($1,1,15)`,[N.kowal]);
+const z=await one('admin',`select * from app.zone($1,1.0)`,[N.kowal]);
+R(+z.price_client===35&&+z.payout===15,'nadpisanie: inna wypłata, cena dla klienta z szablonu');
+R((await as('kowal',`select * from public.price_zones`)).rows.length===0&&+(await as('kowal',`select * from public.my_rates()`)).rows[0].payout===15,'pielęgniarka widzi tylko swoje wypłaty (my_rates)');
+// --- nakładające się obszary: odległość
+await as('admin',`update public.nurse_settings set overlap_mode='distance'`);
+const o3=await order('09:30');x=await O(o3);
+R(x.nurse_id===N.kowal&&(await db.query(`select via from public.order_attempts where order_id=$1`,[o3])).rows[0].via==='odleglosc','tryb „odległość”: najbliższa pielęgniarka');
+await as('admin',`update public.nurse_settings set overlap_mode='rule'`);
+// --- kolejka z limitem
+await as('admin',`update public.assignment_rules set kind='queue' where id=$1`,[rule]);await as('admin',`update public.assignment_pool set queue_limit=1 where rule_id=$1 and nurse_id=$2`,[rule,N.nowak]);
+const o4=await order('10:30');
+R((await O(o4)).nurse_id===N.kowal,'kolejka z limitem: limit Nowak wyczerpany → kolejna osoba');
+await as('admin',`update public.assignment_rules set kind='manual' where id=$1`,[rule]);
+const o5=await order('10:30');x=await O(o5);
+R(x.status==='nowe'&&x.needs_dispatcher,'reguła „ręcznie” → zlecenie czeka na dyspozytora');
+// --- limit dzienny
+await as('admin',`update public.nurse_settings set max_visits_per_day=1`);
+R((await slots(52.05,21.07)).filter(r=>r.nurse_id===N.kowal).length===0,'limit dzienny wyczerpany → brak terminów');
+await as('admin',`update public.nurse_settings set max_visits_per_day=8`);
+R(!!await fails('admin',`select public.create_nurse_order($1)`,[JSON.stringify({client_name:'Jan Klient',address:'Daleko 1',lat:52.5,lng:21.5,city:'Testowo',service_id:svc,start_at:(await db.query(`select ${at('08:00')}::text t`)).rows[0].t})]),'adres bez pokrycia → zlecenie odrzucone (lista oczekujących)');
+await as('nowak',`update public.nurse_settings set overlap_mode='distance'`).catch(()=>{});
+R((await db.query('select overlap_mode from public.nurse_settings')).rows[0].overlap_mode==='rule','ustawienia zmienia tylko Administrator');
+R((await db.query(`select count(*)::int n from public.audit_log where action like 'zlecenie.%' or action like 'pielegniark%'`)).rows[0].n>10,'operacje na pielęgniarkach i zleceniach w audycie');

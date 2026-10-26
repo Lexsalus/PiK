@@ -13,6 +13,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Krok 5 — formularz na stronie zapisuje zgłoszenia w tabeli `leads`
 - ✅ Migracja `002_crm_live.sql` — 2FA egzekwowane w bazie (aal2 dla admin/att/tech), magazyn akt `akta` z regułami per sprawa
 - ✅ Migracja `003_audit_events.sql` — audyt eksportów, pobrań, logowań; audyt zmian kategorii/statusu sprawy
+- ⏳ Migracja `004_pielegniarki.sql` — zakładka Pielęgniarki (**niewdrożona**; wdrożenie poniżej)
 - ⏳ Pierwsze logowanie Administratora do CRM i konfiguracja 2FA — do zrobienia przez Administratora
 - ⏳ Po wdrożeniu: usunąć token API (Supabase → Account → Access Tokens) i pliki SQL / `tok.txt` z pulpitu
 
@@ -21,6 +22,20 @@ Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie
 ## Migracje
 
 Nowe zmiany bazy: plik `supabase/migrations/00N_opis.sql` (uruchamiany raz w SQL Editor). Świeża instalacja: `schema.sql`, potem wszystkie migracje po kolei.
+
+## Migracja 004 — Pielęgniarki (do wdrożenia)
+
+1. SQL Editor → wklej całą zawartość `supabase/migrations/004_pielegniarki.sql` → **Run** (raz).
+2. Limit czasu na przyjęcie zlecenia (co minutę, wymaga pg_cron):
+
+```sql
+select cron.schedule('zlecenia-limit-czasu','* * * * *','select public.run_order_timeouts()');
+```
+
+3. CRM → Pielęgniarki → Ustawienia: usługi, cennik stref miasta, granice dzielnic (import z OpenStreetMap).
+4. Konto pielęgniarki: Authentication → Users → Add user, potem CRM → Ustawienia → Użytkownicy → rola „Pielęgniarka” + aktywacja, a w karcie pielęgniarki → Dane i usługi → Konto.
+
+Bez kroku 2 CRM i tak przekazuje przeterminowane propozycje dalej przy otwarciu zakładki, ale bez pg_cron nie dzieje się to samo z siebie.
 
 ## Krok 1 — uruchom schemat (raz)
 

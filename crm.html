@@ -224,13 +224,13 @@ const COLORS=['#7c5cff','#2fd6a0','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8
 /* --- SHA-256 (synchronicznie, do łańcucha audytu) --- */
 
 /* --- Role i uprawnienia (specyfikacja §9) --- */
-const ROLES={admin:'Administrator',att:'Pełnomocnik',app:'Aplikant',office:'Biuro',tech:'Obsługa techniczna'};
+const ROLES={admin:'Administrator',att:'Pełnomocnik',app:'Aplikant',office:'Biuro',tech:'Obsługa techniczna',nurse:'Pielęgniarka'};
 const PERMS=[
   ['cases_all','Wszystkie sprawy'],['client','Dane klienta'],['pesel','Pełny PESEL (odsłonięcie)'],['documents','Dokumenty i akta'],
   ['entries','Notatki i czynności'],['deadlines','Terminy i zadania'],['deadlines_close','Terminy procesowe — zamykanie'],
   ['initial_fee','Opłata wstępna / wpłata klienta'],['attorney_fee','Wynagrodzenie pełnomocnika'],['success_fee','Success fee'],
   ['allocations','Podział środków kancelarii'],['delete','Usuwanie wpisów i czynności'],['new_cases','Nowe sprawy (zgłoszenia)'],
-  ['reports','Raporty'],['users','Nadawanie uprawnień, użytkownicy'],['config','Konfiguracja systemu, kopie zapasowe'],['audit','Dziennik audytu — podgląd']];
+  ['reports','Raporty'],['users','Nadawanie uprawnień, użytkownicy'],['config','Konfiguracja systemu, kopie zapasowe'],['audit','Dziennik audytu — podgląd'],['nurses','Pielęgniarki (rewiry, terminarz, zlecenia)']];
 const PERM_NAME=Object.fromEntries(PERMS);
 // wartości: 2 = pełny dostęp, 1 = zakres ograniczony (przypisane sprawy / własne dane), 0 = brak
 const ROLE_DEF={
@@ -238,7 +238,8 @@ const ROLE_DEF={
   att:{client:1,documents:1,entries:1,deadlines:1,deadlines_close:1,attorney_fee:1,success_fee:1,reports:1},
   app:{client:1,documents:1,entries:1,deadlines:1},
   office:{client:1,documents:1,deadlines:1,new_cases:2,reports:1},
-  tech:{config:1}};
+  tech:{config:1},
+  nurse:{nurses:1}};
 
 /* --- Dane (wczytywane z bazy przez reload()) --- */
 let DB=null,ME=null;
@@ -282,7 +283,7 @@ const can=(p,u=ME)=>permLevel(p,u)>0;
 const isAdmin=(u=ME)=>u?.role==='admin';
 function activeMember(c,u=ME){return DB.members.find(m=>m.caseId===c.id&&m.userId===u.id&&!m.revokedAt&&(!m.endDate||m.endDate>=iso(today())))}
 const emergencyActive=(u=ME)=>!!(u&&DB.emergency&&DB.emergency.status==='granted'&&DB.emergency.by===u.id&&DB.emergency.until>Date.now());
-const seesCases=(u=ME)=>u&&(u.role!=='tech'||emergencyActive(u));
+const seesCases=(u=ME)=>u&&(!['tech','nurse'].includes(u.role)||emergencyActive(u));
 function canCase(c,u=ME){if(!c||c.deleted)return false;if(isAdmin(u)||permLevel('cases_all',u)===2)return true;if(u.role==='tech')return emergencyActive(u);return !!activeMember(c,u)}
 function caseFlags(c,u=ME){
   if(isAdmin(u))return{docs:true,actions:true,finance:true,approve:true,lead:false};
@@ -351,7 +352,8 @@ function menuItems(){
     can('new_cases')&&['nowe','📥','Nowe sprawy',newLeads,'n'],
     can('deadlines')&&['terminy','📅','Terminy',myDl],
     r!=='tech'&&['powiadomienia','🔔','Powiadomienia',unread,'n'],
-    r!=='tech'&&['zespol','👥','Zespół'],
+    !['tech','nurse'].includes(r)&&['zespol','👥','Zespół'],
+    can('nurses')&&['pielegniarki','🩺','Pielęgniarki',typeof nzBadge==='function'?nzBadge():0],
     (can('initial_fee')||can('attorney_fee')||can('allocations'))&&['finanse','💰','Finanse'],
     can('reports')&&['raporty','📊','Raporty'],
     ['ustawienia','⚙️','Ustawienia']].filter(Boolean);
@@ -389,7 +391,7 @@ function route(){
     const fn=ROUTES[page];if(!fn)throw new Forbidden('Nie ma takiej strony');
     V.innerHTML=fn(a,b)||'';ROUTES[page].after?.(a,b);
   }catch(e){
-    if(e.code===403){V.innerHTML=`<div class="forbid"><b>403</b><h2>Brak dostępu</h2><p class="mut" style="margin:8px 0 18px">${esc(e.message)}</p><p class="hint">W produkcji odmowę zwraca serwer (polityki RLS w Supabase) — ukrycie przycisku w interfejsie nie wystarcza.</p><a class="btn" href="#/${ME.role==='tech'?'ustawienia/system':'pulpit'}" style="margin-top:14px">← Wróć</a></div>`;audit('odmowa.dostepu',location.hash,e.message);save()}
+    if(e.code===403){V.innerHTML=`<div class="forbid"><b>403</b><h2>Brak dostępu</h2><p class="mut" style="margin:8px 0 18px">${esc(e.message)}</p><p class="hint">W produkcji odmowę zwraca serwer (polityki RLS w Supabase) — ukrycie przycisku w interfejsie nie wystarcza.</p><a class="btn" href="#/${ME.role==='tech'?'ustawienia/system':ME.role==='nurse'?'pielegniarki':'pulpit'}" style="margin-top:14px">← Wróć</a></div>`;audit('odmowa.dostepu',location.hash,e.message);save()}
     else{console.error(e);V.innerHTML=`<div class="empty">Błąd: ${esc(e.message)}</div>`}
   }
 }
@@ -966,7 +968,7 @@ async function afterSignIn(){
   try{await reload()}catch(e){console.error(e);return toast('Nie udało się wczytać danych: '+errMsg(e),true)}
   if(!sessionStorage.getItem('crm_logged_'+p.id)){sessionStorage.setItem('crm_logged_'+p.id,1);sb.rpc('log_login',{p_action:'logowanie'})}
   $('#login').style.display='none';$('#app').style.display='grid';
-  if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
+  if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':ME.role==='nurse'?'#/pielegniarki':'#/pulpit';else route();
 }
 function renderLogin(){loginView('password')}
 $('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
@@ -1174,7 +1176,7 @@ function exportCsv(){
 
 /* --- powiadomienia --- */
 function openNt(id){const n=DB.notifications.find(x=>x.id===id);if(!n.read)sb.from('notifications').update({read_at:new Date().toISOString()}).eq('id',id).then(()=>{n.read=nowISO();renderShell()});
-  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else rerender()}
+  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else if(/^(order|nurse)\./.test(n.type))location.hash=n.type==='order.dispatch'?'#/pielegniarki/zlecenia':'#/pielegniarki';else rerender()}
 function markAllRead(){actSafe(async()=>chk(await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',ME.id).is('read_at',null)))}
 
 /* --- finanse --- */
@@ -1274,13 +1276,14 @@ async function tryEditAudit(){const r=await sb.from('audit_log').update({details
 /* --- start --- */
 let startedOnce=false;
 sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){$('#login').style.display='grid';$('#app').style.display='none';loginView('newpass')}});
-(async()=>{
+addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skryptów (m.in. crm-pielegniarki.js)
   if(/type=recovery/.test(location.hash))return; // obsłuży onAuthStateChange
   const {data:{session}}=await sb.auth.getSession();
   if(session)await afterSignIn();else loginView('password');
-})();
+});
 setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();renderShell()}}},30000); // liczniki „na żywo”
 
 </script>
+<script src="crm-pielegniarki.js"></script>
 </body>
 </html>
