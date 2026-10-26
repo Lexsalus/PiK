@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.10.1] — 2026-10-26
+- Administrator nowej bazy aktywny (biuro@lekarzeifarmaceuci.pl); dokumentacja
+
 ## [1.10.0] — 2026-10-26
 - PiK na własnej bazie Supabase (projekt Piel, eamobnucjsavahpxilrt): schemat + migracje 002–003 wdrożone, CRM i formularz strony przepięte; z CRM usunięta rola Pielęgniarka, migracja 004 i jej testy (przeniesione do Lexsalus/Pielegniarki); dokumentacja
 
