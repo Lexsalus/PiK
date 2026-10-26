@@ -5,7 +5,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 🌐 **Strona:** https://lexsalus.github.io/PiK/
 🔐 **Panel treści:** https://lexsalus.github.io/PiK/admin.html
 🗄️ **Baza CRM (Supabase):** wdrożenie — **[SUPABASE.md](SUPABASE.md)**
-⚖️ **CRM kancelarii:** https://lexsalus.github.io/PiK/crm.html (logowanie + 2FA) · wersja demo: `crm-demo.html` — opis: **[CRM.md](CRM.md)**
+⚖️ **CRM kancelarii:** https://lexsalus.github.io/PiK/crm.html (logowanie + 2FA) — opis: **[CRM.md](CRM.md)**
 🧭 **Stan projektu i kontynuacja:** **[STAN.md](STAN.md)**
 
 📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
@@ -45,7 +45,6 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 index.html      strona publiczna
 admin.html      panel administracyjny (treść strony)
 crm.html        CRM kancelarii na żywo (Supabase)
-crm-demo.html   CRM — prototyp na danych przykładowych
 STAN.md         stan projektu, zasady, następne kroki
 supabase/       schemat bazy CRM z RLS + testy (SUPABASE.md)
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)

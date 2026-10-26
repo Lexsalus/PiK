@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **26.10.2026**, wersja **1.8.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **26.10.2026**, wersja **1.8.1**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -11,7 +11,6 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Panel treści strony | `admin.html` | działa (dane w `data.json`, hasło domyślne `admin` — zmienić) |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| CRM — wersja demo | `crm-demo.html` | prototyp na danych przykładowych (do prezentacji) |
 | Baza | Supabase, projekt **CRMKP** `ixlhfhzgzotukstoezcj`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
@@ -25,6 +24,8 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Zmiany w bazie (SQL) wykonuje się w Supabase SQL Editor albo przez API zarządzania z tokenem osobistym ograniczonym do projektu (Database read-write, krótka ważność, usunąć po użyciu).
 
 ## Zasady pracy
+
+- **Jedna wersja, bez demo:** pracujemy na oryginale; w razie problemu cofamy przez historię gita (`git revert` / poprzednia wersja z `CHANGELOG.md`).
 
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.1 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.

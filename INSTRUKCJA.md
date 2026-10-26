@@ -6,7 +6,7 @@
 |----|-------|
 | Strona | `https://lexsalus.github.io/PiK/` |
 | Panel admina | `https://lexsalus.github.io/PiK/admin.html` |
-| CRM kancelarii (prototyp) | `https://lexsalus.github.io/PiK/crm.html` — opis w `CRM.md` |
+| CRM kancelarii | `https://lexsalus.github.io/PiK/crm.html` — opis w `CRM.md` |
 | Podgląd szkicu | `https://lexsalus.github.io/PiK/index.html?preview` |
 
 Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi też przycisk **⚙️ Panel** w prawym górnym rogu strony.
@@ -96,9 +96,8 @@ Sekcja na górze strony: wstępny szacunek roszczenia w czterech kategoriach.
 Pod wynikiem jest przycisk **Chcę bezpłatną analizę mojej sprawy** → formularz (imię, telefon, e-mail, opis, zgoda RODO). Zgłoszenie zawiera kategorię, wpisane wartości i wynik.
 
 **Panel → Ustawienia → Formularz zgłoszenia sprawy:**
-- **Test** — zgłoszenie zapisuje się tylko w przeglądarce, w której je wysłano (do prezentacji CRM); klient widzi komunikat o wersji testowej,
 - **E-mail kancelarii** — otwiera program pocztowy klienta z gotową wiadomością; trzeba podać adres kancelarii,
-- docelowo zgłoszenia trafią prosto do CRM (Supabase).
+- **Baza CRM** (domyślnie) — zgłoszenie trafia od razu do CRM, zakładka „Nowe sprawy”.
 
 **Panel → Kalkulatory:** pole *Gdzie na stronie* (Co mi się należy / Kalkulatory prawne), *Kategoria sprawy w CRM* i *Uwaga pod polami* (zastrzeżenia — **teksty uwag zweryfikuje prawnik przed startem**).
 

@@ -125,7 +125,6 @@ td.best{color:var(--good);font-weight:700}
 .lsum b{color:var(--good)}
 .lok{text-align:center;padding:20px 10px}
 .lok .big{font-size:2.6rem}
-.demo-flag{font-size:.8rem;background:color-mix(in srgb,#f5b84a 18%,transparent);border:1px solid #f5b84a;border-radius:10px;padding:8px 12px}
 .calc{margin-top:22px;display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px}
 .inp{margin-bottom:20px}
@@ -452,7 +451,7 @@ function openCalc(id,scroll,vals){
     ${c.inputs.map(i=>{const v=vals?.[i.key]??i.default;return `<div class="inp"><label>${esc(t(i.label))}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${v}" step="${i.step||1}"> ${esc(t(i.unit||''))}</span></label>
     <input type="range" data-k="${esc(i.key)}" min="${i.min}" max="${i.max}" step="${i.step||1}" value="${v}"></div>`}).join('')}
     ${c.note?`<div class="cnote">${esc(t(c.note))}</div>`:''}</div>
-    <div class="panel res fade"><div class="resv"></div>${k==='claim'&&D.leads?.enabled?`<button class="btn pri lead-cta">${esc(t('Chcę bezpłatną analizę mojej sprawy →'))}</button>`:''}</div>`;
+    <div class="panel res fade"><div class="resv"></div>${k==='claim'&&D.leads?.enabled&&((D.leads.mode==='email'&&D.leads.email)||(D.leads.supabaseUrl&&D.leads.supabaseKey))?`<button class="btn pri lead-cta">${esc(t('Chcę bezpłatną analizę mojej sprawy →'))}</button>`:''}</div>`;
   P.oninput=e=>{const kk=e.target.dataset.k;if(!kk)return;P.querySelectorAll(`[data-k="${kk}"]`).forEach(x=>{if(x!==e.target)x.value=e.target.value});calcBox(k)};
   const cta=P.querySelector('.lead-cta');if(cta)cta.onclick=()=>openLead(c,readVals(P));
   calcBox(k);if(scroll)P.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -469,7 +468,7 @@ const calc=()=>calcBox('tool');
 /* ---------- zgłoszenie sprawy (lead) ---------- */
 function openLead(c,vals){
   const L=D.leads||{},out=compute(c,vals),main=out.find(o=>o.main)||out[0];
-  const sb=L.mode==='supabase'&&L.supabaseUrl&&L.supabaseKey,demo=!sb&&(L.mode!=='email'||!L.email);
+  const mail=L.mode==='email'&&L.email,sb=!mail&&L.supabaseUrl&&L.supabaseKey;
   $('#lBody').innerHTML=`<form class="lform" id="lForm">
     <div class="lsum">${esc(c.icon||'')} <b style="color:var(--txt)">${esc(t(c.name))}</b><br>${esc(t(main.label))}: <b>${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</b></div>
     <label>${esc(t('Imię i nazwisko'))}<input class="field" name="name" required autocomplete="name"></label>
@@ -477,9 +476,8 @@ function openLead(c,vals){
     <label>${esc(t('E-mail'))}<input class="field" name="email" type="email" autocomplete="email"></label>
     <label>${esc(t('Krótko o sprawie (opcjonalnie)'))}<textarea class="field" name="msg"></textarea></label>
     <label class="rodo"><input type="checkbox" name="rodo" required><span>${esc(t(L.consent||''))}</span></label>
-    ${demo?`<div class="demo-flag">${esc(t('Wersja testowa: zgłoszenie zapisze się tylko w tej przeglądarce (podgląd w CRM) i nie zostanie wysłane do kancelarii.'))}</div>`:''}
     <div class="lerr" style="color:var(--bad);font-weight:600;display:none"></div>
-    <button class="btn pri" style="justify-content:center">${esc(t(demo?'Zapisz zgłoszenie (test)':'Wyślij zgłoszenie'))}</button></form>`;
+    <button class="btn pri" style="justify-content:center">${esc(t('Wyślij zgłoszenie'))}</button></form>`;
   $('#lead').classList.add('show');
   $('#lForm').onsubmit=async e=>{
     e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const btn=e.target.querySelector('button.pri');
@@ -494,12 +492,11 @@ function openLead(c,vals){
         if(!r.ok)throw new Error('HTTP '+r.status);
       }catch(err){console.error(err);const x=e.target.querySelector('.lerr');x.textContent=t('Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.');x.style.display='';btn.disabled=false;btn.textContent=t('Wyślij zgłoszenie');return}
     }
-    else if(demo){try{const a=JSON.parse(localStorage.getItem('pk_leads')||'[]');a.unshift(lead);localStorage.setItem('pk_leads',JSON.stringify(a))}catch(err){}}
-    else{
+    else if(mail){
       const lines=[`${c.name} — ${main.label}: ${fmt(main.v,main.decimals)} ${main.unit||''}`,'',...lead.calc.inputs.map(i=>`${i.label}: ${i.value} ${i.unit||''}`),'',...lead.calc.outputs.map(o=>`${o.label}: ${o.value??'—'} ${o.unit||''}`),'',`Imię i nazwisko: ${lead.client.name}`,`Telefon: ${lead.client.phone}`,`E-mail: ${lead.client.email}`,'',lead.message];
       location.href=`mailto:${encodeURIComponent(L.email)}?subject=${encodeURIComponent('Zgłoszenie: '+c.name+' ('+(c.crmCategory||'')+')')}&body=${encodeURIComponent(lines.join('\n'))}`;
     }
-    $('#lBody').innerHTML=`<div class="lok"><div class="big">✅</div><h3>${esc(t('Dziękujemy!'))}</h3><p style="color:var(--mut);margin-top:8px">${esc(t(sb?'Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.':demo?'Zgłoszenie testowe zapisane. Zobaczysz je w CRM w zakładce „Nowe sprawy”.':'Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.'))}</p></div>`;
+    $('#lBody').innerHTML=`<div class="lok"><div class="big">✅</div><h3>${esc(t('Dziękujemy!'))}</h3><p style="color:var(--mut);margin-top:8px">${esc(t(sb?'Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.':'Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.'))}</p></div>`;
   };
 }
 $('#lClose').onclick=()=>$('#lead').classList.remove('show');

@@ -80,9 +80,9 @@ Sprawdzenie: wyślij zgłoszenie testowe ze strony → **Table Editor → leads*
 - podział wpłat: suma = kwota wpływu, inaczej nie można zatwierdzić,
 - dziennik audytu: tylko dopisywanie (także dla Administratora), łańcuch skrótów SHA-256, funkcja `verify_audit_chain()`.
 
-## Następny etap
+## CRM
 
-Podłączenie `crm.html` do bazy: logowanie (hasło + 2FA), odczyt i zapis spraw przez Supabase, dokumenty w Storage (prywatny kubełek `akta`). Prototyp na danych przykładowych zostaje do prezentacji.
+`crm.html` jest podłączony do bazy (logowanie z 2FA, dane i operacje przez Supabase, dokumenty w magazynie `akta`). Opis: CRM.md.
 
 ## Test schematu lokalnie
 

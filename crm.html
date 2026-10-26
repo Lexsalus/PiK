@@ -180,13 +180,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--card2)}
 </style>
 </head>
 <body>
-<div id="login"><div class="lbox">
-  <div style="text-align:center;font-size:2rem">⚖️</div>
-  <h1>CRM Kancelarii</h1>
-  <p>Prototyp: wybierz osobę, aby zobaczyć system z perspektywy jej roli. W wersji produkcyjnej: hasło + 2FA.</p>
-  <div class="ugrid" id="users"></div>
-  <p class="hint" style="text-align:center;margin-top:18px"><a href="index.html" style="color:var(--accent)">← Strona dla klientów</a> · <a href="#" id="resetAll" style="color:var(--accent)">Przywróć dane przykładowe</a></p>
-</div></div>
+<div id="login"><div class="lbox"></div></div>
 <div id="app">
   <aside id="side"></aside>
   <main>
@@ -207,9 +201,9 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--card2)}
 <script>
 'use strict';
 /* =====================================================================
-   CRM Kancelarii — PROTOTYP (bez backendu).
-   Warstwa „api.*” udaje serwer: sprawdza uprawnienia i zwraca 403.
-   W wersji produkcyjnej te same reguły egzekwuje Supabase (RLS + funkcje).
+   CRM Kancelarii — interfejs. Dane i reguły dostępu: Supabase (RLS + funkcje),
+   połączenie z bazą: sekcja „CRM NA ŻYWO” na końcu skryptu.
+   can()/canCase() tylko ukrywają elementy interfejsu — decyduje baza.
    ===================================================================== */
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -228,20 +222,6 @@ const initials=n=>n.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
 const COLORS=['#7c5cff','#2fd6a0','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8a6','#8b5cf6'];
 
 /* --- SHA-256 (synchronicznie, do łańcucha audytu) --- */
-function sha256(str){
-  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
-  const b=new TextEncoder().encode(str),l=b.length,n=((l+9+63)>>6)<<6,m=new Uint8Array(n);m.set(b);m[l]=0x80;
-  const bits=l*8;for(let i=0;i<8;i++)m[n-1-i]=Math.floor(bits/2**(8*i))&255;
-  let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];const w=new Uint32Array(64),r=(x,k)=>(x>>>k)|(x<<(32-k));
-  for(let o=0;o<n;o+=64){
-    for(let i=0;i<16;i++)w[i]=(m[o+i*4]<<24)|(m[o+i*4+1]<<16)|(m[o+i*4+2]<<8)|m[o+i*4+3];
-    for(let i=16;i<64;i++){const s0=r(w[i-15],7)^r(w[i-15],18)^(w[i-15]>>>3),s1=r(w[i-2],17)^r(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0}
-    let [a,b2,c,d,e,f,g,h]=H;
-    for(let i=0;i<64;i++){const S1=r(e,6)^r(e,11)^r(e,25),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[i]+w[i])|0,S0=r(a,2)^r(a,13)^r(a,22),mj=(a&b2)^(a&c)^(b2&c),t2=(S0+mj)|0;h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b2;b2=a;a=(t1+t2)|0}
-    H=H.map((v,i)=>(v+[a,b2,c,d,e,f,g,h][i])|0);
-  }
-  return H.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');
-}
 
 /* --- Role i uprawnienia (specyfikacja §9) --- */
 const ROLES={admin:'Administrator',att:'Pełnomocnik',app:'Aplikant',office:'Biuro',tech:'Obsługa techniczna'};
@@ -260,11 +240,10 @@ const ROLE_DEF={
   office:{client:1,documents:1,deadlines:1,new_cases:2,reports:1},
   tech:{config:1}};
 
-/* --- Baza (prototyp: localStorage) --- */
-const DB_KEY='crm_db_v1',SESS_KEY='crm_session';
+/* --- Dane (wczytywane z bazy przez reload()) --- */
 let DB=null,ME=null;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-let save=()=>store.set(DB_KEY,JSON.stringify(DB));
+let save=()=>{};  // dane trzyma baza
 const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const U=id=>DB.users.find(u=>u.id===id)||{name:'—',id:'',role:''};
 const CAT=code=>DB.categories.find(c=>c.code===code)||{code,name:code,color:'#94a3b8'};
@@ -317,32 +296,9 @@ class Forbidden extends Error{constructor(m){super(m||'Brak uprawnień (403)');t
 const need=(ok,msg)=>{if(!ok)throw new Forbidden(msg)};
 
 /* --- Dziennik audytu: tylko dopisywanie, łańcuch skrótów (§12) --- */
-function audit(action,target,details){
-  const prev=DB.audit.length?DB.audit[DB.audit.length-1].hash:'0'.repeat(64);
-  const e={i:DB.audit.length+1,ts:nowISO(),user:ME?.id||'system',action,target:target||'',details:details||''};
-  e.prev=prev;e.hash=sha256(prev+JSON.stringify([e.i,e.ts,e.user,e.action,e.target,e.details]));
-  DB.audit.push(e);
-}
-function verifyAudit(){
-  let prev='0'.repeat(64);
-  for(const e of DB.audit){const h=sha256(prev+JSON.stringify([e.i,e.ts,e.user,e.action,e.target,e.details]));if(e.prev!==prev||e.hash!==h)return{ok:false,at:e.i};prev=e.hash}
-  return{ok:true,n:DB.audit.length};
-}
 /* --- Historia sprawy (§3) --- */
-function hist(caseId,text,field,before,after){DB.history.push({id:uid('h'),caseId,ts:nowISO(),user:ME?.id||'system',text,field:field||null,before:before??null,after:after??null})}
 
 /* --- Powiadomienia (§10) --- */
-function notify(type,caseId,title,body,recipients,opt={}){
-  const c=caseId&&CASE(caseId);
-  [...new Set(recipients)].filter(Boolean).forEach(rid=>{
-    const u=U(rid);if(!u.id)return;
-    if(c&&!canCase(c,u))return; // odbiorca tylko ze spraw, do których ma dostęp
-    if(opt.finance&&!(can('initial_fee',u)||isAdmin(u)))return;
-    const key=opt.key?`${opt.key}:${rid}`:null;
-    if(key&&DB.notifications.some(n=>n.key===key))return; // każde przypomnienie dokładnie raz
-    DB.notifications.unshift({id:uid('n'),key,recipient:rid,type,caseId:caseId||null,title,body:body||'',priority:opt.priority||'normalne',action:!!opt.action,created:nowISO(),read:null,done:null});
-  });
-}
 const admins=()=>DB.users.filter(u=>u.role==='admin'&&u.active!==false).map(u=>u.id);
 
 /* --- Statusy terminów (§5) --- */
@@ -356,22 +312,8 @@ function dlStatus(d){
 }
 const whenTxt=n=>n===0?'dziś':n===1?'jutro':n===-1?'wczoraj':n>0?`za ${n} dni`:`${-n} dni po terminie`;
 /* zadanie cykliczne (w produkcji co 15 min po stronie serwera) */
-function runJobs(){
-  const t=today(),ti=iso(t);
-  DB.deadlines.filter(d=>d.status!=='done'&&!d.deleted).forEach(d=>{
-    const c=CASE(d.caseId);if(!c||c.deleted)return;const lead=leadOf(c)?.userId,n=dayDiff(t,parseD(d.final));
-    const base=[d.responsible],ctrl=d.controller?[d.controller]:[];
-    const steps=[[14,'T-14',base,'normalne'],[7,'T-7',[...base,...ctrl],'normalne'],[3,'T-3',[...base,...ctrl,lead],'wazne'],[1,'T-1',[...base,...ctrl,lead],'pilne'],[0,'T-0',[...base,...ctrl,lead],'pilne']];
-    // najbliższy osiągnięty próg (np. 5 dni do terminu → T-7); każdy próg generuje się dokładnie raz
-    const st=n>=0?steps.filter(s=>n<=s[0]).pop():null;
-    if(st){const [k,lab,rcp,pr]=st;notify('deadline.approaching',c.id,`${k===0?'Dziś mija termin':'Zbliża się termin'}: ${d.title}`,`${c.number} · ${fD(d.final)}${d.time?' '+d.time:''} · ${lab}`,rcp,{priority:pr,action:k<=1,key:`${d.id}:${lab}`})}
-    if(n<0)notify('deadline.overdue',c.id,`Przekroczony termin: ${d.title}`,`${c.number} · ${-n} dni po terminie — eskalacja`,[...base,lead,...admins()],{priority:'pilne',action:true,key:`${d.id}:over:${ti}`});
-  });
-  // wygasłe nadania uprawnień
-  Object.entries(DB.overrides||{}).forEach(([u,o])=>Object.entries(o).forEach(([p,v])=>{if(v.until&&v.until<ti&&!v.expiredLogged){v.expiredLogged=true;audit('uprawnienie.wygaslo',U(u).name,`${PERM_NAME[p]} (ważne do ${fD(v.until)})`)}}));
-}
 
-/* --- Dane przykładowe (zgodne z makietami specyfikacji v1.1) --- */
+/* --- Słowniki (zgodne ze specyfikacją v1.1) --- */
 const STD_STAGES=['Przyjęcie sprawy','Rejestracja klienta','Wybór rodzaju sprawy','Kontrola konfliktu interesów','Opłata wstępna','Kwalifikacja','Analiza','Umowa','Przygotowanie','Złożenie pozwu'];
 const RST_STAGES=['Analiza sytuacji finansowej','Kontrola konfliktu interesów','Opłata wstępna','Wybór postępowania','Przygotowanie wniosku','Złożenie wniosku','Otwarcie postępowania','Plan spłaty / układ','Wykonanie planu'];
 const ENTRY_KINDS=['przygotowanie dokumentu','analiza','złożenie pisma','kontakt z klientem','rozprawa','rozliczenie','inna'];
@@ -381,125 +323,9 @@ const MEMBER_ROLES={lead:'Pełnomocnik prowadzący',second:'Drugi pełnomocnik',
 const ALLOC_TYPES={sales:'Przedstawiciel handlowy',marketing:'Budżet marketingowy',attorney:'Wynagrodzenie pełnomocnika',company:'Pozostała kwota (alokacja spółki)',other:'Inne'};
 const ALLOC_ST={planned:'planowane',approved:'zatwierdzone',due:'należne',paid:'wypłacone'};
 
-function seed(){
-  const T=today(),D=n=>iso(nextWorkday(addDays(T,n))),past=n=>new Date(Date.now()-n*864e5).toISOString();
-  const db={version:1,created:nowISO(),
-    users:[
-      {id:'u1',name:'Maria Wójcik',role:'admin',email:'m.wojcik@kancelaria.test',color:'#7c5cff'},
-      {id:'u2',name:'Jan Nowak',role:'att',email:'j.nowak@kancelaria.test',color:'#3b82f6'},
-      {id:'u3',name:'Piotr Wiśniewski',role:'att',email:'p.wisniewski@kancelaria.test',color:'#14b8a6'},
-      {id:'u4',name:'Anna Kowalska',role:'app',email:'a.kowalska@kancelaria.test',color:'#ec4899'},
-      {id:'u5',name:'Katarzyna Lis',role:'office',email:'k.lis@kancelaria.test',color:'#f59e0b'},
-      {id:'u6',name:'Tomasz Kamiński',role:'tech',email:'it@kancelaria.test',color:'#64748b'}],
-    categories:[
-      {code:'RST',name:'Restrukturyzacja',color:'#8b5cf6',order:1,active:true,template:'rst'},
-      {code:'SKD',name:'SKD — sankcja kredytu darmowego',color:'#f59e0b',order:2,active:true,template:'std'},
-      {code:'CHF',name:'Kredyt frankowy',color:'#ef4444',order:3,active:true,template:'std'},
-      {code:'PLN',name:'Kredyt złotówkowy',color:'#3b82f6',order:4,active:true,template:'std'},
-      {code:'FX',name:'Kredyt walutowy (EUR, JPY i inne)',color:'#14b8a6',order:5,active:true,template:'std',currency:true},
-      {code:'ROD',name:'Rozwód i sprawy rodzinne',color:'#ec4899',order:6,active:true,template:'std'},
-      {code:'CIV',name:'Inne sprawy cywilne',color:'#22c55e',order:7,active:true,template:'std'},
-      {code:'INNE',name:'Pozostałe sprawy',color:'#94a3b8',order:8,active:true,template:'std'}],
-    currencies:['EUR','JPY','USD','GBP','inne'],
-    templates:{std:STD_STAGES.map((n,i)=>({id:'s'+(i+1),name:n,approval:true,conflict:n==='Kontrola konfliktu interesów'})),
-               rst:RST_STAGES.map((n,i)=>({id:'r'+(i+1),name:n,approval:true,conflict:n==='Kontrola konfliktu interesów'}))},
-    counters:{},clients:[],cases:[],members:[],stages:[],entries:[],documents:[],deadlines:[],notifications:[],
-    payments:[],allocations:[],fees:[],history:[],audit:[],corrections:[],leads:[],overrides:{},
-    holidays:[{date:'01-01',name:'Nowy Rok',fixed:true},{date:'01-06',name:'Trzech Króli',fixed:true},{date:'05-01',name:'Święto Pracy',fixed:true},{date:'05-03',name:'Święto Konstytucji 3 Maja',fixed:true},{date:'08-15',name:'Wniebowzięcie NMP',fixed:true},{date:'11-01',name:'Wszystkich Świętych',fixed:true},{date:'11-11',name:'Święto Niepodległości',fixed:true},{date:'12-24',name:'Wigilia',fixed:true},{date:'12-25',name:'Boże Narodzenie',fixed:true},{date:'12-26',name:'Drugi dzień Bożego Narodzenia',fixed:true}],
-    backups:[0,1,2,3,4,5,6].map(i=>({at:past(i+.1),size:(48+i*.7).toFixed(1)+' MB',ok:true,where:'Magazyn zewnętrzny (UE), szyfrowany'})),
-    lastRestoreTest:iso(addDays(T,-41))};
-  DB=db;ME={id:'system',role:'admin'};
-  const year=T.getFullYear();
-  const mk=(code,num,cl,o)=>{
-    const id=uid('c');db.counters[`${code}-${year}`]=Math.max(db.counters[`${code}-${year}`]||0,num);
-    const clientId=uid('k');db.clients.push({id:clientId,...cl});
-    const c={id,number:`${code}-${year}-${pad(num).padStart(4,'0')}`,category:code,status:o.status||'open',clientId,court:o.court||'',signature:o.sig||'',value:o.value||0,initialFee:o.fee||0,successFee:o.sf??10,currency:o.cur||'',openedAt:iso(addDays(T,-(o.age||20))),closedAt:o.status==='closed'?iso(addDays(T,-3)):null,source:o.source||'Polecenie'};
-    db.cases.push(c);
-    const tpl=db.templates[CAT(code).template==='rst'?'rst':'std'];
-    tpl.forEach((s,i)=>db.stages.push({id:uid('st'),caseId:id,stageId:s.id,order:i+1,name:s.name,status:i<o.stage-1?'approved':i===o.stage-1?'open':'todo',responsible:o.lead,approvedBy:i<o.stage-1?'u1':null,approvedAt:i<o.stage-1?past(30-i):null,conflict:s.conflict?(i<o.stage-1?'brak konfliktu':null):undefined}));
-    (o.team||[]).forEach(([u,r,f])=>db.members.push({id:uid('m'),caseId:id,userId:u,role:r,startDate:iso(addDays(T,-(o.age||20))),endDate:null,accessDocuments:true,accessActions:true,accessFinance:r!=='app',scope:'',canApprove:r==='lead',grantedBy:'u1',grantedAt:past(o.age||20),...(f||{})}));
-    db.history.push({id:uid('h'),caseId:id,ts:past(o.age||20),user:'u1',text:`Założono sprawę ${c.number}`});
-    return c;
-  };
-  const c1=mk('SKD',1,{first:'Jan',last:'Kowalski',pesel:'80010112345',address:'ul. Warszawska 10, 00-001 Warszawa',phone:'123 456 789',email:'jan.kowalski@email.test'},{court:'Sąd Rejonowy w Warszawie',sig:'I C 126/26',value:250000,fee:5000,sf:10,stage:7,lead:'u2',age:11,team:[['u2','lead'],['u3','second'],['u4','app',{accessFinance:false,scope:'Wsparcie przy przygotowaniu pozwu'}]],source:'Formularz na stronie'});
-  const c2=mk('CHF',3,{first:'Anna',last:'Nowak',pesel:'75061498765',address:'ul. Lipowa 4, 02-100 Warszawa',phone:'600 100 200',email:'anna.nowak@email.test'},{court:'Sąd Okręgowy w Warszawie',sig:'XXVIII C 4410/25',value:540000,fee:6000,sf:12,stage:10,lead:'u2',age:120,team:[['u2','lead'],['u4','app',{accessFinance:false}]]});
-  const c3=mk('CIV',10,{first:'Piotr',last:'Zieliński',pesel:'90030355512',address:'ul. Polna 22, 30-001 Kraków',phone:'511 222 333',email:'p.zielinski@email.test'},{court:'Sąd Rejonowy dla Krakowa-Śródmieścia',sig:'I C 2210/26',value:42000,fee:2000,sf:8,stage:9,lead:'u3',age:40,team:[['u3','lead']]});
-  const c4=mk('PLN',2,{first:'Ewa',last:'Malinowska',pesel:'85121244411',address:'ul. Słoneczna 1, 80-001 Gdańsk',phone:'722 333 444',email:'ewa.m@email.test'},{court:'Sąd Okręgowy w Gdańsku',sig:'I C 778/26',value:380000,fee:4000,sf:10,stage:8,lead:'u2',age:60,team:[['u2','lead'],['u5','assist',{accessFinance:false,canApprove:false}]]});
-  const c5=mk('RST',1,{first:'Marek',last:'Dąbrowski',pesel:'78070712399',address:'ul. Fabryczna 9, 90-001 Łódź',phone:'533 444 555',email:'biuro@dabrowski-firma.test'},{court:'Sąd Rejonowy dla Łodzi-Śródmieścia, Wydział Gospodarczy',sig:'',value:620000,fee:8000,sf:0,stage:4,lead:'u3',age:18,team:[['u3','lead'],['u4','app',{accessFinance:false}]]});
-  const c6=mk('FX',1,{first:'Katarzyna',last:'Wrona',pesel:'82020233344',address:'ul. Ogrodowa 3, 50-001 Wrocław',phone:'698 765 432',email:'k.wrona@email.test'},{court:'Sąd Okręgowy we Wrocławiu',sig:'I C 91/26',value:310000,fee:5000,sf:10,stage:10,lead:'u3',age:90,cur:'EUR',team:[['u3','lead'],['u2','second']]});
-  const c7=mk('ROD',4,{first:'Tomasz',last:'Lewandowski',pesel:'88090911122',address:'ul. Krótka 7, 61-001 Poznań',phone:'501 600 700',email:'t.lewandowski@email.test'},{court:'Sąd Okręgowy w Poznaniu',sig:'XII RC 301/26',value:0,fee:3000,sf:0,stage:6,lead:'u2',age:25,team:[['u2','lead']]});
-  const c8=mk('SKD',2,{first:'Agnieszka',last:'Mazur',pesel:'93050566677',address:'ul. Długa 15, 20-001 Lublin',phone:'664 111 222',email:'a.mazur@email.test'},{value:18000,fee:500,sf:25,stage:3,lead:'u3',age:4,team:[['u3','lead'],['u4','app',{accessFinance:false}]],source:'Formularz na stronie'});
-  const c9=mk('CHF',1,{first:'Robert',last:'Kaczmarek',pesel:'70040477788',address:'ul. Lipowa 40, 40-001 Katowice',phone:'609 888 999',email:'r.kaczmarek@email.test'},{court:'Sąd Okręgowy w Katowicach',sig:'II C 1201/24',value:410000,fee:6000,sf:12,stage:10,lead:'u2',age:400,status:'closed',team:[['u2','lead']]});
-  const c10=mk('INNE',1,{first:'Halina',last:'Szymańska',pesel:'60111122233',address:'ul. Zielona 2, 10-001 Olsztyn',phone:'577 222 111',email:'h.szymanska@email.test'},{value:15000,fee:800,sf:0,stage:2,lead:'u3',age:70,status:'suspended',team:[['u3','lead']]});
-  db.cases.forEach(c=>{if(c.status==='closed')db.stages.filter(s=>s.caseId===c.id).forEach(s=>{s.status='approved';s.approvedBy='u1';s.approvedAt=s.approvedAt||past(20)})});
-  // wpisy (makieta §7)
-  const st=(c,n)=>db.stages.find(s=>s.caseId===c.id&&s.order===n);
-  const E=(c,n,o)=>{const e={id:uid('e'),caseId:c.id,stage:st(c,n).id,type:'czynność',kind:'analiza',title:'',desc:'',performedOn:iso(T),performedBy:'u2',approvedBy:null,approvedAt:null,next:null,status:'draft',locked:false,files:[],versions:[],created:past(1),...o};db.entries.push(e);return e};
-  E(c1,6,{type:'czynność',kind:'przygotowanie dokumentu',title:'Przygotowanie dokumentów do złożenia pozwu',desc:'Zebrano umowę kredytową, harmonogram spłat i zaświadczenie z banku.',performedOn:iso(addDays(T,-3)),performedBy:'u4',approvedBy:'u2',approvedAt:past(2.5),status:'approved',locked:true,files:['Pozew_SKD.pdf'],created:past(3)});
-  E(c1,7,{type:'czynność',kind:'kontakt z klientem',title:'Kontakt z klientem — ustalenie szczegółów sprawy',desc:'Rozmowa telefoniczna; klient dośle aneks do umowy.',performedOn:iso(addDays(T,-2)),performedBy:'u2',approvedBy:'u2',approvedAt:past(1.8),status:'approved',locked:true,files:['Notatka.docx'],created:past(2)});
-  E(c1,7,{type:'czynność',kind:'analiza',title:'Analiza umowy kredytowej — wykryto nieprawidłowości',desc:'RRSO zawyżone przez odsetki od kredytowanej prowizji; brak informacji o skutkach zmiany oprocentowania.',performedOn:iso(addDays(T,-1)),performedBy:'u4',status:'draft',files:['Analiza_umowy.pdf'],created:past(1),versions:[{at:past(1.2),by:'u4',title:'Analiza umowy kredytowej',desc:'Wstępna analiza umowy.'}]});
-  E(c1,7,{type:'notatka',kind:'inna',title:'Wynik kalkulatora ze strony',desc:'Klient sprawdził na stronie „Sankcja kredytu darmowego”: szacowana korzyść 15 894 zł (kwota 30 000 zł, koszty 6 000 zł, 10%, 60 rat, 24 zapłacone).',performedBy:'u5',status:'approved',locked:true,approvedBy:'u2',approvedAt:past(9),created:past(11)});
-  E(c3,9,{type:'czynność',kind:'złożenie pisma',title:'Projekt pozwu',desc:'Projekt pozwu o zapłatę z wnioskiem o zabezpieczenie.',performedBy:'u3',status:'draft',files:['Pozew_projekt.docx']});
-  E(c5,4,{type:'notatka',kind:'analiza',title:'Wybór postępowania',desc:'Rozważamy postępowanie o zatwierdzenie układu (PZU) — szybkie i bez obwieszczeń dla kontrahentów.',performedBy:'u3',status:'draft'});
-  // dokumenty z wersjami (§7)
-  const doc=(c,name,by,vers=1,stage)=>db.documents.push({id:uid('d'),caseId:c.id,stage:stage?st(c,stage).id:null,name,versions:Array.from({length:vers},(_,i)=>({v:i+1,at:past(10-i*3),by,size:Math.round(80+Math.random()*900)+' KB',sha:sha256(name+i)})),deleted:false});
-  doc(c1,'Umowa_kredytowa.pdf','u5',1,1);doc(c1,'Pozew_SKD.pdf','u4',2,6);doc(c1,'Pełnomocnictwo_JN.pdf','u2',1,2);
-  doc(c2,'Pozew_CHF.pdf','u2',3,10);doc(c2,'Opinia_biegłego.pdf','u2',1,10);doc(c4,'Harmonogram_spłat.xlsx','u5',1,1);doc(c5,'Bilans_2025.pdf','u3',1,1);
-  // terminy (makieta §5)
-  const DL=(c,o)=>{const d={id:uid('t'),caseId:c.id,type:'statutory',title:'',trigger:null,len:null,unit:'dni',computed:null,final:null,time:'',responsible:leadOf(c)?.userId||'u2',controller:null,controllerOk:null,status:'open',doneAt:null,doneBy:null,proof:null,versions:[],created:past(5),...o};d.computed=d.computed||d.final;db.deadlines.push(d)};
-  DL(c4,{type:'internal',title:'Wniosek dowodowy',final:iso(addDays(T,-3)),responsible:'u2'});
-  DL(c1,{type:'statutory',title:'Odpowiedź na pozew',trigger:iso(addDays(T,-13)),len:14,unit:'dni',final:D(1),time:'10:00',responsible:'u2',controller:'u3',controllerOk:past(8)});
-  DL(c2,{type:'court',title:'Rozprawa',final:D(4),time:'09:30',responsible:'u2'});
-  DL(c3,{type:'statutory',title:'Uzupełnienie braków formalnych',trigger:iso(addDays(T,-0)),len:7,unit:'dni',final:D(7),responsible:'u3',controller:'u2',controllerOk:null});
-  DL(c6,{type:'statutory',title:'Apelacja',trigger:iso(addDays(T,-1)),len:14,unit:'dni',final:D(13),responsible:'u3',controller:'u1',controllerOk:null});
-  DL(c7,{type:'court',title:'Posiedzenie mediacyjne',final:D(20),time:'11:00',responsible:'u2'});
-  DL(c8,{type:'internal',title:'Pozyskać harmonogram spłat od klienta',final:iso(T),responsible:'u4'});
-  DL(c5,{type:'internal',title:'Lista wierzycieli do wniosku',final:D(10),responsible:'u4'});
-  DL(c9,{type:'statutory',title:'Odpowiedź na apelację',final:iso(addDays(T,-30)),responsible:'u2',status:'done',doneAt:iso(addDays(T,-31)),doneBy:'u2',proof:'UPO_odpowiedz.pdf'});
-  db.deadlines.forEach(d=>{if(!d.computed)d.computed=d.final});
-  // finanse (makieta §8)
-  const pay=(c,amount,o)=>{const p={id:uid('p'),caseId:c.id,amount,currency:'PLN',receivedOn:iso(addDays(T,-(o.ago||5))),payer:CLIENT(c.clientId).first+' '+CLIENT(c.clientId).last,title:o.title||'Opłata wstępna',status:'potwierdzona',version:1,history:[]};db.payments.push(p);
-    (o.alloc||[]).forEach(([type,who,amt,status])=>db.allocations.push({id:uid('a'),paymentId:p.id,caseId:c.id,type,recipient:who,amount:amt,status,date:p.receivedOn,basis:o.basis||'Umowa współpracy',version:1,history:[]}));return p};
-  pay(c1,10000,{ago:9,title:'Wpłata klienta',alloc:[['sales','Kamil Nowicki',3000,'approved'],['marketing','',2000,'approved'],['attorney','u2',1000,'due'],['company','',4000,'approved']]});
-  pay(c2,6000,{ago:110,alloc:[['attorney','u2',1500,'paid'],['company','',4500,'approved']]});
-  pay(c3,2000,{ago:35,alloc:[['attorney','u3',800,'paid'],['company','',1200,'approved']]});
-  pay(c4,4000,{ago:55,alloc:[['sales','Kamil Nowicki',1000,'planned'],['attorney','u2',1000,'planned']]});
-  pay(c6,5000,{ago:80,alloc:[['attorney','u3',1500,'paid'],['company','',3500,'approved']]});
-  pay(c8,500,{ago:2});
-  pay(c9,6000,{ago:390,alloc:[['attorney','u2',2000,'paid'],['company','',4000,'approved']]});
-  pay(c9,49200,{ago:6,title:'Success fee (12% zasądzonej kwoty)',alloc:[['attorney','u2',9840,'due'],['company','',39360,'approved']]});
-  db.cases.forEach(c=>{const l=leadOf(c);if(l)db.fees.push({id:uid('f'),caseId:c.id,userId:l.userId,base:c.initialFee?Math.round(c.initialFee*.2):0,sfType:'percent',sfValue:c.successFee?Math.round(c.successFee*.2*10)/10:0,sfBasis:'kwota zasądzona i wyegzekwowana',sfCondition:'prawomocny wyrok uwzględniający powództwo',sfStatus:c.status==='closed'?'spełniony':'niespełniony',version:1,history:[]})});
-  // zgłoszenia ze strony (przykładowe; prawdziwe z formularza dochodzą z localStorage pk_leads)
-  db.leads=[{id:'Ldemo1',created:past(.3),category:'CHF',calc:{name:'Kredyt frankowy i walutowy',outputs:[{label:'Szacowana korzyść z unieważnienia',value:400000,unit:'zł',main:true},{label:'Wpłacone do banku',value:450000,unit:'zł'}],inputs:[{label:'Kwota wypłacona przez bank',value:300000,unit:'zł'},{label:'Średnia rata dotychczas',value:2500,unit:'zł'},{label:'Zapłacone raty',value:180,unit:'mies.'},{label:'Pozostało do spłaty wg banku',value:250000,unit:'zł'}]},client:{name:'Michał Zawadzki',phone:'600 700 800',email:'m.zawadzki@email.test'},message:'Kredyt z 2008 r. w Banku X, mam umowę i aneksy.',status:'nowe',demo:true},
-            {id:'Ldemo2',created:past(1.4),category:'RST',calc:{name:'Restrukturyzacja i oddłużenie',outputs:[{label:'Szacowane umorzenie',value:96000,unit:'zł',main:true}],inputs:[{label:'Suma wszystkich długów',value:150000,unit:'zł'}]},client:{name:'Barbara Kubiak',phone:'512 345 678',email:''},message:'',status:'nowe',demo:true}];
-  // audyt startowy
-  ME={id:'u1',role:'admin'};audit('system.start','Baza przykładowa','Utworzono dane przykładowe prototypu');
-  db.users.forEach(u=>audit('uzytkownik.utworzony',u.name,'Rola: '+ROLES[u.role]));
-  audit('zespol.dolaczono',c1.number,'Anna Kowalska (aplikant) · zakres: dokumenty, czynności (bez finansów)');
-  db.history.push({id:uid('h'),caseId:c1.id,ts:past(.2),user:'u1',text:'Administrator dołączył Annę Kowalską (aplikant) · zakres: dokumenty, czynności'});
-  db.history.push({id:uid('h'),caseId:c1.id,ts:past(3),user:'u5',text:'Zmiana danych klienta: adres',field:'Adres',before:'ul. Warszawska 8, 00-001 Warszawa',after:'ul. Warszawska 10, 00-001 Warszawa'});
-  ME=null;return db;
-}
-function loadDB(){
-  try{DB=JSON.parse(store.get(DB_KEY))}catch(e){DB=null}
-  if(!DB||DB.version!==1){DB=seed();save()}
-}
-function importLeads(){
-  // zgłoszenia z formularza na stronie (tryb test → localStorage tej samej domeny)
-  let ext=[];try{ext=JSON.parse(store.get('pk_leads')||'[]')}catch(e){}
-  let n=0;ext.forEach(l=>{if(!DB.leads.some(x=>x.id===l.id)){DB.leads.unshift({...l,status:l.status||'nowe',fromSite:true});n++}});
-  if(n){DB.users.filter(u=>can('new_cases',u)).forEach(u=>notify('lead.new',null,`Nowe zgłoszenie ze strony (${n})`,'Formularz „Co mi się należy”',[u.id],{priority:'wazne',action:true,key:'lead:'+ext[0].id}));save()}
-}
 
 /* --- UI: toast, modal, awatary, odznaki --- */
 function toast(m,err){const t=$('#toast');t.textContent=m;t.classList.toggle('err',!!err);t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600)}
-function modal(title,body,{ok='Zapisz',wide=false,onOk,cancel='Anuluj',danger=false}={}){
-  const M=$('#modal');$('#mbox').className='mbox'+(wide?' wide':'');
-  $('#mbox').innerHTML=`<div class="mhead"><h2>${esc(title)}</h2><button class="icon-btn" data-x>✕</button></div><form id="mform">${body}<div class="mfoot">${cancel?`<button type="button" class="btn" data-x>${esc(cancel)}</button>`:''}${ok?`<button class="btn ${danger?'del':'pri'}">${esc(ok)}</button>`:''}</div></form>`;
-  M.classList.add('show');$$('[data-x]',M).forEach(b=>b.onclick=closeModal);
-  $('#mform').onsubmit=e=>{e.preventDefault();try{const r=onOk?.(Object.fromEntries(new FormData(e.target)),e.target);if(r!==false)closeModal()}catch(err){if(err.code===403)toast(err.message,true);else{console.error(err);toast(err.message||'Błąd',true)}}};
-  setTimeout(()=>$('#mform input:not([type=hidden]),#mform select,#mform textarea')?.focus(),30);
-}
 const closeModal=()=>$('#modal').classList.remove('show');
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
 addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
@@ -511,18 +337,6 @@ const stBadge=s=>`<span class="badge ${{open:'b-acc',suspended:'b-warn',closed:'
 const clientName=c=>{const k=CLIENT(c.clientId);return `${k.first||''} ${k.last||''}`.trim()};
 const maskPesel=p=>p?String(p).slice(0,6)+'*****':'—';
 
-/* --- logowanie (prototyp) --- */
-function renderLogin(){
-  $('#users').innerHTML=DB.users.filter(u=>u.active!==false).map(u=>`<button class="ucard" data-u="${u.id}">${av(u.id,40)}<div><b>${esc(u.name)}</b><small>${esc(ROLES[u.role])}</small></div></button>`).join('');
-  $$('#users .ucard').forEach(b=>b.onclick=()=>login(b.dataset.u));
-}
-function login(id){
-  ME=U(id);store.set(SESS_KEY,id);audit('logowanie',ME.name,'Prototyp: logowanie bez hasła (produkcja: hasło + 2FA)');save();
-  $('#login').style.display='none';$('#app').style.display='grid';
-  if(!location.hash||location.hash==='#')location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
-}
-$('#logout').onclick=()=>{audit('wylogowanie',ME.name,'');save();ME=null;store.del(SESS_KEY);$('#app').style.display='none';$('#login').style.display='grid';renderLogin();location.hash=''};
-$('#resetAll').onclick=e=>{e.preventDefault();if(!confirm('Przywrócić dane przykładowe? Wszystkie zmiany w prototypie zostaną usunięte.'))return;DB=seed();save();renderLogin();toast('Przywrócono dane przykładowe')};
 const th=store.get('theme');if(th)document.documentElement.dataset.theme=th;
 $('#theme').onclick=()=>{const v=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=v;store.set('theme',v)};
 
@@ -640,43 +454,6 @@ function nextNumber(code){
   // w produkcji: w transakcji bazy (SELECT … FOR UPDATE) — bez duplikatów
   const y=today().getFullYear(),k=`${code}-${y}`;DB.counters[k]=(DB.counters[k]||0)+1;return `${code}-${y}-${String(DB.counters[k]).padStart(4,'0')}`;
 }
-function newCaseModal(pre={}){
-  need(canCreateCase(),'Zakładanie spraw: Administrator lub Biuro.');
-  const cats=DB.categories.filter(c=>c.active).sort((a,b)=>a.order-b.order),atts=DB.users.filter(u=>u.role==='att'&&u.active!==false);
-  const [first='',...rest]=(pre.client?.name||'').split(' ');
-  modal('Nowa sprawa',`<div class="form">
-    <label>Kategoria<select class="f" name="category" id="ncCat">${cats.map(c=>`<option value="${c.code}" ${pre.category===c.code?'selected':''}>${esc(c.code)} — ${esc(c.name)}</option>`).join('')}</select></label>
-    <label id="ncCur" style="display:none">Waluta<select class="f" name="currency">${DB.currencies.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label>
-    <label>Pełnomocnik prowadzący<select class="f" name="lead">${atts.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select></label>
-    <label>Imię<input class="f" name="first" required value="${esc(first)}"></label><label>Nazwisko<input class="f" name="last" required value="${esc(rest.join(' '))}"></label>
-    <label>PESEL<input class="f" name="pesel" pattern="\\d{11}" placeholder="11 cyfr (opcjonalnie)"></label>
-    <label>Telefon<input class="f" name="phone" value="${esc(pre.client?.phone||'')}"></label><label>E-mail<input class="f" name="email" type="email" value="${esc(pre.client?.email||'')}"></label>
-    <label class="full">Adres<input class="f" name="address"></label>
-    <label>Wartość sporu (zł)<input class="f" type="number" name="value" min="0" step="0.01" value="${esc(pre.value||'')}"></label>
-    <label>Opłata wstępna (zł)<input class="f" type="number" name="fee" min="0" step="0.01"></label>
-    <label>Success fee (%)<input class="f" type="number" name="sf" min="0" max="50" step="0.5" value="10"></label></div>
-    <p class="hint">Numer nadawany automatycznie: KOD-ROK-NNNN (osobny licznik dla kodu i roku). Zmiana kategorii później — tylko Administrator; numer się nie zmienia.</p>
-    ${pre.leadId?'<div class="note info" style="margin-top:10px">Wynik kalkulatora ze zgłoszenia zostanie dołączony do sprawy (zakładka Analiza i notatka w pierwszym etapie).</div>':''}`,
-  {ok:'Załóż sprawę',onOk:f=>{
-    const n=nextNumber(f.category),cid=uid('k'),id=uid('c');
-    DB.clients.push({id:cid,first:f.first.trim(),last:f.last.trim(),pesel:f.pesel||'',address:f.address||'',phone:f.phone||'',email:f.email||''});
-    const c={id,number:n,category:f.category,status:'open',clientId:cid,court:'',signature:'',value:+f.value||0,initialFee:+f.fee||0,successFee:+f.sf||0,currency:CAT(f.category).currency?f.currency:'',openedAt:iso(today()),closedAt:null,source:pre.leadId?'Formularz na stronie':'Wprowadzona ręcznie',leadId:pre.leadId||null};
-    DB.cases.push(c);
-    const tpl=DB.templates[CAT(f.category).template==='rst'?'rst':'std'];
-    tpl.forEach((s,i)=>DB.stages.push({id:uid('st'),caseId:id,stageId:s.id,order:i+1,name:s.name,status:i===0?'open':'todo',responsible:f.lead,approvedBy:null,approvedAt:null,conflict:s.conflict?null:undefined}));
-    DB.members.push({id:uid('m'),caseId:id,userId:f.lead,role:'lead',startDate:iso(today()),endDate:null,accessDocuments:true,accessActions:true,accessFinance:true,scope:'Prowadzenie sprawy',canApprove:true,grantedBy:ME.id,grantedAt:nowISO()});
-    DB.fees.push({id:uid('f'),caseId:id,userId:f.lead,base:0,sfType:'percent',sfValue:0,sfBasis:'',sfCondition:'',sfStatus:'niespełniony',version:1,history:[]});
-    hist(id,`Założono sprawę ${n} (${CAT(f.category).name})`);hist(id,`Pełnomocnik prowadzący: ${U(f.lead).name}`);
-    if(pre.leadId){const L=DB.leads.find(l=>l.id===pre.leadId);L.status='przyjęte';L.caseId=id;c.leadData=L.calc;
-      const st=DB.stages.find(s=>s.caseId===id&&s.order===1);
-      DB.entries.push({id:uid('e'),caseId:id,stage:st.id,type:'notatka',kind:'inna',title:'Zgłoszenie ze strony — wynik kalkulatora',desc:`${L.calc.name}: ${L.calc.outputs.map(o=>`${o.label} ${o.value?.toLocaleString?.('pl-PL')??'—'} ${o.unit||''}`).join('; ')}${L.message?`\nWiadomość klienta: ${L.message}`:''}`,performedOn:iso(today()),performedBy:ME.id,status:'draft',locked:false,files:[],versions:[],created:nowISO()});
-      hist(id,'Sprawa utworzona ze zgłoszenia na stronie');}
-    audit('sprawa.utworzona',n,`Klient: ${f.first} ${f.last}; kategoria ${f.category}`);
-    notify('case.new',id,`Nowa sprawa ${n}`,`${f.first} ${f.last} · ${CAT(f.category).name}`,[...admins(),f.lead],{priority:'normalne'});
-    save();toast(`Założono sprawę ${n}`);location.hash=`#/sprawa/${id}`;
-  }});
-  const sync=()=>$('#ncCur').style.display=CAT($('#ncCat').value).currency?'':'none';$('#ncCat').onchange=sync;sync();
-}
 
 /* ===================== NOWE SPRAWY (zgłoszenia z frontu) ===================== */
 ROUTES.nowe=()=>{
@@ -695,8 +472,6 @@ ROUTES.nowe=()=>{
     
     ${L.length?L.map(card).join(''):'<div class="empty">Brak zgłoszeń</div>'}`;
 };
-function leadToCase(id){const l=DB.leads.find(x=>x.id===id);const v=l.calc?.inputs?.find(i=>/kwota/i.test(i.label));newCaseModal({leadId:id,category:l.category,client:l.client,value:v?.value})}
-function rejectLead(id){askReason('Odrzuć zgłoszenie','Powód (np. poza zakresem, brak kontaktu)',r=>{const l=DB.leads.find(x=>x.id===id);l.status='odrzucone';l.reason=r;audit('zgloszenie.odrzucone',l.client.name,r);save();rerender()},{ok:'Odrzuć'})}
 
 /* ===================== KARTA SPRAWY ===================== */
 const TABS=[['klient','Dane klienta'],['finanse','Finanse'],['terminy','Terminy'],['etapy','Etapy'],['dokumenty','Dokumenty'],['zespol','Zespół'],['analiza','Analiza'],['historia','Historia działań']];
@@ -742,34 +517,6 @@ CTAB.klient=c=>{
     <p class="hint">Przypomnienia: 14, 7, 3, 1 dzień i w dniu terminu. Po przekroczeniu — eskalacja do Administratora.</p>`:'<div class="empty">Brak otwartych terminów</div>'}</div></div>
   <div class="card" style="margin-top:14px"><h3>Historia działań <a class="btn sm" href="#/sprawa/${c.id}/historia">Pełna historia →</a></h3>${timeline(DB.history.filter(h=>h.caseId===c.id).slice(-4).reverse())}</div>`;
 };
-function revealPesel(id){need(can('pesel'),'Brak uprawnienia do pełnego PESEL.');const c=CASE(id);shownPesel.add(id);audit('pesel.odsloniecie',c.number,'Wyświetlono pełny PESEL klienta');save();rerender();setTimeout(()=>{shownPesel.delete(id);if(location.hash.includes(id))rerender()},30000);toast('PESEL widoczny przez 30 s · zapisano w audycie')}
-function editClient(id){
-  const c=CASE(id),k=CLIENT(c.clientId);
-  modal('Edytuj dane klienta',`<div class="form">${[['first','Imię'],['last','Nazwisko'],['phone','Telefon'],['email','E-mail']].map(([f,l])=>`<label>${l}<input class="f" name="${f}" value="${esc(k[f]||'')}"></label>`).join('')}<label class="full">Adres<input class="f" name="address" value="${esc(k.address||'')}"></label></div><p class="hint">Każda zmiana pola zapisze się w „Historii działań” z wartością przed i po.</p>`,{onOk:f=>{
-    const L={first:'Imię',last:'Nazwisko',phone:'Telefon',email:'E-mail',address:'Adres'};let n=0;
-    Object.keys(L).forEach(x=>{const v=(f[x]||'').trim();if(v!==(k[x]||'')){hist(c.id,`Zmiana danych klienta: ${L[x].toLowerCase()}`,L[x],k[x]||'',v);k[x]=v;n++}});
-    if(n){audit('klient.zmiana',c.number,`${n} pól`);save();rerender();toast('Zapisano zmiany')}
-  }});
-}
-function editCaseInfo(id){
-  const c=CASE(id);
-  modal('Podstawowe informacje',`<div class="form"><label>Sąd<input class="f" name="court" value="${esc(c.court)}"></label><label>Sygnatura<input class="f" name="signature" value="${esc(c.signature)}"></label>
-    <label>Wartość sporu (zł)<input class="f" type="number" step="0.01" name="value" value="${c.value}"></label><label>Opłata wstępna (zł)<input class="f" type="number" step="0.01" name="initialFee" value="${c.initialFee}"></label><label>Success fee (%)<input class="f" type="number" step="0.5" name="successFee" value="${c.successFee}"></label></div>`,{onOk:f=>{
-    const L={court:'Sąd',signature:'Sygnatura',value:'Wartość sporu',initialFee:'Opłata wstępna',successFee:'Success fee'};
-    Object.keys(L).forEach(x=>{const v=['value','initialFee','successFee'].includes(x)?+f[x]||0:(f[x]||'').trim();if(v!==c[x]){hist(c.id,`Zmiana: ${L[x].toLowerCase()}`,L[x],c[x],v);c[x]=v}});
-    audit('sprawa.zmiana',c.number,'Podstawowe informacje');save();rerender();
-  }});
-}
-function caseAdminModal(id){
-  const c=CASE(id);need(isAdmin(),'Zmiana statusu i kategorii: tylko Administrator.');
-  modal('Status i kategoria sprawy',`<div class="form"><label>Status<select class="f" name="status">${Object.entries(CASE_STATUS).map(([k,v])=>`<option value="${k}" ${c.status===k?'selected':''}>${v}</option>`).join('')}</select></label>
-    <label>Kategoria<select class="f" name="category">${DB.categories.map(k=>`<option value="${k.code}" ${c.category===k.code?'selected':''}>${k.code} — ${esc(k.name)}</option>`).join('')}</select></label>
-    <label class="full">Uzasadnienie<textarea class="f" name="reason" required minlength="5"></textarea></label></div><p class="hint">Zmiana kategorii nie zmienia numeru sprawy (${esc(c.number)}).</p>`,{onOk:f=>{
-    if(f.status!==c.status){hist(c.id,`Zmiana statusu (${f.reason})`,'Status',CASE_STATUS[c.status],CASE_STATUS[f.status]);if(f.status==='closed'){c.closedAt=iso(today());const l=leadOf(c);notify('case.closed',c.id,`Zakończono sprawę ${c.number}`,'',[l?.userId,...admins()])}c.status=f.status}
-    if(f.category!==c.category){hist(c.id,`Zmiana kategorii (${f.reason})`,'Kategoria',c.category,f.category);c.category=f.category}
-    audit('sprawa.status_kategoria',c.number,f.reason);save();rerender();
-  }});
-}
 function timeline(list){
   if(!list.length)return '<div class="empty">Brak zdarzeń</div>';
   return `<div class="timeline">${list.map(h=>`<div class="tl"><time>${fDT(h.ts)}</time><div><b>${esc(U(h.user).name)}</b> · ${esc(h.text)}${h.field?`<div class="diff">${esc(h.field)}: <s>${esc(h.before??'—')}</s> → <ins>${esc(h.after??'—')}</ins></div>`:''}</div></div>`).join('')}</div>`;
@@ -821,94 +568,9 @@ function entryCard(e,c,stage){
     ${e.versions?.length?`<details style="margin-top:8px"><summary class="small mut" style="cursor:pointer">Historia korekt (${e.versions.length})</summary>${e.versions.map(v=>`<div class="small" style="margin-top:6px;padding-left:10px;border-left:2px solid var(--line)">${fDT(v.at)} · ${esc(U(v.by).name)}${v.reason?` · <i>${esc(v.reason)}</i>`:''}<br><b>${esc(v.title)}</b> — ${esc(v.desc)}</div>`).join('')}</details>`:''}
     <div class="ea">${acts.join('')}</div></div>`;
 }
-function entryModal(caseId,stageId,entryId,adminFix){
-  const c=CASE(caseId),e=entryId&&DB.entries.find(x=>x.id===entryId),f=caseFlags(c);
-  need(f.actions,'Brak uprawnienia do czynności w tej sprawie.');
-  modal(e?(adminFix?'Korekta zatwierdzonego wpisu':'Edytuj wpis'):'Nowy wpis',`<div class="form">
-    <label>Typ<select class="f" name="type"><option ${e?.type==='czynność'?'selected':''}>czynność</option><option ${e?.type==='notatka'?'selected':''}>notatka</option></select></label>
-    <label>Rodzaj<select class="f" name="kind">${ENTRY_KINDS.map(k=>`<option ${e?.kind===k?'selected':''}>${k}</option>`).join('')}</select></label>
-    <label class="full">Nazwa czynności<input class="f" name="title" required value="${esc(e?.title||'')}"></label>
-    <label class="full">Opis wykonanej pracy<textarea class="f" name="desc">${esc(e?.desc||'')}</textarea></label>
-    <label>Data wykonania<input class="f" type="date" name="performedOn" value="${e?.performedOn||iso(today())}"></label>
-    <label>Termin kolejnej czynności<input class="f" type="date" name="next" value="${e?.next||''}"></label>
-    ${e?'':`<label class="full">Załączniki<input class="f" type="file" name="files" multiple accept=".pdf,.doc,.docx,.odt,.xlsx,.jpg,.png,.txt"></label>`}
-    ${adminFix?'<label class="full">Uzasadnienie korekty<textarea class="f" name="reason" required minlength="5"></textarea></label>':''}</div>
-    <p class="hint">${e?'Poprzednia treść zostanie zachowana w „Historii korekt”.':'Wpis jest roboczy do zatwierdzenia etapu — możesz go edytować (każda edycja = wersja). Usunąć zapisany wpis może tylko Administrator.'} Termin kolejnej czynności tworzy zadanie w module Terminy.</p>`,{onOk:(v,form)=>{
-    if(e){
-      need(isAdmin()||(!e.locked&&e.performedBy===ME.id),'Edycja zablokowanego lub cudzego wpisu — 403.');
-      e.versions.push({at:nowISO(),by:ME.id,title:e.title,desc:e.desc,reason:v.reason||''});
-      Object.assign(e,{type:v.type,kind:v.kind,title:v.title,desc:v.desc,performedOn:v.performedOn,next:v.next||null});
-      hist(c.id,`${adminFix?'Korekta (Administrator)':'Edycja wpisu'}: ${e.title}`);audit(adminFix?'wpis.korekta_admin':'wpis.edycja',c.number,`${e.title}${v.reason?' · '+v.reason:''}`);
-    }else{
-      const files=[...(form.files?.files||[])].map(x=>x.name);
-      const ne={id:uid('e'),caseId:c.id,stage:stageId,type:v.type,kind:v.kind,title:v.title,desc:v.desc,performedOn:v.performedOn,performedBy:ME.id,approvedBy:null,approvedAt:null,next:v.next||null,status:'draft',locked:false,files,versions:[],created:nowISO()};
-      DB.entries.push(ne);
-      files.forEach(n=>{DB.documents.push({id:uid('d'),caseId:c.id,stage:stageId,name:n,versions:[{v:1,at:nowISO(),by:ME.id,size:'—',sha:sha256(n+Date.now())}],deleted:false})});
-      if(files.length)notify('document.added',c.id,`Dodano dokument: ${files.join(', ')}`,c.number,teamOf(c).map(m=>m.userId).filter(u=>u!==ME.id));
-      hist(c.id,`Dodano wpis: ${v.title}`);audit('wpis.dodany',c.number,v.title);
-      if(v.next)DB.deadlines.push({id:uid('t'),caseId:c.id,type:'internal',title:`Kolejna czynność: ${v.title}`,trigger:null,len:null,unit:'dni',computed:v.next,final:v.next,time:'',responsible:ME.id,controller:null,controllerOk:null,status:'open',versions:[],created:nowISO()});
-    }
-    save();rerender();
-  }});
-}
-function approveEntry(id){const e=DB.entries.find(x=>x.id===id),c=CASE(e.caseId);need(isAdmin()||caseFlags(c).approve,'Brak uprawnienia do zatwierdzania.');e.approvedBy=ME.id;e.approvedAt=nowISO();e.locked=true;e.status='approved';hist(c.id,`Zatwierdzono wpis: ${e.title}`);audit('wpis.zatwierdzony',c.number,e.title);save();rerender()}
-function deleteEntry(id){
-  const e=DB.entries.find(x=>x.id===id),c=CASE(e.caseId);
-  if(!isAdmin()){audit('odmowa.dostepu','DELETE wpis',`${ME.name} → ${e.title}`);save();toast('403 — usuwa tylko Administrator. Próba zapisana w audycie.',true);return}
-  askReason('Usuń wpis',`Uzasadnienie usunięcia „${e.title}”`,r=>{e.deleted={by:ME.id,at:nowISO(),reason:r};hist(c.id,`Usunięto wpis (soft delete): ${e.title} — ${r}`);audit('wpis.usuniety',c.number,`„${e.title}” · treść: ${e.desc.slice(0,120)} · powód: ${r}`);save();rerender();toast('Wpis ukryty — zostaje w archiwum i audycie')},{ok:'Usuń'});
-}
-function correctionModal(id){
-  const e=DB.entries.find(x=>x.id===id),c=CASE(e.caseId);
-  modal('Wniosek o korektę',`<div class="note info" style="margin-bottom:12px">Wpis jest zatwierdzony. Proponowana zmiana trafi do Administratora; oryginał zostaje w historii.</div><div class="form">
-    <label class="full">Nazwa<input class="f" name="title" value="${esc(e.title)}"></label><label class="full">Opis<textarea class="f" name="desc">${esc(e.desc)}</textarea></label>
-    <label class="full">Uzasadnienie<textarea class="f" name="reason" required minlength="5"></textarea></label></div>`,{ok:'Wyślij wniosek',onOk:v=>{
-    DB.corrections.push({id:uid('k'),entryId:id,caseId:c.id,by:ME.id,at:nowISO(),reason:v.reason,title:v.title,desc:v.desc,status:'pending'});
-    notify('correction.request',c.id,'Wniosek o korektę zatwierdzonego wpisu',`${ME.name} · ${c.number} · ${e.title}`,admins(),{priority:'wazne',action:true});
-    hist(c.id,`Wniosek o korektę: ${e.title}`);audit('korekta.wniosek',c.number,v.reason);save();rerender();toast('Wysłano wniosek do Administratora');
-  }});
-}
-function decideCorrection(id,ok){
-  need(isAdmin(),'Decyzja o korekcie: tylko Administrator.');
-  const k=DB.corrections.find(x=>x.id===id),e=DB.entries.find(x=>x.id===k.entryId),c=CASE(k.caseId);
-  k.status=ok?'approved':'rejected';k.decidedBy=ME.id;k.decidedAt=nowISO();
-  if(ok){e.versions.push({at:nowISO(),by:k.by,title:e.title,desc:e.desc,reason:'Korekta zatwierdzona: '+k.reason});e.title=k.title;e.desc=k.desc}
-  notify('correction.decided',c.id,`Korekta ${ok?'zatwierdzona':'odrzucona'}: ${e.title}`,c.number,[k.by]);
-  hist(c.id,`Korekta ${ok?'zatwierdzona':'odrzucona'}: ${e.title}`);audit('korekta.decyzja',c.number,`${ok?'zatwierdzona':'odrzucona'} · ${k.reason}`);save();rerender();
-}
-function approveStage(id){
-  const s=DB.stages.find(x=>x.id===id),c=CASE(s.caseId);need(isAdmin()||caseFlags(c).approve,'Brak uprawnienia do zatwierdzania etapu.');
-  const go=extra=>{s.status='approved';s.approvedBy=ME.id;s.approvedAt=nowISO();Object.assign(s,extra);
-    DB.entries.filter(e=>e.stage===s.id&&!e.deleted).forEach(e=>{e.locked=true;if(!e.approvedBy){e.approvedBy=ME.id;e.approvedAt=nowISO()}e.status='approved'});
-    const nx=DB.stages.find(x=>x.caseId===c.id&&x.order===s.order+1);if(nx&&nx.status==='todo')nx.status='open';
-    hist(c.id,`Zatwierdzono etap ${s.order}: ${s.name}${extra?.conflict?` (wynik: ${extra.conflict})`:''}`);audit('etap.zatwierdzony',c.number,s.name);selStage[c.id]=nx?.id;save();rerender();toast('Etap zatwierdzony i zablokowany')};
-  if(s.conflict!==undefined)modal('Kontrola konfliktu interesów',`<p class="mut" style="margin-bottom:12px">Bez wyniku sprawdzenia klienta i strony przeciwnej nie można przejść dalej.</p><div class="form"><label class="full">Strona przeciwna<input class="f" name="opp" required placeholder="np. Bank X S.A."></label>
-    <label class="full">Wynik<select class="f" name="res"><option>brak konfliktu</option><option>konflikt — odmowa prowadzenia</option></select></label></div>`,{ok:'Zatwierdź etap',onOk:v=>{if(v.res!=='brak konfliktu'){toast('Konflikt interesów — sprawy nie można prowadzić dalej',true);hist(c.id,`Wykryto konflikt interesów (strona przeciwna: ${v.opp})`);audit('konflikt.wykryty',c.number,v.opp);save();return}go({conflict:`brak konfliktu (strona przeciwna: ${v.opp})`})}});
-  else if(confirm(`Zatwierdzić etap „${s.name}”? Wpisy i załączniki zostaną zablokowane.`))go();
-}
 
 /* --- Dokumenty z wersjami (§7) --- */
 const ALLOWED_EXT=['pdf','doc','docx','odt','rtf','txt','xlsx','xls','ods','jpg','jpeg','png'],MAX_MB=25;
-CTAB.dokumenty=c=>{
-  const docs=DB.documents.filter(d=>d.caseId===c.id&&!d.deleted);
-  return `<div class="card"><h3>Dokumenty (${docs.length}) <label class="btn sm pri">+ Dodaj plik<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0])" accept="${ALLOWED_EXT.map(x=>'.'+x).join(',')}"></label></h3>
-  ${docs.length?`<div class="tw"><table><tr><th>Plik</th><th>Etap</th><th>Wersja</th><th>Dodał</th><th>SHA-256</th><th></th></tr>${docs.map(d=>{const v=d.versions[d.versions.length-1],s=d.stage&&DB.stages.find(x=>x.id===d.stage);return `<tr><td>📎 <b>${esc(d.name)}</b><br><small class="mut">${esc(v.size)}</small></td><td class="small">${s?esc(s.order+'. '+s.name):'—'}</td>
-    <td><details><summary style="cursor:pointer">v${v.v}</summary>${d.versions.slice().reverse().map(x=>`<div class="small mut">v${x.v} · ${fDT(x.at)} · ${esc(U(x.by).name)}</div>`).join('')}</details></td><td>${av(v.by,26)}</td><td class="small mut" style="font-family:monospace">${v.sha.slice(0,12)}…</td>
-    <td style="white-space:nowrap"><label class="btn sm">Nowa wersja<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0],'${d.id}')"></label> ${isAdmin()?`<button class="btn sm del" onclick="deleteDoc('${d.id}')">Usuń</button>`:''}</td></tr>`}).join('')}</table></div>`:'<div class="empty">Brak dokumentów</div>'}
-  <p class="hint">Dozwolone: ${ALLOWED_EXT.join(', ')} · maks. ${MAX_MB} MB. Podmiana pliku = nowa wersja, poprzednie zostają do pobrania. W produkcji: szyfrowany magazyn i skan antywirusowy. W prototypie zapisujemy tylko metadane i skrót pliku — treść nie opuszcza przeglądarki.</p></div>`;
-};
-async function uploadDoc(caseId,file,docId){
-  if(!file)return;const c=CASE(caseId);need(caseFlags(c).docs,'Brak dostępu do dokumentów.');
-  const ext=file.name.split('.').pop().toLowerCase();
-  if(!ALLOWED_EXT.includes(ext))return toast('Niedozwolony typ pliku',true);
-  if(file.size>MAX_MB*1048576)return toast(`Plik większy niż ${MAX_MB} MB`,true);
-  let sha;try{const b=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());sha=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){sha=sha256(file.name+file.size)}
-  const size=file.size>1048576?(file.size/1048576).toFixed(1)+' MB':Math.max(1,Math.round(file.size/1024))+' KB';
-  if(docId){const d=DB.documents.find(x=>x.id===docId);d.versions.push({v:d.versions.length+1,at:nowISO(),by:ME.id,size,sha});hist(c.id,`Nowa wersja dokumentu ${d.name} (v${d.versions.length})`);audit('dokument.wersja',c.number,`${d.name} v${d.versions.length} · ${sha.slice(0,16)}`)}
-  else{const open=DB.stages.find(s=>s.caseId===c.id&&s.status==='open');DB.documents.push({id:uid('d'),caseId:c.id,stage:open?.id||null,name:file.name,versions:[{v:1,at:nowISO(),by:ME.id,size,sha}],deleted:false});hist(c.id,`Dodano dokument: ${file.name}`);audit('dokument.dodany',c.number,`${file.name} · ${sha.slice(0,16)}`);
-    notify('document.added',c.id,`Dodano dokument: ${file.name}`,c.number,teamOf(c).map(m=>m.userId).filter(u=>u!==ME.id))}
-  save();rerender();toast('Zapisano dokument');
-}
-function deleteDoc(id){const d=DB.documents.find(x=>x.id===id),c=CASE(d.caseId);askReason('Usuń dokument',`Uzasadnienie usunięcia „${d.name}”`,r=>{d.deleted={by:ME.id,at:nowISO(),reason:r};hist(c.id,`Usunięto dokument (soft delete): ${d.name} — ${r}`);audit('dokument.usuniety',c.number,`${d.name} · ${r}`);save();rerender()},{ok:'Usuń'})}
 
 /* --- Zespół sprawy (§6) --- */
 CTAB.zespol=c=>{
@@ -921,44 +583,6 @@ CTAB.zespol=c=>{
     <div class="note" style="margin-top:14px">Przypisanie w CRM nie zastępuje formalnego umocowania procesowego. Zweryfikuj pełnomocnictwo przed występowaniem przed sądem.</div></div>
   <div class="card"><h3>Historia zmian zespołu</h3>${timeline(DB.history.filter(h=>h.caseId===c.id&&/zesp|dołącz|dostęp|zakres|Pełnomocnik prowadzący/i.test(h.text)).slice().reverse())}</div></div>`;
 };
-function memberModal(caseId,mid){
-  need(isAdmin(),'Dodawać i odbierać dostęp może tylko Administrator.');
-  const c=CASE(caseId),m=mid&&DB.members.find(x=>x.id===mid),inTeam=teamOf(c).map(x=>x.userId);
-  const users=DB.users.filter(u=>['att','app','office'].includes(u.role)&&u.active!==false&&(m||!inTeam.includes(u.id)));
-  if(!m&&!users.length)return toast('Wszyscy pracownicy są już w zespole');
-  modal(m?`Zakres dostępu — ${U(m.userId).name}`:'Dodaj osobę do sprawy',`<div class="form">
-    ${m?'':`<label>Osoba<select class="f" name="user" id="mmU">${users.map(u=>`<option value="${u.id}" data-r="${u.role}">${esc(u.name)} (${ROLES[u.role]})</option>`).join('')}</select></label>`}
-    <label>Rola w sprawie<select class="f" name="role" id="mmR">${Object.entries(MEMBER_ROLES).map(([k,v])=>`<option value="${k}" ${m?.role===k?'selected':''}>${v}</option>`).join('')}</select></label>
-    <label>Data rozpoczęcia<input class="f" type="date" name="start" value="${m?.startDate||iso(today())}"></label><label>Data zakończenia (opcjonalnie)<input class="f" type="date" name="end" value="${m?.endDate||''}"></label>
-    <div class="full fl">Zakres dostępu<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">
-      <label class="chk"><input type="checkbox" name="docs" id="mmD" ${m?(m.accessDocuments?'checked':''):'checked'}>Dokumenty</label>
-      <label class="chk"><input type="checkbox" name="acts" id="mmA" ${m?(m.accessActions?'checked':''):'checked'}>Czynności</label>
-      <label class="chk"><input type="checkbox" name="fin" id="mmF" ${m?.accessFinance?'checked':''}>Finanse</label>
-      <label class="chk"><input type="checkbox" name="appr" id="mmP" ${m?.canApprove?'checked':''}>Może zatwierdzać czynności</label></div></div>
-    <label class="full">Zakres odpowiedzialności<input class="f" name="scope" value="${esc(m?.scope||'')}" placeholder="np. Wsparcie przy przygotowaniu pozwu"></label></div>
-    <div class="note" style="margin-top:12px">Przypisanie w CRM nie zastępuje formalnego umocowania procesowego.</div>`,{onOk:v=>{
-    const role=v.role,user=m?m.userId:v.user;
-    if(role==='lead'&&DB.members.some(x=>x.caseId===c.id&&x.role==='lead'&&!x.revokedAt&&x.id!==m?.id)){toast('W sprawie jest już pełnomocnik prowadzący — najpierw zmień jego rolę',true);return false}
-    if(m?.role==='lead'&&role!=='lead'){toast('Sprawa musi mieć dokładnie jednego pełnomocnika prowadzącego',true);return false}
-    const data={role,startDate:v.start,endDate:v.end||null,accessDocuments:!!v.docs,accessActions:!!v.acts,accessFinance:!!v.fin,canApprove:!!v.appr,scope:v.scope||''};
-    const scopeTxt=[data.accessDocuments&&'dokumenty',data.accessActions&&'czynności',data.accessFinance&&'finanse'].filter(Boolean).join(', ');
-    if(m){Object.assign(m,data);hist(c.id,`Zmieniono zakres: ${U(user).name} → ${scopeTxt}${data.accessFinance?'':' (bez finansów)'}`);audit('zespol.zakres',c.number,`${U(user).name}: ${scopeTxt}`)}
-    else{DB.members.push({id:uid('m'),caseId:c.id,userId:user,...data,grantedBy:ME.id,grantedAt:nowISO()});
-      hist(c.id,`Administrator dołączył: ${U(user).name} (${MEMBER_ROLES[role].toLowerCase()})`);hist(c.id,`Nadano zakres: ${scopeTxt}${data.accessFinance?'':' (bez finansów)'}`);
-      audit('zespol.dolaczono',c.number,`${U(user).name} (${MEMBER_ROLES[role]}) · ${scopeTxt}`)}
-    notify('team.change',c.id,`Zmiana zespołu sprawy ${c.number}`,`${m?'Zmieniono zakres':'Dodano'}: ${U(user).name}`,[user,leadOf(c)?.userId]);
-    save();rerender();
-  }});
-  if(!m){const sync=()=>{const r=$('#mmU').selectedOptions[0].dataset.r;$('#mmR').value=r==='app'?'app':r==='office'?'assist':'second';$('#mmF').checked=r==='att';$('#mmP').checked=false};$('#mmU').onchange=sync;sync()}
-}
-function revokeMember(mid){
-  const m=DB.members.find(x=>x.id===mid),c=CASE(m.caseId);need(isAdmin(),'Odbierać dostęp może tylko Administrator.');
-  if(!confirm(`Odebrać dostęp do ${c.number}: ${U(m.userId).name}? Dostęp wygaśnie natychmiast.`))return;
-  m.revokedAt=nowISO();m.revokedBy=ME.id;m.endDate=iso(today());
-  hist(c.id,`Odebrano dostęp: ${U(m.userId).name}`);audit('zespol.odebrano',c.number,U(m.userId).name);
-  notify('team.change',c.id,`Odebrano dostęp do sprawy ${c.number}`,U(m.userId).name,[m.userId,leadOf(c)?.userId].filter(x=>x!==m.userId));
-  save();rerender();toast('Dostęp odebrany — rekord zachowany w historii');
-}
 
 /* ===================== TERMINY (§5) ===================== */
 let calMonth=null;
@@ -1002,60 +626,6 @@ ROUTES.terminy=()=>{
     <p class="hint">Powiadomień o terminach nie można wyciszyć. Każde przypomnienie generuje się dokładnie raz.</p></div>`;
 };
 ROUTES.terminy.after=()=>{const f=()=>{const r=computeDeadline($('#kTrig').value,+$('#kLen').value||0,$('#kUnit').value);$('#kOut').innerHTML=`<div class="small mut">${esc(r.formula)}</div><div style="font-size:1.35rem;font-weight:800;margin-top:4px">Termin upływa: ${fD(r.final)} <span class="mut" style="font-size:.9rem">(${DOW[parseD(r.final).getDay()]})</span></div><div class="small ${r.moved?'st-soon':'mut'}">${esc(r.why)}</div>`};['kTrig','kLen','kUnit'].forEach(i=>$('#'+i).oninput=f);f()};
-function deadlineModal(caseId){
-  const cs=myCases().filter(c=>c.status==='open'),staff=DB.users.filter(u=>['admin','att','app','office'].includes(u.role)&&u.active!==false);
-  modal('Nowy termin',`<div class="form">
-    <label class="full">Sprawa<select class="f" name="case">${cs.map(c=>`<option value="${c.id}" ${c.id===caseId?'selected':''}>${esc(c.number)} · ${esc(clientName(c))}</option>`).join('')}</select></label>
-    <label>Rodzaj<select class="f" name="type" id="dType">${Object.entries(DL_TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
-    <label>Nazwa<input class="f" name="title" required placeholder="np. Odpowiedź na pozew"></label>
-    <label>Zdarzenie (doręczenie)<input class="f" type="date" name="trigger" id="dTrig" value="${iso(today())}"></label>
-    <label>Długość terminu<span style="display:flex;gap:6px"><input class="f" type="number" name="len" id="dLen" value="14" min="0"><select class="f" name="unit" id="dUnit"><option>dni</option><option>tygodnie</option><option>miesiące</option><option>lata</option></select></span></label>
-    <div class="full" id="dCalc"></div>
-    <label class="chk full"><input type="checkbox" name="manual" id="dMan">Ręczne nadpisanie daty (wymaga uzasadnienia)</label>
-    <label id="dManBox" style="display:none">Data końcowa<input class="f" type="date" name="final"></label><label id="dWhy" style="display:none">Uzasadnienie<input class="f" name="why"></label>
-    <label>Godzina (opcjonalnie)<input class="f" type="time" name="time"></label>
-    <label>Odpowiedzialny<select class="f" name="resp">${staff.map(u=>`<option value="${u.id}" ${u.id===ME.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>
-    <label id="dCtrl">Kontroler — druga osoba (wymagany dla ustawowych)<select class="f" name="ctrl"><option value="">—</option>${staff.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select></label></div>`,{onOk:v=>{
-    const c=CASE(v.case);need(c&&canCase(c),'Brak dostępu do sprawy.');
-    const r=computeDeadline(v.trigger,+v.len,v.unit),man=!!v.manual;
-    if(v.type==='statutory'&&!v.ctrl){toast('Termin procesowy ustawowy wymaga drugiej osoby kontrolującej',true);return false}
-    if(v.ctrl&&v.ctrl===v.resp){toast('Kontroler musi być inną osobą niż odpowiedzialny',true);return false}
-    if(man&&(!v.final||(v.why||'').trim().length<5)){toast('Podaj datę i uzasadnienie nadpisania',true);return false}
-    const d={id:uid('t'),caseId:c.id,type:v.type,title:v.title.trim(),trigger:v.trigger,len:+v.len,unit:v.unit,computed:r.final,final:man?v.final:r.final,override:man?v.why:null,time:v.time||'',responsible:v.resp,controller:v.ctrl||null,controllerOk:null,status:'open',versions:[],created:nowISO()};
-    DB.deadlines.push(d);hist(c.id,`Nowy termin: ${d.title} — ${fD(d.final)}${man?` (nadpisano ręcznie: ${v.why})`:''}`);audit('termin.dodany',c.number,`${d.title} · ${d.final}${man?' · ręcznie: '+v.why:''}`);
-    notify('deadline.new',c.id,`Nowy termin: ${d.title}`,`${c.number} · ${fD(d.final)}`,[d.responsible,d.controller].filter(x=>x!==ME.id),{priority:'normalne',action:!!d.controller});
-    save();rerender();toast('Dodano termin');
-  }});
-  const f=()=>{const r=computeDeadline($('#dTrig').value,+$('#dLen').value||0,$('#dUnit').value);$('#dCalc').innerHTML=`<div class="note info">${esc(r.formula)} → <b>termin upływa ${fD(r.final)} (${DOW[parseD(r.final).getDay()]})</b>${r.moved?`<br><small>${esc(r.why)}</small>`:''}</div>`;
-    const man=$('#dMan').checked;$('#dManBox').style.display=$('#dWhy').style.display=man?'':'none';$('#dCtrl').style.opacity=$('#dType').value==='statutory'?1:.6};
-  ['dTrig','dLen','dUnit','dMan','dType'].forEach(i=>$('#'+i).oninput=f);$('#dMan').onchange=f;f();
-}
-function confirmDl(id){const d=DB.deadlines.find(x=>x.id===id),c=CASE(d.caseId);need(d.controller===ME.id,'Potwierdza wyłącznie wyznaczony kontroler.');d.controllerOk=nowISO();hist(c.id,`Kontroler potwierdził datę terminu: ${d.title} (${fD(d.final)})`);audit('termin.kontrola',c.number,d.title);save();rerender();toast('Potwierdzono poprawność daty')}
-function doneDl(id){
-  const d=DB.deadlines.find(x=>x.id===id),c=CASE(d.caseId);
-  need(can('deadlines_close')||isAdmin()||(d.responsible===ME.id&&d.type==='internal'),'Zamykanie terminów procesowych wymaga uprawnienia.');
-  modal(`Wykonano: ${d.title}`,`<div class="form"><label>Data wykonania<input class="f" type="date" name="at" required value="${iso(today())}"></label><label>Potwierdzenie (np. UPO, prezentata)<input class="f" type="file" name="proof" required></label></div><p class="hint">„Wykonano” wymaga daty i załącznika potwierdzającego.</p>`,{ok:'Zamknij termin',onOk:(v,form)=>{
-    const file=form.proof.files[0];if(!file){toast('Dodaj załącznik potwierdzający',true);return false}
-    Object.assign(d,{status:'done',doneAt:v.at,doneBy:ME.id,proof:file.name});
-    DB.documents.push({id:uid('d'),caseId:c.id,stage:null,name:file.name,versions:[{v:1,at:nowISO(),by:ME.id,size:Math.max(1,Math.round(file.size/1024))+' KB',sha:sha256(file.name+file.size)}],deleted:false});
-    DB.notifications.filter(n=>n.key?.startsWith(d.id+':')).forEach(n=>n.done=nowISO());
-    hist(c.id,`Wykonano termin: ${d.title} (dowód: ${file.name})`);audit('termin.wykonany',c.number,`${d.title} · ${file.name}`);save();rerender();toast('Termin zamknięty');
-  }});
-}
-function changeDl(id){
-  const d=DB.deadlines.find(x=>x.id===id),c=CASE(d.caseId);
-  modal(`Zmień datę: ${d.title}`,`<div class="form"><label>Nowa data<input class="f" type="date" name="final" required value="${d.final}"></label><label>Godzina<input class="f" type="time" name="time" value="${esc(d.time)}"></label><label class="full">Dlaczego?<textarea class="f" name="reason" required minlength="5"></textarea></label></div><p class="hint">Zmiana daty = nowa wersja (kto, kiedy, dlaczego). Termin ustawowy wymaga ponownego potwierdzenia przez kontrolera.</p>`,{onOk:v=>{
-    d.versions.push({at:nowISO(),by:ME.id,from:d.final,to:v.final,reason:v.reason});hist(c.id,`Zmiana daty terminu: ${d.title} (${v.reason})`,'Termin',fD(d.final),fD(v.final));
-    d.final=v.final;d.time=v.time||'';if(d.type==='statutory')d.controllerOk=null;audit('termin.zmiana_daty',c.number,`${d.title} → ${v.final} · ${v.reason}`);save();rerender();
-  }});
-}
-function delDl(id){const d=DB.deadlines.find(x=>x.id===id),c=CASE(d.caseId);askReason('Usuń termin',`Uzasadnienie usunięcia „${d.title}”`,r=>{d.deleted={by:ME.id,at:nowISO(),reason:r};hist(c.id,`Usunięto termin: ${d.title} — ${r}`);audit('termin.usuniety',c.number,`${d.title} · ${r}`);save();rerender()},{ok:'Usuń'})}
-function exportIcs(){
-  const cs=myCases(),dls=DB.deadlines.filter(d=>!d.deleted&&d.status!=='done'&&cs.some(c=>c.id===d.caseId));
-  const ev=dls.map(d=>{const c=CASE(d.caseId),dt=d.final.replace(/-/g,'');return ['BEGIN:VEVENT',`UID:${d.id}@crm-kancelarii`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,d.time?`DTSTART:${dt}T${d.time.replace(':','')}00`:`DTSTART;VALUE=DATE:${dt}`,`SUMMARY:${d.title} (${c.number})`,'DESCRIPTION:'+DL_TYPES[d.type]+' — szczegóły w CRM','END:VEVENT'].join('\r\n')});
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CRM Kancelarii//PL',...ev,'END:VCALENDAR'].join('\r\n')],{type:'text/calendar'}));a.download='terminy.ics';a.click();
-  audit('eksport.ics','Terminy',`${ev.length} terminów`);save();
-}
 
 /* ===================== POWIADOMIENIA (§10) ===================== */
 let ntTab='all';
@@ -1070,7 +640,6 @@ ROUTES.powiadomienia=()=>{
   <div class="card"><h3>Zdarzenia i odbiorcy</h3><div class="small">${[['Nowa sprawa','Administrator + zespół sprawy'],['Przydzielenie / zmiana zespołu','Osoby, których dotyczy'],['Nowy termin','Odpowiedzialny + kontroler'],['Zbliżający się termin','Właściciel + kontroler + pełnomocnik'],['Przekroczenie terminu','Właściciel + eskalacja do Administratora'],['Dodanie dokumentu','Zespół sprawy'],['Wniosek o korektę','Administrator'],['Nowa wpłata klienta','Administrator + uprawnieni do finansów'],['Zakończenie sprawy','Pełnomocnik prowadzący + Administrator']].map(([a,b])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)"><span>${a}</span><span class="mut" style="text-align:right">${b}</span></div>`).join('')}</div>
     <p class="hint">Kanały: w CRM (zawsze), e-mail (sam link, bez treści akt), SMS (terminy pilne, opcjonalnie).</p></div></div>`;
 };
-function openNt(id){const n=DB.notifications.find(x=>x.id===id);n.read=n.read||nowISO();save();if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else rerender()}
 
 /* ===================== ZESPÓŁ ===================== */
 ROUTES.zespol=()=>{
@@ -1138,42 +707,6 @@ function paymentDetail(pid){
   <div class="card"><h3>Historia zmian podziału</h3>${al.flatMap(a=>(a.history||[]).map(h=>({...h,a}))).sort((x,y)=>y.at.localeCompare(x.at)).map(h=>`<div class="tl"><time>${fDT(h.at)}</time><div><b>${esc(U(h.by).name)}</b> · ${esc(ALLOC_TYPES[h.a.type])}: <s>${money(h.from)}</s> → ${money(h.to)}<div class="small mut">${esc(h.reason)}</div></div></div>`).join('')||'<div class="empty">Brak zmian</div>'}
     <p class="hint">Edycja zatwierdzonego podziału tworzy nową wersję: data, autor, uzasadnienie, poprzednia wartość.</p></div></div>`;
 }
-function paymentModal(caseId){
-  need(isAdmin(),'Wpływy wprowadza Administrator.');
-  modal('Nowy wpływ do kancelarii',`<div class="form"><label class="full">Sprawa<select class="f" name="case">${DB.cases.map(c=>`<option value="${c.id}" ${c.id===caseId?'selected':''}>${esc(c.number)} · ${esc(clientName(c))}</option>`).join('')}</select></label>
-    <label>Kwota (zł)<input class="f" type="number" step="0.01" min="0.01" name="amount" required></label><label>Data wpływu<input class="f" type="date" name="date" value="${iso(today())}"></label>
-    <label>Tytuł<input class="f" name="title" value="Wpłata klienta"></label><label>Wpłacający<input class="f" name="payer"></label></div>`,{onOk:v=>{
-    const c=CASE(v.case),p={id:uid('p'),caseId:c.id,amount:+v.amount,currency:'PLN',receivedOn:v.date,payer:v.payer||clientName(c),title:v.title,status:'potwierdzona',version:1,history:[]};
-    DB.payments.push(p);hist(c.id,`Nowa wpłata: ${money(p.amount)} (${p.title})`);audit('finanse.wplyw',c.number,money(p.amount));
-    notify('payment.new',c.id,`Nowa wpłata klienta: ${money(p.amount)}`,c.number,[...admins(),...DB.users.filter(u=>can('initial_fee',u)).map(u=>u.id)],{finance:true});
-    save();location.hash='#/finanse/'+p.id;
-  }});
-}
-function allocModal(pid,aid){
-  need(isAdmin(),'Podział środków: tylko Administrator.');
-  const p=DB.payments.find(x=>x.id===pid),a=aid&&DB.allocations.find(x=>x.id===aid),atts=DB.users.filter(u=>u.role==='att');
-  modal(a?'Zmień pozycję podziału':'Nowa pozycja podziału',`<div class="form"><label>Kategoria<select class="f" name="type" id="alT">${Object.entries(ALLOC_TYPES).map(([k,v])=>`<option value="${k}" ${a?.type===k?'selected':''}>${v}</option>`).join('')}</select></label>
-    <label id="alA">Pełnomocnik<select class="f" name="att">${atts.map(u=>`<option value="${u.id}" ${a?.recipient===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>
-    <label id="alR">Odbiorca<input class="f" name="rec" value="${esc(a&&a.type!=='attorney'?a.recipient:'')}"></label>
-    <label>Kwota (zł)<input class="f" type="number" step="0.01" min="0" name="amount" required value="${a?.amount??Math.max(0,balance(p))}"></label>
-    <label>Status<select class="f" name="status">${Object.entries(ALLOC_ST).map(([k,l])=>`<option value="${k}" ${(a?.status||'planned')===k?'selected':''}>${l}</option>`).join('')}</select></label>
-    <label>Podstawa<input class="f" name="basis" value="${esc(a?.basis||'Umowa współpracy')}"></label>
-    ${a&&a.status!=='planned'?'<label class="full">Uzasadnienie zmiany<textarea class="f" name="reason" required minlength="5"></textarea></label>':''}</div>`,{onOk:v=>{
-    const recipient=v.type==='attorney'?v.att:v.rec,amt=Math.round(+v.amount*100)/100,others=DB.allocations.filter(x=>x.paymentId===pid&&x.id!==aid).reduce((s,x)=>s+x.amount,0);
-    if(others+amt>p.amount+.004){toast(`Suma podziału przekroczyłaby wpływ o ${money(others+amt-p.amount)}`,true);return false}
-    if(['approved','due','paid'].includes(v.status)&&Math.abs(p.amount-others-amt)>.004){toast('Status „zatwierdzone” wymaga pełnego podziału (Bilans 0 zł). Zapisz jako „planowane”.',true);return false}
-    if(a){a.history.push({at:nowISO(),by:ME.id,from:a.amount,to:amt,reason:v.reason||'zmiana planu'});Object.assign(a,{type:v.type,recipient,amount:amt,status:v.status,basis:v.basis,version:a.version+1});audit('finanse.podzial_zmiana',CASE(p.caseId).number,`${ALLOC_TYPES[v.type]} → ${money(amt)} · ${v.reason||''}`)}
-    else{DB.allocations.push({id:uid('a'),paymentId:pid,caseId:p.caseId,type:v.type,recipient,amount:amt,status:v.status,date:iso(today()),basis:v.basis,version:1,history:[]});audit('finanse.podzial',CASE(p.caseId).number,`${ALLOC_TYPES[v.type]}: ${money(amt)}`)}
-    if(v.type==='attorney')notify('fee.change',p.caseId,'Zmiana rozliczenia',`${CASE(p.caseId).number} · ${money(amt)}`,[recipient,...admins()]);
-    save();rerender();
-  }});
-  const s=()=>{const t=$('#alT').value;$('#alA').style.display=t==='attorney'?'':'none';$('#alR').style.display=t==='attorney'?'none':''};$('#alT').onchange=s;s();
-}
-function allocStatus(aid,st){
-  const a=DB.allocations.find(x=>x.id===aid),p=DB.payments.find(x=>x.id===a.paymentId);
-  if(st!=='planned'&&Math.abs(balance(p))>.004){toast('Najpierw pełny podział (Bilans 0 zł)',true);rerender();return}
-  a.history.push({at:nowISO(),by:ME.id,from:a.amount,to:a.amount,reason:`status: ${ALLOC_ST[a.status]} → ${ALLOC_ST[st]}`});a.status=st;a.version++;audit('finanse.status',CASE(a.caseId).number,`${ALLOC_TYPES[a.type]}: ${ALLOC_ST[st]}`);save();rerender();
-}
 
 /* ===================== RAPORTY (§11) ===================== */
 let rep=null;
@@ -1199,12 +732,6 @@ ROUTES.raporty=()=>{
       <h3 style="margin-top:16px">Terminy w okresie</h3><p>${dls.length} łącznie · <span class="st-done">${ok} w terminie</span> · <span class="st-overdue">${over} przekroczone</span> · ${dls.filter(d=>d.status!=='done'&&dlStatus(d).k!=='overdue').length} otwarte</p>
       <p class="hint">${isAdmin()?'Raport finansowy kancelarii (alokacje): w module Finanse.':'Raport finansowy kancelarii: tylko Administrator.'}</p></div></div>`;
 };
-function exportCsv(){
-  const rows=[['Nr sprawy','Kategoria','Klient','Status','Pełnomocnik','Data przyjęcia','Wartość sporu']].concat(myCases().filter(c=>(!rep.cat||c.category===rep.cat)).map(c=>[c.number,c.category,clientName(c),CASE_STATUS[c.status],U(leadOf(c)?.userId).name,c.openedAt,c.value]));
-  const csv='﻿'+rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(';')).join('\r\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`raport-spraw-${rep.from}_${rep.to}.csv`;a.click();
-  audit('eksport.raport','CSV',`${rows.length-1} spraw · ${rep.from}–${rep.to}`);save();toast('Eksport zapisany w audycie');
-}
 
 /* ===================== ANALIZA (kalkulatory na danych sprawy) ===================== */
 let CALCS=null;
@@ -1254,19 +781,6 @@ SET.kategorie=()=>{
   <div class="card"><h3>Szablon procesu: Restrukturyzacja</h3>${DB.templates.rst.map((s,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px"><span class="mut" style="width:22px;padding-top:8px">${i+1}.</span><input class="f" value="${esc(s.name)}" onchange="DB.templates.rst[${i}].name=this.value;audit('konfiguracja.szablon','RST','etap ${i+1}: '+this.value);save()"><button class="btn sm del" onclick="if(confirm('Usunąć etap z szablonu? Dotyczy tylko nowych spraw.')){DB.templates.rst.splice(${i},1);audit('konfiguracja.szablon','RST','usunięto etap');save();rerender()}">✕</button></div>`).join('')}
     <button class="btn sm" onclick="DB.templates.rst.push({id:uid('r'),name:'Nowy etap',approval:true});save();rerender()">+ Etap</button><p class="hint">Zmiany dotyczą nowych spraw RST. Etapy definiuje Administrator.</p></div></div>`;
 };
-function catModal(code){
-  const c=code&&CAT(code);
-  modal(c?`Kategoria ${c.code}`:'Nowa kategoria',`<div class="form"><label>Kod<input class="f" name="code" required maxlength="6" pattern="[A-Za-z]{2,6}" value="${esc(c?.code||'')}"></label><label>Kolor<input class="f" type="color" name="color" value="${c?.color||'#7c5cff'}" style="height:38px;padding:3px"></label>
-    <label class="full">Nazwa<input class="f" name="name" required value="${esc(c?.name||'')}"></label><label>Szablon procesu<select class="f" name="template"><option value="std" ${c?.template!=='rst'?'selected':''}>Standardowy</option><option value="rst" ${c?.template==='rst'?'selected':''}>Restrukturyzacja</option></select></label>
-    <label class="chk" style="align-self:end"><input type="checkbox" name="currency" ${c?.currency?'checked':''}>Pole „waluta”</label></div>${c?'<p class="hint">Zmiana kodu nie zmienia numerów istniejących spraw. Zmiana koloru jest widoczna od razu na liście, w kalendarzu i raportach.</p>':''}`,{onOk:v=>{
-    const nc=v.code.toUpperCase();if(DB.categories.some(x=>x.code===nc&&x!==c)){toast('Taki kod już istnieje',true);return false}
-    if(c){if(nc!==c.code)DB.cases.filter(x=>x.category===c.code).forEach(x=>x.category=nc);Object.assign(c,{code:nc,name:v.name,color:v.color,template:v.template,currency:!!v.currency});audit('konfiguracja.kategoria',nc,'edycja')}
-    else{DB.categories.push({code:nc,name:v.name,color:v.color,order:DB.categories.length+1,active:true,template:v.template,currency:!!v.currency});audit('konfiguracja.kategoria',nc,'dodano')}
-    save();rerender();
-  }});
-}
-function moveCat(code,d){const cs=[...DB.categories].sort((a,b)=>a.order-b.order),i=cs.findIndex(c=>c.code===code),j=i+d;[cs[i].order,cs[j].order]=[cs[j].order,cs[i].order];audit('konfiguracja.kolejnosc',code,d<0?'w górę':'w dół');save();rerender()}
-function toggleCat(code){const c=CAT(code);c.active=!c.active;audit('konfiguracja.kategoria',code,c.active?'aktywowano':'dezaktywowano');save();rerender()}
 
 /* --- Użytkownicy i uprawnienia (§9) --- */
 let selUser=null;
@@ -1300,19 +814,6 @@ ROUTES.ustawienia.after=sub=>{
     if(u.role==='admin')modal('Potwierdź hasłem i 2FA',`<div class="form"><label>Hasło<input class="f" type="password" name="pw" required></label><label>Kod 2FA<input class="f" name="code" required pattern="\\d{6}" placeholder="6 cyfr"></label></div><p class="hint">Prototyp: dowolne hasło i 6 cyfr.</p>`,{ok:'Potwierdź',onOk:fin});else fin();
   };
 };
-function userModal(id){
-  const u=id&&U(id);
-  modal(u?`Konto — ${u.name}`:'Nowy użytkownik',`<div class="form"><label>Imię i nazwisko<input class="f" name="name" required value="${esc(u?.name||'')}"></label><label>E-mail<input class="f" type="email" name="email" required value="${esc(u?.email||'')}"></label>
-    <label>Rola<select class="f" name="role">${Object.entries(ROLES).map(([k,l])=>`<option value="${k}" ${u?.role===k?'selected':''}>${l}</option>`).join('')}</select></label>
-    ${u?`<label class="chk" style="align-self:end"><input type="checkbox" name="active" ${u.active!==false?'checked':''}>Konto aktywne</label>`:''}
-    <label class="full">Uzasadnienie<input class="f" name="reason" required minlength="5"></label></div><p class="hint">W systemie zawsze musi być co najmniej jeden aktywny Administrator. 2FA obowiązkowe: Administrator, pełnomocnicy, obsługa techniczna.</p>`,{onOk:v=>{
-    const active=u?!!v.active:true,adminsLeft=DB.users.filter(x=>x.role==='admin'&&x.active!==false&&x.id!==u?.id).length+((v.role==='admin'&&active)?1:0);
-    if(adminsLeft<1){toast('Musi zostać co najmniej jeden aktywny Administrator',true);return false}
-    if(u){const ch=[];if(u.role!==v.role)ch.push(`rola: ${ROLES[u.role]} → ${ROLES[v.role]}`);if((u.active!==false)!==active)ch.push(active?'aktywowano':'dezaktywowano');Object.assign(u,{name:v.name,email:v.email,role:v.role,active});audit('uzytkownik.zmiana',u.name,`${ch.join(', ')||'dane konta'} · ${v.reason}`)}
-    else{const n={id:uid('u'),name:v.name,email:v.email,role:v.role,color:COLORS[DB.users.length%COLORS.length],active:true};DB.users.push(n);selUser=n.id;audit('uzytkownik.utworzony',n.name,`${ROLES[n.role]} · ${v.reason}`)}
-    save();rerender();
-  }});
-}
 
 /* --- Święta --- */
 SET.swieta=()=>{
@@ -1324,20 +825,6 @@ SET.swieta=()=>{
 };
 
 /* --- System (obsługa techniczna) --- */
-SET.system=()=>{
-  const size=(new Blob([JSON.stringify(DB)]).size/1024).toFixed(0),b=DB.backups[0],tech=DB.audit.filter(e=>/logowanie|wylogowanie|system|kopia|odmowa|awaryjny/.test(e.action)).slice(-12).reverse();
-  const em=DB.emergency;
-  return `<div class="grid g3" style="margin-bottom:14px"><div class="tile"><span>Stan systemu</span><b style="color:var(--good)">OK</b><small class="mut">prototyp · ${size} KB danych</small></div><div class="tile"><span>Ostatnia kopia</span><b style="font-size:1.2rem">${fDT(b?.at)}</b><small class="mut">${esc(b?.where||'')}</small></div><div class="tile"><span>Test odtwarzania</span><b style="font-size:1.2rem">${fD(DB.lastRestoreTest)}</b><small class="${dayDiff(parseD(DB.lastRestoreTest),today())>92?'st-overdue':'mut'}">wymagany co kwartał</small></div></div>
-  <div class="grid g2" style="align-items:start"><div class="card"><h3>Kopie zapasowe <span><button class="btn sm" onclick="DB.backups.unshift({at:nowISO(),size:(new Blob([JSON.stringify(DB)]).size/1048576+40).toFixed(1)+' MB',ok:true,where:'Magazyn zewnętrzny (UE), szyfrowany'});audit('kopia.wykonana','system','ręcznie');save();rerender()">Wykonaj teraz</button> <button class="btn sm" onclick="DB.lastRestoreTest=iso(today());audit('kopia.test_odtwarzania','system','środowisko testowe: OK');save();rerender()">Test odtwarzania</button></span></h3>
-    ${DB.backups.slice(0,8).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)"><span>${fDT(x.at)}</span><span class="mut">${esc(x.size)} · <span class="st-done">✔</span></span></div>`).join('')}
-    <p class="hint">Codziennie, szyfrowane, poza serwerem głównym. Dostęp do kopii: tylko obsługa techniczna.</p></div>
-  <div class="card"><h3>Dostęp awaryjny</h3>${ME.role==='tech'?(em&&em.until>Date.now()?`<div class="note info">Aktywny do ${fDT(new Date(em.until).toISOString())}</div>`:em&&em.status==='pending'?'<div class="note">Wniosek czeka na zgodę Administratora</div>':`<button class="btn" onclick="askReason('Wniosek o dostęp awaryjny','Powód (np. awaria, której nie da się zdiagnozować bez wglądu)',r=>{DB.emergency={by:ME.id,reason:r,status:'pending',at:nowISO()};notify('emergency.request',null,'Wniosek o dostęp awaryjny',U(ME.id).name+': '+r,admins(),{priority:'pilne',action:true});audit('dostep_awaryjny.wniosek',ME.name,r);save();rerender()},{ok:'Wyślij',danger:false})">Złóż wniosek</button>`):
-      em&&em.status==='pending'?`<div class="note">${esc(U(em.by).name)}: ${esc(em.reason)}</div><div style="margin-top:10px;display:flex;gap:8px"><button class="btn pri sm" onclick="DB.emergency.status='granted';DB.emergency.until=Date.now()+36e5;audit('dostep_awaryjny.zgoda',U(DB.emergency.by).name,'60 minut');save();rerender()">Zgoda na 60 min</button><button class="btn sm del" onclick="DB.emergency.status='rejected';audit('dostep_awaryjny.odmowa',U(DB.emergency.by).name,'');save();rerender()">Odmów</button></div>`:'<p class="mut">Brak wniosków.</p>'}
-    <p class="hint">Wniosek → zgoda Administratora → dostęp czasowy (60 min) → pełny zapis w audycie. Poza tym obsługa techniczna nie odczyta żadnej sprawy, dokumentu ani rozliczenia.</p>
-    <h3 style="margin-top:16px">Logi techniczne</h3>${tech.map(e=>`<div class="small" style="padding:4px 0;border-bottom:1px solid var(--line)">${fDT(e.ts)} · ${esc(e.action)} · ${esc(U(e.user).name||e.user)}</div>`).join('')}</div></div>
-  ${isAdmin()?`<div class="card" style="margin-top:14px"><h3>Prototyp</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}));a.download='crm-prototyp.json';a.click();audit('eksport.baza','prototyp','JSON');save()">⬇ Eksport danych (JSON)</button><button class="btn del" onclick="if(confirm('Przywrócić dane przykładowe?')){DB=seed();save();login('u1')}">Przywróć dane przykładowe</button></div>
-    <p class="hint">Następny krok: baza Supabase (PostgreSQL w UE) — te same tabele, reguły dostępu w RLS, audyt bez UPDATE/DELETE, logowanie z 2FA.</p></div>`:''}`;
-};
 /* --- Dziennik audytu --- */
 let audQ='';
 SET.audyt=()=>{
@@ -1352,7 +839,7 @@ SET.konto=()=>`<div class="card" style="max-width:560px"><h3>Moje konto</h3><dl 
 
 /* =====================================================================
    CRM NA ŻYWO — Supabase
-   Interfejs jak w prototypie; dane i reguły w bazie (RLS + funkcje).
+   Dane i reguły w bazie (RLS + funkcje).
    Każda operacja idzie do bazy, po niej odświeżamy dane (reload).
    ===================================================================== */
 const SB_URL='https://ixlhfhzgzotukstoezcj.supabase.co';
@@ -1362,7 +849,6 @@ const NEED_2FA=['admin','att','tech'];
 const errMsg=e=>{const m=e?.message||String(e||'Błąd');return m.replace(/^.*?ERROR:\s*/,'').replace(/\s*\(SQLSTATE.*$/,'')};
 // operacje serwera robią same: historia, audyt, powiadomienia, przypomnienia
 function audit(){} function hist(){} function notify(){} function runJobs(){} function importLeads(){}
-save=()=>{};
 // modal obsługuje operacje asynchroniczne (okno zostaje otwarte, gdy baza odrzuci zmianę)
 function modal(title,body,{ok='Zapisz',wide=false,onOk,cancel='Anuluj',danger=false}={}){
   const M=$('#modal');$('#mbox').className='mbox'+(wide?' wide':'');
@@ -1439,7 +925,7 @@ function loginView(step,extra={}){
     <label>E-mail<input class="f" type="email" name="email" required autocomplete="username" value="${esc(extra.email||'')}"></label>
     <label>Hasło<input class="f" type="password" name="password" required autocomplete="current-password"></label>
     <button class="btn pri" style="justify-content:center">Zaloguj</button><div id="lerr" class="small" style="color:var(--bad)"></div>
-    <a href="#" id="lforgot" class="small" style="color:var(--accent);text-align:center">Nie pamiętam hasła</a></form>`)+`<p class="hint" style="text-align:center;margin-top:16px"><a href="index.html" style="color:var(--accent)">← Strona dla klientów</a> · <a href="crm-demo.html" style="color:var(--accent)">Wersja demonstracyjna</a></p>`;
+    <a href="#" id="lforgot" class="small" style="color:var(--accent);text-align:center">Nie pamiętam hasła</a></form>`)+`<p class="hint" style="text-align:center;margin-top:16px"><a href="index.html" style="color:var(--accent)">← Strona dla klientów</a></p>`;
   if(step==='enroll')L.innerHTML=head+`<p>Twoja rola wymaga logowania dwuskładnikowego (2FA).</p>`+box(`<ol class="small" style="padding-left:18px;line-height:1.7"><li>Zainstaluj aplikację z kodami (np. Google Authenticator, Microsoft Authenticator).</li><li>Zeskanuj kod QR albo wpisz klucz ręcznie.</li><li>Wpisz 6-cyfrowy kod z aplikacji.</li></ol>
     <div style="text-align:center;margin:12px 0"><img src="${esc(extra.qr)}" alt="Kod QR do aplikacji 2FA" style="width:200px;height:200px;background:#fff;border-radius:12px;padding:8px"></div>
     <div class="small mut" style="text-align:center;word-break:break-all">Klucz: <code>${esc(extra.secret)}</code></div>
@@ -1483,7 +969,6 @@ async function afterSignIn(){
   if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
 }
 function renderLogin(){loginView('password')}
-function login(){} // (prototyp: wybór osoby — tu niepotrzebne)
 $('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
 
 /* --- odczyt akt do audytu --- */
