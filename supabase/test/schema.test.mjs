@@ -8,16 +8,24 @@ create role anon nologin; create role authenticated nologin; create role service
 create schema auth; create schema extensions; create extension pgcrypto schema extensions;
 create table auth.users(id uuid primary key, email text, raw_user_meta_data jsonb default '{}');
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
+create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims', true),''),'{}')::jsonb $$;
+grant execute on function auth.jwt() to anon, authenticated;
+create schema storage; grant usage on schema storage to anon, authenticated;
+create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint);
+create table storage.objects(id uuid primary key default gen_random_uuid(), bucket_id text, name text, owner uuid default auth.uid());
+alter table storage.objects enable row level security; grant select, insert on storage.objects to authenticated;
 grant usage on schema public, auth to anon, authenticated; grant execute on function auth.uid() to anon, authenticated;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 alter default privileges in schema public grant all on functions to anon, authenticated;
 alter default privileges in schema public grant all on sequences to anon, authenticated;`);
 try{await db.exec(fs.readFileSync(new URL('../schema.sql', import.meta.url),'utf8'));R(true,'schema.sql wykonany bez błędów')}catch(e){R(false,'schema.sql: '+e.message);process.exit(1)}
+for(const m of fs.readdirSync(new URL('../migrations/', import.meta.url)).sort()){try{await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));R(true,'migracja '+m)}catch(e){R(false,'migracja '+m+': '+e.message);process.exit(1)}}
 const U={admin:'11111111-1111-1111-1111-111111111111',jan:'22222222-2222-2222-2222-222222222222',piotr:'33333333-3333-3333-3333-333333333333',anna:'44444444-4444-4444-4444-444444444444',kasia:'55555555-5555-5555-5555-555555555555',tech:'66666666-6666-6666-6666-666666666666'};
 for(const [k,id] of Object.entries(U))await db.query(`insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)`,[id,k+'@k.test',{full_name:k}]);
 R((await db.query('select count(*)::int n from public.profiles where not active')).rows[0].n===6,'trigger: 6 profili, nieaktywne do zatwierdzenia');
 await db.exec(`update public.profiles set active=true, role=case email when 'admin@k.test' then 'admin' when 'jan@k.test' then 'att' when 'piotr@k.test' then 'att' when 'anna@k.test' then 'app' when 'kasia@k.test' then 'office' else 'tech' end`);
-const as=async(who,sql,params=[])=>{await db.exec(`set role ${who==='anon'?'anon':'authenticated'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,false)`,[who==='anon'?'':U[who]]);try{return await db.query(sql,params)}finally{await db.exec('reset role')}};
+let AAL='aal2';
+const as=async(who,sql,params=[])=>{await db.exec(`set role ${who==='anon'?'anon':'authenticated'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,false), set_config('request.jwt.claims',$2,false)`,[who==='anon'?'':U[who],JSON.stringify({aal:AAL})]);try{return await db.query(sql,params)}finally{await db.exec('reset role')}};
 const fails=async(who,sql,params=[])=>{try{await as(who,sql,params);return null}catch(e){return e.message}};
 // --- sprawy i numeracja
 const c1=(await as('admin',`select public.create_case('SKD','Jan','Kowalski',$1,'80010112345','123','j@k.pl','Warszawa',250000,5000,10) id`,[U.jan])).rows[0].id;
@@ -131,3 +139,20 @@ R(!v2.ok&&v2.broken_at==3,`manipulacja wykryta przy wpisie #${v2.broken_at}`);
 R(!!await fails('jan',`select * from public.verify_audit_chain()`),'weryfikacja audytu: tylko z uprawnieniem');
 const h=(await as('admin',`select text from public.case_history where case_id=$1 order by id`,[c1])).rows.map(r=>r.text);
 R(h.some(t=>t.startsWith('Administrator dołączył'))&&h.some(t=>t.startsWith('Nadano zakres'))&&h.some(t=>t.startsWith('Odebrano dostęp')),'historia zespołu: dołączono / zakres / odebrano');
+
+// --- 2FA egzekwowane w bazie (migracja 002)
+AAL='aal1';
+R((await as('admin',`select * from public.cases`)).rows.length===0,'Administrator bez 2FA (aal1): 0 spraw');
+R((await as('jan',`select * from public.cases`)).rows.length===0,'pełnomocnik bez 2FA: 0 spraw');
+R((await as('kasia',`select * from public.leads`)).rows.length===1,'biuro (2FA niewymagane) działa w aal1');
+R(!!await fails('admin',`select public.reveal_pesel((select client_id from public.cases limit 1))`),'aal1: funkcje wrażliwe odrzucone');
+AAL='aal2';
+R((await as('admin',`select * from public.cases`)).rows.length===2,'Administrator z 2FA (aal2): widzi sprawy');
+// --- magazyn akt
+await as('admin',`insert into public.case_members(case_id,user_id,role,access_finance) values($1,$2,'app',false)`,[c2,U.anna]);
+R(!(await fails('anna',`insert into storage.objects(bucket_id,name) values('akta',$1)`,[c2+'/x/v1-pozew.pdf'])),'aplikant w zespole: zapis pliku do akt sprawy');
+R(!!await fails('anna',`insert into storage.objects(bucket_id,name) values('akta',$1)`,[c1+'/x/v1-pozew.pdf']),'aplikant spoza sprawy: zapis do akt odrzucony');
+R((await as('jan',`select * from storage.objects`)).rows.length===0,'pełnomocnik spoza sprawy nie widzi plików');
+R((await as('piotr',`select * from storage.objects`)).rows.length===1,'pełnomocnik prowadzący widzi plik w aktach');
+R(!!await fails('anna',`insert into storage.objects(bucket_id,name) values('akta','zla-sciezka/plik.pdf')`),'zła ścieżka pliku odrzucona');
+await fails('admin',`delete from storage.objects`);R((await db.query('select count(*)::int n from storage.objects')).rows[0].n===1,'pliki w aktach bez kasowania (DELETE nic nie usuwa)');
