@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.8.4] — 2026-10-26
+- Cofnięcie 1.8.3: przycisk Panel znowu prowadzi do panelu treści (admin.html)
+
 ## [1.8.3] — 2026-10-26
 - Przycisk Panel na stronie prowadzi do CRM (crm.html)
 
