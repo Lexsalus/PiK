@@ -3,7 +3,7 @@ Uruchom po server.mjs i http.server jak w README; wynik: WYNIK n/n."""
 import asyncio, json, os, urllib.request
 from playwright.async_api import async_playwright
 HERE=os.path.dirname(os.path.abspath(__file__))+'/'
-U=os.environ.get('NZ_URL','http://localhost:8765/crm.html'); SH=HERE+'shim.js'; LF=HERE+'node_modules/leaflet/dist/'
+U=os.environ.get('NZ_URL','http://localhost:8766/index.html'); SH=HERE+'shim.js'; LF=HERE+'node_modules/leaflet/dist/'
 res=[]; ok=lambda c,m:(res.append(bool(c)),print(('✅ ' if c else '❌ ')+m))
 def sql(q,p=[]):
   r=urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':q,'params':p}).encode(),method='POST')).read();return json.loads(r).get('data')
