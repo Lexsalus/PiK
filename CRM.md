@@ -47,7 +47,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 - **Raporty:** filtr statusu, eksport CSV / XLSX / PDF (drukowanie do pliku), każdy w audycie; aplikant widzi własne czynności i terminy.
 - **Wylogowanie po 30 min bezczynności**; kolejność kategorii także przeciąganiem.
 
-**Testy:** reguły bazy 90/90 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 51/51 (`supabase/test/e2e/`).
+**Testy:** reguły bazy 89/89 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 51/51 (`supabase/test/e2e/`).
 
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
