@@ -2,6 +2,14 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.8.0] — 2026-10-26
+- CRM na żywo: logowanie z 2FA, wszystkie dane i operacje przez Supabase; prototyp przeniesiony do crm-demo.html
+- Logowanie e-mail + hasło, reset hasła, 2FA (TOTP) z kodem QR; konta nieaktywne zablokowane
+- Baza: migracja 002 (2FA egzekwowane w bazie, magazyn akt `akta`), 003 (audyt eksportów, pobrań, logowań i zmian sprawy)
+- Dokumenty w prywatnym magazynie z wersjami i SHA-256; pobieranie przez krótkie linki
+- Test end-to-end przez interfejs na lokalnej kopii bazy: 36/36 (`supabase/test/e2e/`); testy bazy 74/74
+- STAN.md — stan projektu i instrukcja kontynuacji
+
 ## [1.7.2] — 2026-10-26
 - Supabase: rejestracja wyłączona, adres linków logowania, pierwszy Administrator aktywny
 
