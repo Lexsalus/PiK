@@ -237,7 +237,7 @@ py bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe
 
 Zaplecze dla adwokatów i pracowników: `https://lexsalus.github.io/PiK/crm.html`. Pełny opis ról i modułów: `CRM.md`; baza: `SUPABASE.md`.
 
-**Pierwsze logowanie (Administrator `biuro@lekarzeifarmaceuci.pl`):**
+**Pierwsze logowanie (Administrator `biuro@lekarzeiterapeuci.pl`):**
 1. Wpisz e-mail i hasło ustawione w Supabase.
 2. Zeskanuj kod QR aplikacją (Google / Microsoft Authenticator) i wpisz 6-cyfrowy kod.
 3. Kolejne logowania: hasło + kod z aplikacji.

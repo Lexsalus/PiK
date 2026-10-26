@@ -11,14 +11,14 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Panel treści strony | `admin.html` (przycisk ⚙️ Panel na stronie + link w stopce) | działa (dane w `data.json`); logowanie tylko hasłem w przeglądarce, domyślnie `admin` — zmienić |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026; Administrator aktywny |
+| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026; Administrator: przeniesienie na właściwy adres w toku (SUPABASE.md, krok 3) |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
 
 ## Konta i dostęp
 
-- Administrator CRM: `biuro@lekarzeifarmaceuci.pl` (nazwa „Admin”), 2FA konfiguruje się przy pierwszym logowaniu.
+- Administrator CRM: `biuro@lekarzeiterapeuci.pl` (nazwa „Admin”), 2FA konfiguruje się przy pierwszym logowaniu.
 - Nowych pracowników zakłada się w Supabase → Authentication → Users (samodzielna rejestracja wyłączona), rolę i aktywację nadaje się w CRM → Ustawienia → Użytkownicy.
 - Klucz publiczny (`sb_publishable_…`) jest w `crm.html` i `data.json` — może być jawny. **Nigdy** nie umieszczać klucza `sb_secret_…`.
 - Zmiany w bazie (SQL) wykonuje się w Supabase SQL Editor albo przez API zarządzania z tokenem osobistym ograniczonym do projektu (Database read-write, krótka ważność, usunąć po użyciu).
