@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.11.0] — 2026-10-26
+- Uzupełnienia specyfikacji CRM v1.1 (migracja 004): reguły powiadomień i brakujące zdarzenia, zastępstwa, przypomnienia per typ terminu, potwierdzenie hasłem i 2FA przy zmianie uprawnień Administratora, raporty (filtr statusu, XLSX, PDF, raport aplikanta), wylogowanie po 30 min bezczynności, przeciąganie kategorii; testy bazy 90/90, e2e 51/51
+
 ## [1.10.4] — 2026-10-26
 - Administrator nowej bazy: biuro@lekarzeiterapeuci.pl; konto z błędnym adresem usunięte
 

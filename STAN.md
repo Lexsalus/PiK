@@ -11,7 +11,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Panel treści strony | `admin.html` (przycisk ⚙️ Panel na stronie + link w stopce) | działa (dane w `data.json`); logowanie tylko hasłem w przeglądarce, domyślnie `admin` — zmienić |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026; Administrator aktywny |
+| Baza | Supabase, projekt **Piel** `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–004 wdrożone 26.10.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
@@ -35,7 +35,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (72 testy reguł bazy) i `supabase/test/e2e/` (36 kroków przez interfejs CRM, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (90 testów reguł bazy) i `supabase/test/e2e/` (51 kroków przez interfejs CRM, lokalna kopia bazy).
 
 ## Zrobione
 
@@ -50,6 +50,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - 1.8.3 → 1.8.4 — próba przekierowania przycisku ⚙️ Panel do CRM, **cofnięta na prośbę właściciela**; przycisk prowadzi do `admin.html`.
 - 1.9.0 — zakładka **Pielęgniarki** w CRM (`crm-pielegniarki.js`) + migracja `004_pielegniarki.sql` (rola „Pielęgniarka”, uprawnienie `nurses`). Migracja 004 wdrożona (1.9.1).
 - 1.9.2 → 1.9.3 — panel wydzielony do repo `Lexsalus/Pielegniarki` (https://lexsalus.github.io/Pielegniarki/), zakładka zdjęta z CRM.
+- 1.11.0 — uzupełnienia specyfikacji (migracja 004): reguły powiadomień + brakujące zdarzenia, zastępstwa, przypomnienia per typ, 2FA przy uprawnieniach Administratora, raporty (status, XLSX, PDF, aplikant), wylogowanie po bezczynności, przeciąganie kategorii.
 - 1.10.0 — PiK na własnej bazie: projekt **Piel** `eamobnucjsavahpxilrt` (schemat + 002–003). CRMKP zostaje dla pielęgniarek. Z CRM usunięta rola „Pielęgniarka”, migracja 004 i jej testy (są w repo Pielegniarki).
 
 ## Otwarte sprawy
@@ -75,6 +76,13 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 6. Test odtwarzania kopii zapasowej (co kwartał) — wymaga planu Supabase z kopiami.
 
 ## Decyzje do podjęcia (ze specyfikacji)
+
+- **Kopie zapasowe (§12):** darmowy plan Supabase nie robi kopii; codzienne kopie dopiero w planie Pro (7 dni) — albo ręczny eksport bazy. Test odtwarzania co kwartał.
+- **Blokada konta po nieudanych logowaniach (§12):** Supabase na darmowym planie ogranicza tylko próby z jednego adresu IP; blokada konta wymaga haka uwierzytelniania z planu płatnego.
+- **Skan antywirusowy załączników (§7):** wymaga funkcji serwerowej i usługi skanującej (wybór dostawcy).
+- **Uprawnienia jako zasób + akcja (§9):** teraz poziomy pełny / ograniczony / brak; pełny model view/create/edit/approve/delete wymaga ustalenia macierzy dla każdej roli.
+- **E-mail i SMS w powiadomieniach (§10):** dostawca poczty (SMTP — przy okazji znosi limit 2 e-maili/h) i SMS.
+- **Czas wylogowania po bezczynności:** ustawione 30 min — do potwierdzenia.
 
 - Zakres roli Biuro (w systemie: tylko przypisane sprawy + zgłoszenia ze strony).
 - Okresy przechowywania danych per kategoria.

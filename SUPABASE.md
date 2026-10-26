@@ -8,10 +8,11 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 
 ## Stan wdrożenia (26.10.2026, nowy projekt `eamobnucjsavahpxilrt`)
 
-- ✅ Krok 1 — schemat + migracje 002–003 (29 tabel z RLS, 60 polityk, 8 kategorii, magazyn `akta`)
+- ✅ Krok 1 — schemat + migracje 002–003 (004: niżej) (29 tabel z RLS, 60 polityk, 8 kategorii, magazyn `akta`)
 - ✅ Krok 2 — rejestracja wyłączona; adres logowania i przekierowań: `https://lexsalus.github.io/PiK/crm.html` (`/PiK/**`); 2FA (TOTP) włączone
 - ✅ Krok 3 — Administrator: `biuro@lekarzeiterapeuci.pl` (nazwa „Admin”), aktywny; 2FA konfiguruje się przy pierwszym logowaniu (konto z błędnym adresem usunięte)
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
+- ✅ Migracja `004_uzupelnienia_specyfikacji.sql` — reguły powiadomień, zastępstwa, harmonogram przypomnień per typ, 2FA przy zmianie uprawnień Administratora, raporty aplikanta
 - ✅ Krok 5 — formularz na stronie i CRM wskazują nowy projekt (`data.json`, `crm.html`)
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 

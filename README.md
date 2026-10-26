@@ -46,7 +46,7 @@ index.html      strona publiczna
 admin.html      panel administracyjny (treść strony)
 crm.html        CRM kancelarii na żywo (Supabase)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002, 003), test/ — testy bazy 72/72, e2e CRM 36/36 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–004), test/ — testy bazy 90/90, e2e CRM 51/51 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
