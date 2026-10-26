@@ -4,6 +4,14 @@ Projekt: **ixlhfhzgzotukstoezcj** · adres: `https://ixlhfhzgzotukstoezcj.supaba
 
 Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Przeszedł 62 testy kryteriów akceptacji na PostgreSQL (`supabase/test/schema.test.mjs`).
 
+## Stan wdrożenia (26.10.2026)
+
+- ✅ Krok 1 — schemat uruchomiony (29 tabel z RLS, 60 reguł dostępu); sprawdzono z zewnątrz: anonimowy może tylko dodać zgłoszenie
+- ⬜ Krok 2 — wyłączenie samodzielnej rejestracji (do zrobienia w panelu)
+- ⬜ Krok 3 — pierwszy Administrator (do zrobienia)
+- ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
+- ✅ Krok 5 — formularz na stronie zapisuje zgłoszenia w tabeli `leads`
+
 ## Krok 1 — uruchom schemat (raz)
 
 1. Otwórz **SQL Editor**: https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/sql/new

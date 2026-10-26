@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.7.1] — 2026-10-26
+- Formularz „Co mi się należy” zapisuje zgłoszenia w bazie Supabase (schemat wdrożony, przypomnienia pg_cron aktywne)
+
 ## [1.7.0] — 2026-10-23
 - Baza CRM dla Supabase: supabase/schema.sql z RLS, audytem i testami; formularz może zapisywać zgłoszenia w bazie
 - Schemat: wszystkie tabele ze specyfikacji, funkcje uprawnień, polityki RLS, numeracja w transakcji, blokada etapów, wersje wpisów i terminów, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia (pg_cron)
