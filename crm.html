@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>CRM Kancelarii</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -20,7 +21,7 @@ a{color:inherit;text-decoration:none}
 h1{font-size:1.45rem;letter-spacing:-.02em}h2{font-size:1.1rem}h3{font-size:1rem}
 .proto{background:var(--warn);color:#1a1300;text-align:center;font-weight:700;font-size:.78rem;padding:5px 10px}
 /* login */
-#login{min-height:calc(100vh - 28px);display:grid;place-items:center;padding:24px}
+#login{min-height:100vh;display:grid;place-items:center;padding:24px}
 .lbox{width:100%;max-width:760px}
 .lbox h1{text-align:center;margin:10px 0 6px}
 .lbox>p{text-align:center;color:var(--mut);margin-bottom:22px}
@@ -29,8 +30,8 @@ h1{font-size:1.45rem;letter-spacing:-.02em}h2{font-size:1.1rem}h3{font-size:1rem
 .ucard:hover{border-color:var(--accent);transform:translateY(-2px)}
 .ucard small{display:block;color:var(--mut)}
 /* layout */
-#app{display:none;grid-template-columns:232px 1fr;min-height:calc(100vh - 28px)}
-aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:calc(100vh - 28px);overflow:auto}
+#app{display:none;grid-template-columns:232px 1fr;min-height:100vh}
+aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh;overflow:auto}
 .brand{font-weight:800;font-size:1.02rem;display:flex;gap:10px;align-items:center;padding:4px 10px 16px}
 .brand i{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#2fd6a0);display:grid;place-items:center;font-style:normal;color:#fff;font-size:.85rem}
 .nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--mut);font-weight:600;cursor:pointer;border:0;background:none;width:100%;text-align:left}
@@ -179,7 +180,6 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--card2)}
 </style>
 </head>
 <body>
-<div class="proto">PROTOTYP CRM — dane przykładowe zapisane tylko w tej przeglądarce. Nie wpisuj prawdziwych danych klientów.</div>
 <div id="login"><div class="lbox">
   <div style="text-align:center;font-size:2rem">⚖️</div>
   <h1>CRM Kancelarii</h1>
@@ -264,7 +264,7 @@ const ROLE_DEF={
 const DB_KEY='crm_db_v1',SESS_KEY='crm_session';
 let DB=null,ME=null;
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-const save=()=>store.set(DB_KEY,JSON.stringify(DB));
+let save=()=>store.set(DB_KEY,JSON.stringify(DB));
 const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const U=id=>DB.users.find(u=>u.id===id)||{name:'—',id:'',role:''};
 const CAT=code=>DB.categories.find(c=>c.code===code)||{code,name:code,color:'#94a3b8'};
@@ -692,7 +692,7 @@ ROUTES.nowe=()=>{
     ${l.message?`<div class="note info" style="margin-top:10px">${esc(l.message)}</div>`:''}
     <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`};
   return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia z formularza „Co mi się należy” na stronie · ${open.length} do obsłużenia</p></div></div>
-    <div class="note info" style="margin-bottom:14px">Prototyp: zgłoszenia wysłane w trybie testowym z <a href="index.html#nalezy" target="_blank" style="color:var(--accent)">tej samej przeglądarki</a> pojawiają się tutaj automatycznie. Docelowo formularz zapisze zgłoszenie w bazie (Supabase).</div>
+    
     ${L.length?L.map(card).join(''):'<div class="empty">Brak zgłoszeń</div>'}`;
 };
 function leadToCase(id){const l=DB.leads.find(x=>x.id===id);const v=l.calc?.inputs?.find(i=>/kwota/i.test(i.label));newCaseModal({leadId:id,category:l.category,client:l.client,value:v?.value})}
@@ -729,7 +729,7 @@ CTAB.klient=c=>{
   return `<div class="grid g3">
   <div class="card"><h3>Dane klienta ${canEdit?`<button class="btn sm" onclick="editClient('${c.id}')">Edytuj</button>`:''}</h3><dl class="kv">
     <dt>Imię i nazwisko</dt><dd>${esc(k.first)} ${esc(k.last)}</dd>
-    <dt>PESEL</dt><dd>${shownPesel.has(c.id)?esc(k.pesel):`${esc(maskPesel(k.pesel))} <span class="mut small">(maskowany)</span>`} ${can('pesel')&&k.pesel&&!shownPesel.has(c.id)?`<button class="btn sm" onclick="revealPesel('${c.id}')">Pokaż</button>`:''}</dd>
+    <dt>PESEL</dt><dd>${shownPesel.has(c.id)&&k.pesel?esc(k.pesel):`${esc(k.peselMasked||maskPesel(k.pesel))} <span class="mut small">(maskowany)</span>`} ${can('pesel')&&(k.pesel||k.peselMasked)&&!shownPesel.has(c.id)?`<button class="btn sm" onclick="revealPesel('${c.id}')">Pokaż</button>`:''}</dd>
     <dt>Adres</dt><dd>${esc(k.address||'—')}</dd><dt>Telefon</dt><dd>${esc(k.phone||'—')}</dd><dt>E-mail</dt><dd>${esc(k.email||'—')}</dd></dl>
     <p class="hint">PESEL i dokumenty: szyfrowane w spoczynku. Pełny PESEL tylko z uprawnieniem; każde odsłonięcie trafia do audytu.</p></div>
   <div class="card"><h3>Podstawowe informacje ${isAdmin()?`<button class="btn sm" onclick="editCaseInfo('${c.id}')">Edytuj</button>`:''}</h3><dl class="kv">
@@ -812,7 +812,6 @@ function entryCard(e,c,stage){
   if(locked&&!isAdmin()&&!pend)acts.push(`<button class="btn sm" onclick="correctionModal('${e.id}')">Wniosek o korektę</button>`);
   if(locked&&isAdmin())acts.push(`<button class="btn sm" onclick="entryModal('${c.id}','${stage.id}','${e.id}',true)">Popraw (z uzasadnieniem)</button>`);
   if(isAdmin())acts.push(`<button class="btn sm del" onclick="deleteEntry('${e.id}')">Usuń</button>`);
-  else acts.push(`<button class="btn sm" title="Pokaż, co odpowie serwer" onclick="deleteEntry('${e.id}')" style="opacity:.6">Usuń (test 403)</button>`);
   return `<div class="entry ${locked?'locked':'draft'}"><div class="eh"><div style="display:flex;gap:10px;align-items:center">${av(e.performedBy)}<div><b>${esc(e.title)}</b><br><small class="mut">${esc(U(e.performedBy).name)} · ${fD(e.performedOn)} · ${esc(e.type)}${e.kind?' / '+esc(e.kind):''}</small></div></div>
     <span class="badge ${locked?'b-good':'b-warn'}">${locked?'🔒 Zatwierdzone · zablokowane':'Roboczy · edytowalny'}</span></div>
     ${e.desc?`<p style="margin-top:8px;white-space:pre-wrap">${esc(e.desc)}</p>`:''}${(e.files||[]).map(x=>`<span class="file">📎 ${esc(x)}</span>`).join('')}
@@ -1065,7 +1064,7 @@ ROUTES.powiadomienia=()=>{
   const all=DB.notifications.filter(n=>n.recipient===ME.id&&(!n.caseId||canCase(CASE(n.caseId)))); // po odebraniu dostępu starych nie można otworzyć
   const list=all.filter(n=>ntTab==='all'||(ntTab==='unread'&&!n.read)||(ntTab==='action'&&n.action&&!n.done));
   const icon={pilne:'!',wazne:'!',normalne:'i'},lab={pilne:'PILNE',wazne:'WAŻNE',normalne:'NORMALNE'};
-  return `<div class="ph"><div><h1>Powiadomienia</h1><p>Odbiorcy wynikają z ról i przypisań do spraw.</p></div><button class="btn" onclick="DB.notifications.filter(n=>n.recipient===ME.id).forEach(n=>n.read=n.read||nowISO());save();rerender()">Oznacz wszystkie jako przeczytane</button></div>
+  return `<div class="ph"><div><h1>Powiadomienia</h1><p>Odbiorcy wynikają z ról i przypisań do spraw.</p></div><button class="btn" onclick="markAllRead()">Oznacz wszystkie jako przeczytane</button></div>
   <div class="chips" style="margin-bottom:14px">${[['all',`Wszystkie (${all.length})`],['unread',`Do przeczytania (${all.filter(n=>!n.read).length})`],['action',`Wymagające działania (${all.filter(n=>n.action&&!n.done).length})`]].map(([k,l])=>`<span class="chip ${ntTab===k?'on':''}" onclick="ntTab='${k}';rerender()">${l}</span>`).join('')}</div>
   <div class="grid" style="grid-template-columns:1.4fr 1fr;align-items:start"><div>${list.length?list.map(n=>`<div class="nt ${n.read?'':'unread'}" onclick="openNt('${n.id}')"><span class="ic ${n.priority}">${icon[n.priority]}</span><div style="flex:1;min-width:0"><b>${esc(n.title)}</b><div class="small mut">${esc(n.body)} · ${fDT(n.created)}</div></div><div style="text-align:right"><span class="badge ${n.priority==='pilne'?'b-bad':n.priority==='wazne'?'b-warn':'b-info'}">${n.action&&!n.done?'WYMAGA DZIAŁANIA':lab[n.priority]}</span></div></div>`).join(''):'<div class="empty">Brak powiadomień</div>'}</div>
   <div class="card"><h3>Zdarzenia i odbiorcy</h3><div class="small">${[['Nowa sprawa','Administrator + zespół sprawy'],['Przydzielenie / zmiana zespołu','Osoby, których dotyczy'],['Nowy termin','Odpowiedzialny + kontroler'],['Zbliżający się termin','Właściciel + kontroler + pełnomocnik'],['Przekroczenie terminu','Właściciel + eskalacja do Administratora'],['Dodanie dokumentu','Zespół sprawy'],['Wniosek o korektę','Administrator'],['Nowa wpłata klienta','Administrator + uprawnieni do finansów'],['Zakończenie sprawy','Pełnomocnik prowadzący + Administrator']].map(([a,b])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)"><span>${a}</span><span class="mut" style="text-align:right">${b}</span></div>`).join('')}</div>
@@ -1351,13 +1350,451 @@ SET.audyt=()=>{
 SET.konto=()=>`<div class="card" style="max-width:560px"><h3>Moje konto</h3><dl class="kv"><dt>Imię i nazwisko</dt><dd>${esc(ME.name)}</dd><dt>Rola</dt><dd>${esc(ROLES[ME.role])}</dd><dt>E-mail</dt><dd>${esc(ME.email)}</dd><dt>2FA</dt><dd>${['admin','att','tech'].includes(ME.role)?'obowiązkowe':'zalecane'} <span class="mut">(w produkcji)</span></dd></dl>
   <h3 style="margin-top:16px">Moje uprawnienia</h3>${PERMS.filter(([k])=>can(k)).map(([k,l])=>`<span class="badge ${permLevel(k)===2?'b-good':'b-warn'}" style="margin:0 6px 6px 0">${l}</span>`).join('')||'<span class="mut">—</span>'}</div>`;
 
-/* ===================== START ===================== */
-loadDB();
-const sess=store.get(SESS_KEY);
-if(sess&&U(sess).id&&U(sess).active!==false){ME=U(sess);$('#login').style.display='none';$('#app').style.display='grid';importLeads();if(!location.hash||location.hash==='#')location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route()}
-else renderLogin();
-addEventListener('storage',e=>{if(e.key==='pk_leads'&&ME&&can('new_cases')){importLeads();rerender()}});
-setInterval(()=>{if(ME&&document.visibilityState==='visible'){const before=DB.notifications.length;runJobs();if(DB.notifications.length!==before){save();renderShell()}}},30000); // liczniki „na żywo” (produkcja: WebSocket / co 30 s)
+/* =====================================================================
+   CRM NA ŻYWO — Supabase
+   Interfejs jak w prototypie; dane i reguły w bazie (RLS + funkcje).
+   Każda operacja idzie do bazy, po niej odświeżamy dane (reload).
+   ===================================================================== */
+const SB_URL='https://ixlhfhzgzotukstoezcj.supabase.co';
+const SB_KEY='sb_publishable_RyhhD3X6ZQ2broLW8CHc6w_PRz15jd4';               // klucz publiczny (publishable) — może być jawny
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const NEED_2FA=['admin','att','tech'];
+const errMsg=e=>{const m=e?.message||String(e||'Błąd');return m.replace(/^.*?ERROR:\s*/,'').replace(/\s*\(SQLSTATE.*$/,'')};
+// operacje serwera robią same: historia, audyt, powiadomienia, przypomnienia
+function audit(){} function hist(){} function notify(){} function runJobs(){} function importLeads(){}
+save=()=>{};
+// modal obsługuje operacje asynchroniczne (okno zostaje otwarte, gdy baza odrzuci zmianę)
+function modal(title,body,{ok='Zapisz',wide=false,onOk,cancel='Anuluj',danger=false}={}){
+  const M=$('#modal');$('#mbox').className='mbox'+(wide?' wide':'');
+  $('#mbox').innerHTML=`<div class="mhead"><h2>${esc(title)}</h2><button class="icon-btn" data-x>✕</button></div><form id="mform">${body}<div class="mfoot">${cancel?`<button type="button" class="btn" data-x>${esc(cancel)}</button>`:''}${ok?`<button class="btn ${danger?'del':'pri'}">${esc(ok)}</button>`:''}</div></form>`;
+  M.classList.add('show');$$('[data-x]',M).forEach(b=>b.onclick=closeModal);
+  $('#mform').onsubmit=async e=>{e.preventDefault();const btn=$('#mform button.pri,#mform button.del');if(btn)btn.disabled=true;
+    try{const r=await onOk?.(Object.fromEntries(new FormData(e.target)),e.target);if(r!==false)closeModal()}
+    catch(err){console.error(err);toast(errMsg(err),true)}finally{if(btn)btn.disabled=false}};
+  setTimeout(()=>$('#mform input:not([type=hidden]),#mform select,#mform textarea')?.focus(),30);
+}
+const chk=r=>{if(r?.error)throw r.error;return r?.data};
+async function act(fn,okMsg){try{const d=await fn();await reload();rerender();if(okMsg)toast(okMsg);return d}catch(e){console.error(e);toast(errMsg(e),true);throw e}}
+const actSafe=(fn,m)=>act(fn,m).catch(()=>{});
+
+/* --- pobranie danych (RLS zwraca tylko to, co wolno) --- */
+const TABLES=['profiles','role_permissions','permission_overrides','case_categories','currencies','process_template_stages','holidays','clients','cases','case_finance','case_members','case_stages','case_entries','entry_versions','correction_requests','documents','document_versions','deadlines','deadline_versions','payments','allocations','allocation_versions','attorney_fees','case_history','notifications','leads','emergency_access'];
+let RAW={};
+async function fetchAll(t,order){let q=sb.from(t).select('*');if(order)q=q.order(order,{ascending:true});const r=await q.limit(5000);return r.error?[]:r.data}
+async function reload(){
+  const rows=await Promise.all(TABLES.map(t=>fetchAll(t)));TABLES.forEach((t,i)=>RAW[t]=rows[i]);
+  const by=(arr,k)=>arr.reduce((m,x)=>((m[x[k]]=m[x[k]]||[]).push(x),m),{});
+  const d={version:'live'};
+  d.users=RAW.profiles.map(p=>({id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color,active:p.active}));
+  Object.keys(ROLE_DEF).forEach(r=>{Object.keys(ROLE_DEF[r]).forEach(k=>delete ROLE_DEF[r][k])});
+  RAW.role_permissions.forEach(r=>{(ROLE_DEF[r.role]=ROLE_DEF[r.role]||{})[r.perm]=r.level});
+  d.overrides={};RAW.permission_overrides.forEach(o=>{(d.overrides[o.user_id]=d.overrides[o.user_id]||{})[o.perm]={value:o.level,until:o.valid_until,reason:o.reason}});
+  d.categories=RAW.case_categories.map(c=>({code:c.code,name:c.name,color:c.color_hex,order:c.sort_order,active:c.is_active,template:c.process_template,currency:c.has_currency}));
+  d.currencies=RAW.currencies.map(c=>c.code);
+  d.templates={std:[],rst:[]};RAW.process_template_stages.sort((a,b)=>a.sort_order-b.sort_order).forEach(s=>d.templates[s.template].push({id:s.id,name:s.name,conflict:s.is_conflict_check,order:s.sort_order}));
+  d.holidays=RAW.holidays.map(h=>({id:h.id,date:h.month_day||h.day,name:h.name,fixed:!!h.month_day}));
+  d.clients=RAW.clients.map(c=>({id:c.id,first:c.first_name,last:c.last_name,pesel:null,peselMasked:c.pesel_masked,address:c.address,phone:c.phone,email:c.email}));
+  const fin=Object.fromEntries(RAW.case_finance.map(f=>[f.case_id,f]));
+  d.cases=RAW.cases.map(c=>({id:c.id,number:c.case_number,category:c.category_code,status:c.status,clientId:c.client_id,court:c.court||'',signature:c.court_signature||'',value:+c.subject_value||0,
+    initialFee:fin[c.id]?+fin[c.id].initial_fee:null,successFee:fin[c.id]?+fin[c.id].success_fee_pct:null,currency:c.currency||'',openedAt:c.opened_at,closedAt:c.closed_at,source:c.source,leadId:c.lead_id,leadData:c.lead_data}));
+  d.members=RAW.case_members.map(m=>({id:m.id,caseId:m.case_id,userId:m.user_id,role:m.role,startDate:m.start_date,endDate:m.end_date,accessDocuments:m.access_documents,accessActions:m.access_actions,accessFinance:m.access_finance,scope:m.responsibility_scope||'',canApprove:m.can_approve,grantedBy:m.granted_by,grantedAt:m.granted_at,revokedAt:m.revoked_at,revokedBy:m.revoked_by}));
+  d.stages=RAW.case_stages.map(s=>({id:s.id,caseId:s.case_id,stageId:s.template_stage_id,order:s.sort_order,name:s.name,status:s.status,responsible:s.responsible_user_id||leadOfRaw(s.case_id),approvedBy:s.approved_by,approvedAt:s.approved_at,conflict:s.is_conflict_check?(s.conflict_result||null):undefined}));
+  const dv=by(RAW.document_versions,'document_id');
+  d.documents=RAW.documents.map(x=>({id:x.id,caseId:x.case_id,stage:x.stage_id,entryId:x.entry_id,name:x.name,deleted:x.deleted_at?{at:x.deleted_at,by:x.deleted_by,reason:x.delete_reason}:false,
+    versions:(dv[x.id]||[]).sort((a,b)=>a.version-b.version).map(v=>({v:v.version,at:v.uploaded_at,by:v.uploaded_by,size:v.size_bytes>1048576?(v.size_bytes/1048576).toFixed(1)+' MB':Math.max(1,Math.round((v.size_bytes||0)/1024))+' KB',sha:v.sha256,path:v.storage_path}))}));
+  const ev=by(RAW.entry_versions,'entry_id'),docsByEntry=by(d.documents.filter(x=>x.entryId),'entryId');
+  d.entries=RAW.case_entries.map(e=>({id:e.id,caseId:e.case_id,stage:e.stage_id,type:e.type,kind:e.kind,title:e.title,desc:e.description,performedOn:e.performed_on,performedBy:e.performed_by,approvedBy:e.approved_by,approvedAt:e.approved_at,next:e.next_action_date,
+    status:e.locked?'approved':'draft',locked:e.locked,files:(docsByEntry[e.id]||[]).map(x=>x.name),created:e.created_at,deleted:e.deleted_at?{at:e.deleted_at,by:e.deleted_by,reason:e.delete_reason}:false,
+    versions:(ev[e.id]||[]).sort((a,b)=>a.edited_at.localeCompare(b.edited_at)).map(v=>({at:v.edited_at,by:v.edited_by,title:v.title,desc:v.description,reason:v.reason}))}));
+  d.corrections=RAW.correction_requests.map(k=>({id:k.id,entryId:k.entry_id,caseId:k.case_id,by:k.requested_by,at:k.created_at,reason:k.reason,title:k.proposed_title,desc:k.proposed_description,status:k.status,decidedBy:k.decided_by,decidedAt:k.decided_at}));
+  const dlv=by(RAW.deadline_versions,'deadline_id'),docName=id=>d.documents.find(x=>x.id===id)?.name;
+  d.deadlines=RAW.deadlines.map(x=>({id:x.id,caseId:x.case_id,type:x.type,title:x.title,trigger:x.trigger_date,len:x.term_length,unit:x.term_unit||'dni',computed:x.computed_due_date||x.final_due_date,final:x.final_due_date,override:x.override_reason,
+    time:x.due_time?String(x.due_time).slice(0,5):'',responsible:x.responsible_user_id,controller:x.second_controller_id,controllerOk:x.controller_confirmed_at,status:x.status,doneAt:x.completed_at,doneBy:x.completed_by,proof:docName(x.proof_document_id)||(x.proof_document_id?'załącznik':null),
+    versions:(dlv[x.id]||[]).map(v=>({at:v.changed_at,by:v.changed_by,from:v.old_date,to:v.new_date,reason:v.reason})),deleted:x.deleted_at?{at:x.deleted_at,reason:x.delete_reason}:false,created:x.created_at}));
+  d.payments=RAW.payments.map(p=>({id:p.id,caseId:p.case_id,amount:+p.amount,currency:p.currency,receivedOn:p.received_on,payer:p.payer||'',title:p.title,status:p.status}));
+  const av_=by(RAW.allocation_versions,'allocation_id');
+  d.allocations=RAW.allocations.map(a=>({id:a.id,paymentId:a.payment_id,caseId:a.case_id,type:a.recipient_type,recipient:a.recipient_type==='attorney'?a.recipient_user_id:(a.recipient_name||''),amount:+a.amount,status:a.status,date:a.allocation_date,paidOn:a.paid_on,basis:a.basis||'',version:a.version,
+    history:(av_[a.id]||[]).map(h=>({at:h.changed_at,by:h.changed_by,from:+h.amount,to:+a.amount,reason:h.reason}))}));
+  d.fees=RAW.attorney_fees.map(f=>({id:f.id,caseId:f.case_id,userId:f.user_id,base:+f.base_amount,sfType:f.sf_type,sfValue:+f.sf_value,sfBasis:f.sf_basis||'',sfCondition:f.sf_condition||'',sfStatus:f.sf_status}));
+  d.history=RAW.case_history.sort((a,b)=>a.id-b.id).map(h=>({id:h.id,caseId:h.case_id,ts:h.at,user:h.user_id,text:h.text,field:h.field,before:h.before_value,after:h.after_value}));
+  d.notifications=RAW.notifications.sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(n=>({id:n.id,recipient:n.recipient_id,type:n.event_type,caseId:n.case_id,title:n.title,body:n.body||'',priority:n.priority,action:n.requires_action,created:n.created_at,read:n.read_at,done:n.action_done_at,key:n.dedupe_key}));
+  d.leads=RAW.leads.map(l=>({id:l.id,created:l.created_at,category:l.category,calc:l.calc||{},client:{name:l.client_name,phone:l.phone,email:l.email||''},message:l.message||'',status:l.status,reason:l.reason,caseId:l.case_id,fromSite:true}));
+  const em=RAW.emergency_access.sort((a,b)=>b.created_at.localeCompare(a.created_at));
+  const e0=em.find(e=>e.status==='pending')||em.find(e=>e.status==='granted'&&new Date(e.valid_until)>new Date());
+  d.emergency=e0?{id:e0.id,by:e0.user_id,reason:e0.reason,status:e0.status,until:e0.valid_until?new Date(e0.valid_until).getTime():0}:null;
+  d.audit=[];
+  DB=d;
+  ME=d.users.find(u=>u.id===SESSION_UID)||ME;
+  if(can('audit')){const a=await sb.from('audit_log').select('*').order('id',{ascending:false}).limit(1000);d.audit=(a.data||[]).reverse().map(x=>({i:x.id,ts:x.at,user:x.user_id,action:x.action,target:x.target,details:x.details,hash:x.hash,prev:x.prev_hash}))}
+}
+const leadOfRaw=cid=>RAW.case_members?.find(m=>m.case_id===cid&&m.role==='lead'&&!m.revoked_at)?.user_id;
+
+/* --- logowanie: e-mail + hasło, potem 2FA (TOTP) --- */
+let SESSION_UID=null;
+function loginView(step,extra={}){
+  const L=$('#login .lbox');
+  const head=`<div style="text-align:center;font-size:2rem">⚖️</div><h1>CRM Kancelarii</h1>`;
+  const box=c=>`<div class="card" style="max-width:420px;margin:18px auto 0">${c}</div>`;
+  if(step==='password')L.innerHTML=head+`<p>Zaloguj się kontem nadanym przez Administratora.</p>`+box(`<form id="lf" class="form" style="grid-template-columns:1fr">
+    <label>E-mail<input class="f" type="email" name="email" required autocomplete="username" value="${esc(extra.email||'')}"></label>
+    <label>Hasło<input class="f" type="password" name="password" required autocomplete="current-password"></label>
+    <button class="btn pri" style="justify-content:center">Zaloguj</button><div id="lerr" class="small" style="color:var(--bad)"></div>
+    <a href="#" id="lforgot" class="small" style="color:var(--accent);text-align:center">Nie pamiętam hasła</a></form>`)+`<p class="hint" style="text-align:center;margin-top:16px"><a href="index.html" style="color:var(--accent)">← Strona dla klientów</a> · <a href="crm-demo.html" style="color:var(--accent)">Wersja demonstracyjna</a></p>`;
+  if(step==='enroll')L.innerHTML=head+`<p>Twoja rola wymaga logowania dwuskładnikowego (2FA).</p>`+box(`<ol class="small" style="padding-left:18px;line-height:1.7"><li>Zainstaluj aplikację z kodami (np. Google Authenticator, Microsoft Authenticator).</li><li>Zeskanuj kod QR albo wpisz klucz ręcznie.</li><li>Wpisz 6-cyfrowy kod z aplikacji.</li></ol>
+    <div style="text-align:center;margin:12px 0"><img src="${extra.qr}" alt="Kod QR do aplikacji 2FA" style="width:200px;height:200px;background:#fff;border-radius:12px;padding:8px"></div>
+    <div class="small mut" style="text-align:center;word-break:break-all">Klucz: <code>${esc(extra.secret)}</code></div>
+    <form id="lf" class="form" style="grid-template-columns:1fr;margin-top:12px"><label>Kod z aplikacji<input class="f" name="code" required pattern="\\d{6}" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label><button class="btn pri" style="justify-content:center">Potwierdź</button><div id="lerr" class="small" style="color:var(--bad)"></div></form>`);
+  if(step==='verify')L.innerHTML=head+`<p>Wpisz kod z aplikacji 2FA.</p>`+box(`<form id="lf" class="form" style="grid-template-columns:1fr"><label>Kod (6 cyfr)<input class="f" name="code" required pattern="\\d{6}" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label><button class="btn pri" style="justify-content:center">Zaloguj</button><div id="lerr" class="small" style="color:var(--bad)"></div><a href="#" id="lback" class="small" style="color:var(--accent);text-align:center">Wyloguj</a></form>`);
+  if(step==='newpass')L.innerHTML=head+`<p>Ustaw nowe hasło.</p>`+box(`<form id="lf" class="form" style="grid-template-columns:1fr"><label>Nowe hasło (min. 12 znaków)<input class="f" type="password" name="p1" required minlength="12" autocomplete="new-password"></label><label>Powtórz<input class="f" type="password" name="p2" required minlength="12" autocomplete="new-password"></label><button class="btn pri" style="justify-content:center">Zapisz hasło</button><div id="lerr" class="small" style="color:var(--bad)"></div></form>`);
+  if(step==='inactive')L.innerHTML=head+box(`<p>Konto <b>${esc(extra.email||'')}</b> nie jest jeszcze aktywne. Poproś Administratora o nadanie roli i aktywację.</p><button class="btn" id="lback" style="margin-top:12px">Wyloguj</button>`);
+  if(step==='loading')L.innerHTML=head+`<p>Wczytywanie danych…</p>`;
+  const f=$('#lf'),err=m=>{const x=$('#lerr');if(x)x.textContent=m};
+  $('#lback')&&($('#lback').onclick=async e=>{e.preventDefault();await sb.auth.signOut();loginView('password')});
+  $('#lforgot')&&($('#lforgot').onclick=async e=>{e.preventDefault();const em=$('#lf [name=email]').value.trim();if(!em)return err('Wpisz e-mail, potem kliknij ponownie.');
+    const r=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});err(r.error?errMsg(r.error):'Jeśli konto istnieje, wysłaliśmy link do ustawienia hasła.')});
+  if(!f)return;
+  f.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(f)),b=f.querySelector('button');b.disabled=true;
+    try{
+      if(step==='password'){const r=await sb.auth.signInWithPassword({email:v.email.trim(),password:v.password});if(r.error)throw r.error;await afterSignIn()}
+      if(step==='enroll'){const r=await sb.auth.mfa.challengeAndVerify({factorId:extra.factorId,code:v.code});if(r.error)throw r.error;await sb.rpc('log_login',{p_action:'logowanie.2fa_konfiguracja'});await afterSignIn()}
+      if(step==='verify'){const r=await sb.auth.mfa.challengeAndVerify({factorId:extra.factorId,code:v.code});if(r.error)throw r.error;await afterSignIn()}
+      if(step==='newpass'){if(v.p1!==v.p2)throw new Error('Hasła się różnią');const r=await sb.auth.updateUser({password:v.p1});if(r.error)throw r.error;toast('Hasło zmienione');await afterSignIn()}
+    }catch(x){err(/Invalid login/i.test(x.message)?'Nieprawidłowy e-mail lub hasło.':/invalid totp|Invalid TOTP/i.test(x.message)?'Nieprawidłowy kod — sprawdź czas w telefonie i spróbuj ponownie.':errMsg(x))}finally{b.disabled=false}};
+}
+async function afterSignIn(){
+  const {data:{user}}=await sb.auth.getUser();if(!user)return loginView('password');
+  SESSION_UID=user.id;
+  const p=(await sb.from('profiles').select('*').eq('id',user.id).single()).data;
+  if(!p||!p.active)return loginView('inactive',{email:user.email});
+  const aal=(await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data;
+  if(NEED_2FA.includes(p.role)&&aal?.currentLevel!=='aal2'){
+    const f=(await sb.auth.mfa.listFactors()).data;const tot=(f?.totp||[]).find(x=>x.status==='verified');
+    if(tot)return loginView('verify',{factorId:tot.id});
+    (f?.all||[]).filter(x=>x.factor_type==='totp'&&x.status!=='verified').forEach(x=>sb.auth.mfa.unenroll({factorId:x.id}));
+    const en=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'CRM '+new Date().toISOString().slice(0,10)});
+    if(en.error){loginView('password');return toast(errMsg(en.error),true)}
+    return loginView('enroll',{factorId:en.data.id,qr:en.data.totp.qr_code,secret:en.data.totp.secret});
+  }
+  loginView('loading');
+  ME={id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color};
+  try{await reload()}catch(e){console.error(e);return toast('Nie udało się wczytać danych: '+errMsg(e),true)}
+  if(!sessionStorage.getItem('crm_logged_'+p.id)){sessionStorage.setItem('crm_logged_'+p.id,1);sb.rpc('log_login',{p_action:'logowanie'})}
+  $('#login').style.display='none';$('#app').style.display='grid';
+  if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
+}
+function renderLogin(){loginView('password')}
+function login(){} // (prototyp: wybór osoby — tu niepotrzebne)
+$('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
+
+/* --- odczyt akt do audytu --- */
+{const orig=ROUTES.sprawa,after=orig.after;ROUTES.sprawa=(id,tab)=>{const h=orig(id,tab);const k='crm_read_'+id;if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,1);sb.rpc('log_case_open',{p_case:id})}return h};ROUTES.sprawa.after=after}
+
+/* --- sprawy i zgłoszenia --- */
+function newCaseModal(pre={}){
+  need(canCreateCase(),'Zakładanie spraw: Administrator lub Biuro.');
+  const cats=DB.categories.filter(c=>c.active).sort((a,b)=>a.order-b.order),atts=DB.users.filter(u=>u.role==='att'&&u.active!==false);
+  if(!atts.length)return toast('Najpierw aktywuj co najmniej jednego pełnomocnika (Ustawienia → Użytkownicy)',true);
+  const [first='',...rest]=(pre.client?.name||'').split(' ');
+  modal('Nowa sprawa',`<div class="form">
+    <label>Kategoria<select class="f" name="category" id="ncCat">${cats.map(c=>`<option value="${c.code}" ${pre.category===c.code?'selected':''}>${esc(c.code)} — ${esc(c.name)}</option>`).join('')}</select></label>
+    <label id="ncCur" style="display:none">Waluta<select class="f" name="currency">${DB.currencies.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label>
+    <label>Pełnomocnik prowadzący<select class="f" name="lead">${atts.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select></label>
+    <label>Imię<input class="f" name="first" required value="${esc(first)}"></label><label>Nazwisko<input class="f" name="last" required value="${esc(rest.join(' '))}"></label>
+    <label>PESEL<input class="f" name="pesel" pattern="\\d{11}" placeholder="11 cyfr (opcjonalnie)"></label>
+    <label>Telefon<input class="f" name="phone" value="${esc(pre.client?.phone||'')}"></label><label>E-mail<input class="f" name="email" type="email" value="${esc(pre.client?.email||'')}"></label>
+    <label class="full">Adres<input class="f" name="address"></label>
+    <label>Wartość sporu (zł)<input class="f" type="number" name="value" min="0" step="0.01" value="${esc(pre.value||'')}"></label>
+    <label>Opłata wstępna (zł)<input class="f" type="number" name="fee" min="0" step="0.01"></label>
+    <label>Success fee (%)<input class="f" type="number" name="sf" min="0" max="50" step="0.5" value="10"></label></div>
+    <p class="hint">Numer nadaje baza: KOD-ROK-NNNN, bez duplikatów. PESEL zapisuje się zaszyfrowany.</p>`,{ok:'Załóż sprawę',onOk:async f=>{
+    const id=await act(async()=>chk(await sb.rpc('create_case',{p_category:f.category,p_first:f.first.trim(),p_last:f.last.trim(),p_lead:f.lead,p_pesel:f.pesel||null,p_phone:f.phone||null,p_email:f.email||null,p_address:f.address||null,
+      p_value:+f.value||0,p_initial_fee:+f.fee||0,p_success_fee:+f.sf||0,p_currency:CAT(f.category).currency?f.currency:null,p_lead_id:pre.leadId||null})));
+    const c=CASE(id);toast(`Założono sprawę ${c?.number||''}`);location.hash=`#/sprawa/${id}`;
+  }});
+  const sync=()=>$('#ncCur').style.display=CAT($('#ncCat').value).currency?'':'none';$('#ncCat').onchange=sync;sync();
+}
+function leadToCase(id){const l=DB.leads.find(x=>x.id===id);const v=l.calc?.inputs?.find(i=>/kwota/i.test(i.label));newCaseModal({leadId:id,category:DB.categories.some(c=>c.code===l.category)?l.category:'INNE',client:l.client,value:v?.value})}
+function rejectLead(id){askReason('Odrzuć zgłoszenie','Powód (np. poza zakresem, brak kontaktu)',r=>act(async()=>chk(await sb.from('leads').update({status:'odrzucone',reason:r,handled_by:ME.id}).eq('id',id)),'Zgłoszenie odrzucone'),{ok:'Odrzuć'})}
+async function revealPesel(id){const c=CASE(id);try{const p=chk(await sb.rpc('reveal_pesel',{p_client:c.clientId}));CLIENT(c.clientId).pesel=p;shownPesel.add(id);rerender();setTimeout(()=>{shownPesel.delete(id);const k=CLIENT(c.clientId);if(k)k.pesel=null;if(location.hash.includes(id))rerender()},30000);toast('PESEL widoczny przez 30 s · zapisano w audycie')}catch(e){toast(errMsg(e),true)}}
+function editClient(id){
+  const c=CASE(id),k=CLIENT(c.clientId);
+  modal('Edytuj dane klienta',`<div class="form">${[['first','Imię'],['last','Nazwisko'],['phone','Telefon'],['email','E-mail']].map(([f,l])=>`<label>${l}<input class="f" name="${f}" value="${esc(k[f]||'')}"></label>`).join('')}<label class="full">Adres<input class="f" name="address" value="${esc(k.address||'')}"></label></div><p class="hint">Każda zmiana pola zapisze się w „Historii działań” z wartością przed i po.</p>`,
+  {onOk:f=>act(async()=>chk(await sb.from('clients').update({first_name:f.first.trim(),last_name:f.last.trim(),phone:f.phone||null,email:f.email||null,address:f.address||null}).eq('id',k.id)),'Zapisano zmiany')});
+}
+function editCaseInfo(id){
+  const c=CASE(id);
+  modal('Podstawowe informacje',`<div class="form"><label>Sąd<input class="f" name="court" value="${esc(c.court)}"></label><label>Sygnatura<input class="f" name="signature" value="${esc(c.signature)}"></label>
+    <label>Wartość sporu (zł)<input class="f" type="number" step="0.01" name="value" value="${c.value}"></label><label>Opłata wstępna (zł)<input class="f" type="number" step="0.01" name="initialFee" value="${c.initialFee??0}"></label><label>Success fee (%)<input class="f" type="number" step="0.5" name="successFee" value="${c.successFee??0}"></label></div>`,
+  {onOk:f=>act(async()=>{chk(await sb.from('cases').update({court:f.court||null,court_signature:f.signature||null,subject_value:+f.value||0}).eq('id',id));
+    chk(await sb.from('case_finance').update({initial_fee:+f.initialFee||0,success_fee_pct:+f.successFee||0}).eq('case_id',id))},'Zapisano')});
+}
+function caseAdminModal(id){
+  const c=CASE(id);need(isAdmin(),'Zmiana statusu i kategorii: tylko Administrator.');
+  modal('Status i kategoria sprawy',`<div class="form"><label>Status<select class="f" name="status">${Object.entries(CASE_STATUS).map(([k,v])=>`<option value="${k}" ${c.status===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>Kategoria<select class="f" name="category">${DB.categories.map(k=>`<option value="${k.code}" ${c.category===k.code?'selected':''}>${k.code} — ${esc(k.name)}</option>`).join('')}</select></label></div><p class="hint">Zmiana trafia do historii sprawy i audytu. Numer sprawy (${esc(c.number)}) się nie zmienia.</p>`,
+  {onOk:f=>act(async()=>chk(await sb.from('cases').update({status:f.status,category_code:f.category}).eq('id',id)),'Zapisano')});
+}
+
+/* --- wpisy, etapy, korekty --- */
+async function sha256File(file){const b=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const safeName=n=>n.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ł/g,'l').replace(/Ł/g,'L').replace(/[^\w.\-]+/g,'_').slice(-120);
+async function storeFile(caseId,file,{docId,stageId,entryId,name}={}){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!ALLOWED_EXT.includes(ext))throw new Error('Niedozwolony typ pliku: .'+ext);
+  if(file.size>MAX_MB*1048576)throw new Error(`Plik większy niż ${MAX_MB} MB`);
+  const sha=await sha256File(file),id=docId||crypto.randomUUID(),path=`${caseId}/${id}/${Date.now()}-${safeName(file.name)}`;
+  chk(await sb.storage.from('akta').upload(path,file,{upsert:false,contentType:file.type||'application/octet-stream'}));
+  if(!docId)chk(await sb.from('documents').insert({id,case_id:caseId,stage_id:stageId||null,entry_id:entryId||null,name:name||file.name}));
+  chk(await sb.from('document_versions').insert({document_id:id,version:0,storage_path:path,size_bytes:file.size,sha256:sha}));
+  return id;
+}
+function entryModal(caseId,stageId,entryId,adminFix){
+  const c=CASE(caseId),e=entryId&&DB.entries.find(x=>x.id===entryId);
+  need(caseFlags(c).actions,'Brak uprawnienia do czynności w tej sprawie.');
+  modal(e?(adminFix?'Korekta zatwierdzonego wpisu':'Edytuj wpis'):'Nowy wpis',`<div class="form">
+    <label>Typ<select class="f" name="type"><option ${e?.type==='czynność'?'selected':''}>czynność</option><option ${e?.type==='notatka'?'selected':''}>notatka</option></select></label>
+    <label>Rodzaj<select class="f" name="kind">${ENTRY_KINDS.map(k=>`<option ${e?.kind===k?'selected':''}>${k}</option>`).join('')}</select></label>
+    <label class="full">Nazwa czynności<input class="f" name="title" required value="${esc(e?.title||'')}"></label>
+    <label class="full">Opis wykonanej pracy<textarea class="f" name="desc">${esc(e?.desc||'')}</textarea></label>
+    <label>Data wykonania<input class="f" type="date" name="performedOn" value="${e?.performedOn||iso(today())}"></label>
+    <label>Termin kolejnej czynności<input class="f" type="date" name="next" value="${e?.next||''}"></label>
+    ${e?'':`<label class="full">Załączniki<input class="f" type="file" name="files" multiple accept="${ALLOWED_EXT.map(x=>'.'+x).join(',')}"></label>`}
+    ${adminFix?'<label class="full">Uzasadnienie korekty<textarea class="f" name="reason" required minlength="5"></textarea></label>':''}</div>
+    <p class="hint">${e?'Poprzednia treść zostanie zachowana w „Historii korekt”.':'Wpis jest roboczy do zatwierdzenia etapu. Usunąć zapisany wpis może tylko Administrator.'} Termin kolejnej czynności tworzy zadanie w Terminach.</p>`,{onOk:(v,form)=>act(async()=>{
+    const row={type:v.type,kind:v.kind,title:v.title.trim(),description:v.desc||'',performed_on:v.performedOn,next_action_date:v.next||null};
+    if(e){chk(await sb.from('case_entries').update({...row,...(adminFix?{edit_reason:v.reason}:{})}).eq('id',e.id))}
+    else{const ins=chk(await sb.from('case_entries').insert({...row,case_id:c.id,stage_id:stageId}).select('id').single());
+      for(const file of [...(form.files?.files||[])])await storeFile(c.id,file,{stageId,entryId:ins.id})}
+  },'Zapisano')});
+}
+function approveEntry(id){actSafe(async()=>chk(await sb.from('case_entries').update({locked:true}).eq('id',id)),'Wpis zatwierdzony')}
+function deleteEntry(id){
+  const e=DB.entries.find(x=>x.id===id);
+  if(!isAdmin()){actSafe(async()=>{const r=await sb.from('case_entries').update({deleted_at:new Date().toISOString(),delete_reason:'próba usunięcia'}).eq('id',id).select('id');chk(r);if(!r.data?.length)throw new Error('Brak uprawnień (RLS)')});return}
+  askReason('Usuń wpis',`Uzasadnienie usunięcia „${e.title}”`,r=>act(async()=>chk(await sb.from('case_entries').update({deleted_at:new Date().toISOString(),delete_reason:r}).eq('id',id)),'Wpis ukryty — zostaje w archiwum i audycie'),{ok:'Usuń'});
+}
+function correctionModal(id){
+  const e=DB.entries.find(x=>x.id===id);
+  modal('Wniosek o korektę',`<div class="note info" style="margin-bottom:12px">Wpis jest zatwierdzony. Proponowana zmiana trafi do Administratora; oryginał zostaje w historii.</div><div class="form">
+    <label class="full">Nazwa<input class="f" name="title" value="${esc(e.title)}"></label><label class="full">Opis<textarea class="f" name="desc">${esc(e.desc)}</textarea></label>
+    <label class="full">Uzasadnienie<textarea class="f" name="reason" required minlength="5"></textarea></label></div>`,{ok:'Wyślij wniosek',onOk:v=>act(async()=>chk(await sb.from('correction_requests').insert({entry_id:id,case_id:e.caseId,reason:v.reason,proposed_title:v.title,proposed_description:v.desc||''})),'Wysłano wniosek do Administratora')});
+}
+function decideCorrection(id,ok){actSafe(async()=>chk(await sb.rpc('decide_correction',{p_id:id,p_approve:ok})),ok?'Korekta zatwierdzona':'Korekta odrzucona')}
+function approveStage(id){
+  const s=DB.stages.find(x=>x.id===id),c=CASE(s.caseId);
+  const go=res=>act(async()=>{chk(await sb.rpc('approve_stage',{p_stage:id,p_conflict_result:res||null}));selStage[c.id]=DB.stages.find(x=>x.caseId===c.id&&x.order===s.order+1)?.id},'Etap zatwierdzony i zablokowany');
+  if(s.conflict!==undefined)modal('Kontrola konfliktu interesów',`<p class="mut" style="margin-bottom:12px">Bez wyniku sprawdzenia klienta i strony przeciwnej nie można przejść dalej.</p><div class="form"><label class="full">Strona przeciwna<input class="f" name="opp" required placeholder="np. Bank X S.A."></label>
+    <label class="full">Wynik<select class="f" name="res"><option>brak konfliktu</option><option>konflikt — odmowa prowadzenia</option></select></label></div>`,{ok:'Zatwierdź etap',onOk:v=>go(`${v.res} (strona przeciwna: ${v.opp})`)});
+  else if(confirm(`Zatwierdzić etap „${s.name}”? Wpisy i załączniki zostaną zablokowane.`))go().catch(()=>{});
+}
+
+/* --- dokumenty (Supabase Storage, prywatny kubełek „akta”) --- */
+async function uploadDoc(caseId,file,docId){
+  if(!file)return;need(caseFlags(CASE(caseId)).docs,'Brak dostępu do dokumentów.');
+  const open=DB.stages.find(s=>s.caseId===caseId&&s.status==='open');
+  actSafe(()=>storeFile(caseId,file,{docId,stageId:open?.id}),docId?'Zapisano nową wersję':'Zapisano dokument');
+}
+async function downloadDoc(id,v){
+  const d=DB.documents.find(x=>x.id===id),ver=d.versions.find(x=>x.v===v)||d.versions[d.versions.length-1];
+  try{const r=chk(await sb.storage.from('akta').createSignedUrl(ver.path,60,{download:d.name}));sb.rpc('log_event',{p_action:'dokument.pobranie',p_target:CASE(d.caseId).number,p_details:`${d.name} v${ver.v}`});location.href=r.signedUrl}catch(e){toast(errMsg(e),true)}
+}
+function deleteDoc(id){const d=DB.documents.find(x=>x.id===id);askReason('Usuń dokument',`Uzasadnienie usunięcia „${d.name}”`,r=>act(async()=>chk(await sb.from('documents').update({deleted_at:new Date().toISOString(),delete_reason:r}).eq('id',id)),'Dokument ukryty'),{ok:'Usuń'})}
+CTAB.dokumenty=c=>{
+  const docs=DB.documents.filter(d=>d.caseId===c.id&&!d.deleted);
+  return `<div class="card"><h3>Dokumenty (${docs.length}) <label class="btn sm pri">+ Dodaj plik<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0])" accept="${ALLOWED_EXT.map(x=>'.'+x).join(',')}"></label></h3>
+  ${docs.length?`<div class="tw"><table><tr><th>Plik</th><th>Etap</th><th>Wersja</th><th>Dodał</th><th>SHA-256</th><th></th></tr>${docs.map(d=>{const v=d.versions[d.versions.length-1];if(!v)return '';const s=d.stage&&DB.stages.find(x=>x.id===d.stage);return `<tr><td>📎 <b>${esc(d.name)}</b><br><small class="mut">${esc(v.size)}</small></td><td class="small">${s?esc(s.order+'. '+s.name):'—'}</td>
+    <td><details><summary style="cursor:pointer">v${v.v}</summary>${d.versions.slice().reverse().map(x=>`<div class="small mut">v${x.v} · ${fDT(x.at)} · ${esc(U(x.by).name)} · <a href="#" onclick="event.preventDefault();downloadDoc('${d.id}',${x.v})" style="color:var(--accent)">pobierz</a></div>`).join('')}</details></td><td>${av(v.by,26)}</td><td class="small mut" style="font-family:monospace">${esc(v.sha.slice(0,12))}…</td>
+    <td style="white-space:nowrap"><button class="btn sm" onclick="downloadDoc('${d.id}')">Pobierz</button> <label class="btn sm">Nowa wersja<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0],'${d.id}')"></label> ${isAdmin()?`<button class="btn sm del" onclick="deleteDoc('${d.id}')">Usuń</button>`:''}</td></tr>`}).join('')}</table></div>`:'<div class="empty">Brak dokumentów</div>'}
+  <p class="hint">Pliki w prywatnym, szyfrowanym magazynie akt. Dozwolone: ${ALLOWED_EXT.join(', ')} · maks. ${MAX_MB} MB. Podmiana pliku = nowa wersja; poprzednie zostają do pobrania. Pobranie trafia do audytu.</p></div>`;
+};
+
+/* --- zespół sprawy --- */
+function memberModal(caseId,mid){
+  need(isAdmin(),'Dodawać i odbierać dostęp może tylko Administrator.');
+  const c=CASE(caseId),m=mid&&DB.members.find(x=>x.id===mid),inTeam=teamOf(c).map(x=>x.userId);
+  const users=DB.users.filter(u=>['att','app','office'].includes(u.role)&&u.active!==false&&(m||!inTeam.includes(u.id)));
+  if(!m&&!users.length)return toast('Brak aktywnych pracowników do dodania (Ustawienia → Użytkownicy)');
+  modal(m?`Zakres dostępu — ${U(m.userId).name}`:'Dodaj osobę do sprawy',`<div class="form">
+    ${m?'':`<label>Osoba<select class="f" name="user" id="mmU">${users.map(u=>`<option value="${u.id}" data-r="${u.role}">${esc(u.name)} (${ROLES[u.role]})</option>`).join('')}</select></label>`}
+    <label>Rola w sprawie<select class="f" name="role" id="mmR">${Object.entries(MEMBER_ROLES).map(([k,v])=>`<option value="${k}" ${m?.role===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>Data rozpoczęcia<input class="f" type="date" name="start" value="${m?.startDate||iso(today())}"></label><label>Data zakończenia (opcjonalnie)<input class="f" type="date" name="end" value="${m?.endDate||''}"></label>
+    <div class="full fl">Zakres dostępu<div style="display:flex;gap:18px;flex-wrap:wrap;padding:6px 0">
+      <label class="chk"><input type="checkbox" name="docs" ${m?(m.accessDocuments?'checked':''):'checked'}>Dokumenty</label>
+      <label class="chk"><input type="checkbox" name="acts" ${m?(m.accessActions?'checked':''):'checked'}>Czynności</label>
+      <label class="chk"><input type="checkbox" name="fin" id="mmF" ${m?.accessFinance?'checked':''}>Finanse</label>
+      <label class="chk"><input type="checkbox" name="appr" id="mmP" ${m?.canApprove?'checked':''}>Może zatwierdzać czynności</label></div></div>
+    <label class="full">Zakres odpowiedzialności<input class="f" name="scope" value="${esc(m?.scope||'')}"></label></div>
+    <div class="note" style="margin-top:12px">Przypisanie w CRM nie zastępuje formalnego umocowania procesowego.</div>`,{onOk:v=>act(async()=>{
+    const row={role:v.role,start_date:v.start,end_date:v.end||null,access_documents:!!v.docs,access_actions:!!v.acts,access_finance:!!v.fin,can_approve:!!v.appr,responsibility_scope:v.scope||null};
+    if(m)chk(await sb.from('case_members').update(row).eq('id',m.id));else chk(await sb.from('case_members').insert({...row,case_id:c.id,user_id:v.user}));
+  },'Zapisano zespół')});
+  if(!m){const sync=()=>{const r=$('#mmU').selectedOptions[0].dataset.r;$('#mmR').value=r==='app'?'app':r==='office'?'assist':'second';$('#mmF').checked=r==='att';$('#mmP').checked=false};$('#mmU').onchange=sync;sync()}
+}
+function revokeMember(mid){const m=DB.members.find(x=>x.id===mid),c=CASE(m.caseId);if(!confirm(`Odebrać dostęp do ${c.number}: ${U(m.userId).name}? Dostęp wygaśnie natychmiast.`))return;
+  actSafe(async()=>chk(await sb.from('case_members').update({revoked_at:new Date().toISOString(),revoked_by:ME.id,end_date:iso(today())}).eq('id',mid)),'Dostęp odebrany')}
+
+/* --- terminy --- */
+function deadlineModal(caseId){
+  const cs=myCases().filter(c=>c.status==='open'),staff=DB.users.filter(u=>['admin','att','app','office'].includes(u.role)&&u.active!==false);
+  if(!cs.length)return toast('Brak spraw w toku',true);
+  modal('Nowy termin',`<div class="form">
+    <label class="full">Sprawa<select class="f" name="case">${cs.map(c=>`<option value="${c.id}" ${c.id===caseId?'selected':''}>${esc(c.number)} · ${esc(clientName(c))}</option>`).join('')}</select></label>
+    <label>Rodzaj<select class="f" name="type" id="dType">${Object.entries(DL_TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label>Nazwa<input class="f" name="title" required placeholder="np. Odpowiedź na pozew"></label>
+    <label>Zdarzenie (doręczenie)<input class="f" type="date" name="trigger" id="dTrig" value="${iso(today())}"></label>
+    <label>Długość terminu<span style="display:flex;gap:6px"><input class="f" type="number" name="len" id="dLen" value="14" min="0"><select class="f" name="unit" id="dUnit"><option>dni</option><option>tygodnie</option><option>miesiące</option><option>lata</option></select></span></label>
+    <div class="full" id="dCalc"></div>
+    <label class="chk full"><input type="checkbox" name="manual" id="dMan">Ręczne nadpisanie daty (wymaga uzasadnienia)</label>
+    <label id="dManBox" style="display:none">Data końcowa<input class="f" type="date" name="final"></label><label id="dWhy" style="display:none">Uzasadnienie<input class="f" name="why"></label>
+    <label>Godzina (opcjonalnie)<input class="f" type="time" name="time"></label>
+    <label>Odpowiedzialny<select class="f" name="resp">${staff.map(u=>`<option value="${u.id}" ${u.id===ME.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>
+    <label id="dCtrl">Kontroler — druga osoba (wymagany dla ustawowych)<select class="f" name="ctrl"><option value="">—</option>${staff.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select></label></div>`,{onOk:v=>{
+    const r=computeDeadline(v.trigger,+v.len,v.unit),man=!!v.manual;
+    if(v.type==='statutory'&&!v.ctrl){toast('Termin procesowy ustawowy wymaga drugiej osoby kontrolującej',true);return false}
+    if(v.ctrl&&v.ctrl===v.resp){toast('Kontroler musi być inną osobą niż odpowiedzialny',true);return false}
+    if(man&&(!v.final||(v.why||'').trim().length<5)){toast('Podaj datę i uzasadnienie nadpisania',true);return false}
+    return act(async()=>chk(await sb.from('deadlines').insert({case_id:v.case,type:v.type,title:v.title.trim(),trigger_date:v.trigger,term_length:+v.len,term_unit:v.unit,computed_due_date:r.final,final_due_date:man?v.final:r.final,override_reason:man?v.why.trim():null,
+      due_time:v.time||null,responsible_user_id:v.resp,second_controller_id:v.ctrl||null})),'Dodano termin');
+  }});
+  const f=()=>{const r=computeDeadline($('#dTrig').value,+$('#dLen').value||0,$('#dUnit').value);$('#dCalc').innerHTML=`<div class="note info">${esc(r.formula)} → <b>termin upływa ${fD(r.final)} (${DOW[parseD(r.final).getDay()]})</b>${r.moved?`<br><small>${esc(r.why)}</small>`:''}</div>`;
+    const man=$('#dMan').checked;$('#dManBox').style.display=$('#dWhy').style.display=man?'':'none';$('#dCtrl').style.opacity=$('#dType').value==='statutory'?1:.6};
+  ['dTrig','dLen','dUnit','dMan','dType'].forEach(i=>$('#'+i).oninput=f);$('#dMan').onchange=f;f();
+}
+function confirmDl(id){actSafe(async()=>chk(await sb.from('deadlines').update({controller_confirmed_at:new Date().toISOString()}).eq('id',id)),'Potwierdzono poprawność daty')}
+function doneDl(id){
+  const d=DB.deadlines.find(x=>x.id===id);
+  modal(`Wykonano: ${d.title}`,`<div class="form"><label>Data wykonania<input class="f" type="date" name="at" required value="${iso(today())}"></label><label>Potwierdzenie (np. UPO, prezentata)<input class="f" type="file" name="proof" required></label></div><p class="hint">„Wykonano” wymaga daty i załącznika potwierdzającego.</p>`,{ok:'Zamknij termin',onOk:(v,form)=>{
+    const file=form.proof.files[0];if(!file){toast('Dodaj załącznik potwierdzający',true);return false}
+    return act(async()=>{const doc=await storeFile(d.caseId,file,{});chk(await sb.from('deadlines').update({status:'done',completed_at:v.at,proof_document_id:doc}).eq('id',id))},'Termin zamknięty');
+  }});
+}
+function changeDl(id){
+  const d=DB.deadlines.find(x=>x.id===id);
+  modal(`Zmień datę: ${d.title}`,`<div class="form"><label>Nowa data<input class="f" type="date" name="final" required value="${d.final}"></label><label>Godzina<input class="f" type="time" name="time" value="${esc(d.time)}"></label><label class="full">Dlaczego?<textarea class="f" name="reason" required minlength="5"></textarea></label></div><p class="hint">Zmiana daty = nowa wersja. Termin ustawowy wymaga ponownego potwierdzenia przez kontrolera.</p>`,
+  {onOk:v=>act(async()=>chk(await sb.from('deadlines').update({final_due_date:v.final,due_time:v.time||null,change_reason:v.reason}).eq('id',id)),'Zmieniono datę')});
+}
+function delDl(id){const d=DB.deadlines.find(x=>x.id===id);askReason('Usuń termin',`Uzasadnienie usunięcia „${d.title}”`,r=>act(async()=>chk(await sb.from('deadlines').update({deleted_at:new Date().toISOString(),delete_reason:r}).eq('id',id)),'Termin usunięty'),{ok:'Usuń'})}
+function exportIcs(){
+  const cs=myCases(),dls=DB.deadlines.filter(d=>!d.deleted&&d.status!=='done'&&cs.some(c=>c.id===d.caseId));
+  const ev=dls.map(d=>{const c=CASE(d.caseId),dt=d.final.replace(/-/g,'');return ['BEGIN:VEVENT',`UID:${d.id}@crm-kancelarii`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,d.time?`DTSTART:${dt}T${d.time.replace(':','')}00`:`DTSTART;VALUE=DATE:${dt}`,`SUMMARY:${d.title} (${c.number})`,'DESCRIPTION:'+DL_TYPES[d.type]+' — szczegóły w CRM','END:VEVENT'].join('\r\n')});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CRM Kancelarii//PL',...ev,'END:VCALENDAR'].join('\r\n')],{type:'text/calendar'}));a.download='terminy.ics';a.click();
+  sb.rpc('log_event',{p_action:'eksport.ics',p_target:'Terminy',p_details:`${ev.length} terminów`});
+}
+function exportCsv(){
+  const rows=[['Nr sprawy','Kategoria','Klient','Status','Pełnomocnik','Data przyjęcia','Wartość sporu']].concat(myCases().filter(c=>(!rep.cat||c.category===rep.cat)).map(c=>[c.number,c.category,clientName(c),CASE_STATUS[c.status],U(leadOf(c)?.userId).name,c.openedAt,c.value]));
+  const csv='﻿'+rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`raport-spraw-${rep.from}_${rep.to}.csv`;a.click();
+  sb.rpc('log_event',{p_action:'eksport.raport',p_target:'CSV',p_details:`${rows.length-1} spraw · ${rep.from}–${rep.to}`});toast('Eksport zapisany w audycie');
+}
+
+/* --- powiadomienia --- */
+function openNt(id){const n=DB.notifications.find(x=>x.id===id);if(!n.read)sb.from('notifications').update({read_at:new Date().toISOString()}).eq('id',id).then(()=>{n.read=nowISO();renderShell()});
+  if(n.caseId)location.hash=`#/sprawa/${n.caseId}${/termin/i.test(n.title)?'/terminy':/korekt/i.test(n.title)?'/etapy':''}`;else if(n.type==='lead.new')location.hash='#/nowe';else rerender()}
+function markAllRead(){actSafe(async()=>chk(await sb.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',ME.id).is('read_at',null)))}
+
+/* --- finanse --- */
+function paymentModal(caseId){
+  need(isAdmin(),'Wpływy wprowadza Administrator.');
+  modal('Nowy wpływ do kancelarii',`<div class="form"><label class="full">Sprawa<select class="f" name="case">${DB.cases.map(c=>`<option value="${c.id}" ${c.id===caseId?'selected':''}>${esc(c.number)} · ${esc(clientName(c))}</option>`).join('')}</select></label>
+    <label>Kwota (zł)<input class="f" type="number" step="0.01" min="0.01" name="amount" required></label><label>Data wpływu<input class="f" type="date" name="date" value="${iso(today())}"></label>
+    <label>Tytuł<input class="f" name="title" value="Wpłata klienta"></label><label>Wpłacający<input class="f" name="payer"></label></div>`,{onOk:async v=>{
+    const p=await act(async()=>chk(await sb.from('payments').insert({case_id:v.case,amount:+v.amount,received_on:v.date,title:v.title||'Wpłata klienta',payer:v.payer||clientName(CASE(v.case))}).select('id').single()),'Zapisano wpływ');
+    location.hash='#/finanse/'+p.id;
+  }});
+}
+function allocModal(pid,aid){
+  need(isAdmin(),'Podział środków: tylko Administrator.');
+  const p=DB.payments.find(x=>x.id===pid),a=aid&&DB.allocations.find(x=>x.id===aid),atts=DB.users.filter(u=>u.role==='att');
+  modal(a?'Zmień pozycję podziału':'Nowa pozycja podziału',`<div class="form"><label>Kategoria<select class="f" name="type" id="alT">${Object.entries(ALLOC_TYPES).map(([k,v])=>`<option value="${k}" ${a?.type===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label id="alA">Pełnomocnik<select class="f" name="att">${atts.map(u=>`<option value="${u.id}" ${a?.recipient===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>
+    <label id="alR">Odbiorca<input class="f" name="rec" value="${esc(a&&a.type!=='attorney'?a.recipient:'')}"></label>
+    <label>Kwota (zł)<input class="f" type="number" step="0.01" min="0" name="amount" required value="${a?.amount??Math.max(0,balance(p))}"></label>
+    <label>Status<select class="f" name="status">${Object.entries(ALLOC_ST).map(([k,l])=>`<option value="${k}" ${(a?.status||'planned')===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label>Podstawa<input class="f" name="basis" value="${esc(a?.basis||'Umowa współpracy')}"></label>
+    ${a&&a.status!=='planned'?'<label class="full">Uzasadnienie zmiany<textarea class="f" name="reason" required minlength="5"></textarea></label>':''}</div><p class="hint">Baza pilnuje bilansu: suma nie może przekroczyć wpływu, a status inny niż „planowane” wymaga pełnego podziału.</p>`,{onOk:v=>act(async()=>{
+    const row={recipient_type:v.type,recipient_user_id:v.type==='attorney'?v.att:null,recipient_name:v.type==='attorney'?null:(v.rec||null),amount:Math.round(+v.amount*100)/100,status:v.status,basis:v.basis||null,paid_on:v.status==='paid'?(a?.paidOn||iso(today())):null,change_reason:v.reason||null};
+    if(a)chk(await sb.from('allocations').update(row).eq('id',a.id));else chk(await sb.from('allocations').insert({...row,payment_id:pid,case_id:p.caseId}));
+  },'Zapisano podział')});
+  const s=()=>{const t=$('#alT').value;$('#alA').style.display=t==='attorney'?'':'none';$('#alR').style.display=t==='attorney'?'none':''};$('#alT').onchange=s;s();
+}
+function allocStatus(aid,st){actSafe(async()=>chk(await sb.from('allocations').update({status:st,paid_on:st==='paid'?iso(today()):null,change_reason:'zmiana statusu'}).eq('id',aid)),'Zmieniono status').catch(()=>rerender())}
+
+/* --- ustawienia: kategorie, waluty, szablon RST, święta --- */
+function catModal(code){
+  const c=code&&CAT(code);
+  modal(c?`Kategoria ${c.code}`:'Nowa kategoria',`<div class="form"><label>Kod<input class="f" name="code" required maxlength="6" pattern="[A-Za-z]{2,6}" value="${esc(c?.code||'')}"></label><label>Kolor<input class="f" type="color" name="color" value="${c?.color||'#7c5cff'}" style="height:38px;padding:3px"></label>
+    <label class="full">Nazwa<input class="f" name="name" required value="${esc(c?.name||'')}"></label><label>Szablon procesu<select class="f" name="template"><option value="std" ${c?.template!=='rst'?'selected':''}>Standardowy</option><option value="rst" ${c?.template==='rst'?'selected':''}>Restrukturyzacja</option></select></label>
+    <label class="chk" style="align-self:end"><input type="checkbox" name="currency" ${c?.currency?'checked':''}>Pole „waluta”</label></div>`,{onOk:v=>act(async()=>{
+    const row={code:v.code.toUpperCase(),name:v.name,color_hex:v.color,process_template:v.template,has_currency:!!v.currency};
+    if(c)chk(await sb.from('case_categories').update(row).eq('code',c.code));else chk(await sb.from('case_categories').insert({...row,sort_order:DB.categories.length+1}));
+  },'Zapisano kategorię')});
+}
+function moveCat(code,d){const cs=[...DB.categories].sort((a,b)=>a.order-b.order),i=cs.findIndex(c=>c.code===code),j=i+d;
+  actSafe(async()=>{chk(await sb.from('case_categories').update({sort_order:cs[j].order}).eq('code',cs[i].code));chk(await sb.from('case_categories').update({sort_order:cs[i].order}).eq('code',cs[j].code))})}
+function toggleCat(code){actSafe(async()=>chk(await sb.from('case_categories').update({is_active:!CAT(code).active}).eq('code',code)))}
+function addCurrency(v){v=(v||'').trim().toUpperCase();if(v&&!DB.currencies.includes(v))actSafe(async()=>chk(await sb.from('currencies').insert({code:v})))}
+function delCurrency(v){actSafe(async()=>chk(await sb.from('currencies').delete().eq('code',v)))}
+function renameRst(id,name){actSafe(async()=>chk(await sb.from('process_template_stages').update({name}).eq('id',id)),'Zapisano')}
+function delRst(id){if(confirm('Usunąć etap z szablonu? Dotyczy tylko nowych spraw.'))actSafe(async()=>chk(await sb.from('process_template_stages').delete().eq('id',id)))}
+function addRst(){const n=Math.max(0,...DB.templates.rst.map(s=>s.order))+1;actSafe(async()=>chk(await sb.from('process_template_stages').insert({template:'rst',sort_order:n,name:'Nowy etap'})))}
+function addHoliday(f){const fixed=f.fixed.checked;actSafe(async()=>chk(await sb.from('holidays').insert(fixed?{month_day:f.d.value.slice(5),name:f.n.value}:{day:f.d.value,name:f.n.value})),'Dodano')}
+function delHoliday(id){actSafe(async()=>chk(await sb.from('holidays').delete().eq('id',id)))}
+{const orig=SET.kategorie;SET.kategorie=()=>orig().replace(/onclick="DB\.currencies=DB\.currencies\.filter\(y=>y!=='([^']*)'\);save\(\);rerender\(\)"/g,`onclick="delCurrency('$1')"`)
+  .replace(/<form onsubmit="event\.preventDefault\(\);const v=this\.c\.value[^"]*"/,`<form onsubmit="event.preventDefault();addCurrency(this.c.value)"`)
+  .replace(/onchange="DB\.templates\.rst\[(\d+)\]\.name=this\.value;[^"]*"/g,(m,i)=>`onchange="renameRst('${DB.templates.rst[+i].id}',this.value)"`)
+  .replace(/onclick="if\(confirm\('Usunąć etap z szablonu\? Dotyczy tylko nowych spraw\.'\)\)\{DB\.templates\.rst\.splice\((\d+),1\);[^"]*"/g,(m,i)=>`onclick="delRst('${DB.templates.rst[+i].id}')"`)
+  .replace(/onclick="DB\.templates\.rst\.push\([^"]*"/,`onclick="addRst()"`)}
+{const orig=SET.swieta;SET.swieta=()=>orig().replace(/onclick="DB\.holidays\.splice\((\d+),1\);[^"]*"/g,(m,i)=>`onclick="delHoliday('${DB.holidays[+i].id}')"`)
+  .replace(/<form onsubmit="event\.preventDefault\(\);const f=this;DB\.holidays\.push[^"]*"/,`<form onsubmit="event.preventDefault();addHoliday(this)"`)}
+
+/* --- użytkownicy i uprawnienia --- */
+function userModal(id){
+  const u=id&&U(id);
+  if(!u)return modal('Nowy użytkownik',`<ol class="small" style="padding-left:18px;line-height:1.8">
+    <li>Otwórz <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/auth/users" target="_blank" style="color:var(--accent)">Supabase → Authentication → Users</a> → <b>Add user</b> → <b>Create new user</b> (zaznacz <i>Auto Confirm User</i>) albo <b>Send invitation</b>.</li>
+    <li>Wróć tutaj i odśwież — konto pojawi się na liście jako <b>nieaktywne</b>.</li><li>Ustaw rolę, nazwę i aktywuj konto przyciskiem „Rola / konto”.</li></ol>
+    <p class="hint">Konta zakłada tylko Administrator; samodzielna rejestracja jest wyłączona. Pełnomocnik, Administrator i Obsługa techniczna przy pierwszym logowaniu skonfigurują 2FA.</p>`,{ok:'Odśwież listę',onOk:()=>act(async()=>{})});
+  modal(`Konto — ${u.name}`,`<div class="form"><label>Imię i nazwisko<input class="f" name="name" required value="${esc(u.name||'')}"></label><label>E-mail<input class="f" value="${esc(u.email||'')}" disabled></label>
+    <label>Rola<select class="f" name="role">${Object.entries(ROLES).map(([k,l])=>`<option value="${k}" ${u.role===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="chk" style="align-self:end"><input type="checkbox" name="active" ${u.active!==false?'checked':''}>Konto aktywne</label></div><p class="hint">W systemie musi zostać co najmniej jeden aktywny Administrator (pilnuje tego baza). Zmiana trafia do audytu.</p>`,
+  {onOk:v=>act(async()=>chk(await sb.from('profiles').update({full_name:v.name.trim(),role:v.role,active:!!v.active}).eq('id',u.id)),'Zapisano konto')});
+}
+{const after=ROUTES.ustawienia.after;ROUTES.ustawienia.after=sub=>{after?.(sub);const f=$('#permForm');if(!f)return;
+  f.onsubmit=async e=>{e.preventDefault();const u=U(selUser),v=Object.fromEntries(new FormData(f)),ov=DB.overrides[u.id]||{},ups=[],dels=[];
+    PERMS.forEach(([k])=>{const nv=v['p_'+k]===''?null:+v['p_'+k],until=v['u_'+k]||null,o=ov[k];
+      if(nv===null&&o)dels.push(k);else if(nv!==null&&(!o||o.value!==nv||(o.until||null)!==until))ups.push({user_id:u.id,perm:k,level:nv,valid_until:until,reason:(v.reason||'').trim(),granted_by:ME.id,granted_at:new Date().toISOString()})});
+    if(!ups.length&&!dels.length)return toast('Brak zmian');
+    if((v.reason||'').trim().length<5)return toast('Podaj uzasadnienie zmiany',true);
+    actSafe(async()=>{if(ups.length)chk(await sb.from('permission_overrides').upsert(ups));for(const k of dels)chk(await sb.from('permission_overrides').delete().eq('user_id',u.id).eq('perm',k))},`Zapisano ${ups.length+dels.length} zmian — działa od razu`)}}}
+
+/* --- system i audyt (wersja na żywo) --- */
+SET.system=()=>{
+  const em=DB.emergency;
+  return `<div class="grid g3" style="margin-bottom:14px"><div class="tile"><span>Baza</span><b style="color:var(--good);font-size:1.3rem">Supabase · UE</b><small class="mut">PostgreSQL 17 · RLS · 2FA</small></div>
+    <div class="tile"><span>Kopie zapasowe</span><b style="font-size:1.1rem">wg planu Supabase</b><small><a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/database/backups/scheduled" target="_blank" style="color:var(--accent)">Database → Backups</a></small></div>
+    <div class="tile"><span>Przypomnienia o terminach</span><b style="font-size:1.1rem">co 15 min</b><small class="mut">pg_cron · run_deadline_reminders()</small></div></div>
+  <div class="grid g2" style="align-items:start"><div class="card"><h3>Dostęp awaryjny</h3>${ME.role==='tech'?(em&&em.status==='granted'&&em.until>Date.now()?`<div class="note info">Aktywny do ${fDT(new Date(em.until).toISOString())}</div>`:em&&em.status==='pending'?'<div class="note">Wniosek czeka na zgodę Administratora</div>':`<button class="btn" onclick="askReason('Wniosek o dostęp awaryjny','Powód (np. awaria, której nie da się zdiagnozować bez wglądu)',r=>act(async()=>chk(await sb.from('emergency_access').insert({reason:r})),'Wniosek wysłany'),{ok:'Wyślij',danger:false})">Złóż wniosek</button>`):
+      em&&em.status==='pending'?`<div class="note">${esc(U(em.by).name)}: ${esc(em.reason)}</div><div style="margin-top:10px;display:flex;gap:8px"><button class="btn pri sm" onclick="actSafe(async()=>chk(await sb.from('emergency_access').update({status:'granted',decided_by:ME.id,valid_until:new Date(Date.now()+59*60000).toISOString()}).eq('id','${em.id}')),'Zgoda na 60 min')">Zgoda na 60 min</button><button class="btn sm del" onclick="actSafe(async()=>chk(await sb.from('emergency_access').update({status:'rejected',decided_by:ME.id}).eq('id','${em.id}')),'Odmówiono')">Odmów</button></div>`:'<p class="mut">Brak wniosków.</p>'}
+    <p class="hint">Wniosek → zgoda Administratora → dostęp czasowy (60 min) → zapis w audycie. Poza tym obsługa techniczna nie odczyta żadnej sprawy, dokumentu ani rozliczenia — pilnuje tego baza.</p></div>
+  <div class="card"><h3>Konfiguracja</h3><div class="small" style="line-height:1.9">
+    <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/auth/users" target="_blank" style="color:var(--accent)">Użytkownicy (Supabase Auth)</a><br>
+    <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/logs/explorer" target="_blank" style="color:var(--accent)">Logi techniczne</a><br>
+    <a href="https://supabase.com/dashboard/project/ixlhfhzgzotukstoezcj/storage/buckets/akta" target="_blank" style="color:var(--accent)">Magazyn akt</a></div>
+    <p class="hint">Test odtwarzania kopii: co kwartał na osobnym projekcie testowym (procedura w SUPABASE.md).</p></div></div>`;
+};
+{const orig=SET.audyt;SET.audyt=()=>orig().replace(/onclick="const r=verifyAudit\(\);[^"]*"/,`onclick="verifyAuditLive()"`).replace(/<button class="btn sm" onclick="toast\('UPDATE\/DELETE odrzucone[^"]*">Test: edytuj wpis<\/button>/,`<button class="btn sm" onclick="tryEditAudit()">Test: edytuj wpis</button>`)}
+async function verifyAuditLive(){try{const r=chk(await sb.rpc('verify_audit_chain'))[0];toast(r.ok?`Łańcuch skrótów poprawny (${r.checked} wpisów)`:`Wykryto manipulację przy wpisie #${r.broken_at}`,!r.ok)}catch(e){toast(errMsg(e),true)}}
+async function tryEditAudit(){const r=await sb.from('audit_log').update({details:'test'}).eq('id',1).select('id');toast(r.error?'Baza odrzuciła zmianę: '+errMsg(r.error):(r.data?.length?'UWAGA: zmiana przeszła!':'Baza odrzuciła zmianę — dziennik przyjmuje tylko dopisywanie'),!r.error&&r.data?.length)}
+
+/* --- start --- */
+let startedOnce=false;
+sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){$('#login').style.display='grid';$('#app').style.display='none';loginView('newpass')}});
+(async()=>{
+  if(/type=recovery/.test(location.hash))return; // obsłuży onAuthStateChange
+  const {data:{session}}=await sb.auth.getSession();
+  if(session)await afterSignIn();else loginView('password');
+})();
+setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();renderShell()}}},30000); // liczniki „na żywo”
 
 </script>
 </body>
