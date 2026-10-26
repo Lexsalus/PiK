@@ -3,7 +3,7 @@ Uruchom po server.mjs i http.server jak w README; wynik: WYNIK n/n."""
 import asyncio, json, os, urllib.request
 from playwright.async_api import async_playwright
 HERE=os.path.dirname(os.path.abspath(__file__))+'/'
-U='http://localhost:8765/crm.html'; SH=HERE+'shim.js'; LF=HERE+'node_modules/leaflet/dist/'
+U=os.environ.get('NZ_URL','http://localhost:8765/crm.html'); SH=HERE+'shim.js'; LF=HERE+'node_modules/leaflet/dist/'
 res=[]; ok=lambda c,m:(res.append(bool(c)),print(('✅ ' if c else '❌ ')+m))
 def sql(q,p=[]):
   r=urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':q,'params':p}).encode(),method='POST')).read();return json.loads(r).get('data')
@@ -147,8 +147,9 @@ async def main():
     await nav(f'#/pielegniarki/terminarz/{nid}',800); await pg.click('text=›'); await pg.wait_for_timeout(500)
     ok(await pg.locator('.nzweek .nzb.vis').count()>=1 and await pg.locator('.nzweek .nzb.win').count()>=1,'terminarz: okna dostępności i wizyta w przyszłym tygodniu')
     await pg.screenshot(path=HERE+'terminarz.png',full_page=True)
-    await nav('#/ustawienia/audyt',900); await pg.click('text=Sprawdź łańcuch skrótów'); await pg.wait_for_timeout(700); ok('poprawny' in await toast(),'łańcuch audytu poprawny po scenariuszu')
-    a=await T('#view'); ok('zlecenie.utworzone' in a and 'pielegniarka.obszar_zatwierdzony' in a,'audyt: zlecenia i zatwierdzenia obszarów')
+    if 'crm.html' in U:
+      await nav('#/ustawienia/audyt',900); await pg.click('text=Sprawdź łańcuch skrótów'); await pg.wait_for_timeout(700); ok('poprawny' in await toast(),'łańcuch audytu poprawny po scenariuszu')
+      a=await T('#view'); ok('zlecenie.utworzone' in a and 'pielegniarka.obszar_zatwierdzony' in a,'audyt: zlecenia i zatwierdzenia obszarów')
     print('ERR',[e for e in errs if 'favicon' not in e]); print(f'WYNIK: {sum(res)}/{len(res)}')
     await b.close()
 asyncio.run(main())

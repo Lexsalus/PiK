@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.9.2] — 2026-10-26
+- Test zakładki Pielęgniarki obsługuje też osobną aplikację (NZ_URL); STAN: repo Lexsalus/Pielegniarki
+
 ## [1.9.1] — 2026-10-26
 - Migracja 004 (Pielęgniarki) wdrożona na produkcji + pg_cron zlecenia-limit-czasu; dokumentacja
 
