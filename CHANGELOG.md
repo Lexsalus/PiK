@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.12.2] — 2026-10-27
+- Migracje 004 i 005 wdrożone na bazie Porównywarka (27.10.2026) — „Opublikuj” w CRM działa
+
 ## [1.12.1] — 2026-10-27
 - CRM: licznik powiadomień nie zgłasza błędu, gdy wylogowanie nastąpi w trakcie sprawdzania
 

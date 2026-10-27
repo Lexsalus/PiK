@@ -8,13 +8,13 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 
 ## Stan wdrożenia (26.10.2026, nowy projekt `eamobnucjsavahpxilrt`)
 
-- ✅ Krok 1 — schemat + migracje 002–003 (004: niżej) (29 tabel z RLS, 60 polityk, 8 kategorii, magazyn `akta`)
+- ✅ Krok 1 — schemat + migracje 002–003 (004–005: niżej) (29 tabel z RLS, 60 polityk, 8 kategorii, magazyn `akta`)
 - ✅ Krok 2 — rejestracja wyłączona; adres logowania i przekierowań: `https://lexsalus.github.io/PiK/crm.html` (`/PiK/**`); 2FA (TOTP) włączone
 - ✅ Krok 3 — Administrator: `biuro@lekarzeiterapeuci.pl` (nazwa „Admin”), aktywny; 2FA konfiguruje się przy pierwszym logowaniu (konto z błędnym adresem usunięte)
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
-- ⏳ Migracja `004_uzupelnienia_specyfikacji.sql` (czeka na zgodę właściciela na wdrożenie) — reguły powiadomień, zastępstwa, harmonogram przypomnień per typ, 2FA przy zmianie uprawnień Administratora, raporty aplikanta
+- ✅ Migracja `004_uzupelnienia_specyfikacji.sql` (wdrożona 27.10.2026) — reguły powiadomień, zastępstwa, harmonogram przypomnień per typ, 2FA przy zmianie uprawnień Administratora, raporty aplikanta
 - ✅ Krok 5 — formularz na stronie i CRM wskazują nowy projekt (`data.json`, `crm.html`)
-- ⏳ Migracja `005_tresci_strony.sql` (czeka na zgodę właściciela na wdrożenie) — treści strony w bazie (`site_content`), publikacja z CRM tylko przez Administratora z 2FA (`site_publish`). Do czasu wdrożenia strona korzysta z `data.json`, a „Opublikuj” w CRM zwróci błąd.
+- ✅ Migracja `005_tresci_strony.sql` (wdrożona 27.10.2026) — treści strony w bazie (`site_content`), publikacja z CRM tylko przez Administratora z 2FA (`site_publish`). Dopóki nic nie opublikowano, strona korzysta z `data.json`.
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).
