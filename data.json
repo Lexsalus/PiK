@@ -1521,7 +1521,8 @@
       "Wysyłanie…": "Надсилання…",
       "Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.": "Не вдалося надіслати заявку. Спробуйте ще раз або зателефонуйте до фірми.",
       "Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.": "Заявку надіслано. Юридична фірма зв'яжеться з вами — зазвичай протягом 1 робочого дня.",
-      "PODGLĄD — szkic z CRM (nieopublikowany)": "ПЕРЕГЛЯД — чернетка з CRM (неопублікована)"
+      "PODGLĄD — szkic z CRM (nieopublikowany)": "ПЕРЕГЛЯД — чернетка з CRM (неопублікована)",
+      "Zbyt wiele zgłoszeń z tego adresu e-mail. Spróbuj ponownie za godzinę lub zadzwoń do kancelarii.": "Забагато заявок з цієї адреси e-mail. Спробуйте знову через годину або зателефонуйте до юридичної фірми."
     },
     "en": {
       "Porównaj": "Compare",
@@ -1800,7 +1801,8 @@
       "Wysyłanie…": "Sending…",
       "Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.": "Could not send the request. Please try again shortly or call the firm.",
       "Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.": "Request sent. The firm will contact you — usually within 1 business day.",
-      "PODGLĄD — szkic z CRM (nieopublikowany)": "PREVIEW — draft from the CRM (not published)"
+      "PODGLĄD — szkic z CRM (nieopublikowany)": "PREVIEW — draft from the CRM (not published)",
+      "Zbyt wiele zgłoszeń z tego adresu e-mail. Spróbuj ponownie za godzinę lub zadzwoń do kancelarii.": "Too many requests from this e-mail address. Please try again in an hour or call the law firm."
     }
   },
   "leads": {

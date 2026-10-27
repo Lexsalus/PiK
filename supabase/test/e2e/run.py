@@ -4,16 +4,23 @@ import os
 HERE=os.path.dirname(os.path.abspath(__file__))+'/'
 U='http://localhost:8765/crm.html';SH=HERE+'shim.js';SC=HERE
 res=[];ok=lambda c,m:(res.append(c),print(('✅ ' if c else '❌ ')+m))
+SITEQ=[]
 async def main():
   async with async_playwright() as p:
-    b=await p.chromium.launch(); c=await b.new_context(locale='pl-PL',viewport={'width':1360,'height':900}); errs=[]
+    b=await p.chromium.launch(args=['--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests']); c=await b.new_context(locale='pl-PL',viewport={'width':1360,'height':900}); errs=[]
     async def rt(r):
       u=r.request.url
       if 'supabase-js' in u: return await r.fulfill(path=SH,content_type='application/javascript')
+      if u.split('?')[0].endswith('/crm.html'):  # podpisy SRI nie pasują do podmienionych lokalnie bibliotek testowych
+        import re as _re
+        body=open(HERE+'../../../crm.html',encoding='utf-8').read()
+        body=_re.sub(r' integrity="sha384-[^"]*"','',body); body=_re.sub(r"x\.integrity='sha384-[^']*';",'',body)
+        return await r.fulfill(status=200,content_type='text/html; charset=utf-8',body=body)
       if 'xlsx.full.min.js' in u: return await r.fulfill(path=HERE+'node_modules/xlsx/dist/xlsx.full.min.js',content_type='application/javascript')
       if 'rest/v1/site_content' in u:
+        SITEQ.append(u)
         import urllib.request
-        d=json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':'select data from public.site_content where id=1','params':[]}).encode(),method='POST')).read()).get('data')
+        d=json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':'select data, published_at from public.site_content where id=1','params':[]}).encode(),method='POST')).read()).get('data')
         return await r.fulfill(status=200,content_type='application/json',body=json.dumps(d))
       if 'localhost' in u: return await r.continue_()
       await r.abort()
@@ -140,6 +147,13 @@ async def main():
     d=await dl.value; ok(d.suggested_filename.endswith('.xlsx'),'eksport XLSX: '+d.suggested_filename)
     await pg.click('text=⬇ PDF'); await pg.wait_for_timeout(900); ok('PDF' in await T('#toast'),'eksport PDF (drukowanie do pliku)')
     ok(len(sql("select 1 from public.audit_log where action='eksport.raport' and target in ('XLSX','PDF')"))==2,'eksporty XLSX i PDF w audycie')
+    # --- zużycie: po zapisie pobierane tylko zmienione tabele; SRI w kodzie
+    raw=open(HERE+'../../../crm.html',encoding='utf-8').read(); ix=open(HERE+'../../../index.html',encoding='utf-8').read()
+    ok(raw.count('integrity=')>=1 and "x.integrity='sha384-" in raw and ix.count("'sha384-")==4,'SRI: supabase-js i xlsx w CRM, pdf.js/worker/mammoth/jszip na stronie')
+    await pg.evaluate("window.__fa=[];{const o=fetchAll;fetchAll=t=>{__fa.push(t);return o(t)}};0")
+    await nav('#/powiadomienia'); await pg.wait_for_timeout(500)
+    if await pg.locator('text=Oznacz wszystkie jako przeczytane').count(): await pg.click('text=Oznacz wszystkie jako przeczytane'); await pg.wait_for_timeout(900)
+    fa=await pg.evaluate('__fa'); ok(0<len(fa)<10 and 'notifications' in fa,f'po zapisie pobrane tylko zmienione tabele ({len(fa)} z 27): '+str(fa))
     # --- podpowiedzi i [?]
     await nav('#/pulpit'); await pg.wait_for_timeout(300)
     ok(await pg.locator('#side a.nav[data-tip]').count()>=5,'podpowiedzi: pozycje lewego menu')
@@ -171,6 +185,8 @@ async def main():
     sp=await c.new_page(); sp.on('pageerror',lambda e:errs.append(str(e)))
     await sp.goto('http://localhost:8765/index.html'); await sp.wait_for_timeout(1200)
     ok('Porównaj.to TEST' in await sp.inner_text('body'),'strona publiczna pokazuje opublikowaną wersję z bazy')
+    n0=len([x for x in SITEQ if 'select=data' in x]); await sp.goto('http://localhost:8765/index.html'); await sp.wait_for_timeout(1000)
+    ok(len([x for x in SITEQ if 'select=data' in x])==n0 and 'Porównaj.to TEST' in await sp.inner_text('body'),'strona: przy kolejnym wejściu treści z pamięci przeglądarki (pobrana tylko data publikacji)')
     ok(await sp.get_attribute('#adminLink','href')=='crm.html' and await sp.locator('footer a[href="crm.html"]').count()==1,'przycisk ⚙️ Panel i stopka prowadzą do CRM')
     await nav('#/strona/settings'); await pg.wait_for_timeout(500); await pg.fill('#stView [data-p="site.tagline"]','Hasło szkicu XYZ'); await pg.wait_for_timeout(200)
     await sp.goto('http://localhost:8765/index.html?preview'); await sp.wait_for_timeout(1200); b2=await sp.inner_text('body')

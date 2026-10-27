@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>CRM Kancelarii</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js" integrity="sha384-KX6Y/AMIv9qA8TLCDul2JatZWeyrJVgj3Xu/0r30Nr05xO8md1+wHAgtdsRV9LoE" crossorigin="anonymous"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -873,15 +873,32 @@ function modal(title,body,{ok='Zapisz',wide=false,onOk,cancel='Anuluj',danger=fa
   setTimeout(()=>$('#mform input:not([type=hidden]),#mform select,#mform textarea')?.focus(),30);
 }
 const chk=r=>{if(r?.error)throw r.error;return r?.data};
-async function act(fn,okMsg){try{const d=await fn();await reload();rerender();if(okMsg)toast(okMsg);return d}catch(e){console.error(e);toast(errMsg(e),true);throw e}}
+async function act(fn,okMsg){const tr=TRACK=new Set();try{const d=await fn();TRACK=null;await reload(touchedTables(tr));rerender();if(okMsg)toast(okMsg);return d}catch(e){TRACK=null;console.error(e);toast(errMsg(e),true);throw e}}
 const actSafe=(fn,m)=>act(fn,m).catch(()=>{});
 
 /* --- pobranie danych (RLS zwraca tylko to, co wolno) --- */
 const TABLES=['profiles','role_permissions','permission_overrides','case_categories','currencies','process_template_stages','holidays','clients','cases','case_finance','case_members','case_stages','case_entries','entry_versions','correction_requests','documents','document_versions','deadlines','deadline_versions','payments','allocations','allocation_versions','attorney_fees','case_history','notifications','leads','emergency_access'];
 let RAW={};
-async function fetchAll(t,order){let q=sb.from(t).select('*');if(order)q=q.order(order,{ascending:true});const r=await q.limit(5000);return r.error?[]:r.data}
-async function reload(){
-  const rows=await Promise.all(TABLES.map(t=>fetchAll(t)));TABLES.forEach((t,i)=>RAW[t]=rows[i]);
+/* pobieranie tabeli stronami po 1000 wierszy (serwer i tak zwraca najwyżej 1000 naraz) — bez cichego ucinania */
+const EXTRA_TABLES=['notification_rules','user_substitutes','deadline_reminder_rules'];  // wczytywane dodatkowo (migracja 004)
+const TABLE_KEY={notification_rules:['event_type'],deadline_reminder_rules:['type'],role_permissions:['role','perm'],permission_overrides:['user_id','perm'],case_categories:['code'],currencies:['code'],case_finance:['case_id']};
+async function fetchAll(t){const keys=TABLE_KEY[t]||['id'],out=[],N=1000;
+  for(let i=0;i<200000;i+=N){let q=sb.from(t).select('*');keys.forEach(k=>q=q.order(k,{ascending:true}));const r=await q.range(i,i+N-1);
+    if(r.error){console.warn('reload',t,r.error.message);return RAW[t]||[]}out.push(...r.data);if(r.data.length<N)break}
+  return out}
+/* po zapisie pobieramy tylko tabele, które mogły się zmienić (zapis + skutki wyzwalaczy w bazie) */
+const TABLE_DEPS={cases:['case_history','case_stages','case_finance','case_members','clients','leads'],clients:['case_history'],case_finance:['case_history'],case_members:['case_history'],case_stages:['case_history','case_entries'],
+  case_entries:['entry_versions','case_history','deadlines'],correction_requests:['case_entries','entry_versions','case_history'],documents:['document_versions','case_history'],document_versions:['documents','case_history'],
+  deadlines:['deadline_versions','case_history'],payments:['allocations','case_history'],allocations:['allocation_versions','attorney_fees','case_history'],attorney_fees:['case_history'],leads:['cases'],
+  emergency_access:[],permission_overrides:['profiles'],profiles:['permission_overrides']};
+const RPC_TABLES={approve_stage:['case_stages','case_entries','case_history'],decide_correction:['correction_requests','case_entries','entry_versions','case_history'],reveal_pesel:[],log_event:[],report_summary:[],site_publish:[]};
+let TRACK=null;
+{const f=sb.from.bind(sb),r=sb.rpc.bind(sb);sb.from=t=>{TRACK?.add(t);return f(t)};sb.rpc=(n,a)=>{if(TRACK)RPC_TABLES[n]?RPC_TABLES[n].forEach(t=>TRACK.add(t)):TRACK.add('*');return r(n,a)}}
+function touchedTables(set){if(!set||!set.size||set.has('*'))return null;const out=new Set(['notifications']);
+  set.forEach(t=>{if(TABLES.includes(t)||EXTRA_TABLES.includes(t)){out.add(t);(TABLE_DEPS[t]||[]).forEach(x=>out.add(x))}});return [...out]}
+async function reload(only){  // only = lista tabel do pobrania; bez listy (albo przy pierwszym wczytaniu) — wszystkie
+  const list=only&&TABLES.every(t=>RAW[t])?only.filter(t=>TABLES.includes(t)):TABLES;
+  const rows=await Promise.all(list.map(t=>fetchAll(t)));list.forEach((t,i)=>RAW[t]=rows[i]);
   const by=(arr,k)=>arr.reduce((m,x)=>((m[x[k]]=m[x[k]]||[]).push(x),m),{});
   const d={version:'live'};
   d.users=RAW.profiles.map(p=>({id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color,active:p.active}));
@@ -982,7 +999,7 @@ async function afterSignIn(){
   if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
 }
 function renderLogin(){loginView('password')}
-$('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
+$('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;RAW={};REPC&&Object.keys(REPC).forEach(k=>delete REPC[k]);$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
 
 /* --- odczyt akt do audytu --- */
 {const orig=ROUTES.sprawa,after=orig.after;ROUTES.sprawa=(id,tab)=>{const h=orig(id,tab);const k='crm_read_'+id;if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,1);sb.rpc('log_case_open',{p_case:id})}return h};ROUTES.sprawa.after=after}
@@ -1290,7 +1307,8 @@ async function tryEditAudit(){const r=await sb.from('audit_log').update({details
    harmonogram przypomnień, potwierdzenie hasłem i 2FA, raporty, wylogowanie
    po bezczynności, kolejność kategorii przeciąganiem
    ===================================================================== */
-{const base=reload;reload=async()=>{await base();const [nr,us,rr]=await Promise.all(['notification_rules','user_substitutes','deadline_reminder_rules'].map(t=>fetchAll(t)));DB.notifRules=nr;DB.substitutes=us;DB.reminderRules=rr}}
+{const base=reload;reload=async o=>{await base(o);const need=EXTRA_TABLES.filter(t=>!o||!RAW[t]||o.includes(t));(await Promise.all(need.map(t=>fetchAll(t)))).forEach((r,i)=>RAW[need[i]]=r);
+  DB.notifRules=RAW.notification_rules;DB.substitutes=RAW.user_substitutes;DB.reminderRules=RAW.deadline_reminder_rules}}
 SET_TABS.splice(SET_TABS.findIndex(t=>t[0]==='system'),0,['powiadomienia','Powiadomienia',()=>isAdmin()],['przypomnienia','Przypomnienia o terminach',()=>isAdmin()]);
 const NR_ORDER=['case.new','lead.new','team.change','deadline.new','deadline.approaching','deadline.overdue','document.new','correction.request','correction.decided','payment.new','fee.success','fee.change','case.closed','perm.change'];
 const NR_GROUPS={admin:'Administrator',team:'Zespół sprawy',lead:'Pełnomocnik prowadzący',finance:'Uprawnieni do finansów',new_cases:'Obsługa zgłoszeń'};
@@ -1327,7 +1345,7 @@ function reauth(){return new Promise(res=>{modal('Potwierdź hasłem i 2FA',`<p 
 /* raporty: wiersze, XLSX, PDF, widok aplikanta */
 function reportRows(){return [['Nr sprawy','Kategoria','Klient','Status','Pełnomocnik','Data przyjęcia','Wartość sporu']].concat(myCases().filter(c=>(!rep.cat||c.category===rep.cat)&&(!rep.att||leadOf(c)?.userId===rep.att)&&(!rep.st||c.status===rep.st)).map(c=>[c.number,c.category,clientName(c),CASE_STATUS[c.status],U(leadOf(c)?.userId).name,c.openedAt,c.value]))}
 async function exportXlsx(){try{
-  if(!window.XLSX)await new Promise((ok,no)=>{const x=document.createElement('script');x.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';x.onload=ok;x.onerror=()=>no(new Error('Nie udało się wczytać biblioteki XLSX'));document.head.appendChild(x)});
+  if(!window.XLSX)await new Promise((ok,no)=>{const x=document.createElement('script');x.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';x.integrity='sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw';x.crossOrigin='anonymous';x.onload=ok;x.onerror=()=>no(new Error('Nie udało się wczytać biblioteki XLSX'));document.head.appendChild(x)});
   const rows=reportRows(),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Sprawy');
   const dl=[['Termin','Sprawa','Typ','Data','Status']].concat(DB.deadlines.filter(d=>!d.deleted&&d.final>=rep.from&&d.final<=rep.to&&canCase(CASE(d.caseId))).map(d=>[d.title,CASE(d.caseId)?.number||'',DL_TYPES[d.type],d.final,dlStatus(d).label]));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(dl),'Terminy');XLSX.writeFile(wb,`raport-${rep.from}_${rep.to}.xlsx`);

@@ -333,9 +333,13 @@ async function load(){
   const preview=new URLSearchParams(location.search).has('preview');
   if(preview){try{const d=store.get('pk_draft');if(d){D=JSON.parse(d);$('#pv').innerHTML='<div class="preview-flag" data-i18n>PODGLĄD — szkic z CRM (nieopublikowany)</div>'}}catch(e){}}
   if(!D){ // opublikowane treści z bazy (edycja w CRM → Treści strony); zapasowo data.json
-    try{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),5000);
-      const r=await fetch(SITE_DB+'/rest/v1/site_content?id=eq.1&select=data',{headers:{apikey:SITE_KEY},signal:ac.signal,cache:'no-store'});clearTimeout(t);
-      if(r.ok){const j=await r.json();if(j[0]?.data?.site)D=j[0].data}}catch(e){}
+    // najpierw tylko data publikacji (kilkadziesiąt bajtów); pełne treści (~90 KB) pobieramy tylko, gdy się zmieniły
+    const H={headers:{apikey:SITE_KEY},cache:'no-store'},get=async(sel)=>{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),5000);
+      try{const r=await fetch(SITE_DB+'/rest/v1/site_content?id=eq.1&select='+sel,{...H,signal:ac.signal});return r.ok?(await r.json())[0]:null}finally{clearTimeout(t)}};
+    try{const m=await get('published_at');
+      if(m){let c=null;try{c=JSON.parse(store.get('pk_site')||'null')}catch(e){}
+        if(c?.at===m.published_at&&c?.data?.site)D=c.data;
+        else{const j=await get('data,published_at');if(j?.data?.site){D=j.data;store.set('pk_site',JSON.stringify({at:j.published_at,data:j.data}))}}}}catch(e){}
   }
   if(!D){
     try{D=await (await fetch('data.json',{cache:'no-store'})).json()}
@@ -495,8 +499,8 @@ function openLead(c,vals){
       try{
         const r=await fetch(L.supabaseUrl.replace(/\/$/,'')+'/rest/v1/leads',{method:'POST',headers:{apikey:L.supabaseKey,'Content-Type':'application/json',Prefer:'return=minimal'},
           body:JSON.stringify({category:lead.category,calc:lead.calc,client_name:lead.client.name,phone:lead.client.phone,email:lead.client.email||null,message:lead.message||null,lang,consent:true})});
-        if(!r.ok)throw new Error('HTTP '+r.status);
-      }catch(err){console.error(err);const x=e.target.querySelector('.lerr');x.textContent=t('Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.');x.style.display='';btn.disabled=false;btn.textContent=t('Wyślij zgłoszenie');return}
+        if(!r.ok){let m='';try{m=(await r.json()).message||''}catch(e){}throw new Error(/Zbyt wiele zgłoszeń/.test(m)?'LIMIT':'HTTP '+r.status)}
+      }catch(err){console.error(err);const x=e.target.querySelector('.lerr');x.textContent=err.message==='LIMIT'?t('Zbyt wiele zgłoszeń z tego adresu e-mail. Spróbuj ponownie za godzinę lub zadzwoń do kancelarii.'):t('Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.');x.style.display='';btn.disabled=false;btn.textContent=t('Wyślij zgłoszenie');return}
     }
     else if(mail){
       const lines=[`${c.name} — ${main.label}: ${fmt(main.v,main.decimals)} ${main.unit||''}`,'',...lead.calc.inputs.map(i=>`${i.label}: ${i.value} ${i.unit||''}`),'',...lead.calc.outputs.map(o=>`${o.label}: ${o.value??'—'} ${o.unit||''}`),'',`Imię i nazwisko: ${lead.client.name}`,`Telefon: ${lead.client.phone}`,`E-mail: ${lead.client.email}`,'',lead.message];
@@ -510,13 +514,18 @@ $('#lead').onclick=e=>{if(e.target.id==='lead')$('#lead').classList.remove('show
 addEventListener('keydown',e=>{if(e.key==='Escape')$('#lead').classList.remove('show')});
 
 /* ---------- analiza umów ---------- */
-const LIB={
-  pdf:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-  pdfW:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-  docx:'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',
-  zip:'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'};
+const LIB={  // podpisy kontrolne (SRI): przeglądarka odrzuci zmieniony plik; przy zmianie wersji trzeba podać nowy odcisk
+  pdf:['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e'],
+  pdfW:['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js','sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2'],
+  docx:['https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js','sha384-nFoSjZIoH3CCp8W639jJyQkuPHinJ2NHe7on1xvlUA7SuGfJAfvMldrsoAVm6ECz'],
+  zip:['https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG']};
 const libs={};
-const needLib=src=>libs[src]??=new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{delete libs[src];rej(new Error(t('Nie udało się wczytać pliku.')))};document.head.appendChild(s)});
+const needLib=([src,sri])=>libs[src]??=new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.integrity=sri;s.crossOrigin='anonymous';s.onload=res;s.onerror=()=>{delete libs[src];rej(new Error(t('Nie udało się wczytać pliku.')))};document.head.appendChild(s)});
+/* worker pdf.js nie obsługuje atrybutu integrity — pobieramy go, sprawdzamy odcisk i uruchamiamy z lokalnej kopii */
+let pdfWorkerUrl=null;
+async function pdfWorker([src,sri]){if(pdfWorkerUrl)return pdfWorkerUrl;
+  const b=await (await fetch(src,{integrity:sri,mode:'cors'})).arrayBuffer();
+  pdfWorkerUrl=URL.createObjectURL(new Blob([b],{type:'text/javascript'}));return pdfWorkerUrl}
 const LV={high:{w:3,c:'var(--bad)',l:'Wysokie ryzyko'},medium:{w:2,c:'#f5b84a',l:'Do sprawdzenia'},info:{w:0,c:'#5aa9ff',l:'Informacyjnie'}};
 let lastRep=null;
 
@@ -554,7 +563,7 @@ async function extractText(f,ext){
     d.querySelectorAll('p,div,br,li,tr,h1,h2,h3,h4').forEach(x=>x.append('\n'));return{text:d.body.textContent}}
   if(ext==='rtf')return{text:rtfText(await f.text())};
   if(ext==='pdf'){
-    await needLib(LIB.pdf);pdfjsLib.GlobalWorkerOptions.workerSrc=LIB.pdfW;
+    await needLib(LIB.pdf);pdfjsLib.GlobalWorkerOptions.workerSrc=await pdfWorker(LIB.pdfW);
     const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,out=[];
     for(let i=1;i<=pdf.numPages;i++){const c=await (await pdf.getPage(i)).getTextContent();out.push(c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join(''))}
     return{text:out.join('\n\n').replace(/(\p{L})-\n(\p{L})/gu,'$1$2'),pages:pdf.numPages};
