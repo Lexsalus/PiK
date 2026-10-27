@@ -239,3 +239,9 @@ R(!!await fails('anon',`select public.report_summary(current_date,current_date)`
 const rc=(await as('admin',`select public.report_summary(current_date-3650,current_date+3650,'SKD') r`)).rows[0].r;
 R(rc.cases===(await db.query(`select count(*)::int n from public.cases where category_code='SKD'`)).rows[0].n,'006: raport — filtr kategorii');
 R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).rows[0].n),'006: przypomnienia działają po zmianie');}
+// --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
+{await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
+ await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
+ R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
+ R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
+ R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
