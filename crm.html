@@ -1351,7 +1351,7 @@ addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skry
   const {data:{session}}=await sb.auth.getSession();
   if(session)await afterSignIn();else loginView('password');
 });
-setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();if(ME&&DB)renderShell()}}},30000); // liczniki „na żywo”
+setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);if(!ME||!DB)return;const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();if(ME&&DB)renderShell()}}},30000); // liczniki „na żywo”
 
 </script>
 <script src="crm-strona.js"></script>
