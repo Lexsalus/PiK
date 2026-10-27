@@ -58,6 +58,35 @@ async function load(){
   D=draft||(ORIG&&structuredClone(ORIG));
   if(D){norm();READY=true}
 }
+/* lista różnic: szkic (ta przeglądarka) ↔ opublikowana wersja */
+const DIFF_TOP={site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
+const DIFF_LN={uk:'ukraiński',en:'angielski'};
+const DIFF_KEY={items:'oferty',fields:'parametry',inputs:'pola',outputs:'wyniki',rules:'reguły',indicators:'wskaźniki',legal:'zgodność z prawem',suspicion:'podejrzana treść',name:'nazwa',tagline:'hasło (podtytuł)',accent:'kolor akcentu',formula:'wzór',label:'etykieta',description:'opis',note:'uwaga',unit:'jednostka',url:'link',badge:'etykieta oferty',patterns:'wzorce',advice:'porada',formats:'formaty',enabled:'włączone',languages:'języki',mode:'tryb',title:'tytuł',consent:'zgoda RODO'};
+function diffList(a,b){
+  const out=[],nm=o=>o&&typeof o==='object'?(o.name||o.label||o.key||o.id||''):'',isObj=x=>x&&typeof x==='object';
+  const walk=(x,y,path)=>{
+    if(out.length>=1000)return;
+    if(JSON.stringify(x)===JSON.stringify(y))return;
+    if(Array.isArray(x)&&Array.isArray(y)){
+      const byId=x.concat(y).every(e=>isObj(e)&&e.id!=null);
+      if(byId){const mx=new Map(x.map(e=>[e.id,e])),my=new Map(y.map(e=>[e.id,e]));
+        [...new Set([...mx.keys(),...my.keys()])].forEach(id=>walk(mx.get(id),my.get(id),[...path,nm(mx.get(id)||my.get(id))||id]))}
+      else if(x.concat(y).every(e=>!isObj(e))){out.push({path,d:x.join(', '),p:y.join(', ')})}
+      else for(let i=0;i<Math.max(x.length,y.length);i++)walk(x[i],y[i],[...path,nm(x[i]||y[i])||('#'+(i+1))]);
+      return}
+    if(isObj(x)&&isObj(y)&&!Array.isArray(x)&&!Array.isArray(y)){
+      [...new Set([...Object.keys(x),...Object.keys(y)])].forEach(k=>walk(x[k],y[k],k==='values'?path:[...path,path.length?(path[0]===DIFF_TOP.translations&&path.length===1?(DIFF_LN[k]||k):(path[0]===DIFF_TOP.translations?k:(DIFF_KEY[k]||k))):(DIFF_TOP[k]||k)]));return}
+    out.push({path,d:x,p:y})};
+  walk(a,b,[]);return out}
+const diffVal=v=>v===undefined?'<span class="mut">— brak —</span>':v&&typeof v==='object'?`<span class="mut">${Array.isArray(v)?'lista ('+v.length+')':'element'+(v.name||v.label?' „'+esc(v.name||v.label)+'”':'')}</span>`:esc(String(v).length>160?String(v).slice(0,157)+'…':String(v))||'<span class="mut">(puste)</span>';
+function showDiff(){
+  if(!D||!ORIG)return;const L=diffList(D,ORIG);
+  const sec={};L.forEach(x=>{const k=x.path[0]||'—';sec[k]=(sec[k]||0)+1});
+  modal('Różnice: szkic ↔ opublikowana wersja',L.length?`<p class="small mut" style="margin-bottom:8px">${L.length>=1000?'Pierwsze 1000 różnic':L.length+' '+(L.length===1?'różnica':'różnic')} · ${Object.entries(sec).map(([k,n])=>esc(k)+': '+n).join(' · ')}</p>
+    <p class="hint" style="margin:0 0 10px">„Użyj opublikowanej wersji” — zostaje prawa kolumna. „Zostaw mój szkic” — zostaje lewa kolumna.${SITE.src==='file'?' Opublikowana wersja to na razie plik <code>data.json</code> z repozytorium (z CRM nic jeszcze nie opublikowano).':''}</p>
+    <div class="tw" style="max-height:60vh;overflow:auto"><table><tr><th>Miejsce</th><th>Szkic (ta przeglądarka)</th><th>Opublikowana</th></tr>${L.map(x=>`<tr style="vertical-align:top"><td class="small">${x.path.map(esc).join(' › ')}</td><td class="small">${diffVal(x.d)}</td><td class="small">${diffVal(x.p)}</td></tr>`).join('')}</table></div>`
+    :'<div class="empty">Szkic i opublikowana wersja są takie same.</div>',{ok:'',cancel:'Zamknij',wide:true});
+}
 function useNew(){if(!confirm('Odrzucić szkic i wczytać opublikowaną wersję strony?'))return;D=structuredClone(ORIG);norm();STALE=false;render();toast('Wczytano opublikowaną wersję')}
 function keepDraft(){STALE=false;save();render();toast('Zostawiono szkic')}
 const dirty=()=>!!D&&JSON.stringify(D)!==JSON.stringify(ORIG);
@@ -84,7 +113,7 @@ ROUTES.strona=sub=>{
   return `<div id="stWrap"><div class="ph"><div><h1>Treści strony</h1><p>Porównywarka, kalkulatory, analiza umów, tłumaczenia i SEO. Zmiany zapisują się jako szkic w tej przeglądarce — na stronie pojawią się po „Opublikuj”.</p></div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="stst" id="stStatus">…</span><a class="btn" href="index.html?preview" target="_blank" data-tip="Strona ze szkicem z tej przeglądarki (nieopublikowanym)">👁 Podgląd</a><a class="btn" href="index.html" target="_blank">🌐 Strona</a><button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj</button></div></div>
     <div class="tabs">${TABS.map(([k,l])=>`<a class="tab ${k===view?'on':''}" href="#/strona/${k}">${l}</a>`).join('')}</div>
-    <div id="stStale"><span style="flex:1;min-width:240px">⚠️ <b>Opublikowana wersja strony zmieniła się</b> od czasu utworzenia Twojego szkicu (np. publikacja z innego komputera). Szkic nie zawiera tych zmian.</span><button class="btn pri" type="button" data-st="useNew()">Użyj opublikowanej wersji</button><button class="btn" type="button" data-st="keepDraft()">Zostaw mój szkic</button></div>
+    <div id="stStale"><span style="flex:1;min-width:240px">⚠️ <b>Opublikowana wersja strony zmieniła się</b> od czasu utworzenia Twojego szkicu (np. publikacja z innego komputera). Szkic nie zawiera tych zmian.</span><button class="btn" type="button" data-st="showDiff()" data-tip="Co jest inne w szkicu z tej przeglądarki, a co w opublikowanej wersji">🔍 Pokaż różnice</button><button class="btn pri" type="button" data-st="useNew()">Użyj opublikowanej wersji</button><button class="btn" type="button" data-st="keepDraft()">Zostaw mój szkic</button></div>
     <h2 id="stTitle" style="font-size:1.15rem;margin-bottom:14px"></h2><div id="stView"><div class="empty">Wczytywanie…</div></div></div>`;
 };
 ROUTES.strona.after=async()=>{if(!READY)await load();render()};

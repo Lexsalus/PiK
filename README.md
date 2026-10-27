@@ -48,7 +48,7 @@ crm-pomoc.js    podpowiedzi w CRM (dymki i ikonki [?]) — słowniki tekstów w 
 crm-podglad.js  CRM → Podgląd: panel oczami wybranej roli lub osoby (tylko Administrator, tylko do odczytu)
 crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawny admin.html)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 93/93 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 96/96 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

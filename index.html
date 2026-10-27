@@ -187,6 +187,13 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .goog-text-highlight{background:none!important;box-shadow:none!important}
 @media(max-width:760px){nav .wrap{gap:6px;padding:0 10px}.logo{font-size:1rem;gap:6px}.logo i{display:none}.ver-badge{margin-left:0}.lang button{padding:7px 7px}.icon-btn{width:34px;height:34px}.admin-btn{padding:7px 9px}.calc{grid-template-columns:1fr}.links,.admin-btn span{display:none}.hero{padding-top:50px}.lang{margin-left:auto}}
 .fade{animation:fade .4s both}@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+/* paski przewijania w stylu strony */
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 38%,transparent);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--accent) 70%,transparent);border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+.tabs::-webkit-scrollbar,.tw::-webkit-scrollbar,.sres::-webkit-scrollbar{height:6px;width:6px}
+@supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}}
 </style>
 </head>
 <body>
