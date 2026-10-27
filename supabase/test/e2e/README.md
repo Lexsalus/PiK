@@ -10,4 +10,4 @@ python3 -m http.server 8765 &               # z katalogu głównego repo
 python3 e2e/run.py                          # wymaga: pip install playwright
 ```
 Dane i konta są fikcyjne, tylko w lokalnej bazie (hasło `Haslo-testowe-123`, kod 2FA `123456`): admin@k.test, jan@k.test, piotr@k.test (pełnomocnicy), anna@k.test (aplikant), kasia@k.test (biuro), tech@k.test, nowy@k.test (nieaktywne).
-Wynik 27.10.2026: 87/87.
+Wynik 27.10.2026: 93/93.
