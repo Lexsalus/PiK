@@ -11,7 +11,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims', true),''),'{}')::jsonb $$;
 grant execute on function auth.jwt() to anon, authenticated;
 create schema storage; grant usage on schema storage to anon, authenticated;
-create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint);
+create table storage.buckets(id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
 create table storage.objects(id uuid primary key default gen_random_uuid(), bucket_id text, name text, owner uuid default auth.uid());
 alter table storage.objects enable row level security; grant select, insert on storage.objects to authenticated;
 grant usage on schema public, auth to anon, authenticated; grant execute on function auth.uid() to anon, authenticated;
@@ -221,3 +221,21 @@ R(pub&&pub.categories.length===site.categories.length&&!('adminHash' in pub.site
 R(!!await fails('admin',`update public.site_content set data='{}'`)||(await as('anon',`select data from public.site_content`)).rows[0].data.categories,'005: bezpośrednia zmiana tabeli → odmowa');
 R(!!await fails('kasia',`insert into public.site_content(id,data) values(2,'{}')`),'005: zapis do tabeli tylko przez funkcję');
 R((await db.query(`select count(*)::int n from public.audit_log where action='strona.publikacja'`)).rows[0].n===1,'005: publikacja zapisana w audycie');}
+// --- 006: zgodność ze specyfikacją (czas polski, typy plików, raport w bazie)
+{AAL='aal2';AMR=[];
+R((await db.query(`select current_setting('timezone') tz`)).rows[0].tz==='Europe/Warsaw','006: strefa czasowa bazy Europe/Warsaw');
+const mt=(await db.query(`select allowed_mime_types m from storage.buckets where id='akta'`)).rows[0]?.m||[];
+R(mt.includes('application/pdf')&&mt.includes('image/png')&&!mt.includes('application/x-msdownload')&&!mt.includes('text/html'),'006: magazyn akt — tylko dozwolone typy plików');
+const all=(await db.query(`select count(*)::int n from public.cases`)).rows[0].n;
+const ra=(await as('admin',`select public.report_summary(current_date-3650,current_date+3650) r`)).rows[0].r;
+R(ra.cases===all&&Object.values(ra.by_category).reduce((a,b)=>a+b,0)===all,'006: raport w bazie — Administrator widzi wszystkie sprawy ('+all+')');
+const rj=(await as('jan',`select public.report_summary(current_date-3650,current_date+3650) r`)).rows[0].r;
+const jn=(await as('jan',`select count(*)::int n from public.cases`)).rows[0].n;
+R(rj.cases===jn&&jn<all,'006: raport pełnomocnika — tylko jego sprawy ('+jn+' z '+all+')');
+const ps=(await db.query(`select coalesce(sum(amount),0)::numeric s from public.payments where received_on between current_date-3650 and current_date+3650`)).rows[0].s;
+R(Number(ra.payments)===Number(ps),'006: „Wpłaty klientów” w raporcie = suma wpływów w Finansach');
+R(Number((await as('anna',`select public.report_summary(current_date-3650,current_date+3650) r`)).rows[0].r.payments)===0,'006: aplikant — wpłaty w raporcie niewidoczne (0)');
+R(!!await fails('anon',`select public.report_summary(current_date,current_date)`),'006: raport — niezalogowany → odmowa');
+const rc=(await as('admin',`select public.report_summary(current_date-3650,current_date+3650,'SKD') r`)).rows[0].r;
+R(rc.cases===(await db.query(`select count(*)::int n from public.cases where category_code='SKD'`)).rows[0].n,'006: raport — filtr kategorii');
+R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).rows[0].n),'006: przypomnienia działają po zmianie');}

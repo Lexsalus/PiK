@@ -712,29 +712,36 @@ function paymentDetail(pid){
 
 /* ===================== RAPORTY (§11) ===================== */
 let rep=null;
+/* agregacje liczy baza (report_summary, migracja 006), wynik pamiętany 5 min (§11) */
+const REPC={},REP_TTL=300000;
+const repKey=()=>JSON.stringify([rep.from,rep.to,rep.cat||null,rep.att||null,rep.st||null]);
+const repCached=()=>{const c=REPC[repKey()];return c&&Date.now()-c.t<REP_TTL?c:null};
+async function repFetch(){const k=repKey();const r=await sb.rpc('report_summary',{p_from:rep.from,p_to:rep.to,p_cat:rep.cat||null,p_att:rep.att||null,p_status:rep.st||null});if(r.error)throw r.error;REPC[k]={t:Date.now(),d:r.data};return r.data}
 ROUTES.raporty=()=>{
   need(can('reports'),'Brak dostępu do raportów.');
   const t=today();rep=rep||{from:iso(new Date(t.getFullYear(),t.getMonth(),1)),to:iso(new Date(t.getFullYear(),t.getMonth()+1,0)),cat:'',att:''};
-  const scope=myCases().filter(c=>(!rep.cat||c.category===rep.cat)&&(!rep.att||leadOf(c)?.userId===rep.att)&&(!rep.st||c.status===rep.st));
   const inR=d=>d&&d>=rep.from&&d<=rep.to;
-  const st=k=>scope.filter(c=>c.status===k).length,closedIn=scope.filter(c=>c.status==='closed'&&inR(c.closedAt)).length;
-  const dls=DB.deadlines.filter(d=>!d.deleted&&scope.some(c=>c.id===d.caseId)&&inR(d.final)),ok=dls.filter(d=>d.status==='done'&&d.doneAt<=d.final).length,over=dls.filter(d=>dlStatus(d).k==='overdue'||(d.status==='done'&&d.doneAt>d.final)).length;
-  const showFin=isAdmin()||can('initial_fee'),pays=showFin?DB.payments.filter(p=>scope.some(c=>c.id===p.caseId)&&inR(p.receivedOn)):[];
-  const cats=[...DB.categories].sort((a,b)=>a.order-b.order),byCat=cats.map(c=>[c,scope.filter(x=>x.category===c.code).length]),mx=Math.max(1,...byCat.map(x=>x[1]));
+  const C=repCached(),S=C?.d,v=x=>S?x:'…';
+  const st=k=>v(S?.by_status?.[k]||0),closedIn=v(S?.closed_in_range),over=S?.deadlines_over||0;
+  const showFin=isAdmin()||can('initial_fee');
+  const cats=[...DB.categories].sort((a,b)=>a.order-b.order),byCat=cats.map(c=>[c,S?.by_category?.[c.code]||0]),mx=Math.max(1,...byCat.map(x=>x[1]));
   const W=560,Hh=190,bw=W/cats.length;
   return `<div class="ph"><div><h1>Raporty i analizy</h1><p>${isAdmin()?'Całość kancelarii':ME.role==='att'?'Twoje sprawy i Twoje rozliczenia':'Raporty operacyjne wg uprawnień'}</p></div><span class="noprint" style="display:flex;gap:8px"><button class="btn" onclick="exportCsv()">⬇ CSV</button><button class="btn" onclick="exportXlsx()">⬇ XLSX</button><button class="btn" onclick="exportPdf()">⬇ PDF</button></span></div>
   <div class="toolbar"><label class="fl">Od<input class="f" type="date" value="${rep.from}" onchange="rep.from=this.value;rerender()"></label><label class="fl">Do<input class="f" type="date" value="${rep.to}" onchange="rep.to=this.value;rerender()"></label>
     <label class="fl">Kategoria<select class="f" onchange="rep.cat=this.value;rerender()"><option value="">wszystkie</option>${cats.map(c=>`<option ${rep.cat===c.code?'selected':''}>${c.code}</option>`).join('')}</select></label>
     <label class="fl">Status<select class="f" onchange="rep.st=this.value;rerender()"><option value="">wszystkie</option>${Object.entries(CASE_STATUS).map(([k,l])=>`<option value="${k}" ${rep.st===k?'selected':''}>${l}</option>`).join('')}</select></label>
     ${isAdmin()?`<label class="fl">Pełnomocnik<select class="f" onchange="rep.att=this.value;rerender()"><option value="">wszyscy</option>${DB.users.filter(u=>u.role==='att').map(u=>`<option value="${u.id}" ${rep.att===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label>`:''}</div>
-  <div class="grid g4" style="margin-bottom:14px"><div class="tile"><span>Liczba spraw</span><b>${scope.length}</b></div><div class="tile"><span>Zakończone w okresie</span><b>${closedIn}</b></div>
-    <div class="tile"><span>Wpłaty klientów</span><b>${showFin?money(pays.reduce((s,p)=>s+p.amount,0)):'—'}</b>${showFin?'':'<small class="mut">brak uprawnienia</small>'}</div><div class="tile"><span>Terminy przekroczone</span><b class="${over?'st-overdue':''}">${over}</b></div></div>
+  <div class="grid g4" style="margin-bottom:14px"><div class="tile"><span>Liczba spraw</span><b>${v(S?.cases)}</b></div><div class="tile"><span>Zakończone w okresie</span><b>${closedIn}</b></div>
+    <div class="tile"><span>Wpłaty klientów</span><b>${showFin?(S?money(+S.payments):'…'):'—'}</b>${showFin?'':'<small class="mut">brak uprawnienia</small>'}</div><div class="tile"><span>Terminy przekroczone</span><b class="${over?'st-overdue':''}">${v(over)}</b></div></div>
   <div class="grid" style="grid-template-columns:1.5fr 1fr">
     <div class="card"><h3>Sprawy według kategorii</h3><svg class="svgchart" viewBox="0 0 ${W} ${Hh+30}" style="width:100%;height:auto">${byCat.map(([c,n],i)=>{const h=n/mx*(Hh-24);return `<rect x="${i*bw+bw*.18}" y="${Hh-h}" width="${bw*.64}" height="${h}" rx="5" fill="${c.color}"><title>${c.code}: ${n}</title></rect><text x="${i*bw+bw/2}" y="${Hh-h-6}" text-anchor="middle" style="fill:var(--txt);font-weight:700">${n}</text><text x="${i*bw+bw/2}" y="${Hh+18}" text-anchor="middle">${c.code}</text>`}).join('')}</svg></div>
     <div class="card"><h3>Status spraw</h3>${Object.entries(CASE_STATUS).map(([k,l])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span>${l}</span><b>${st(k)}</b></div>`).join('')}
-      <h3 style="margin-top:16px">Terminy w okresie</h3><p>${dls.length} łącznie · <span class="st-done">${ok} w terminie</span> · <span class="st-overdue">${over} przekroczone</span> · ${dls.filter(d=>d.status!=='done'&&dlStatus(d).k!=='overdue').length} otwarte</p>
-      <p class="hint">${isAdmin()?'Raport finansowy kancelarii (alokacje): w module Finanse.':'Raport finansowy kancelarii: tylko Administrator.'}</p></div></div>${ME.role==='app'?ownReport(inR):''}`;
+      <h3 style="margin-top:16px">Terminy w okresie</h3><p>${v(S?.deadlines)} łącznie · <span class="st-done">${v(S?.deadlines_ok)} w terminie</span> · <span class="st-overdue">${v(over)} przekroczone</span> · ${v(S?.deadlines_open)} otwarte</p>
+      <p class="hint">${isAdmin()?'Raport finansowy kancelarii (alokacje): w module Finanse.':'Raport finansowy kancelarii: tylko Administrator.'}</p>
+      <p class="hint" id="repAt">${C?`Policzone w bazie o ${new Date(C.t).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})} · wynik pamiętany 5 min`:'Liczenie w bazie…'}</p></div></div>${ME.role==='app'?ownReport(inR):''}`;
 };
+
+ROUTES.raporty.after=()=>{if(!repCached())repFetch().then(()=>{if(location.hash.startsWith('#/raporty'))rerender()}).catch(e=>{const h=$('#repAt');if(h)h.textContent='Błąd raportu: '+errMsg(e)})};
 
 /* ===================== ANALIZA (kalkulatory na danych sprawy) ===================== */
 let CALCS=null;
@@ -758,8 +765,8 @@ async function loadCalcs(c){
       return{vals,out,main,f}};
     $$('#caBox [data-k]').forEach(i=>i.oninput=run);run();
     const sv=$('#caSave');if(sv)sv.onclick=()=>{const r=run(),st=DB.stages.find(s=>s.caseId===c.id&&s.status==='open');if(!st)return toast('Brak otwartego etapu',true);
-      DB.entries.push({id:uid('e'),caseId:c.id,stage:st.id,type:'czynność',kind:'analiza',title:`Kalkulacja: ${k.name}`,desc:`${r.main.label}: ${r.f(r.main.v,r.main.decimals)} ${r.main.unit||''}\n`+k.inputs.map(i=>`${i.label}: ${r.vals[i.key]} ${i.unit||''}`).join('\n'),performedOn:iso(today()),performedBy:ME.id,status:'draft',locked:false,files:[],versions:[],created:nowISO()});
-      hist(c.id,`Zapisano kalkulację: ${k.name}`);audit('wpis.dodany',c.number,`Kalkulacja ${k.name}`);save();toast(`Zapisano w etapie „${st.name}”`)}};
+      const desc=`${r.main.label}: ${r.f(r.main.v,r.main.decimals)} ${r.main.unit||''}\n`+k.inputs.map(i=>`${i.label}: ${r.vals[i.key]} ${i.unit||''}`).join('\n');
+      actSafe(async()=>chk(await sb.from('case_entries').insert({case_id:c.id,stage_id:st.id,type:'czynność',kind:'analiza',title:`Kalkulacja: ${k.name}`,description:desc,performed_on:iso(today())})),`Zapisano w etapie „${st.name}”`)}};
   $('#caSel').onchange=draw;draw();
 }
 
