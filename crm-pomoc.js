@@ -38,6 +38,7 @@ const NAV={
   finanse:'Wpływy od klientów, podział środków i wynagrodzenia. Zakres zależy od uprawnień — pełnomocnik widzi tylko swoje rozliczenie.',
   raporty:'Raporty liczone w bazie, w zakresie Twoich uprawnień. Wynik jest pamiętany 5 minut.',
   strona:'Treści strony publicznej: porównywarka, kalkulatory, analiza umów, tłumaczenia, SEO. Zmiany są szkicem do czasu „Opublikuj”.',
+  podglad:'Podgląd panelu jako wybrana rola lub osoba — menu, sprawy, zakładki i przyciski. Tylko do odczytu.',
   ustawienia:'Kategorie, użytkownicy i uprawnienia, święta, powiadomienia, przypomnienia, system, dziennik audytu i Twoje konto.'};
 
 /* --- zakładki (po tekście) --- */
