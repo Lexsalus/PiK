@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.14.0] — 2026-10-27
+- Podpowiedzi w CRM: dymki przy menu, zakładkach i przyciskach, ikonki [?] przy polach i kolumnach (crm-pomoc.js); numer wersji przy nazwie CRM
+
 ## [1.13.1] — 2026-10-27
 - Migracja 006 wdrożona; migracja 007 — naprawa polskich znaków w funkcjach i etykietach po wdrożeniu 004/005 (m.in. powiadomienie o success fee)
 

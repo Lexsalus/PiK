@@ -63,10 +63,12 @@ Wszystkie 12 modułów jest zrobionych, a kryteria akceptacji sprawdzają testy 
 - daty w bazie według czasu polskiego; przypomnienie „w dniu terminu” od 8:00 (§5),
 - magazyn akt przyjmuje tylko dozwolone typy plików — sprawdza serwer, nie tylko przeglądarka (§7),
 - raport liczony w bazie (`report_summary`), wynik pamiętany 5 min (§11),
-- „Zapisz wynik jako czynność” w zakładce Analiza zapisuje czynność w bazie (wcześniej tylko w oknie przeglądarki).
+- „Zapisz wynik jako czynność” w zakładce Analiza zapisuje czynność w bazie (wcześniej tylko w oknie przeglądarki),
+- zasady haseł w Supabase: min. 12 znaków, małe i wielkie litery, cyfry, ponowne potwierdzenie przy zmianie hasła (§12).
+
+Podpowiedzi: każda pozycja menu, zakładka i ważniejszy przycisk ma dymek (najechanie lub Tab), a pola i kolumny, których znaczenie nie jest oczywiste, mają ikonkę [?]. Teksty są w `crm-pomoc.js`. Numer wersji CRM widać przy nazwie w lewym górnym rogu.
 
 Do decyzji właściciela:
-- zasady haseł w Supabase (min. 12 znaków, małe/wielkie litery i cyfry, potwierdzenie przy zmianie hasła) — ustawienie projektu (§12),
 - blokada konta po nieudanych logowaniach — w Supabase tylko w planie Team (hook „Password Verification Attempt”); teraz jest limit prób na adres IP (§12),
 - uprawnienia jako akcje (podgląd / tworzenie / edycja / zatwierdzanie / usuwanie) zamiast poziomów pełny / ograniczony / brak — przebudowa modelu (§9),
 - skan antywirusowy plików — wymaga zewnętrznej usługi (§7),

@@ -33,6 +33,7 @@ h1{font-size:1.45rem;letter-spacing:-.02em}h2{font-size:1.1rem}h3{font-size:1rem
 #app{display:none;grid-template-columns:232px 1fr;min-height:100vh}
 aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh;overflow:auto}
 .brand{font-weight:800;font-size:1.02rem;display:flex;gap:10px;align-items:center;padding:4px 10px 16px}
+.brand .ver{font-size:.7rem;font-weight:700;color:var(--mut);background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:1px 7px;margin-left:-2px;white-space:nowrap}
 .brand i{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#2fd6a0);display:grid;place-items:center;font-style:normal;color:#fff;font-size:.85rem}
 .nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--mut);font-weight:600;cursor:pointer;border:0;background:none;width:100%;text-align:left}
 .nav:hover{background:var(--card)}.nav.on{background:var(--card2);color:var(--txt)}
@@ -358,9 +359,11 @@ function menuItems(){
     isAdmin()&&['strona','🌐','Treści strony'],
     ['ustawienia','⚙️','Ustawienia']].filter(Boolean);
 }
+/* numer wersji przy nazwie (version.json, podbijany przy każdej wysyłce) */
+let APP_VER='';fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{APP_VER=v.version||'';if(ME)renderShell()}).catch(()=>{});
 function renderShell(){
   const cur=(location.hash.split('/')[1]||'pulpit').replace('sprawa','sprawy');
-  $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM</div>`+menuItems().map(([k,ic,l,cnt,cl])=>`<a class="nav ${cur===k?'on':''}" href="#/${k}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`).join('')+
+  $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM${APP_VER?`<span class="ver" data-tip="Wersja CRM — lista zmian w CHANGELOG.md">v${esc(APP_VER)}</span>`:''}</div>`+menuItems().map(([k,ic,l,cnt,cl])=>`<a class="nav ${cur===k?'on':''}" href="#/${k}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`).join('')+
     `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>`;
   $('#meBox').innerHTML=`${av(ME.id)}<div><b>${esc(ME.name)}</b><small>${esc(ROLES[ME.role])}</small></div>`;
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;
@@ -1362,5 +1365,6 @@ setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=a
 
 </script>
 <script src="crm-strona.js"></script>
+<script src="crm-pomoc.js"></script>
 </body>
 </html>
