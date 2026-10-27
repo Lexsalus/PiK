@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.14.1] — 2026-10-27
+- Dokumentacja zaktualizowana (stan migracji, testy 120/81, zasady haseł, UTF-8 przy wdrożeniach); podstawowy audyt bezpieczeństwa i zużycia w STAN.md
+
 ## [1.14.0] — 2026-10-27
 - Podpowiedzi w CRM: dymki przy menu, zakładkach i przyciskach, ikonki [?] przy polach i kolumnach (crm-pomoc.js); numer wersji przy nazwie CRM
 

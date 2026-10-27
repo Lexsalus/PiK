@@ -4,19 +4,19 @@ Projekt: **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt` (UE, Irla
 
 > Od 26.10.2026 PiK (strona + CRM kancelarii) ma własną bazę. Poprzedni projekt **CRM Pielęgniarki** (dawniej „CRMKP”, `ixlhfhzgzotukstoezcj`) należy teraz do panelu pielęgniarek (repo `Lexsalus/Pielegniarki`).
 
-Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Razem z migracjami przechodzi 74 testy reguł na PostgreSQL (`supabase/test/schema.test.mjs`).
+Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reguły dostępu w bazie (RLS), dziennik audytu z łańcuchem skrótów i zapis zgłoszeń z formularza. Razem z migracjami przechodzi 120 testów reguł na PostgreSQL (`supabase/test/schema.test.mjs`).
 
-## Stan wdrożenia (26.10.2026, nowy projekt `eamobnucjsavahpxilrt`)
+## Stan wdrożenia (27.10.2026, projekt `eamobnucjsavahpxilrt`)
 
 - ✅ Krok 1 — schemat + migracje 002–003 (004–005: niżej) (29 tabel z RLS, 60 polityk, 8 kategorii, magazyn `akta`)
-- ✅ Krok 2 — rejestracja wyłączona; adres logowania i przekierowań: `https://lexsalus.github.io/PiK/crm.html` (`/PiK/**`); 2FA (TOTP) włączone
+- ✅ Krok 2 — rejestracja wyłączona; adres logowania i przekierowań: `https://lexsalus.github.io/PiK/crm.html` (`/PiK/**`); 2FA (TOTP) włączone; hasła: min. 12 znaków, małe i wielkie litery, cyfry, ponowne potwierdzenie przy zmianie hasła (27.10.2026)
 - ✅ Krok 3 — Administrator: `biuro@lekarzeiterapeuci.pl` (nazwa „Admin”), aktywny; 2FA konfiguruje się przy pierwszym logowaniu (konto z błędnym adresem usunięte)
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
 - ✅ Migracja `004_uzupelnienia_specyfikacji.sql` (wdrożona 27.10.2026) — reguły powiadomień, zastępstwa, harmonogram przypomnień per typ, 2FA przy zmianie uprawnień Administratora, raporty aplikanta
 - ✅ Krok 5 — formularz na stronie i CRM wskazują nowy projekt (`data.json`, `crm.html`)
-- ⏳ Migracja `007_naprawa_kodowania.sql` (czeka na zgodę: „wdróż migrację 007 na bazie PiK”) — naprawa polskich znaków po wdrożeniu 004 i 005 (wysłane w złym kodowaniu; m.in. powiadomienie o success fee nie powstawało). Przy wdrożeniach przez API wysyłać treść jako UTF-8.
-- ✅ Migracja `006_zgodnosc_specyfikacji.sql` (wdrożona 27.10.2026) — czas polski w bazie (Europe/Warsaw), przypomnienie w dniu terminu od 8:00, dozwolone typy plików w magazynie `akta`, raport liczony w bazie (`report_summary`).
 - ✅ Migracja `005_tresci_strony.sql` (wdrożona 27.10.2026) — treści strony w bazie (`site_content`), publikacja z CRM tylko przez Administratora z 2FA (`site_publish`). Dopóki nic nie opublikowano, strona korzysta z `data.json`.
+- ✅ Migracja `006_zgodnosc_specyfikacji.sql` (wdrożona 27.10.2026) — czas polski w bazie (Europe/Warsaw), przypomnienie w dniu terminu od 8:00, dozwolone typy plików w magazynie `akta`, raport liczony w bazie (`report_summary`).
+- ⏳ Migracja `007_naprawa_kodowania.sql` (czeka na zgodę: „wdróż migrację 007 na bazie PiK”) — naprawa polskich znaków po wdrożeniu 004 i 005 (wysłane w złym kodowaniu; m.in. powiadomienie o success fee nie powstawało). Przy wdrożeniach przez API wysyłać treść jako UTF-8.
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).

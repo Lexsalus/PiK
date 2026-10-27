@@ -241,7 +241,7 @@ Zaplecze dla adwokatów i pracowników: `https://lexsalus.github.io/PiK/crm.html
 3. Kolejne logowania: hasło + kod z aplikacji.
 
 **Nowy pracownik:**
-1. Supabase → Authentication → Users → **Add user** (e-mail, hasło, *Auto Confirm User*).
+1. Supabase → Authentication → Users → **Add user** (e-mail, hasło: min. 12 znaków, małe i wielkie litery, cyfry; *Auto Confirm User*).
 2. CRM → Ustawienia → Użytkownicy → nadaj rolę i aktywuj.
 3. Pełnomocnik i obsługa techniczna konfigurują 2FA przy pierwszym logowaniu.
 
