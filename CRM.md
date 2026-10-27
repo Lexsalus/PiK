@@ -57,6 +57,21 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 - SEO (meta tagi, robots.txt, sitemap) dalej buduje GitHub Actions z `data.json` w repo.
 - Analiza w karcie sprawy korzysta z kalkulatorów z opublikowanej wersji.
 
+## Zgodność ze specyfikacją v1.1 — przegląd 27.10.2026
+
+Wszystkie 12 modułów jest zrobionych, a kryteria akceptacji sprawdzają testy (bazy i przez interfejs). Poprawione po przeglądzie (migracja 006):
+- daty w bazie według czasu polskiego; przypomnienie „w dniu terminu” od 8:00 (§5),
+- magazyn akt przyjmuje tylko dozwolone typy plików — sprawdza serwer, nie tylko przeglądarka (§7),
+- raport liczony w bazie (`report_summary`), wynik pamiętany 5 min (§11),
+- „Zapisz wynik jako czynność” w zakładce Analiza zapisuje czynność w bazie (wcześniej tylko w oknie przeglądarki).
+
+Do decyzji właściciela:
+- zasady haseł w Supabase (min. 12 znaków, małe/wielkie litery i cyfry, potwierdzenie przy zmianie hasła) — ustawienie projektu (§12),
+- blokada konta po nieudanych logowaniach — w Supabase tylko w planie Team (hook „Password Verification Attempt”); teraz jest limit prób na adres IP (§12),
+- uprawnienia jako akcje (podgląd / tworzenie / edycja / zatwierdzanie / usuwanie) zamiast poziomów pełny / ograniczony / brak — przebudowa modelu (§9),
+- skan antywirusowy plików — wymaga zewnętrznej usługi (§7),
+- e-mail i SMS — wybór dostawcy (§10); retencja RODO — okresy przechowywania per kategoria (§12); kopie zapasowe — plan Pro lub eksport (§12).
+
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
 - Zakres roli Biuro: wszystkie sprawy czy tylko przypisane (obecnie: przypisane).

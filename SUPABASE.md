@@ -14,6 +14,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
 - ✅ Migracja `004_uzupelnienia_specyfikacji.sql` (wdrożona 27.10.2026) — reguły powiadomień, zastępstwa, harmonogram przypomnień per typ, 2FA przy zmianie uprawnień Administratora, raporty aplikanta
 - ✅ Krok 5 — formularz na stronie i CRM wskazują nowy projekt (`data.json`, `crm.html`)
+- ⏳ Migracja `006_zgodnosc_specyfikacji.sql` (czeka na zgodę właściciela: „wdróż migrację 006 na bazie PiK”) — czas polski w bazie (Europe/Warsaw), przypomnienie w dniu terminu od 8:00, dozwolone typy plików w magazynie `akta`, raport liczony w bazie (`report_summary`).
 - ✅ Migracja `005_tresci_strony.sql` (wdrożona 27.10.2026) — treści strony w bazie (`site_content`), publikacja z CRM tylko przez Administratora z 2FA (`site_publish`). Dopóki nic nie opublikowano, strona korzysta z `data.json`.
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 

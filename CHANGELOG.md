@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.13.0] — 2026-10-27
+- Zgodność ze specyfikacją v1.1: migracja 006 (czas polski, przypomnienie w dniu terminu od 8:00, dozwolone typy plików w aktach, raport w bazie — czeka na wdrożenie), raporty liczone w bazie z pamięcią 5 min, zapis kalkulacji z zakładki Analiza do bazy
+
 ## [1.12.2] — 2026-10-27
 - Migracje 004 i 005 wdrożone na bazie Porównywarka (27.10.2026) — „Opublikuj” w CRM działa
 

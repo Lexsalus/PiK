@@ -35,7 +35,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (106 testów reguł bazy) i `supabase/test/e2e/` (70 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (116 testów reguł bazy) i `supabase/test/e2e/` (75 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
 
 ## Zrobione
 
@@ -45,6 +45,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (27.10.2026)
 
+- 1.13.0 — przegląd zgodności ze specyfikacją v1.1 (opis w `CRM.md`): migracja `006_zgodnosc_specyfikacji.sql` (czas polski, przypomnienie 8:00, typy plików, raport w bazie — **czeka na wdrożenie** frazą „wdróż migrację 006 na bazie PiK”), raporty z bazy z pamięcią 5 min, naprawiony zapis kalkulacji z zakładki Analiza. Zasady haseł w Supabase — do potwierdzenia przez właściciela.
 - 1.12.0 — **Treści strony w CRM**: panel z `admin.html` przeniesiony do CRM (`crm-strona.js`, tylko Administrator), publikacja do bazy (migracja `005_tresci_strony.sql`, wdrożona 27.10.2026 razem z 004), strona czyta opublikowaną wersję (zapas: `data.json`), ⚙️ Panel → CRM, `admin.html` usunięty. SEO dalej z `data.json`.
 
 ## Wcześniejsze zmiany (26.10.2026)

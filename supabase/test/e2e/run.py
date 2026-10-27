@@ -49,6 +49,9 @@ async def main():
     ok('800101*****' in await T('#view'),'PESEL maskowany (z bazy)')
     await pg.click('text=Pokaż'); await pg.wait_for_timeout(600); ok('80010112345' in await T('#view'),'Administrator odsłania PESEL (zaszyfrowany w bazie)')
     await nav(f'#/sprawa/{caseid}/analiza'); await pg.wait_for_timeout(500); ok('Wynik kalkulatora ze zgłoszenia' in await T('#view'),'Analiza: wynik kalkulatora klienta')
+    await pg.wait_for_timeout(600); ok(await pg.is_visible('#caSave'),'Analiza: przycisk zapisu kalkulacji'); await pg.click('#caSave'); await pg.wait_for_timeout(1200)
+    import urllib.request
+    ok(len(json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':"select 1 from public.case_entries where kind='analiza' and title like 'Kalkulacja:%'",'params':[]}).encode(),method='POST')).read()).get('data'))==1,'Analiza: kalkulacja zapisana w bazie jako czynność')
     # --- zespół: aplikantka bez finansów
     await nav(f'#/sprawa/{caseid}/zespol'); await pg.click('text=+ Dodaj osobę do sprawy'); await pg.wait_for_timeout(300)
     await pg.select_option('#mmU',label='Anna Kowalska (Aplikant)'); await submit()
@@ -129,6 +132,10 @@ async def main():
     await pg.locator('tr',has_text='Pozostałe sprawy').drag_to(pg.locator('tr',has_text='Restrukturyzacja').first); await pg.wait_for_timeout(1300)
     ok(sql("select code from public.case_categories order by sort_order")[0]['code']=='INNE','przeciąganie zmienia kolejność kategorii')
     await nav('#/raporty'); ok(await pg.locator('.toolbar select').count()>=2 and 'Status' in await T('.toolbar'),'raporty: filtr statusu')
+    await pg.wait_for_timeout(1200); ok('Policzone w bazie' in await T('#view'),'raporty: liczone w bazie (report_summary)')
+    await pg.evaluate("rep.from='2000-01-01';rep.to='2099-12-31';rerender()"); await pg.wait_for_timeout(1200)
+    n=sql("select count(*)::int n from public.cases")[0]['n']; ok((await T('.tile:has-text("Liczba spraw") b')).strip()==str(n),f'raporty: liczba spraw z bazy = {n}')
+    pc=await pg.evaluate("Object.keys(REPC).length"); await nav('#/pulpit'); await nav('#/raporty'); ok(await pg.evaluate("Object.keys(REPC).length")==pc and 'Policzone w bazie' in await T('#view'),'raporty: wynik z pamięci (5 min) bez ponownego liczenia')
     async with pg.expect_download() as dl: await pg.click('text=⬇ XLSX')
     d=await dl.value; ok(d.suggested_filename.endswith('.xlsx'),'eksport XLSX: '+d.suggested_filename)
     await pg.click('text=⬇ PDF'); await pg.wait_for_timeout(900); ok('PDF' in await T('#toast'),'eksport PDF (drukowanie do pliku)')
