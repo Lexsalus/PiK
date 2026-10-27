@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.17.1] — 2026-10-27
+- Migracja 009 wdrożona (uprawnienia: podgląd i zmiana osobno)
+
 ## [1.17.0] — 2026-10-27
 - Podgląd panelu (Administrator): CRM oczami wybranej roli lub osoby — menu, sprawy, zakładki i przyciski; tylko do odczytu
 

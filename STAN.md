@@ -11,7 +11,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Treści strony | CRM → **🌐 Treści strony** (tylko Administrator; przycisk ⚙️ Panel na stronie i link w stopce prowadzą do CRM) | szkic + „Opublikuj” do bazy (`site_content`, migracja 005 — wdrożona); dopóki nic nie opublikowano, strona czyta `data.json`. `admin.html` usunięty |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–008 wdrożone 27.10.2026; Administrator aktywny |
+| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–009 wdrożone 27.10.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
@@ -46,7 +46,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 ## Ostatnie zmiany (27.10.2026)
 
 - 1.17.0 — **Podgląd panelu** jako rola lub osoba (Administrator, tylko do odczytu, `crm-podglad.js`).
-- 1.16.0 — uprawnienia: podgląd i zmiana osobno (wariant pośredni §9; migracja `009_uprawnienia_akcje.sql` — czeka na wdrożenie). Następny krok: pełna macierz akcji.
+- 1.16.0 — uprawnienia: podgląd i zmiana osobno (wariant pośredni §9; migracja `009_uprawnienia_akcje.sql` — wdrożona 27.10.2026). Następny krok: pełna macierz akcji.
 - 1.15.0 — poprawki po audycie (SRI, limit zgłoszeń z e-maila, pobieranie tylko zmienionych tabel, porządki powiadomień, pamięć treści na stronie, uwagi doradców — migracja `008_audyt_bezpieczenstwa.sql`, wdrożona 27.10.2026); migracja 007 wdrożona. Doradcy Supabase po wdrożeniu: zostały tylko uwagi „z założenia” (funkcje SECURITY DEFINER dla zalogowanych, case_counters bez reguł — dostęp tylko przez wyzwalacz) i HIBP (plan płatny).
 - 1.14.1 — aktualizacja dokumentacji i podstawowy audyt bezpieczeństwa i zużycia (sekcja niżej).
 - 1.14.0 — podpowiedzi w CRM (dymki + [?], `crm-pomoc.js`), numer wersji przy nazwie CRM; zasady haseł w Supabase ustawione (min. 12, małe/wielkie/cyfry, potwierdzenie przy zmianie).
