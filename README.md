@@ -1,9 +1,8 @@
 # PiK — Porównywarka, Kalkulatory i analiza umów
 
-Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów i panel administracyjny. Treść strony w `data.json`; zgłoszenia i dane CRM w bazie Supabase.
+Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów. Treści strony edytuje Administrator w CRM (🌐 Treści strony) i publikuje do bazy Supabase (zapasowo `data.json`); zgłoszenia i dane CRM też w bazie.
 
 🌐 **Strona:** https://lexsalus.github.io/PiK/
-🔐 **Panel treści:** https://lexsalus.github.io/PiK/admin.html
 🗄️ **Baza CRM (Supabase):** wdrożenie — **[SUPABASE.md](SUPABASE.md)**
 ⚖️ **CRM kancelarii:** https://lexsalus.github.io/PiK/crm.html (logowanie + 2FA) — opis: **[CRM.md](CRM.md)**
 🧭 **Stan projektu i kontynuacja:** **[STAN.md](STAN.md)**
@@ -29,8 +28,9 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Finanse (podział wpłat, wynagrodzenie pełnomocnika), raporty, powiadomienia
 - Role i uprawnienia, dziennik audytu z łańcuchem skrótów; zgłoszenia z formularza → „Nowe sprawy”
 
-**Panel administracyjny (treść strony)**
-- Ustawienia strony (nazwa, kolor akcentu, podtytuł, hasło)
+**CRM → 🌐 Treści strony** (tylko Administrator; dawny panel `admin.html`)
+- Ustawienia strony (nazwa, kolor akcentu, podtytuł)
+- Szkic w przeglądarce, podgląd, **🚀 Opublikuj** do bazy (strona widzi zmiany od razu)
 - Kategorie z dowolnymi parametrami (liczba / tekst / tak-nie) i ofertami
 - Kalkulatory z własnymi wzorami i testem na żywo
 - Analiza umów: reguły podstawowe i prawne (z podstawą prawną), limity odsetek, wskaźniki podejrzanej treści, tester reguł
@@ -43,13 +43,13 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 
 ```
 index.html      strona publiczna
-admin.html      panel administracyjny (treść strony)
 crm.html        CRM kancelarii na żywo (Supabase)
+crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawny admin.html)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–004), test/ — testy bazy 89/89, e2e CRM 51/51 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–005), test/ — testy bazy 106/106, e2e CRM 70/70 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
-data.json       dane strony (ustawienia, SEO, języki, kategorie, kalkulatory, tłumaczenia)
+data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)
 version.json    aktualna wersja
 CHANGELOG.md    historia wersji
 bump.py         podbijanie wersji
@@ -91,6 +91,6 @@ py -m http.server 8000
 
 ## Bezpieczeństwo
 
-- **Panel treści:** hasło to bramka w interfejsie (skrót SHA-256 w `data.json`), nie zabezpieczenie serwerowe. Treść chroni dostęp do zapisu w repozytorium.
+- **Treści strony:** publikuje tylko Administrator z 2FA — sprawdza to baza (funkcja `site_publish`), każda publikacja w audycie. Odczyt opublikowanej wersji jest publiczny (to treść strony).
 - **CRM:** dane klientów są w Supabase (UE), chronione regułami RLS w bazie, 2FA egzekwowanym w bazie, szyfrowaniem PESEL i dziennikiem audytu. W kodzie strony jest tylko klucz publiczny `sb_publishable_…`; klucza `sb_secret_…` nie umieszcza się nigdzie w repo.
-- `admin.html` i `crm.html` są wyłączone z indeksowania (`robots.txt`).
+- `crm.html` jest wyłączony z indeksowania (`robots.txt`).

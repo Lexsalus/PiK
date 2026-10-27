@@ -49,6 +49,14 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 
 **Testy:** reguły bazy 89/89 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról 51/51 (`supabase/test/e2e/`).
 
+## Treści strony (migracja 005, 27.10.2026)
+
+- **🌐 Treści strony** w lewym menu — tylko Administrator (na razie; inne uprawnienia do ustalenia później). Przeniesione z dawnego `admin.html`, który został usunięty; przycisk ⚙️ Panel i link w stopce strony prowadzą do CRM.
+- Zakładki: Ustawienia, Kategorie (porównywarka), Kalkulatory, Analiza umów, Tłumaczenia, SEO, Publikacja — te same funkcje co w starym panelu, bez osobnego hasła (logowanie CRM z 2FA).
+- Zmiany to szkic w przeglądarce (z podglądem `index.html?preview`); **🚀 Opublikuj** zapisuje je w bazie (`site_content`, funkcja `site_publish` — tylko Administrator z 2FA, wpis w audycie). Strona publiczna czyta opublikowaną wersję; dopóki jej nie ma — `data.json`.
+- SEO (meta tagi, robots.txt, sitemap) dalej buduje GitHub Actions z `data.json` w repo.
+- Analiza w karcie sprawy korzysta z kalkulatorów z opublikowanej wersji.
+
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
 - Zakres roli Biuro: wszystkie sprawy czy tylko przypisane (obecnie: przypisane).

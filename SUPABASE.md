@@ -14,6 +14,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Krok 4 — pg_cron: zadanie `przypomnienia-terminy` co 15 min
 - ⏳ Migracja `004_uzupelnienia_specyfikacji.sql` (czeka na zgodę właściciela na wdrożenie) — reguły powiadomień, zastępstwa, harmonogram przypomnień per typ, 2FA przy zmianie uprawnień Administratora, raporty aplikanta
 - ✅ Krok 5 — formularz na stronie i CRM wskazują nowy projekt (`data.json`, `crm.html`)
+- ⏳ Migracja `005_tresci_strony.sql` (czeka na zgodę właściciela na wdrożenie) — treści strony w bazie (`site_content`), publikacja z CRM tylko przez Administratora z 2FA (`site_publish`). Do czasu wdrożenia strona korzysta z `data.json`, a „Opublikuj” w CRM zwróci błąd.
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).
@@ -61,7 +62,8 @@ select cron.schedule('przypomnienia-terminy','*/15 * * * *','select public.run_d
 
 ## Krok 5 — formularz na stronie zapisuje zgłoszenia w bazie
 
-Panel treści (`admin.html`) → **Ustawienia → Formularz zgłoszenia sprawy** → *Gdzie trafia zgłoszenie*: **Baza CRM (Supabase)** (ustawione domyślnie) + adres projektu i klucz publiczny. Po zmianie: **Publikacja → Pobierz data.json** i wrzuć do repo.
+CRM → **🌐 Treści strony → Ustawienia → Formularz zgłoszenia sprawy** → *Gdzie trafia zgłoszenie*: **Baza CRM (Supabase)** (ustawione domyślnie) + adres projektu i klucz publiczny. Po zmianie: **🚀 Opublikuj**.
+Przy nowym projekcie Supabase podmień też adres i klucz publiczny w `index.html` (stałe `SITE_DB`, `SITE_KEY` — odczyt opublikowanych treści).
 Przy nowym projekcie Supabase podmień też adres i klucz publiczny w `crm.html` (stałe na początku skryptu).
 
 Sprawdzenie: wyślij zgłoszenie testowe ze strony → **Table Editor → leads** — powinien pojawić się wiersz.

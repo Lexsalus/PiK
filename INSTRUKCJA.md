@@ -5,17 +5,15 @@
 | Co | Adres |
 |----|-------|
 | Strona | `https://lexsalus.github.io/PiK/` |
-| Panel admina | `https://lexsalus.github.io/PiK/admin.html` |
+| Treści strony | CRM → **🌐 Treści strony** (tylko Administrator) |
 | CRM kancelarii | `https://lexsalus.github.io/PiK/crm.html` — opis w `CRM.md` |
 | Podgląd szkicu | `https://lexsalus.github.io/PiK/index.html?preview` |
 
-Numer wersji widać w stopce strony i na dole menu panelu. Do panelu prowadzi przycisk **⚙️ Panel** w prawym górnym rogu strony i link w stopce. Panel ma też link do CRM.
+Numer wersji widać w stopce strony. Przycisk **⚙️ Panel** w prawym górnym rogu strony i link w stopce prowadzą do CRM. Treści strony (pkt 3–10) edytuje Administrator w CRM → **🌐 Treści strony** (dawny `admin.html` został usunięty).
 
-## 2. Pierwsze logowanie do panelu treści
+## 2. Logowanie do edycji treści
 
-1. Otwórz panel i zaloguj się hasłem `admin`.
-2. **Ustawienia → Hasło administratora** — ustaw nowe hasło.
-3. Wyeksportuj `data.json` i wrzuć do repo (pkt 10) — bez tego nowe hasło nie zadziała na innych komputerach.
+Treści strony edytuje się w CRM po zalogowaniu kontem Administratora (e-mail, hasło i 2FA). Osobnego hasła panelu już nie ma. Zakładki: Ustawienia, Kategorie, Kalkulatory, Analiza umów, Tłumaczenia, SEO, Publikacja — poniżej „Panel → …” oznacza te zakładki.
 
 ## 3. Ustawienia strony
 
@@ -151,7 +149,7 @@ Tabela tekstów:
 - licznik u góry pokazuje postęp, np. `Ukraiński: 92/101`,
 - zmiana polskiego tekstu w kategorii/kalkulatorze tworzy nowy wpis, a stare tłumaczenie trafia do grupy **Nieużywane** (przycisk **Usuń nieużywane** je czyści).
 
-Tłumaczenia są zapisywane w `data.json` — publikujesz je jak resztę zmian (pkt 10).
+Tłumaczenia publikujesz jak resztę zmian (pkt 10).
 
 ## 8. SEO — optymalizacja pod Google
 
@@ -173,7 +171,7 @@ Tytuł i opis tłumaczysz w zakładce Tłumaczenia (grupa „SEO”).
 **Pierwsze zgłoszenie do Google:**
 1. Wejdź na [Google Search Console](https://search.google.com/search-console) → *Dodaj usługę* → *Prefiks URL* → adres strony.
 2. Wybierz weryfikację *Tag HTML*, skopiuj wartość `content="…"` do pola **Google Search Console — kod weryfikacji**.
-3. Opublikuj `data.json`, odczekaj ~1 min i kliknij *Zweryfikuj*.
+3. Pobierz `data.json` i podmień w repo (pkt 10), odczekaj ~1 min i kliknij *Zweryfikuj*.
 4. W Search Console → *Mapy witryn* dodaj `sitemap.xml`.
 
 > Na adresie `github.io/PiK/` Google czyta `robots.txt` tylko z głównej domeny, dlatego mapę witryny trzeba zgłosić ręcznie (krok 4). Po podpięciu własnej domeny `robots.txt` zacznie działać automatycznie.
@@ -190,17 +188,17 @@ Skrypt dostaje atrybut `data-lang` z aktualnym językiem strony.
 
 ## 10. Publikacja zmian
 
-Zmiany w panelu to **szkic** zapisany tylko w tej przeglądarce (status „Szkic — niewyeksportowany”). Nie widać go na stronie publicznej ani na innym komputerze. Wyczyszczenie danych przeglądarki lub tryb incognito kasuje szkic — przy większych zmianach pobieraj co jakiś czas `data.json` jako kopię.
+Zmiany w CRM → Treści strony to **szkic** zapisany tylko w tej przeglądarce (status „Szkic — nieopublikowany”). Nie widać go na stronie publicznej ani na innym komputerze. Wyczyszczenie danych przeglądarki lub tryb incognito kasuje szkic — przy większych zmianach pobieraj co jakiś czas `data.json` jako kopię.
 
-Jeśli `data.json` w repo zmieni się po utworzeniu szkicu (np. po aktualizacji strony), panel pokaże żółty komunikat z wyborem: **Użyj nowej wersji z repo** albo **Zostaw mój szkic**.
+Jeśli opublikowana wersja zmieni się po utworzeniu szkicu (np. publikacja z innego komputera), CRM pokaże żółty komunikat z wyborem: **Użyj opublikowanej wersji** albo **Zostaw mój szkic**.
 
-1. **Podgląd** — sprawdź stronę z danymi szkicu.
-2. **Publikacja → Pobierz data.json**.
-3. Podmień `data.json` w repozytorium.
-4. Podbij wersję (pkt 11), commit, push.
-5. Po ~1 min zmiany są na stronie (zakładka *Actions* w GitHubie pokazuje postęp).
+1. **👁 Podgląd** — sprawdź stronę z danymi szkicu.
+2. **🚀 Opublikuj** — treści trafiają do bazy (tabela `site_content`), strona pokazuje je od razu po odświeżeniu. Publikacja jest w dzienniku audytu.
+3. **SEO:** meta tagi, `robots.txt` i `sitemap.xml` dalej tworzy GitHub Actions z `data.json` w repo — po zmianach w zakładce SEO: **Publikacja → Pobierz data.json**, podmień plik w repo, podbij wersję (pkt 11), commit, push.
 
-Inne akcje: **Kopiuj JSON**, **Importuj plik** (wczytanie `data.json` z dysku), **Odrzuć szkic** (powrót do wersji z repo).
+Dopóki nic nie opublikowano z CRM, strona korzysta z `data.json` z repo (tak samo, gdy baza chwilowo nie odpowiada).
+
+Inne akcje: **Kopiuj JSON**, **Importuj plik** (wczytanie `data.json` z dysku do szkicu), **Odrzuć szkic** (powrót do opublikowanej wersji).
 
 ## 11. Wersjonowanie
 
@@ -223,9 +221,9 @@ py bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe
 | Problem | Rozwiązanie |
 |---------|-------------|
 | „Nie udało się wczytać data.json” lokalnie | uruchom serwer: `py -m http.server 8000` i wejdź na `localhost:8000` |
-| Zmiany nie widać na stronie | odśwież z Ctrl+F5; sprawdź zakładkę *Actions* |
-| Nie pamiętam hasła | wpisz nowy skrót SHA-256 w `site.adminHash` w `data.json` (skrót hasła `admin`: `8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918`) |
-| Nowe hasło / SEO nie działa na innym komputerze | szkic jest tylko w Twojej przeglądarce — wyeksportuj i opublikuj `data.json` |
+| Zmiany nie widać na stronie | sprawdź, czy kliknięto **🚀 Opublikuj**; odśwież z Ctrl+F5 |
+| Zmiany nie widać na innym komputerze | szkic jest tylko w Twojej przeglądarce — kliknij **🚀 Opublikuj** |
+| Zmiany SEO nie działają | SEO buduje się z `data.json` w repo — pobierz go w zakładce Publikacja i podmień w repo |
 | Tłumaczenie Google nie przełącza się | wyczyść cookies strony lub wybierz PL i ponownie UA/EN |
 | Wynik kalkulatora „—” | błąd we wzorze lub dzielenie przez zero — sprawdź test w panelu |
 | Brak przycisku „Chcę bezpłatną analizę” | panel → Formularz zgłoszenia: uzupełnij adres i klucz Supabase albo e-mail kancelarii |
