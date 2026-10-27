@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.18.0] — 2026-10-27
+- Treści strony: przycisk „Pokaż różnice” (szkic ↔ opublikowana wersja); paski przewijania dopasowane do stylu (CRM i strona)
+
 ## [1.17.1] — 2026-10-27
 - Migracja 009 wdrożona (uprawnienia: podgląd i zmiana osobno)
 

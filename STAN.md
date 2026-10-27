@@ -35,7 +35,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (137 testów reguł bazy) i `supabase/test/e2e/` (93 kroki przez interfejs CRM i stronę, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (137 testów reguł bazy) i `supabase/test/e2e/` (96 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
 
 ## Zrobione
 
@@ -45,6 +45,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (27.10.2026)
 
+- 1.18.0 — Treści strony: przycisk „🔍 Pokaż różnice” przy ostrzeżeniu o nieaktualnym szkicu; paski przewijania w stylu strony (CRM i strona publiczna).
 - 1.17.0 — **Podgląd panelu** jako rola lub osoba (Administrator, tylko do odczytu, `crm-podglad.js`).
 - 1.16.0 — uprawnienia: podgląd i zmiana osobno (wariant pośredni §9; migracja `009_uprawnienia_akcje.sql` — wdrożona 27.10.2026). Następny krok: pełna macierz akcji.
 - 1.15.0 — poprawki po audycie (SRI, limit zgłoszeń z e-maila, pobieranie tylko zmienionych tabel, porządki powiadomień, pamięć treści na stronie, uwagi doradców — migracja `008_audyt_bezpieczenstwa.sql`, wdrożona 27.10.2026); migracja 007 wdrożona. Doradcy Supabase po wdrożeniu: zostały tylko uwagi „z założenia” (funkcje SECURITY DEFINER dla zalogowanych, case_counters bez reguł — dostęp tylko przez wyzwalacz) i HIBP (plan płatny).
