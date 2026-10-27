@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.16.0] — 2026-10-27
+- Uprawnienia: podgląd i zmiana osobno dla danych klienta, dokumentów, czynności, terminów i zgłoszeń (migracja 009 — czeka na wdrożenie); przyciski dodawania i edycji tylko z uprawnieniem do zmiany
+
 ## [1.15.1] — 2026-10-27
 - Migracja 008 wdrożona (limit zgłoszeń, porządki powiadomień, uwagi doradców Supabase)
 

@@ -242,6 +242,7 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
 // --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
 {await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
  await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
+ for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
@@ -260,3 +261,20 @@ R((await as('jan',`select count(*)::int n from public.permission_overrides`)).ro
 const noidx=(await db.query(`select count(*)::int n from pg_constraint c where c.contype='f' and c.connamespace='public'::regnamespace and not exists(select 1 from pg_index i where i.indrelid=c.conrelid and (string_to_array(i.indkey::text,' '))[1:array_length(c.conkey,1)]=(select array_agg(x::text) from unnest(c.conkey) x))`)).rows[0].n;
 R(noidx===0,'008: każdy klucz obcy ma indeks');
 R((await db.query(`select count(*)::int n from pg_proc where proname in ('audit_readonly','member_guard','path_case') and proconfig is not null`)).rows[0].n===3,'008: stała search_path w 3 funkcjach');}
+// --- 009: uprawnienia — podgląd i zmiana osobno
+{AAL='aal2';AMR=[];
+const rp=(await db.query(`select perm, bool_and(l_v=l_c) same from (select perm, role, max(level) filter (where action='view') l_v, max(level) filter (where action='change') l_c from public.role_permissions where perm in ('client','documents','entries','deadlines','new_cases') group by perm, role) x group by perm`)).rows;
+R(rp.length===5&&rp.every(x=>x.same),'009: „zmiana” ma dla ról ten sam poziom co dotychczasowe uprawnienie (dostęp bez zmian)');
+const ov=async(u,p,lvl)=>as('admin',`insert into public.permission_overrides(user_id,perm,action,level,reason) values($1,$2,'change',$3,'test podglądu bez zmiany') on conflict(user_id,perm,action) do update set level=excluded.level`,[U[u],p,lvl]);
+const dov=async(u,p)=>as('admin',`delete from public.permission_overrides where user_id=$1 and perm=$2 and action='change'`,[U[u],p]);
+let cc=(await db.query(`select m.case_id id from public.case_members m join public.case_stages s on s.case_id=m.case_id and s.status='open' where m.user_id=$1 and m.revoked_at is null and m.access_actions and m.access_documents limit 1`,[U.anna])).rows[0]?.id;
+if(!cc){cc=(await db.query(`select case_id id from public.case_stages where status='open' limit 1`)).rows[0].id;await as('admin',`insert into public.case_members(case_id,user_id,role,access_documents,access_actions) values($1,$2,'app',true,true)`,[cc,U.anna])}
+const stOpen=(await db.query(`select id from public.case_stages where case_id=$1 and status='open' order by sort_order limit 1`,[cc])).rows[0]?.id;
+await ov('anna','entries',0);
+R((await as('anna',`select count(*)::int n from public.case_entries where case_id=$1`,[cc])).rows[0].n>=0&&!!await fails('anna',`insert into public.case_entries(case_id,stage_id,type,title) values($1,$2,'notatka','tylko podgląd')`,[cc,stOpen]),'009: aplikant z samym podglądem czynności widzi wpisy, ale nie dodaje');
+await dov('anna','entries');
+R(!await fails('anna',`insert into public.case_entries(case_id,stage_id,type,title) values($1,$2,'notatka','po przywróceniu')`,[cc,stOpen]),'009: po cofnięciu ograniczenia — dodawanie działa');
+await ov('jan','documents',0);R(!!await fails('jan',`insert into public.documents(case_id,name) values($1,'x.pdf')`,[cc]),'009: dokumenty — bez „zmiany” nie można dodać pliku');await dov('jan','documents');
+await ov('jan','deadlines',0);R(!!await fails('jan',`insert into public.deadlines(case_id,type,title,final_due_date,responsible_user_id) values($1,'internal','t',current_date+5,$2)`,[cc,U.jan]),'009: terminy — bez „zmiany” nie można dodać terminu');await dov('jan','deadlines');
+await ov('kasia','new_cases',0);R((await as('kasia',`update public.leads set reason='x' where status='nowe' returning id`)).rows.length===0&&(await as('kasia',`select count(*)::int n from public.leads`)).rows[0].n>0,'009: zgłoszenia — z samym podglądem widzi, ale nie obsługuje');await dov('kasia','new_cases');
+R((await db.query(`select details from public.audit_log where action='uprawnienia.zmiana' order by id desc limit 1`)).rows[0].details.includes('(zmiana)'),'009: audyt rozróżnia podgląd i zmianę');}

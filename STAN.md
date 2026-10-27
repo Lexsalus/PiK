@@ -35,7 +35,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (129 testów reguł bazy) i `supabase/test/e2e/` (84 kroki przez interfejs CRM i stronę, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (137 testów reguł bazy) i `supabase/test/e2e/` (87 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
 
 ## Zrobione
 
@@ -45,6 +45,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (27.10.2026)
 
+- 1.16.0 — uprawnienia: podgląd i zmiana osobno (wariant pośredni §9; migracja `009_uprawnienia_akcje.sql` — czeka na wdrożenie). Następny krok: pełna macierz akcji.
 - 1.15.0 — poprawki po audycie (SRI, limit zgłoszeń z e-maila, pobieranie tylko zmienionych tabel, porządki powiadomień, pamięć treści na stronie, uwagi doradców — migracja `008_audyt_bezpieczenstwa.sql`, wdrożona 27.10.2026); migracja 007 wdrożona. Doradcy Supabase po wdrożeniu: zostały tylko uwagi „z założenia” (funkcje SECURITY DEFINER dla zalogowanych, case_counters bez reguł — dostęp tylko przez wyzwalacz) i HIBP (plan płatny).
 - 1.14.1 — aktualizacja dokumentacji i podstawowy audyt bezpieczeństwa i zużycia (sekcja niżej).
 - 1.14.0 — podpowiedzi w CRM (dymki + [?], `crm-pomoc.js`), numer wersji przy nazwie CRM; zasady haseł w Supabase ustawione (min. 12, małe/wielkie/cyfry, potwierdzenie przy zmianie).
@@ -100,7 +101,7 @@ Zostaje: sprawdzanie haseł z wycieków (HIBP) — plan płatny; kto publikuje t
 - **Kopie zapasowe (§12):** darmowy plan Supabase nie robi kopii; codzienne kopie dopiero w planie Pro (7 dni) — albo ręczny eksport bazy. Test odtwarzania co kwartał.
 - **Blokada konta po nieudanych logowaniach (§12):** Supabase na darmowym planie ogranicza tylko próby z jednego adresu IP; blokada konta wymaga haka uwierzytelniania z planu płatnego.
 - **Skan antywirusowy załączników (§7):** wymaga funkcji serwerowej i usługi skanującej (wybór dostawcy).
-- **Uprawnienia jako zasób + akcja (§9):** teraz poziomy pełny / ograniczony / brak; pełny model view/create/edit/approve/delete wymaga ustalenia macierzy dla każdej roli.
+- **Uprawnienia jako zasób + akcja (§9):** zrobiony wariant pośredni (podgląd / zmiana, migracja 009); pełna macierz create/edit/approve/delete — następny krok, wymaga ustalenia z kancelarią, kto ma jakie akcje.
 - **E-mail i SMS w powiadomieniach (§10):** dostawca poczty (SMTP — przy okazji znosi limit 2 e-maili/h) i SMS.
 - **Czas wylogowania po bezczynności:** ustawione 30 min — do potwierdzenia.
 

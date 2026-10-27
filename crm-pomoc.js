@@ -172,6 +172,8 @@ const TH={
   'Poziom / kiedy':'Waga ostrzeżenia i warunek: gdy fragment występuje albo gdy go brakuje.',
   'Bilans':'Kwota wpływu minus suma pozycji podziału. Do zatwierdzenia musi wynosić 0 zł.',
   'Nadanie indywidualne':'Nadpisuje uprawnienie z roli dla tej osoby (nadaj pełny / ograniczony albo odbierz).',
+  'Uprawnienie':'„podgląd” — widzi dane; „zmiana” — dodaje i edytuje. Usuwanie i zatwierdzanie to osobne uprawnienia.',
+  'Funkcja':'„podgląd” — widzi dane; „zmiana” — dodaje i edytuje. Usuwanie i zatwierdzanie to osobne uprawnienia.',
   'Ważne do':'Puste = bezterminowo. Po tej dacie nadanie wygasa samo.',
   'Dodatkowi odbiorcy':'Grupy, które oprócz odbiorców z ról i przypisań dostają to powiadomienie.',
   'Kanały':'W CRM zawsze. E-mail i SMS — po wyborze dostawcy.',

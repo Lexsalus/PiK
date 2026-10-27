@@ -228,18 +228,20 @@ const COLORS=['#7c5cff','#2fd6a0','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8
 /* --- Role i uprawnienia (specyfikacja §9) --- */
 const ROLES={admin:'Administrator',att:'Pełnomocnik',app:'Aplikant',office:'Biuro',tech:'Obsługa techniczna'};
 const PERMS=[
-  ['cases_all','Wszystkie sprawy'],['client','Dane klienta'],['pesel','Pełny PESEL (odsłonięcie)'],['documents','Dokumenty i akta'],
-  ['entries','Notatki i czynności'],['deadlines','Terminy i zadania'],['deadlines_close','Terminy procesowe — zamykanie'],
+  ['cases_all','Wszystkie sprawy'],['client','Dane klienta — podgląd'],['client:change','Dane klienta — zmiana'],['pesel','Pełny PESEL (odsłonięcie)'],
+  ['documents','Dokumenty i akta — podgląd'],['documents:change','Dokumenty — dodawanie i nowe wersje'],
+  ['entries','Notatki i czynności — podgląd'],['entries:change','Notatki i czynności — dodawanie i edycja'],
+  ['deadlines','Terminy i zadania — podgląd'],['deadlines:change','Terminy — dodawanie i zmiany'],['deadlines_close','Terminy procesowe — zamykanie'],
   ['initial_fee','Opłata wstępna / wpłata klienta'],['attorney_fee','Wynagrodzenie pełnomocnika'],['success_fee','Success fee'],
-  ['allocations','Podział środków kancelarii'],['delete','Usuwanie wpisów i czynności'],['new_cases','Nowe sprawy (zgłoszenia)'],
+  ['allocations','Podział środków kancelarii'],['delete','Usuwanie wpisów i czynności'],['new_cases','Nowe sprawy (zgłoszenia) — podgląd'],['new_cases:change','Nowe sprawy — obsługa zgłoszeń'],
   ['reports','Raporty'],['users','Nadawanie uprawnień, użytkownicy'],['config','Konfiguracja systemu, kopie zapasowe'],['audit','Dziennik audytu — podgląd']];
 const PERM_NAME=Object.fromEntries(PERMS);
 // wartości: 2 = pełny dostęp, 1 = zakres ograniczony (przypisane sprawy / własne dane), 0 = brak
 const ROLE_DEF={
   admin:Object.fromEntries(PERMS.map(([k])=>[k,2])),
-  att:{client:1,documents:1,entries:1,deadlines:1,deadlines_close:1,attorney_fee:1,success_fee:1,reports:1},
-  app:{client:1,documents:1,entries:1,deadlines:1},
-  office:{client:1,documents:1,deadlines:1,new_cases:2,reports:1},
+  att:{client:1,'client:change':1,documents:1,'documents:change':1,entries:1,'entries:change':1,deadlines:1,'deadlines:change':1,deadlines_close:1,attorney_fee:1,success_fee:1,reports:1},
+  app:{client:1,'client:change':1,documents:1,'documents:change':1,entries:1,'entries:change':1,deadlines:1,'deadlines:change':1},
+  office:{client:1,'client:change':1,documents:1,'documents:change':1,deadlines:1,'deadlines:change':1,new_cases:2,'new_cases:change':2,reports:1},
   tech:{config:1}};
 
 /* --- Dane (wczytywane z bazy przez reload()) --- */
@@ -281,15 +283,17 @@ function permLevel(p,u=ME){
   return ROLE_DEF[u.role]?.[p]||0;
 }
 const can=(p,u=ME)=>permLevel(p,u)>0;
+/* „zmiana” (dodawanie i edycja) — osobno od podglądu (migracja 009) */
+const canChange=(p,u=ME)=>isAdmin(u)||permLevel(p+':change',u)>0;
 const isAdmin=(u=ME)=>u?.role==='admin';
 function activeMember(c,u=ME){return DB.members.find(m=>m.caseId===c.id&&m.userId===u.id&&!m.revokedAt&&(!m.endDate||m.endDate>=iso(today())))}
 const emergencyActive=(u=ME)=>!!(u&&DB.emergency&&DB.emergency.status==='granted'&&DB.emergency.by===u.id&&DB.emergency.until>Date.now());
 const seesCases=(u=ME)=>u&&(u.role!=='tech'||emergencyActive(u));
 function canCase(c,u=ME){if(!c||c.deleted)return false;if(isAdmin(u)||permLevel('cases_all',u)===2)return true;if(u.role==='tech')return emergencyActive(u);return !!activeMember(c,u)}
 function caseFlags(c,u=ME){
-  if(isAdmin(u))return{docs:true,actions:true,finance:true,approve:true,lead:false};
+  if(isAdmin(u))return{docs:true,docsChange:true,actions:true,actionsChange:true,finance:true,approve:true,lead:false};
   const m=activeMember(c,u);if(!m)return{docs:false,actions:false,finance:false,approve:false};
-  return{docs:m.accessDocuments&&can('documents',u),actions:m.accessActions&&can('entries',u),finance:m.accessFinance,approve:!!m.canApprove,lead:m.role==='lead',member:m};
+  return{docs:m.accessDocuments&&can('documents',u),docsChange:m.accessDocuments&&canChange('documents',u),actions:m.accessActions&&can('entries',u),actionsChange:m.accessActions&&canChange('entries',u),finance:m.accessFinance,approve:!!m.canApprove,lead:m.role==='lead',member:m};
 }
 const leadOf=c=>DB.members.find(m=>m.caseId===c.id&&m.role==='lead'&&!m.revokedAt);
 const teamOf=c=>DB.members.filter(m=>m.caseId===c.id&&!m.revokedAt&&(!m.endDate||m.endDate>=iso(today())));
@@ -472,7 +476,7 @@ ROUTES.nowe=()=>{
       <div><div class="mut small">${esc(l.calc?.name||'Kalkulator')}</div><b style="font-size:1.25rem">${m?`${(+m.value).toLocaleString('pl-PL')} ${esc(m.unit||'')}`:'—'}</b><div class="mut small">${esc(m?.label||'')}</div></div>
       <div><div class="mut small">Wpisane dane</div><div class="small">${(l.calc?.inputs||[]).map(i=>`${esc(i.label)}: <b>${(+i.value).toLocaleString('pl-PL')} ${esc(i.unit||'')}</b>`).join('<br>')}</div></div></div>
     ${l.message?`<div class="note info" style="margin-top:10px">${esc(l.message)}</div>`:''}
-    <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`};
+    <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'&&canChange('new_cases')?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`};
   return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia z formularza „Co mi się należy” na stronie · ${open.length} do obsłużenia</p></div></div>
     
     ${L.length?L.map(card).join(''):'<div class="empty">Brak zgłoszeń</div>'}`;
@@ -505,7 +509,7 @@ const CTAB={};
 CTAB.klient=c=>{
   const k=CLIENT(c.clientId),f=caseFlags(c),showFee=isAdmin()||(f.finance&&can('initial_fee')),showSF=isAdmin()||(f.finance&&can('success_fee'));
   const nd=DB.deadlines.filter(d=>d.caseId===c.id&&d.status!=='done'&&!d.deleted).sort((a,b)=>a.final.localeCompare(b.final))[0],s=nd&&dlStatus(nd);
-  const canEdit=isAdmin()||ME.role==='office'||f.lead;
+  const canEdit=isAdmin()||((ME.role==='office'||f.lead)&&canChange('client'));
   return `<div class="grid g3">
   <div class="card"><h3>Dane klienta ${canEdit?`<button class="btn sm" onclick="editClient('${c.id}')">Edytuj</button>`:''}</h3><dl class="kv">
     <dt>Imię i nazwisko</dt><dd>${esc(k.first)} ${esc(k.last)}</dd>
@@ -534,7 +538,7 @@ CTAB.etapy=c=>{
   const st=DB.stages.filter(s=>s.caseId===c.id).sort((a,b)=>a.order-b.order),f=caseFlags(c);
   const cur=st.find(s=>s.id===selStage[c.id])||st.find(s=>s.status==='open')||st[st.length-1];selStage[c.id]=cur.id;
   const entries=DB.entries.filter(e=>e.stage===cur.id&&!e.deleted),docs=DB.documents.filter(d=>d.stage===cur.id&&!d.deleted);
-  const canAdd=f.actions&&(cur.status!=='approved'||isAdmin())&&cur.status!=='todo';
+  const canAdd=f.actionsChange&&(cur.status!=='approved'||isAdmin())&&cur.status!=='todo';
   const canApproveStage=cur.status==='open'&&(isAdmin()||f.approve);
   const corr=DB.corrections.filter(k=>k.caseId===c.id&&k.status==='pending');
   return `<div class="grid" style="grid-template-columns:280px 1fr;align-items:start">
@@ -559,9 +563,9 @@ function entryCard(e,c,stage){
   const locked=e.locked||stage.status==='approved',mine=e.performedBy===ME.id||e.author===ME.id,f=caseFlags(c);
   const pend=DB.corrections.find(k=>k.entryId===e.id&&k.status==='pending');
   const acts=[];
-  if(!locked&&mine)acts.push(`<button class="btn sm" onclick="entryModal('${c.id}','${stage.id}','${e.id}')">Edytuj (zapis wersji)</button>`);
+  if(!locked&&mine&&f.actionsChange)acts.push(`<button class="btn sm" onclick="entryModal('${c.id}','${stage.id}','${e.id}')">Edytuj (zapis wersji)</button>`);
   if(!locked&&(isAdmin()||f.approve))acts.push(`<button class="btn sm" onclick="approveEntry('${e.id}')">Zatwierdź wpis</button>`);
-  if(locked&&!isAdmin()&&!pend)acts.push(`<button class="btn sm" onclick="correctionModal('${e.id}')">Wniosek o korektę</button>`);
+  if(locked&&!isAdmin()&&!pend&&f.actionsChange)acts.push(`<button class="btn sm" onclick="correctionModal('${e.id}')">Wniosek o korektę</button>`);
   if(locked&&isAdmin())acts.push(`<button class="btn sm" onclick="entryModal('${c.id}','${stage.id}','${e.id}',true)">Popraw (z uzasadnieniem)</button>`);
   if(isAdmin())acts.push(`<button class="btn sm del" onclick="deleteEntry('${e.id}')">Usuń</button>`);
   return `<div class="entry ${locked?'locked':'draft'}"><div class="eh"><div style="display:flex;gap:10px;align-items:center">${av(e.performedBy)}<div><b>${esc(e.title)}</b><br><small class="mut">${esc(U(e.performedBy).name)} · ${fD(e.performedOn)} · ${esc(e.type)}${e.kind?' / '+esc(e.kind):''}</small></div></div>
@@ -593,14 +597,14 @@ CTAB.zespol=c=>{
 let calMonth=null;
 CTAB.terminy=c=>{
   const dls=DB.deadlines.filter(d=>d.caseId===c.id&&!d.deleted).sort((a,b)=>(a.status==='done')-(b.status==='done')||a.final.localeCompare(b.final));
-  return `<div class="card"><h3>Terminy sprawy <button class="btn sm pri" onclick="deadlineModal('${c.id}')">+ Dodaj termin</button></h3>${dls.length?dls.map(d=>dlRow(d)+dlActions(d)).join(''):'<div class="empty">Brak terminów</div>'}</div>`;
+  return `<div class="card"><h3>Terminy sprawy ${canChange('deadlines')?`<button class="btn sm pri" onclick="deadlineModal('${c.id}')">+ Dodaj termin</button>`:''}</h3>${dls.length?dls.map(d=>dlRow(d)+dlActions(d)).join(''):'<div class="empty">Brak terminów</div>'}</div>`;
 };
 function dlActions(d){
   if(d.status==='done')return `<div class="small mut" style="padding:0 0 10px 108px">✔ Wykonano ${fD(d.doneAt)} · ${esc(U(d.doneBy).name)} · dowód: 📎 ${esc(d.proof||'—')}</div>`;
   const a=[];
-  if(d.type==='statutory'&&d.controller&&!d.controllerOk&&d.controller===ME.id)a.push(`<button class="btn sm pri" onclick="confirmDl('${d.id}')">Potwierdzam poprawność daty</button>`);
-  if(can('deadlines_close')||isAdmin()||d.responsible===ME.id&&d.type==='internal')a.push(`<button class="btn sm" onclick="doneDl('${d.id}')">Wykonano</button>`);
-  if(isAdmin()||d.responsible===ME.id)a.push(`<button class="btn sm" onclick="changeDl('${d.id}')">Zmień datę</button>`);
+  if(d.type==='statutory'&&d.controller&&!d.controllerOk&&d.controller===ME.id&&canChange('deadlines'))a.push(`<button class="btn sm pri" onclick="confirmDl('${d.id}')">Potwierdzam poprawność daty</button>`);
+  if(isAdmin()||canChange('deadlines')&&(can('deadlines_close')||d.responsible===ME.id&&d.type==='internal'))a.push(`<button class="btn sm" onclick="doneDl('${d.id}')">Wykonano</button>`);
+  if(isAdmin()||d.responsible===ME.id&&canChange('deadlines'))a.push(`<button class="btn sm" onclick="changeDl('${d.id}')">Zmień datę</button>`);
   if(isAdmin())a.push(`<button class="btn sm del" onclick="delDl('${d.id}')">Usuń</button>`);
   return a.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 0 10px 108px">${a.join('')}${d.versions?.length?`<span class="small mut" style="align-self:center">zmiany daty: ${d.versions.length}</span>`:''}</div>`:'';
 }
@@ -613,7 +617,7 @@ ROUTES.terminy=()=>{
   const cells=Array.from({length:42},(_,i)=>addDays(start,i));const H=holidaySet(y);
   const mName=first.toLocaleDateString('pl-PL',{month:'long',year:'numeric'});
   return `<div class="ph"><div><h1>Terminy procesowe</h1><p>Kalkulator, kontrola drugiej osoby, przypomnienia T-14/7/3/1/0 i eskalacja po przekroczeniu.</p></div>
-    <div style="display:flex;gap:8px"><button class="btn" onclick="exportIcs()">⬇ Eksport .ics</button><button class="btn pri" onclick="deadlineModal()">+ Dodaj termin</button></div></div>
+    <div style="display:flex;gap:8px"><button class="btn" onclick="exportIcs()">⬇ Eksport .ics</button>${canChange('deadlines')?'<button class="btn pri" onclick="deadlineModal()">+ Dodaj termin</button>':''}</div></div>
   <div class="grid" style="grid-template-columns:1.25fr 1fr;align-items:start">
   <div class="card"><h3><span style="text-transform:capitalize">${esc(mName)}</span><span><button class="btn sm" onclick="calMonth=new Date(${y},${m-1},1);rerender()">‹</button> <button class="btn sm" onclick="calMonth=null;rerender()">Dziś</button> <button class="btn sm" onclick="calMonth=new Date(${y},${m+1},1);rerender()">›</button></span></h3>
     <div class="cal">${['Pn','Wt','Śr','Cz','Pt','So','Nd'].map(d=>`<div class="dh">${d}</div>`).join('')}${cells.map(d=>{const di=iso(d),ev=dls.filter(x=>x.final===di),hol=holidaySet(d.getFullYear()).get(di);
@@ -760,7 +764,7 @@ async function loadCalcs(c){
   $('#calcArea').innerHTML=`<div class="toolbar"><select class="f" id="caSel">${CALCS.map(x=>`<option value="${x.id}" ${x.id===pref.id?'selected':''}>${esc(x.icon||'')} ${esc(x.name)}</option>`).join('')}</select></div><div id="caBox"></div>`;
   const draw=()=>{const k=CALCS.find(x=>x.id===$('#caSel').value),pre=c.leadData&&k.name===c.leadData.name?Object.fromEntries(c.leadData.inputs.map(i=>[i.label,i.value])):{};
     $('#caBox').innerHTML=`<div class="calcbox"><div class="form">${k.inputs.map(i=>`<label>${esc(i.label)} (${esc(i.unit||'')})<input class="f" type="number" step="any" data-k="${esc(i.key)}" value="${pre[i.label]??i.default}"></label>`).join('')}</div><div class="card res" id="caRes" style="background:var(--bg2)"></div></div>${k.note?`<p class="hint">${esc(k.note)}</p>`:''}
-      ${caseFlags(c).actions&&c.status==='open'?'<button class="btn pri" id="caSave" style="margin-top:12px">Zapisz wynik jako czynność „analiza”</button>':''}`;
+      ${caseFlags(c).actionsChange&&c.status==='open'?'<button class="btn pri" id="caSave" style="margin-top:12px">Zapisz wynik jako czynność „analiza”</button>':''}`;
     const run=()=>{const vals=Object.fromEntries($$('#caBox [data-k]').map(i=>[i.dataset.k,parseFloat(i.value)||0])),scope={...vals};
       const out=k.outputs.map(o=>{let v=NaN;try{v=Number(new Function(...Object.keys(scope),'with(Math){return ('+o.formula+')}')(...Object.values(scope)))}catch(e){}scope[o.key]=v;return{...o,v}});
       const main=out.find(o=>o.main)||out[0],f=(v,d)=>Number.isFinite(v)?v.toLocaleString('pl-PL',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}):'—';
@@ -881,7 +885,7 @@ const TABLES=['profiles','role_permissions','permission_overrides','case_categor
 let RAW={};
 /* pobieranie tabeli stronami po 1000 wierszy (serwer i tak zwraca najwyżej 1000 naraz) — bez cichego ucinania */
 const EXTRA_TABLES=['notification_rules','user_substitutes','deadline_reminder_rules'];  // wczytywane dodatkowo (migracja 004)
-const TABLE_KEY={notification_rules:['event_type'],deadline_reminder_rules:['type'],role_permissions:['role','perm'],permission_overrides:['user_id','perm'],case_categories:['code'],currencies:['code'],case_finance:['case_id']};
+const TABLE_KEY={notification_rules:['event_type'],deadline_reminder_rules:['type'],role_permissions:['role','perm','action'],permission_overrides:['user_id','perm','action'],case_categories:['code'],currencies:['code'],case_finance:['case_id']};
 async function fetchAll(t){const keys=TABLE_KEY[t]||['id'],out=[],N=1000;
   for(let i=0;i<200000;i+=N){let q=sb.from(t).select('*');keys.forEach(k=>q=q.order(k,{ascending:true}));const r=await q.range(i,i+N-1);
     if(r.error){console.warn('reload',t,r.error.message);return RAW[t]||[]}out.push(...r.data);if(r.data.length<N)break}
@@ -903,8 +907,8 @@ async function reload(only){  // only = lista tabel do pobrania; bez listy (albo
   const d={version:'live'};
   d.users=RAW.profiles.map(p=>({id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color,active:p.active}));
   Object.keys(ROLE_DEF).forEach(r=>{Object.keys(ROLE_DEF[r]).forEach(k=>delete ROLE_DEF[r][k])});
-  RAW.role_permissions.forEach(r=>{(ROLE_DEF[r.role]=ROLE_DEF[r.role]||{})[r.perm]=r.level});
-  d.overrides={};RAW.permission_overrides.forEach(o=>{(d.overrides[o.user_id]=d.overrides[o.user_id]||{})[o.perm]={value:o.level,until:o.valid_until,reason:o.reason}});
+  RAW.role_permissions.forEach(r=>{(ROLE_DEF[r.role]=ROLE_DEF[r.role]||{})[r.perm+(r.action==='change'?':change':'')]=r.level});
+  d.overrides={};RAW.permission_overrides.forEach(o=>{(d.overrides[o.user_id]=d.overrides[o.user_id]||{})[o.perm+(o.action==='change'?':change':'')]={value:o.level,until:o.valid_until,reason:o.reason}});
   d.categories=RAW.case_categories.map(c=>({code:c.code,name:c.name,color:c.color_hex,order:c.sort_order,active:c.is_active,template:c.process_template,currency:c.has_currency}));
   d.currencies=RAW.currencies.map(c=>c.code);
   d.templates={std:[],rst:[]};RAW.process_template_stages.sort((a,b)=>a.sort_order-b.sort_order).forEach(s=>d.templates[s.template].push({id:s.id,name:s.name,conflict:s.is_conflict_check,order:s.sort_order}));
@@ -1065,7 +1069,7 @@ async function storeFile(caseId,file,{docId,stageId,entryId,name}={}){
 }
 function entryModal(caseId,stageId,entryId,adminFix){
   const c=CASE(caseId),e=entryId&&DB.entries.find(x=>x.id===entryId);
-  need(caseFlags(c).actions,'Brak uprawnienia do czynności w tej sprawie.');
+  need(caseFlags(c).actionsChange,'Brak uprawnienia do dodawania i edycji czynności w tej sprawie.');
   modal(e?(adminFix?'Korekta zatwierdzonego wpisu':'Edytuj wpis'):'Nowy wpis',`<div class="form">
     <label>Typ<select class="f" name="type"><option ${e?.type==='czynność'?'selected':''}>czynność</option><option ${e?.type==='notatka'?'selected':''}>notatka</option></select></label>
     <label>Rodzaj<select class="f" name="kind">${ENTRY_KINDS.map(k=>`<option ${e?.kind===k?'selected':''}>${k}</option>`).join('')}</select></label>
@@ -1105,7 +1109,7 @@ function approveStage(id){
 
 /* --- dokumenty (Supabase Storage, prywatny kubełek „akta”) --- */
 async function uploadDoc(caseId,file,docId){
-  if(!file)return;need(caseFlags(CASE(caseId)).docs,'Brak dostępu do dokumentów.');
+  if(!file)return;need(caseFlags(CASE(caseId)).docsChange,'Brak uprawnienia do dodawania dokumentów.');
   const open=DB.stages.find(s=>s.caseId===caseId&&s.status==='open');
   actSafe(()=>storeFile(caseId,file,{docId,stageId:open?.id}),docId?'Zapisano nową wersję':'Zapisano dokument');
 }
@@ -1115,11 +1119,11 @@ async function downloadDoc(id,v){
 }
 function deleteDoc(id){const d=DB.documents.find(x=>x.id===id);askReason('Usuń dokument',`Uzasadnienie usunięcia „${d.name}”`,r=>act(async()=>chk(await sb.from('documents').update({deleted_at:new Date().toISOString(),delete_reason:r}).eq('id',id)),'Dokument ukryty'),{ok:'Usuń'})}
 CTAB.dokumenty=c=>{
-  const docs=DB.documents.filter(d=>d.caseId===c.id&&!d.deleted);
-  return `<div class="card"><h3>Dokumenty (${docs.length}) <label class="btn sm pri">+ Dodaj plik<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0])" accept="${ALLOWED_EXT.map(x=>'.'+x).join(',')}"></label></h3>
+  const docs=DB.documents.filter(d=>d.caseId===c.id&&!d.deleted),dch=caseFlags(c).docsChange;
+  return `<div class="card"><h3>Dokumenty (${docs.length}) ${dch?`<label class="btn sm pri">+ Dodaj plik<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0])" accept="${ALLOWED_EXT.map(x=>'.'+x).join(',')}"></label>`:''}</h3>
   ${docs.length?`<div class="tw"><table><tr><th>Plik</th><th>Etap</th><th>Wersja</th><th>Dodał</th><th>SHA-256</th><th></th></tr>${docs.map(d=>{const v=d.versions[d.versions.length-1];if(!v)return '';const s=d.stage&&DB.stages.find(x=>x.id===d.stage);return `<tr><td>📎 <b>${esc(d.name)}</b><br><small class="mut">${esc(v.size)}</small></td><td class="small">${s?esc(s.order+'. '+s.name):'—'}</td>
     <td><details><summary style="cursor:pointer">v${v.v}</summary>${d.versions.slice().reverse().map(x=>`<div class="small mut">v${x.v} · ${fDT(x.at)} · ${esc(U(x.by).name)} · <a href="#" onclick="event.preventDefault();downloadDoc('${d.id}',${x.v})" style="color:var(--accent)">pobierz</a></div>`).join('')}</details></td><td>${av(v.by,26)}</td><td class="small mut" style="font-family:monospace">${esc(v.sha.slice(0,12))}…</td>
-    <td style="white-space:nowrap"><button class="btn sm" onclick="downloadDoc('${d.id}')">Pobierz</button> <label class="btn sm">Nowa wersja<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0],'${d.id}')"></label> ${isAdmin()?`<button class="btn sm del" onclick="deleteDoc('${d.id}')">Usuń</button>`:''}</td></tr>`}).join('')}</table></div>`:'<div class="empty">Brak dokumentów</div>'}
+    <td style="white-space:nowrap"><button class="btn sm" onclick="downloadDoc('${d.id}')">Pobierz</button> ${dch?`<label class="btn sm">Nowa wersja<input type="file" hidden onchange="uploadDoc('${c.id}',this.files[0],'${d.id}')"></label>`:''} ${isAdmin()?`<button class="btn sm del" onclick="deleteDoc('${d.id}')">Usuń</button>`:''}</td></tr>`}).join('')}</table></div>`:'<div class="empty">Brak dokumentów</div>'}
   <p class="hint">Pliki w prywatnym, szyfrowanym magazynie akt. Dozwolone: ${ALLOWED_EXT.join(', ')} · maks. ${MAX_MB} MB. Podmiana pliku = nowa wersja; poprzednie zostają do pobrania. Pobranie trafia do audytu.</p></div>`;
 };
 
@@ -1277,11 +1281,11 @@ function userModal(id){
 {const after=ROUTES.ustawienia.after;ROUTES.ustawienia.after=sub=>{after?.(sub);const f=$('#permForm');if(!f)return;
   f.onsubmit=async e=>{e.preventDefault();const u=U(selUser),v=Object.fromEntries(new FormData(f)),ov=DB.overrides[u.id]||{},ups=[],dels=[];
     PERMS.forEach(([k])=>{const nv=v['p_'+k]===''?null:+v['p_'+k],until=v['u_'+k]||null,o=ov[k];
-      if(nv===null&&o)dels.push(k);else if(nv!==null&&(!o||o.value!==nv||(o.until||null)!==until))ups.push({user_id:u.id,perm:k,level:nv,valid_until:until,reason:(v.reason||'').trim(),granted_by:ME.id,granted_at:new Date().toISOString()})});
+      if(nv===null&&o)dels.push(k);else if(nv!==null&&(!o||o.value!==nv||(o.until||null)!==until))ups.push({user_id:u.id,perm:k.split(':')[0],action:k.includes(':')?'change':'view',level:nv,valid_until:until,reason:(v.reason||'').trim(),granted_by:ME.id,granted_at:new Date().toISOString()})});
     if(!ups.length&&!dels.length)return toast('Brak zmian');
     if((v.reason||'').trim().length<5)return toast('Podaj uzasadnienie zmiany',true);
     if(u.role==='admin'&&!await reauth())return;
-    actSafe(async()=>{if(ups.length)chk(await sb.from('permission_overrides').upsert(ups));for(const k of dels)chk(await sb.from('permission_overrides').delete().eq('user_id',u.id).eq('perm',k))},`Zapisano ${ups.length+dels.length} zmian — działa od razu`)}}}
+    actSafe(async()=>{if(ups.length)chk(await sb.from('permission_overrides').upsert(ups));for(const k of dels)chk(await sb.from('permission_overrides').delete().eq('user_id',u.id).eq('perm',k.split(':')[0]).eq('action',k.includes(':')?'change':'view'))},`Zapisano ${ups.length+dels.length} zmian — działa od razu`)}}}
 
 /* --- system i audyt (wersja na żywo) --- */
 SET.system=()=>{

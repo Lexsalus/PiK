@@ -47,7 +47,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 - **Raporty:** filtr statusu, eksport CSV / XLSX / PDF (drukowanie do pliku), każdy w audycie; aplikant widzi własne czynności i terminy.
 - **Wylogowanie po 30 min bezczynności**; kolejność kategorii także przeciąganiem.
 
-**Testy:** reguły bazy 129/129 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 84/84 (`supabase/test/e2e/`).
+**Testy:** reguły bazy 137/137 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 87/87 (`supabase/test/e2e/`).
 
 ## Treści strony (migracja 005, 27.10.2026)
 
@@ -70,9 +70,15 @@ Podpowiedzi: każda pozycja menu, zakładka i ważniejszy przycisk ma dymek (naj
 
 Do decyzji właściciela:
 - blokada konta po nieudanych logowaniach — w Supabase tylko w planie Team (hook „Password Verification Attempt”); teraz jest limit prób na adres IP (§12),
-- uprawnienia jako akcje (podgląd / tworzenie / edycja / zatwierdzanie / usuwanie) zamiast poziomów pełny / ograniczony / brak — przebudowa modelu (§9),
 - skan antywirusowy plików — wymaga zewnętrznej usługi (§7),
 - e-mail i SMS — wybór dostawcy (§10); retencja RODO — okresy przechowywania per kategoria (§12); kopie zapasowe — plan Pro lub eksport (§12).
+
+## Uprawnienia: podgląd i zmiana (migracja 009, wariant pośredni §9)
+
+- Dane klienta, dokumenty, notatki i czynności, terminy oraz zgłoszenia ze strony mają osobno **podgląd** i **zmianę** (dodawanie i edycja). Np. aplikant może widzieć dokumenty, ale ich nie dodawać.
+- Usuwanie (uprawnienie „Usuwanie wpisów i czynności”) i zatwierdzanie (znacznik w zespole sprawy) zostają jak były.
+- Dla obecnych ról i nadań nic się nie zmienia — „zmiana” dostała ten sam poziom co dotychczasowe uprawnienie. Nadaje się je w Ustawienia → Użytkownicy i uprawnienia (osobne wiersze „… — zmiana”).
+- Model (uprawnienie × akcja) jest gotowy pod pełną macierz akcji (osobno dodawanie, edycja, zatwierdzanie, usuwanie) — to następny krok.
 
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
