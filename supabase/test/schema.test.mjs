@@ -205,3 +205,19 @@ R(!await fails('admin',`insert into public.permission_overrides(user_id,perm,lev
 // raporty aplikanta
 R((await db.query(`select level from public.role_permissions where role='app' and perm='reports'`)).rows[0]?.level===1,'aplikant ma raporty (zakres: własne dane)');
 
+// --- 005: treści strony w bazie (edycja w CRM, publikacja tylko Administrator)
+{AAL='aal2';AMR=[];
+const site=JSON.parse(fs.readFileSync(new URL('../../data.json', import.meta.url),'utf8'));
+R((await as('anon',`select * from public.site_content`)).rows.length===0,'005: pusta tabela treści — strona używa data.json');
+R(!!await fails('kasia',`select public.site_publish($1)`,[site]),'005: publikacja treści — biuro → odmowa');
+R(!!await fails('jan',`select public.site_publish($1)`,[site]),'005: publikacja treści — pełnomocnik → odmowa');
+R(!!await fails('anon',`select public.site_publish($1)`,[site]),'005: publikacja treści — niezalogowany → odmowa');
+AAL='aal1';R(!!await fails('admin',`select public.site_publish($1)`,[site]),'005: Administrator bez 2FA → odmowa');AAL='aal2';
+R(!!await fails('admin',`select public.site_publish($1)`,[{site:{}}]),'005: niepełne dane → odmowa');
+R(!!await fails('admin',`select public.site_publish($1)`,[{...site,leads:{...site.leads,supabaseKey:'sb_secret_abc'}}]),'005: klucz SECRET w danych → odmowa');
+R(!await fails('admin',`select public.site_publish($1)`,[{...site,site:{...site.site,adminHash:'x'}}]),'005: Administrator z 2FA publikuje');
+const pub=(await as('anon',`select data from public.site_content where id=1`)).rows[0]?.data;
+R(pub&&pub.categories.length===site.categories.length&&!('adminHash' in pub.site),'005: strona czyta opublikowaną wersję bez logowania (bez skrótu hasła)');
+R(!!await fails('admin',`update public.site_content set data='{}'`)||(await as('anon',`select data from public.site_content`)).rows[0].data.categories,'005: bezpośrednia zmiana tabeli → odmowa');
+R(!!await fails('kasia',`insert into public.site_content(id,data) values(2,'{}')`),'005: zapis do tabeli tylko przez funkcję');
+R((await db.query(`select count(*)::int n from public.audit_log where action='strona.publikacja'`)).rows[0].n===1,'005: publikacja zapisana w audycie');}

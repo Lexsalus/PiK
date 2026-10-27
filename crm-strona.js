@@ -1,146 +1,128 @@
-<!doctype html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex">
-<title>Panel administracyjny</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--accent:#7c5cff;--bg:#0b0d14;--bg2:#10131c;--card:#151927;--card2:#1b2032;--line:#262c42;--txt:#e8eaf3;--mut:#8b92ad;--good:#2fd6a0;--bad:#ff6b81;--warn:#f5b84a}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);font-size:14px;min-height:100vh}
-button,input,select,textarea{font:inherit;color:inherit}
-a{color:var(--accent)}
-/* login */
-#login{min-height:100vh;display:grid;place-items:center;padding:20px}
-.lbox{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;width:100%;max-width:360px;text-align:center}
-.lbox h1{font-size:1.4rem;margin:10px 0 20px}
-.lbox .err{color:var(--bad);margin-top:10px;min-height:1.2em}
-/* layout */
-#app{display:none;grid-template-columns:230px 1fr;min-height:100vh}
-aside{background:var(--bg2);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
-.brand{font-weight:800;font-size:1.05rem;padding:6px 10px 20px;display:flex;gap:10px;align-items:center}
-.brand i{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;font-style:normal;color:#fff}
-.nav{padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--mut);font-weight:600;border:0;background:none;text-align:left;display:flex;gap:10px}
-.nav:hover{background:var(--card)}.nav.on{background:var(--card2);color:var(--txt)}
-aside .sp{flex:1}
-main{padding:28px;max-width:1200px;width:100%}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
-.top h2{font-size:1.5rem}
-.status{font-size:.82rem;padding:6px 12px;border-radius:20px;background:var(--card);border:1px solid var(--line);color:var(--mut)}
-.status.dirty{color:var(--warn);border-color:var(--warn)}
-.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
-.box h3{font-size:1rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.f{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;outline:none;width:100%;min-width:0}
-.f:focus{border-color:var(--accent)}
-.f.code{font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
-.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.form label{display:grid;gap:6px;color:var(--mut);font-weight:600;font-size:.82rem}
-.btn{padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-weight:600;white-space:nowrap}
-.btn:hover{border-color:var(--accent)}
-.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.del{color:var(--bad)}.btn.del:hover{border-color:var(--bad)}
-.btn.sm{padding:5px 9px;font-size:.8rem}
-.split{display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:start}
-.list{display:grid;gap:6px}
-.li{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:flex;justify-content:space-between;gap:6px}
-.li.on{border-color:var(--accent);background:var(--card2)}
-.li small{color:var(--mut)}
-.tw{overflow-x:auto}
-table{border-collapse:collapse;width:100%}
-th{color:var(--mut);font-weight:600;font-size:.78rem;text-align:left;padding:6px;white-space:nowrap}
-td{padding:4px 6px;vertical-align:middle}
-td input[type=checkbox],td input[type=radio]{accent-color:var(--accent);width:18px;height:18px}
-.hint{color:var(--mut);font-size:.82rem;line-height:1.5;margin-top:8px}
-.hint code{background:var(--bg2);padding:1px 6px;border-radius:5px}
-.test{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
-.test div{background:var(--bg2);border-radius:10px;padding:10px 12px}
-.test span{display:block;color:var(--mut);font-size:.78rem}
-.test b.err{color:var(--bad)}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--card2);border:1px solid var(--accent);padding:12px 18px;border-radius:12px;opacity:0;transform:translateY(10px);transition:.3s;pointer-events:none}
-.toast.show{opacity:1;transform:none}
-@media(max-width:860px){#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.brand{width:100%;padding-bottom:8px}aside .sp{display:none}.split{grid-template-columns:1fr}main{padding:16px}}
-</style>
-</head>
-<body>
+/* =====================================================================
+   TREŚCI STRONY (porównywarka) — edycja w CRM, tylko Administrator.
+   Przeniesione z dawnego admin.html. Dane strony: opublikowana wersja w bazie
+   (tabela site_content, migracja 005); dopóki nic nie opublikowano — data.json.
+   Zmiany zapisują się jako szkic w tej przeglądarce (klucz pk_draft — z niego
+   korzysta podgląd strony index.html?preview); na stronie pojawiają się po
+   „Opublikuj” (funkcja site_publish, wpis w audycie).
+   ===================================================================== */
+const SITE={pub:null,at:null,src:'',loaded:false};
+/* opublikowane treści strony (z bazy, w zapasie data.json) — używa też analiza w karcie sprawy */
+async function siteContent(force){
+  if(SITE.loaded&&!force)return SITE.pub;
+  let pub=null,at=null,src='';
+  try{const r=await sb.from('site_content').select('data,published_at').eq('id',1).maybeSingle();if(!r.error&&r.data?.data){pub=r.data.data;at=r.data.published_at;src='db'}}catch(e){}
+  if(!pub){try{pub=await (await fetch('data.json',{cache:'no-store'})).json();src='file'}catch(e){}}
+  Object.assign(SITE,{pub,at,src,loaded:true});return pub;
+}
+(()=>{
+document.head.insertAdjacentHTML('beforeend',`<style>
+#stWrap .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+#stWrap .box h3{font-size:1rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+#stWrap .f.code{font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
+#stWrap .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+#stWrap .form label{display:grid;gap:6px;color:var(--mut);font-weight:600;font-size:.82rem}
+#stWrap .split{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;align-items:start}
+#stWrap .list{display:grid;gap:6px}
+#stWrap .li{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:flex;justify-content:space-between;gap:6px}
+#stWrap .li.on{border-color:var(--accent);background:var(--card2)}#stWrap .li small{color:var(--mut)}
+#stWrap td input[type=checkbox],#stWrap td input[type=radio]{accent-color:var(--accent);width:18px;height:18px}
+#stWrap .hint code{background:var(--bg2);padding:1px 6px;border-radius:5px}
+#stWrap .test{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+#stWrap .test div{background:var(--bg2);border-radius:10px;padding:10px 12px}#stWrap .test span{display:block;color:var(--mut);font-size:.78rem}#stWrap .test b.err{color:var(--bad)}
+#stWrap .stst{font-size:.82rem;padding:6px 12px;border-radius:20px;background:var(--card);border:1px solid var(--line);color:var(--mut);white-space:nowrap}
+#stWrap .stst.dirty{color:var(--warn);border-color:var(--warn)}
+#stStale{display:none;background:color-mix(in srgb,var(--warn) 15%,var(--card));border:1px solid var(--warn);border-radius:14px;padding:14px 16px;margin-bottom:18px;gap:12px;align-items:center;flex-wrap:wrap}
+@media(max-width:860px){#stWrap .split{grid-template-columns:1fr}}
+</style>`);
+/* pola i przyciski edytora: data-st / data-stch (kod wykonywany w zakresie tego modułu) */
+const VIEW={addEventListener:(t,f)=>document.addEventListener(t,e=>{if(e.target?.closest?.('#stWrap'))f(e)})};
+function run(code){return eval(code)}
+document.addEventListener('click',e=>{const el=e.target.closest?.('#stWrap [data-st]');if(el&&!el.disabled)run.call(el,el.dataset.st)});
+document.addEventListener('change',e=>{const el=e.target.closest?.('#stWrap [data-stch]');if(el)run.call(el,el.dataset.stch)});
 
-<div id="login"><div class="lbox">
-  <div style="font-size:2rem">🔐</div><h1>Panel administracyjny</h1>
-  <input class="f" type="password" id="pw" placeholder="Hasło" autofocus>
-  <button class="btn pri" id="pwGo" style="width:100%;margin-top:12px;padding:11px">Zaloguj</button>
-  <div class="err" id="pwErr"></div>
-  <p class="hint">Domyślne hasło: <code>admin</code> — zmień je w Ustawieniach.</p>
-</div></div>
-
-<div id="app">
-  <aside>
-    <div class="brand"><i>◆</i><span id="bName">Admin</span></div>
-    <button class="nav on" data-v="settings">⚙️ Ustawienia</button>
-    <button class="nav" data-v="cats">🗂️ Kategorie</button>
-    <button class="nav" data-v="calcs">🧮 Kalkulatory</button>
-    <button class="nav" data-v="contracts">📄 Analiza umów</button>
-    <button class="nav" data-v="i18n">🌐 Tłumaczenia</button>
-    <button class="nav" data-v="seo">🔎 SEO</button>
-    <button class="nav" data-v="export">💾 Publikacja</button>
-    <div class="sp"></div>
-    <div id="ver" style="color:var(--mut);font-size:.78rem;padding:4px 12px"></div>
-    <a class="nav" href="index.html" target="_blank" style="text-decoration:none">🏠 Strona</a>
-    <a class="nav" href="crm.html" target="_blank" style="text-decoration:none">⚖️ CRM kancelarii</a>
-    <a class="nav" href="index.html?preview" target="_blank" style="text-decoration:none">👁️ Podgląd</a>
-    <button class="nav" id="logout">↩ Wyloguj</button>
-  </aside>
-  <main><div id="stale" style="display:none;background:color-mix(in srgb,var(--warn) 15%,var(--card));border:1px solid var(--warn);border-radius:14px;padding:14px 16px;margin-bottom:18px;gap:12px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:240px">⚠️ <b>Plik data.json w repozytorium zmienił się</b> od czasu utworzenia Twojego szkicu. Szkic nie zawiera tych zmian.</span><button class="btn pri" onclick="useNew()">Użyj nowej wersji z repo</button><button class="btn" onclick="keepDraft()">Zostaw mój szkic</button></div><div class="top"><h2 id="vTitle"></h2><span class="status" id="status">Zapisano</span></div><div id="view"></div></main>
-</div>
-<div class="toast" id="toast"></div>
-
-<script>
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='pk_draft';
-let D,ORIG,view='settings',ci=0,ki=0,BASE='',STALE=false;
+let D,ORIG,view='settings',ci=0,ki=0,BASE='',STALE=false,READY=false;
 const hash=t=>{let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(36)};
-
-async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)};
-const slug=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ł/g,'l').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'id';
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ł/g,'l').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'id';
 const uid=p=>p+Math.random().toString(36).slice(2,7);
+const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂️ Kategorie','Kategorie porównywarki'],['calcs','🧮 Kalkulatory','Kalkulatory'],['contracts','📄 Analiza umów','Analiza umów'],['i18n','🌐 Tłumaczenia','Tłumaczenia'],['seo','🔎 SEO','Optymalizacja pod Google (SEO)'],['export','🚀 Publikacja','Publikacja']];
 
 async function load(){
-  try{ORIG=await (await fetch('data.json',{cache:'no-store'})).json()}catch(e){ORIG=null}
+  const p=await siteContent(true);ORIG=p?structuredClone(p):null;if(ORIG?.site)delete ORIG.site.adminHash;
   let draft=null;try{draft=JSON.parse(localStorage.getItem(KEY))}catch(e){}
   BASE=ORIG?hash(JSON.stringify(ORIG)):'';
   let dBase=null;try{dBase=localStorage.getItem(KEY+'_base')}catch(e){}
+  if(draft?.site)delete draft.site.adminHash;
   STALE=!!(draft&&ORIG&&dBase!==BASE&&JSON.stringify(draft)!==JSON.stringify(ORIG));
-  D=draft||structuredClone(ORIG);
-  if(!D){$('#pwErr').textContent='Brak data.json — uruchom przez serwer.';return}
-  norm();
-  if(sessionStorage.getItem('pk_auth')===D.site.adminHash)enter();
+  D=draft||(ORIG&&structuredClone(ORIG));
+  if(D){norm();READY=true}
 }
-$('#pwGo').onclick=async()=>{
-  const h=await sha($('#pw').value);
-  const ok=[D?.site?.adminHash,ORIG?.site?.adminHash].includes(h);
-  if(ok){sessionStorage.setItem('pk_auth',D.site.adminHash);enter()}else{$('#pwErr').textContent='Nieprawidłowe hasło'}
-};
-$('#pw').onkeydown=e=>{if(e.key==='Enter')$('#pwGo').click()};
-$('#logout').onclick=()=>{sessionStorage.removeItem('pk_auth');location.reload()};
-function enter(){$('#login').style.display='none';$('#app').style.display='grid';$('#stale').style.display=STALE?'flex':'none';render()}
-function useNew(){if(!confirm('Odrzucić szkic i wczytać data.json z repozytorium?'))return;D=structuredClone(ORIG);norm();STALE=false;$('#stale').style.display='none';render();toast('Wczytano wersję z repo')}
-function keepDraft(){STALE=false;$('#stale').style.display='none';save();toast('Zostawiono szkic')}
-
+function useNew(){if(!confirm('Odrzucić szkic i wczytać opublikowaną wersję strony?'))return;D=structuredClone(ORIG);norm();STALE=false;render();toast('Wczytano opublikowaną wersję')}
+function keepDraft(){STALE=false;save();render();toast('Zostawiono szkic')}
+const dirty=()=>!!D&&JSON.stringify(D)!==JSON.stringify(ORIG);
 function save(){
+  if(!D)return;
   try{localStorage.setItem(KEY,JSON.stringify(D));if(!STALE)localStorage.setItem(KEY+'_base',BASE)}catch(e){}
-  const dirty=JSON.stringify(D)!==JSON.stringify(ORIG);
-  $('#status').textContent=dirty?'Szkic — niewyeksportowany':'Zgodne z data.json';
-  $('#status').classList.toggle('dirty',dirty);
-  document.documentElement.style.setProperty('--accent',D.site.accent||'#7c5cff');
-  $('#bName').textContent=D.site.name||'Admin';
+  const st=$('#stStatus');if(st){const d=dirty();st.textContent=d?'Szkic — nieopublikowany':(SITE.src==='db'?'Zgodne z opublikowaną':'Zgodne z data.json');st.classList.toggle('dirty',d)}
 }
+function render(){
+  const V=$('#stView');if(!V)return;
+  if(!READY){V.innerHTML='<div class="empty">Nie udało się wczytać treści strony.</div>';return}
+  save();$('#stStale').style.display=STALE?'flex':'none';
+  $('#stTitle').textContent=TABS.find(t=>t[0]===view)[2];
+  V.innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,i18n:vI18n,seo:vSeo,export:vExport})[view]();
+  if(view==='calcs')testCalc();
+  if(view==='i18n')renderTl();
+  if(view==='seo')seoPreview();
+  if(view==='contracts')testRules();
+}
+
+ROUTES.strona=sub=>{
+  need(isAdmin(),'Treści strony edytuje tylko Administrator.');
+  view=TABS.some(t=>t[0]===sub)?sub:'settings';
+  return `<div id="stWrap"><div class="ph"><div><h1>Treści strony</h1><p>Porównywarka, kalkulatory, analiza umów, tłumaczenia i SEO. Zmiany zapisują się jako szkic w tej przeglądarce — na stronie pojawią się po „Opublikuj”.</p></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="stst" id="stStatus">…</span><a class="btn" href="index.html?preview" target="_blank" data-tip="Strona ze szkicem z tej przeglądarki (nieopublikowanym)">👁 Podgląd</a><a class="btn" href="index.html" target="_blank">🌐 Strona</a><button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj</button></div></div>
+    <div class="tabs">${TABS.map(([k,l])=>`<a class="tab ${k===view?'on':''}" href="#/strona/${k}">${l}</a>`).join('')}</div>
+    <div id="stStale"><span style="flex:1;min-width:240px">⚠️ <b>Opublikowana wersja strony zmieniła się</b> od czasu utworzenia Twojego szkicu (np. publikacja z innego komputera). Szkic nie zawiera tych zmian.</span><button class="btn pri" type="button" data-st="useNew()">Użyj opublikowanej wersji</button><button class="btn" type="button" data-st="keepDraft()">Zostaw mój szkic</button></div>
+    <h2 id="stTitle" style="font-size:1.15rem;margin-bottom:14px"></h2><div id="stView"><div class="empty">Wczytywanie…</div></div></div>`;
+};
+ROUTES.strona.after=async()=>{if(!READY)await load();render()};
+
+/* ---------- Publikacja ---------- */
+function vExport(){
+  const d=dirty(),when=SITE.at?new Date(SITE.at).toLocaleString('pl-PL',{dateStyle:'medium',timeStyle:'short'}):'';
+  return `<div class="box"><h3>Stan</h3>
+    <p>${SITE.src==='db'?`Strona pokazuje wersję opublikowaną <b>${esc(when)}</b>.`:'Strona korzysta jeszcze z pliku <code>data.json</code> — z CRM nic nie opublikowano.'}</p>
+    <p style="margin-top:6px">${d?'<b style="color:var(--warn)">Masz nieopublikowane zmiany</b> (szkic w tej przeglądarce).':'Szkic jest zgodny z opublikowaną wersją.'}</p></div>
+   <div class="box"><h3>Jak opublikować zmiany</h3>
+    <ol class="hint" style="padding-left:18px;font-size:.9rem;color:var(--txt)">
+      <li>Edytuj dane — zapisują się automatycznie jako szkic w tej przeglądarce.</li>
+      <li>Sprawdź <a href="index.html?preview" target="_blank">podgląd strony</a>.</li>
+      <li>Kliknij <b>🚀 Opublikuj</b> — odwiedzający zobaczą zmiany od razu (po odświeżeniu strony).</li></ol>
+    <p class="hint"><b>SEO:</b> meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy GitHub Actions z pliku <code>data.json</code> w repozytorium. Po zmianach w zakładce SEO pobierz <code>data.json</code> i podmień go w repo.</p></div>
+   <div class="box"><h3>Akcje</h3><div style="display:flex;gap:10px;flex-wrap:wrap">
+     <button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj na stronie</button>
+     <button class="btn" type="button" data-st="dl()">⬇ Pobierz data.json</button>
+     <button class="btn" type="button" data-st="navigator.clipboard.writeText(JSON.stringify(D,null,2)).then(()=>toast('Skopiowano JSON'))">📋 Kopiuj JSON</button>
+     <label class="btn">📂 Importuj plik<input type="file" accept=".json" hidden data-stch="imp(this.files[0])"></label>
+     <button class="btn del" type="button" data-st="reset()">↺ Odrzuć szkic</button></div></div>`;
+}
+function publish(){
+  if(!D)return;if(!dirty()&&SITE.src==='db')return toast('Brak zmian do opublikowania');
+  modal('Opublikować treści strony?',`<p>Szkic z tej przeglądarki zastąpi treści na stronie publicznej. Odwiedzający zobaczą zmiany od razu.</p><p class="hint">Publikacja trafia do dziennika audytu.</p>`,{ok:'🚀 Opublikuj',onOk:async()=>{
+    const r=await sb.rpc('site_publish',{p_data:D});if(r.error)throw r.error;
+    ORIG=structuredClone(D);SITE.pub=structuredClone(D);SITE.at=r.data;SITE.src='db';BASE=hash(JSON.stringify(ORIG));STALE=false;
+    render();toast('Opublikowano — strona pokazuje nową wersję')}});
+}
+function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));a.download='data.json';a.click();URL.revokeObjectURL(a.href);toast('Pobrano data.json')}
+function imp(f){if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(!j.site||!j.categories||!j.calculators)throw 0;delete j.site.adminHash;D=j;norm();render();toast('Zaimportowano do szkicu')}catch(e){toast('Nieprawidłowy plik',true)}})}
+function reset(){if(!ORIG||!confirm('Odrzucić wszystkie nieopublikowane zmiany?'))return;D=structuredClone(ORIG);norm();STALE=false;try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono opublikowaną wersję')}
 
 /* ścieżkowe wiązanie pól: data-p="categories.0.name" */
 const getP=p=>p.split('.').reduce((o,k)=>o?.[k],D);
 function setP(p,v){const ks=p.split('.'),last=ks.pop();ks.reduce((o,k)=>o[k],D)[last]=v}
-$('#view').addEventListener('input',e=>{
+VIEW.addEventListener('input',e=>{
   const el=e.target,p=el.dataset.p;if(!p)return;
   let v=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.t==='num')v=el.value===''?'':Number(el.value);
@@ -151,7 +133,7 @@ $('#view').addEventListener('input',e=>{
   setP(p,v);save();
   if(view==='calcs')testCalc();
 });
-$('#view').addEventListener('change',e=>{
+VIEW.addEventListener('change',e=>{
   const el=e.target;
   if(el.dataset.rekey!==undefined){ // zmiana klucza pola => migracja wartości ofert
     const c=D.categories[ci],f=c.fields[el.dataset.rekey],nk=slug(el.value),ok=el.dataset.old;
@@ -160,18 +142,7 @@ $('#view').addEventListener('change',e=>{
   if(el.dataset.rerender!==undefined)render();
 });
 
-document.querySelectorAll('aside .nav[data-v]').forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll('aside .nav').forEach(x=>x.classList.toggle('on',x===b));render()});
 
-function render(){
-  save();
-  const T={settings:'Ustawienia strony',cats:'Kategorie porównywarki',calcs:'Kalkulatory',contracts:'Analiza umów',i18n:'Tłumaczenia',seo:'Optymalizacja pod Google (SEO)',export:'Publikacja'};
-  $('#vTitle').textContent=T[view];
-  $('#view').innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,i18n:vI18n,seo:vSeo,export:vExport})[view]();
-  if(view==='calcs')testCalc();
-  if(view==='i18n')renderTl();
-  if(view==='seo')seoPreview();
-  if(view==='contracts')testRules();
-}
 
 /* ---------- Ustawienia ---------- */
 function vSettings(){
@@ -193,19 +164,14 @@ function vSettings(){
   <div class="box"><h3>Chatbot (Ilona)</h3><div class="form">
     <label style="display:flex;align-items:center;gap:10px;color:var(--txt)"><input type="checkbox" data-p="site.chatbot.enabled" ${s.chatbot?.enabled?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">Pokaż chatbota na stronie</label>
     <label style="grid-column:1/-1">Adres skryptu osadzającego<input class="f code" data-p="site.chatbot.src" value="${esc(s.chatbot?.src||'')}"></label></div>
-    <p class="hint">Skrypt ładuje się na stronie publicznej (także w podglądzie). Dostaje atrybut <code>data-lang</code> z aktualnym językiem strony.</p></div>
-  <div class="box"><h3>Hasło administratora</h3><div class="form">
-    <label>Nowe hasło<input class="f" type="password" id="np"></label>
-    <label>&nbsp;<button class="btn pri" onclick="chPw()">Zmień hasło</button></label></div>
-    <p class="hint">Hasło jest przechowywane jako skrót SHA-256 w <code>data.json</code>. To zabezpieczenie „na drzwiach” — strona jest statyczna, więc nie chroni danych przed kimś, kto zajrzy do repozytorium. Prawdziwą ochroną jest to, że tylko Ty masz prawo zapisu w repo.</p></div>`;
+    <p class="hint">Skrypt ładuje się na stronie publicznej (także w podglądzie). Dostaje atrybut <code>data-lang</code> z aktualnym językiem strony.</p></div>`;
 }
-async function chPw(){const v=$('#np').value;if(v.length<4)return toast('Min. 4 znaki');D.site.adminHash=await sha(v);sessionStorage.setItem('pk_auth',D.site.adminHash);save();$('#np').value='';toast('Hasło zmienione — wyeksportuj data.json')}
 
 /* ---------- Kategorie ---------- */
 function vCats(){
   const cs=D.categories;ci=Math.min(ci,cs.length-1);
-  const list=`<div class="list">${cs.map((c,i)=>`<div class="li ${i===ci?'on':''}" onclick="ci=${i};render()"><span>${esc(c.icon)} ${esc(c.name)}</span><small>${c.items.length}</small></div>`).join('')}
-    <button class="btn" onclick="addCat()">+ Nowa kategoria</button></div>`;
+  const list=`<div class="list">${cs.map((c,i)=>`<div class="li ${i===ci?'on':''}" data-st="ci=${i};render()"><span>${esc(c.icon)} ${esc(c.name)}</span><small>${c.items.length}</small></div>`).join('')}
+    <button class="btn" data-st="addCat()">+ Nowa kategoria</button></div>`;
   if(ci<0)return `<div class="split">${list}<div class="box">Brak kategorii.</div></div>`;
   const c=cs[ci],P=`categories.${ci}`;
   const fields=c.fields.map((f,i)=>`<tr>
@@ -214,23 +180,23 @@ function vCats(){
     <td><select class="f" data-p="${P}.fields.${i}.type" data-rerender>${['number','text','bool'].map(t=>`<option ${f.type===t?'selected':''} value="${t}">${{number:'liczba',text:'tekst',bool:'tak/nie'}[t]}</option>`).join('')}</select></td>
     <td><input class="f" data-p="${P}.fields.${i}.unit" value="${esc(f.unit)}" style="width:90px"></td>
     <td><select class="f" data-p="${P}.fields.${i}.better">${[['','—'],['lower','niższa'],['higher','wyższa']].map(([v,l])=>`<option value="${v}" ${f.better===v?'selected':''}>${l}</option>`).join('')}</select></td>
-    <td><button class="btn sm" onclick="mv('fields',${i},-1)">↑</button> <button class="btn sm del" onclick="delField(${i})">✕</button></td></tr>`).join('');
+    <td><button class="btn sm" data-st="mv('fields',${i},-1)">↑</button> <button class="btn sm del" data-st="delField(${i})">✕</button></td></tr>`).join('');
   const items=c.items.map((it,i)=>`<tr>
     <td><input class="f" data-p="${P}.items.${i}.name" value="${esc(it.name)}" style="min-width:150px"></td>
     <td><input class="f" data-p="${P}.items.${i}.badge" value="${esc(it.badge)}" style="width:110px"></td>
     ${c.fields.map(f=>{const p=`${P}.items.${i}.values.${f.key}`,v=it.values[f.key];
       return `<td>${f.type==='bool'?`<input type="checkbox" data-p="${p}" ${v?'checked':''}>`:`<input class="f" ${f.type==='number'?'type="number" step="any" data-t="num"':''} data-p="${p}" value="${esc(v)}" style="width:${f.type==='number'?90:130}px">`}</td>`}).join('')}
     <td><input class="f" data-p="${P}.items.${i}.url" value="${esc(it.url)}" style="width:140px" placeholder="https://"></td>
-    <td><button class="btn sm" onclick="mv('items',${i},-1)">↑</button> <button class="btn sm del" onclick="delItem(${i})">✕</button></td></tr>`).join('');
+    <td><button class="btn sm" data-st="mv('items',${i},-1)">↑</button> <button class="btn sm del" data-st="delItem(${i})">✕</button></td></tr>`).join('');
   return `<div class="split">${list}<div>
-   <div class="box"><h3>Kategoria <button class="btn sm del" onclick="delCat()">Usuń kategorię</button></h3><div class="form">
+   <div class="box"><h3>Kategoria <button class="btn sm del" data-st="delCat()">Usuń kategorię</button></h3><div class="form">
      <label>Nazwa<input class="f" data-p="${P}.name" value="${esc(c.name)}"></label>
      <label>Ikona (emoji)<input class="f" data-p="${P}.icon" value="${esc(c.icon)}"></label>
      <label>ID<input class="f code" data-p="${P}.id" value="${esc(c.id)}"></label></div></div>
-   <div class="box"><h3>Parametry porównania <button class="btn sm" onclick="addField()">+ Parametr</button></h3><div class="tw"><table>
+   <div class="box"><h3>Parametry porównania <button class="btn sm" data-st="addField()">+ Parametr</button></h3><div class="tw"><table>
      <tr><th>Klucz</th><th>Etykieta</th><th>Typ</th><th>Jednostka</th><th>Lepsza wartość</th><th></th></tr>${fields}</table></div>
      <p class="hint">„Lepsza wartość” podświetla najlepszą ofertę (★) dla danego parametru.</p></div>
-   <div class="box"><h3>Oferty (${c.items.length}) <button class="btn sm pri" onclick="addItem()">+ Oferta</button></h3><div class="tw"><table>
+   <div class="box"><h3>Oferty (${c.items.length}) <button class="btn sm pri" data-st="addItem()">+ Oferta</button></h3><div class="tw"><table>
      <tr><th>Nazwa</th><th>Etykieta</th>${c.fields.map(f=>`<th>${esc(f.label)}${f.unit?` (${esc(f.unit)})`:''}</th>`).join('')}<th>Link</th><th></th></tr>${items}</table></div></div>
   </div></div>`;
 }
@@ -245,8 +211,8 @@ function mv(arr,i,d){const a=view==='cats'?D.categories[ci][arr]:D.calculators[k
 /* ---------- Kalkulatory ---------- */
 function vCalcs(){
   const cs=D.calculators;ki=Math.min(ki,cs.length-1);
-  const list=`<div class="list">${cs.map((c,i)=>`<div class="li ${i===ki?'on':''}" onclick="ki=${i};render()"><span>${esc(c.icon)} ${esc(c.name)}</span></div>`).join('')}
-    <button class="btn" onclick="addCalc()">+ Nowy kalkulator</button></div>`;
+  const list=`<div class="list">${cs.map((c,i)=>`<div class="li ${i===ki?'on':''}" data-st="ki=${i};render()"><span>${esc(c.icon)} ${esc(c.name)}</span></div>`).join('')}
+    <button class="btn" data-st="addCalc()">+ Nowy kalkulator</button></div>`;
   if(ki<0)return `<div class="split">${list}<div class="box">Brak kalkulatorów.</div></div>`;
   const c=cs[ki],P=`calculators.${ki}`;
   const ins=c.inputs.map((x,i)=>`<tr>
@@ -254,7 +220,7 @@ function vCalcs(){
     <td><input class="f" data-p="${P}.inputs.${i}.label" value="${esc(x.label)}" style="min-width:150px"></td>
     <td><input class="f" data-p="${P}.inputs.${i}.unit" value="${esc(x.unit)}" style="width:70px"></td>
     ${['default','min','max','step'].map(k=>`<td><input class="f" type="number" step="any" data-t="num" data-p="${P}.inputs.${i}.${k}" value="${x[k]}" style="width:85px"></td>`).join('')}
-    <td><button class="btn sm" onclick="mv('inputs',${i},-1)">↑</button> <button class="btn sm del" onclick="D.calculators[ki].inputs.splice(${i},1);render()">✕</button></td></tr>`).join('');
+    <td><button class="btn sm" data-st="mv('inputs',${i},-1)">↑</button> <button class="btn sm del" data-st="D.calculators[ki].inputs.splice(${i},1);render()">✕</button></td></tr>`).join('');
   const outs=c.outputs.map((o,i)=>`<tr>
     <td><input type="radio" name="main" value="${i}" data-p="x" ${o.main?'checked':''} title="Wynik główny"></td>
     <td><input class="f code" data-p="${P}.outputs.${i}.key" value="${esc(o.key)}" style="width:90px"></td>
@@ -262,9 +228,9 @@ function vCalcs(){
     <td><input class="f code" data-p="${P}.outputs.${i}.formula" value="${esc(o.formula)}" style="min-width:260px"></td>
     <td><input class="f" data-p="${P}.outputs.${i}.unit" value="${esc(o.unit)}" style="width:60px"></td>
     <td><input class="f" type="number" data-t="num" min="0" max="6" data-p="${P}.outputs.${i}.decimals" value="${o.decimals??0}" style="width:60px"></td>
-    <td><button class="btn sm" onclick="mv('outputs',${i},-1)">↑</button> <button class="btn sm del" onclick="D.calculators[ki].outputs.splice(${i},1);render()">✕</button></td></tr>`).join('');
+    <td><button class="btn sm" data-st="mv('outputs',${i},-1)">↑</button> <button class="btn sm del" data-st="D.calculators[ki].outputs.splice(${i},1);render()">✕</button></td></tr>`).join('');
   return `<div class="split">${list}<div>
-   <div class="box"><h3>Kalkulator <button class="btn sm del" onclick="delCalc()">Usuń kalkulator</button></h3><div class="form">
+   <div class="box"><h3>Kalkulator <button class="btn sm del" data-st="delCalc()">Usuń kalkulator</button></h3><div class="form">
      <label>Nazwa<input class="f" data-p="${P}.name" value="${esc(c.name)}"></label>
      <label>Ikona<input class="f" data-p="${P}.icon" value="${esc(c.icon)}"></label>
      <label>ID<input class="f code" data-p="${P}.id" value="${esc(c.id)}"></label>
@@ -273,16 +239,16 @@ function vCalcs(){
      <label style="grid-column:1/-1">Opis<input class="f" data-p="${P}.description" value="${esc(c.description)}"></label>
      <label style="grid-column:1/-1">Uwaga pod polami (zastrzeżenia, podstawa, warunki)<textarea class="f" data-p="${P}.note" rows="3">${esc(c.note||'')}</textarea></label></div>
      ${c.kind==='claim'?'<p class="hint">Kalkulatory „Co mi się należy” mają przycisk zgłoszenia — wynik i dane klienta trafiają do CRM jako nowa sprawa w wybranej kategorii.</p>':''}</div>
-   <div class="box"><h3>Pola wejściowe <button class="btn sm" onclick="addIn()">+ Pole</button></h3><div class="tw"><table>
+   <div class="box"><h3>Pola wejściowe <button class="btn sm" data-st="addIn()">+ Pole</button></h3><div class="tw"><table>
      <tr><th>Zmienna</th><th>Etykieta</th><th>Jedn.</th><th>Domyślna</th><th>Min</th><th>Max</th><th>Krok</th><th></th></tr>${ins}</table></div></div>
-   <div class="box"><h3>Wyniki <button class="btn sm" onclick="addOut()">+ Wynik</button></h3><div class="tw"><table>
+   <div class="box"><h3>Wyniki <button class="btn sm" data-st="addOut()">+ Wynik</button></h3><div class="tw"><table>
      <tr><th title="Wynik główny">★</th><th>Zmienna</th><th>Etykieta</th><th>Wzór</th><th>Jedn.</th><th>Miejsca po przec.</th><th></th></tr>${outs}</table></div>
      <p class="hint">Wzory to wyrażenia JavaScript. Dostępne: zmienne wejściowe, wyniki z wierszy <b>powyżej</b> oraz funkcje <code>pow</code>, <code>sqrt</code>, <code>round</code>, <code>min</code>, <code>max</code>, <code>abs</code>, <code>log</code>, <code>PI</code>. Warunki: <code>a&gt;b ? x : y</code>.</p>
-     <h3 style="margin-top:18px">Test na wartościach domyślnych</h3><div class="test" id="test"></div></div>
+     <h3 style="margin-top:18px">Test na wartościach domyślnych</h3><div class="test" id="stTest"></div></div>
   </div></div>`;
 }
 function testCalc(){
-  const t=$('#test');if(!t)return;const c=D.calculators[ki];
+  const t=$('#stTest');if(!t)return;const c=D.calculators[ki];
   const scope=Object.fromEntries(c.inputs.map(i=>[i.key,Number(i.default)||0]));
   t.innerHTML=c.outputs.map(o=>{let v,err='';
     try{v=new Function(...Object.keys(scope),'with(Math){return ('+o.formula+')}')(...Object.values(scope));if(!Number.isFinite(v))err='nie jest liczbą'}catch(e){err=e.message}
@@ -306,13 +272,14 @@ function norm(){
   D.contracts.suspicion=D.contracts.suspicion||structuredClone(O.contracts?.suspicion||{enabled:false,longSentence:40,longWeight:4,longMax:20,indicators:[]});
   D.leads=D.leads||structuredClone(O.leads||{enabled:true,mode:'supabase',email:'',consent:''});
   if(O.calculators&&!D.calculators.some(c=>c.kind==='claim'))D.calculators=[...structuredClone(O.calculators.filter(c=>c.kind==='claim')),...D.calculators];
+  delete D.site.adminHash;
   D.site.chatbot=D.site.chatbot||structuredClone(O.site?.chatbot||{enabled:false,src:''});
 }
 
 /* ---------- Tłumaczenia ---------- */
 const LN={uk:'Ukraiński',en:'Angielski'};
 // teksty interfejsu strony (index.html) — źródło po polsku
-const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — dane z panelu admina (niezapisane w repo)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć','Umowy','Analiza umów','Analizuj umowę →','Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.','Przeciągnij plik tutaj lub kliknij, aby wybrać','Obsługiwane formaty:','lub wklej treść umowy','Analizuj','Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.','Wczytywanie pliku…','Ryzyko','niskie','średnie','wysokie','Wysokie ryzyko','Do sprawdzenia','Informacyjnie','Brak zapisu','Wykryte dane','Kwoty','Daty','Okresy','Procenty','Pokaż pełny tekst','Pobierz raport','Nowa analiza','Nie wykryto zapisów z listy kontrolnej.','słów','stron','Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.','Nieobsługiwany format pliku.','Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.','Plik jest za duży. Maksymalny rozmiar:','Raport analizy umowy','Nie udało się wczytać pliku.','Wklej tekst','Zgodność z prawem','Podejrzana treść','Ryzyko zapisów','Podstawowa analiza','Styl i przejrzystość treści','Podstawa:','Nie wykryto naruszeń z listy kontrolnej.','Nie wykryto podejrzanych sygnałów.','Średnia długość zdania:','Długie zdania','Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.','limit:','dobrze','uwaga','źle','Ryzyko prawne','za opóźnienie','Co mi się należy','Sprawdź, co Ci się należy →','Porównaj usługi','Sprawdź, co Ci się należy','Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.','Chcę bezpłatną analizę mojej sprawy →','Bezpłatna analiza Twojej sprawy','Imię i nazwisko','Telefon','E-mail','Krótko o sprawie (opcjonalnie)','Wyślij zgłoszenie','Dziękujemy!','Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.','Wysyłanie…','Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.','Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.'];
+const UI_KEYS=['Porównaj','Kalkulatory','Panel','Motyw','Porównuj mądrzej.','Licz szybciej.','kategorii','ofert','kalkulatorów','Porównywarka','Zaznacz do 4 ofert, aby zestawić je obok siebie.','Szukaj oferty…','Sortuj: domyślnie','rosnąco','malejąco','Wyniki liczą się na bieżąco.','Panel administracyjny','Wybrano','Wyczyść','Porównanie','Zobacz →','Tak','Nie','Brak wyników.','Brak kategorii.','PODGLĄD — szkic z CRM (nieopublikowany)','Używamy plików cookie do analityki.','Akceptuję','Odrzuć','Umowy','Analiza umów','Analizuj umowę →','Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.','Przeciągnij plik tutaj lub kliknij, aby wybrać','Obsługiwane formaty:','lub wklej treść umowy','Analizuj','Plik nie opuszcza Twojej przeglądarki — analiza odbywa się lokalnie.','Wczytywanie pliku…','Ryzyko','niskie','średnie','wysokie','Wysokie ryzyko','Do sprawdzenia','Informacyjnie','Brak zapisu','Wykryte dane','Kwoty','Daty','Okresy','Procenty','Pokaż pełny tekst','Pobierz raport','Nowa analiza','Nie wykryto zapisów z listy kontrolnej.','słów','stron','Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.','Nieobsługiwany format pliku.','Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.','Plik jest za duży. Maksymalny rozmiar:','Raport analizy umowy','Nie udało się wczytać pliku.','Wklej tekst','Zgodność z prawem','Podejrzana treść','Ryzyko zapisów','Podstawowa analiza','Styl i przejrzystość treści','Podstawa:','Nie wykryto naruszeń z listy kontrolnej.','Nie wykryto podejrzanych sygnałów.','Średnia długość zdania:','Długie zdania','Bardzo długie zdania utrudniają zrozumienie i mogą ukrywać istotne warunki.','limit:','dobrze','uwaga','źle','Ryzyko prawne','za opóźnienie','Co mi się należy','Sprawdź, co Ci się należy →','Porównaj usługi','Sprawdź, co Ci się należy','Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.','Chcę bezpłatną analizę mojej sprawy →','Bezpłatna analiza Twojej sprawy','Imię i nazwisko','Telefon','E-mail','Krótko o sprawie (opcjonalnie)','Wyślij zgłoszenie','Dziękujemy!','Otworzyliśmy Twój program pocztowy z gotową wiadomością — wyślij ją, a kancelaria skontaktuje się z Tobą.','Wysyłanie…','Nie udało się wysłać zgłoszenia. Spróbuj ponownie za chwilę lub zadzwoń do kancelarii.','Zgłoszenie wysłane. Kancelaria skontaktuje się z Tobą — zwykle w ciągu 1 dnia roboczego.'];
 let TL=[],tlQ='',tlMiss=false;
 function collect(){
   const out=new Map(),add=(s,ctx)=>{s=String(s??'').trim();if(s&&!/^[\d\s.,%+\-*/()]+$/.test(s)&&!out.has(s))out.set(s,ctx)};
@@ -347,7 +314,7 @@ function vI18n(){
      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
        <input class="f" id="tlQ" placeholder="Szukaj tekstu…" value="${esc(tlQ)}" style="max-width:280px">
        <label style="display:flex;gap:6px;align-items:center;color:var(--mut)"><input type="checkbox" id="tlMiss" ${tlMiss?'checked':''} style="accent-color:var(--accent)">Tylko brakujące</label>
-       <button class="btn sm del" onclick="delUnused()" style="margin-left:auto">Usuń nieużywane</button></div>
+       <button class="btn sm del" data-st="delUnused()" style="margin-left:auto">Usuń nieużywane</button></div>
      <div class="tw"><table><thead><tr><th>Polski (źródło)</th>${on.map(l=>`<th>${LN[l]}</th>`).join('')}</tr></thead><tbody id="tlBody"></tbody></table></div>
      <p class="hint">Zmiana tekstu polskiego w kategoriach/kalkulatorach tworzy nowy wpis — stare tłumaczenie trafia do „Nieużywane”.</p></div>`;
 }
@@ -361,12 +328,12 @@ function renderTl(){
     return grp+`<tr><td style="max-width:320px">${esc(x.s)}</td>${on.map(l=>`<td><div style="display:flex;gap:4px"><input class="f" data-tl="${l}" data-i="${x.i}" value="${esc(D.translations[l]?.[x.s]||'')}" style="min-width:200px;${D.translations[l]?.[x.s]?'':'border-color:color-mix(in srgb,var(--warn) 50%,var(--line))'}">
       <a class="btn sm" target="_blank" rel="noopener" title="Otwórz w Tłumaczu Google" href="https://translate.google.com/?sl=pl&tl=${l}&op=translate&text=${encodeURIComponent(x.s)}" style="text-decoration:none">G↗</a></div></td>`).join('')}</tr>`}).join('')||`<tr><td class="hint">Brak tekstów.</td></tr>`;
 }
-$('#view').addEventListener('input',e=>{
+VIEW.addEventListener('input',e=>{
   const el=e.target;
   if(el.dataset.tl){const s=TL[el.dataset.i].s,l=el.dataset.tl,v=el.value.trim();if(v)D.translations[l][s]=v;else delete D.translations[l][s];save();el.style.borderColor=v?'':'color-mix(in srgb,var(--warn) 50%,var(--line))'}
   if(el.id==='tlQ'){tlQ=el.value;renderTl()}
 });
-$('#view').addEventListener('change',e=>{
+VIEW.addEventListener('change',e=>{
   const el=e.target;
   if(el.id==='tlMiss'){tlMiss=el.checked;renderTl()}
   if(el.id==='tlMode'){D.i18n.mode=el.value;render()}
@@ -395,7 +362,7 @@ function vSeo(){
      <label>Częstotliwość zmian (sitemap)<select class="f" data-p="${P}.sitemapChangefreq">${['always','hourly','daily','weekly','monthly','yearly','never'].map(v=>`<option ${s.sitemapChangefreq===v?'selected':''}>${v}</option>`).join('')}</select></label>
      ${inp('sitemapPriority','Priorytet (sitemap, 0.0–1.0)','1.0')}
      <label style="grid-column:1/-1">Dodatkowe reguły robots.txt<textarea class="f code" data-p="${P}.robotsExtra" rows="3" placeholder="Disallow: /prywatne/">${esc(s.robotsExtra)}</textarea></label></div>
-     <p class="hint"><code>admin.html</code> jest zawsze wyłączony z indeksowania.</p></div>
+     <p class="hint"><code>crm.html</code> jest zawsze wyłączony z indeksowania.</p></div>
    <div class="box"><h3>Google i Bing</h3><div class="form">
      ${inp('googleVerification','Google Search Console — kod weryfikacji','zawartość content="…"')}
      ${inp('bingVerification','Bing Webmaster — kod weryfikacji')}
@@ -415,9 +382,9 @@ function vSeo(){
      <h3 style="margin-top:16px">Podgląd plików generowanych przy publikacji</h3>
      <div class="form"><label>robots.txt<textarea class="f code" id="pRobots" rows="6" readonly></textarea></label>
      <label>sitemap.xml<textarea class="f code" id="pSitemap" rows="6" readonly></textarea></label></div>
-     <p class="hint">Meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy automatycznie GitHub Actions (<code>build_seo.py</code>) przy każdej publikacji — wystarczy wrzucić <code>data.json</code>.</p></div>`;
+     <p class="hint">Meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy automatycznie GitHub Actions (<code>build_seo.py</code>) z pliku <code>data.json</code> w repozytorium — po zmianach SEO pobierz go w zakładce „Publikacja” i podmień w repo.</p></div>`;
 }
-const tr=(l,s)=>l==='pl'?s:(D.translations[l]?.[s]||s);
+const trS=(l,s)=>l==='pl'?s:(D.translations[l]?.[s]||s);
 function seoPreview(){
   if(!$('#serp'))return;
   const s=D.seo,url=(s.siteUrl||'').trim(),title=s.title||D.site.name,desc=s.description||'';
@@ -444,14 +411,14 @@ function seoPreview(){
   $('#ogPrev').innerHTML=(s.ogImage?`<img src="${esc(s.ogImage)}" alt="" style="width:100%;aspect-ratio:1.91;object-fit:cover;display:block" onerror="this.style.display='none'">`:`<div style="aspect-ratio:1.91;display:grid;place-items:center;color:var(--mut);background:var(--card2)">brak obrazka</div>`)+
     `<div style="padding:10px 12px"><div class="hint" style="margin:0">${esc(host.toUpperCase())}</div><b>${esc(title)}</b><div class="hint" style="margin:2px 0 0">${esc(desc.slice(0,110))}</div></div>`;
   const base=url||'https://twoja-strona.pl/';
-  $('#pRobots').value=`User-agent: *\n${s.robotsIndex?'Allow: /':'Disallow: /'}\nDisallow: ${new URL('admin.html',base).pathname}\n${s.robotsExtra?s.robotsExtra.trim()+'\n':''}\nSitemap: ${base}sitemap.xml`;
+  $('#pRobots').value=`User-agent: *\n${s.robotsIndex?'Allow: /':'Disallow: /'}\nDisallow: ${new URL('crm.html',base).pathname}\n${s.robotsExtra?s.robotsExtra.trim()+'\n':''}\nSitemap: ${base}sitemap.xml`;
   const today=new Date().toISOString().slice(0,10);
   $('#pSitemap').value=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n`+
     langs.map(l=>`  <url>\n    <loc>${base}${l==='pl'?'':'?lang='+l}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${s.sitemapChangefreq}</changefreq>\n    <priority>${s.sitemapPriority}</priority>\n`+
       (langs.length>1?langs.map(a=>`    <xhtml:link rel="alternate" hreflang="${a}" href="${base}${a==='pl'?'':'?lang='+a}"/>\n`).join(''):'')+`  </url>`).join('\n')+`\n</urlset>`;
 }
-$('#view').addEventListener('input',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
-$('#view').addEventListener('change',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
+VIEW.addEventListener('input',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
+VIEW.addEventListener('change',e=>{if(view==='seo'&&e.target.dataset.p)seoPreview()});
 
 /* ---------- Analiza umów ---------- */
 const FMT={pdf:'PDF',docx:'Word (.docx)',odt:'OpenDocument (.odt)',rtf:'RTF',txt:'Tekst (.txt, .md)',html:'HTML'};
@@ -460,7 +427,7 @@ const MODE={present:'gdy występuje',missing:'gdy brakuje',interest:'odsetki > l
 let ruleTest='Umowa zawarta w dniu 01.11.2026. Umowa przedłuża się automatycznie na kolejny rok. W przypadku wcześniejszego rozwiązania umowy Klient zapłaci opłatę 300 zł. Odsetki za opóźnienie wynoszą 25% w skali roku. Sądem właściwym jest sąd właściwy dla siedziby Sprzedawcy. Szczegóły określa regulamin, w szczególności cennik.';
 const chkBox=(path,on,label)=>`<label style="display:flex;gap:10px;align-items:center;color:var(--txt);font-weight:500"><input type="checkbox" data-p="${path}" ${on?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">${label}</label>`;
 const patCell=(path,arr)=>`<td><textarea class="f code" data-pat="${path}" rows="3" style="min-width:220px">${esc((arr||[]).join('\n'))}</textarea></td>`;
-const rowBtns=(list,i)=>`<td style="white-space:nowrap"><button class="btn sm" onclick="mvRule('${list}',${i})">↑</button> <button class="btn sm del" onclick="delRule('${list}',${i})">✕</button></td>`;
+const rowBtns=(list,i)=>`<td style="white-space:nowrap"><button class="btn sm" data-st="mvRule('${list}',${i})">↑</button> <button class="btn sm del" data-st="delRule('${list}',${i})">✕</button></td>`;
 function ruleTable(list,withBasis,modes){
   const arr=getP(list);
   return `<div class="tw"><table><tr><th>Nazwa</th><th>Poziom / kiedy</th><th>Wzorce (jeden w linii)</th><th>Porada dla użytkownika</th>${withBasis?'<th>Podstawa prawna</th>':''}<th></th></tr>
@@ -481,12 +448,12 @@ function vContracts(){
      <label style="grid-column:1/-1">Dozwolone formaty<span style="display:flex;flex-wrap:wrap;gap:14px;color:var(--txt);font-weight:500;padding:6px 0">${Object.entries(FMT).map(([k,l])=>`<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="fmt" value="${k}" ${C.formats.includes(k)?'checked':''} style="accent-color:var(--accent)">${l}</label>`).join('')}</span></label>
      <label style="grid-column:1/-1">Zastrzeżenie pod wynikiem<input class="f" data-p="${P}.disclaimer" value="${esc(C.disclaimer)}"></label></div>
      <p class="hint">Pliki są analizowane w przeglądarce odwiedzającego — nic nie trafia na serwer. Skany (PDF bez warstwy tekstu) i stary format .doc nie są obsługiwane; strona poprosi wtedy o wklejenie tekstu.</p></div>
-   <div class="box"><h3>📋 Podstawowa analiza — reguły (${C.rules.length}) <button class="btn sm pri" onclick="addRule('contracts.rules')">+ Reguła</button></h3>
+   <div class="box"><h3>📋 Podstawowa analiza — reguły (${C.rules.length}) <button class="btn sm pri" data-st="addRule('contracts.rules')">+ Reguła</button></h3>
      ${ruleTable('contracts.rules',false,['present','missing'])}
      <p class="hint"><b>Wzorce</b> to wyrażenia regularne, wielkość liter nie ma znaczenia. Przykłady: <code>kar[aąy] umown</code> (różne odmiany), <code>okres\\w* wypowiedzeni</code> (<code>\\w*</code> = dowolna końcówka), <code>.{0,60}</code> = do 60 dowolnych znaków pomiędzy. Wystarczy też zwykły fragment tekstu, np. <code>weksel</code>.<br>
      <b>Gdy brakuje</b> — reguła zgłasza problem, jeśli w umowie <i>nie</i> znaleziono żadnego wzorca.<br>
      <b>Pasek „Ryzyko zapisów”</b> 0–100: wysokie = 3 pkt, do sprawdzenia = 2 pkt, informacyjne = 0 pkt (w stosunku do sumy wszystkich reguł).</p></div>
-   <div class="box"><h3>⚖️ Zgodność z prawem (${L.rules.length}) <button class="btn sm pri" onclick="addRule('contracts.legal.rules')">+ Reguła</button></h3>
+   <div class="box"><h3>⚖️ Zgodność z prawem (${L.rules.length}) <button class="btn sm pri" data-st="addRule('contracts.legal.rules')">+ Reguła</button></h3>
      <div class="form" style="margin-bottom:14px">
        ${chkBox(P+'.legal.enabled',L.enabled,'Włącz dział „Zgodność z prawem”')}
        <label>Odsetki maksymalne umowne (% rocznie)<input class="f" type="number" step="0.01" data-t="num" data-p="${P}.legal.maxInterest" value="${L.maxInterest}"></label>
@@ -495,7 +462,7 @@ function vContracts(){
      ${ruleTable('contracts.legal.rules',true,['present','missing','interest'])}
      <p class="hint"><b>Odsetki &gt; limit</b> — wzorce wskazują słowa (np. „odsetki”), a reguła sprawdza procenty do 120 znaków dalej. Jeśli w pobliżu jest „opóźnienie” lub „zwłoka”, porównuje z limitem za opóźnienie.<br>
      <b>Pasek „Ryzyko prawne”</b>: wysokie = 30 pkt, do sprawdzenia = 15 pkt, informacyjne = 5 pkt (maks. 100). Reguły są wskazówkami, nie oceną prawną.</p></div>
-   <div class="box"><h3>🔍 Podejrzana treść — wskaźniki (${S.indicators.length}) <button class="btn sm pri" onclick="addInd()">+ Wskaźnik</button></h3>
+   <div class="box"><h3>🔍 Podejrzana treść — wskaźniki (${S.indicators.length}) <button class="btn sm pri" data-st="addInd()">+ Wskaźnik</button></h3>
      <div class="form" style="margin-bottom:14px">
        ${chkBox(P+'.suspicion.enabled',S.enabled,'Włącz dział „Styl i przejrzystość”')}
        <label>Długie zdanie = ponad (słów)<input class="f" type="number" data-t="num" data-p="${P}.suspicion.longSentence" value="${S.longSentence}"></label>
@@ -526,35 +493,13 @@ function addRule(list){getP(list).push({id:uid('r_'),name:'Nowa reguła',level:'
 function addInd(){D.contracts.suspicion.indicators.push({id:uid('s_'),name:'Nowy wskaźnik',patterns:['fragment tekstu'],weight:4,max:20,explain:''});render()}
 function delRule(list,i){const a=getP(list);if(confirm('Usunąć „'+a[i].name+'”?')){a.splice(i,1);render()}}
 function mvRule(list,i){const a=getP(list);if(i<1)return;[a[i-1],a[i]]=[a[i],a[i-1]];render()}
-$('#view').addEventListener('input',e=>{
+VIEW.addEventListener('input',e=>{
   if(view!=='contracts')return;const el=e.target;
   if(el.dataset.pat){getP(el.dataset.pat).patterns=el.value.split('\n').map(x=>x.trim()).filter(Boolean);save()}
   if(el.id==='ruleTest')ruleTest=el.value;
   testRules();
 });
-$('#view').addEventListener('change',e=>{
+VIEW.addEventListener('change',e=>{
   if(view==='contracts'&&e.target.classList.contains('fmt')){D.contracts.formats=[...document.querySelectorAll('.fmt:checked')].map(x=>x.value);save()}
 });
-
-/* ---------- Publikacja ---------- */
-function vExport(){
-  return `<div class="box"><h3>Jak opublikować zmiany</h3>
-    <ol class="hint" style="padding-left:18px;font-size:.9rem;color:var(--txt)">
-      <li>Edytuj dane — zapisują się automatycznie jako szkic w tej przeglądarce.</li>
-      <li>Sprawdź <a href="index.html?preview" target="_blank">podgląd strony</a>.</li>
-      <li>Pobierz <code>data.json</code> i podmień plik w repozytorium (commit + push).</li>
-      <li>GitHub Pages opublikuje zmiany w ~1 min.</li></ol></div>
-   <div class="box"><h3>Akcje</h3><div style="display:flex;gap:10px;flex-wrap:wrap">
-     <button class="btn pri" onclick="dl()">⬇ Pobierz data.json</button>
-     <button class="btn" onclick="navigator.clipboard.writeText(JSON.stringify(D,null,2)).then(()=>toast('Skopiowano JSON'))">📋 Kopiuj JSON</button>
-     <label class="btn">📂 Importuj plik<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label>
-     <button class="btn del" onclick="reset()">↺ Odrzuć szkic</button></div></div>`;
-}
-function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));a.download='data.json';a.click();URL.revokeObjectURL(a.href);toast('Pobrano data.json')}
-function imp(f){if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(!j.site||!j.categories||!j.calculators)throw 0;D=j;render();toast('Zaimportowano')}catch(e){toast('Nieprawidłowy plik')}})}
-function reset(){if(!ORIG||!confirm('Odrzucić wszystkie niezapisane zmiany?'))return;D=structuredClone(ORIG);STALE=false;$('#stale').style.display='none';try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono data.json')}
-fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{$('#ver').textContent='Wersja '+v.version+' · '+v.date}).catch(()=>{});
-load();
-</script>
-</body>
-</html>
+})();

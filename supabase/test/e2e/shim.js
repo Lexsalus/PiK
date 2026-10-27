@@ -10,7 +10,7 @@ class B{constructor(t){this.b={table:t,filters:[],op:'select'}}
   select(){if(this.b.op==='select')this.b.op='select';else this.b.returning=true;return this}
   eq(c,v){this.b.filters.push(['eq',c,v]);return this} is(c,v){this.b.filters.push(['is',c,v]);return this}
   order(c,o){this.b.order=[c,o?.ascending!==false];return this} limit(n){this.b.limit=n;return this}
-  single(){this.b.single=true;return this}
+  single(){this.b.single=true;return this} maybeSingle(){this.b.single=true;return this}
   insert(v){this.b.op='insert';this.b.values=v;return this} update(v){this.b.op='update';this.b.values=v;return this}
   upsert(v,o){this.b.op='upsert';this.b.values=v;if(o?.onConflict)this.b.onConflict=o.onConflict;return this} delete(){this.b.op='delete';return this}
   then(res,rej){return q(this.b).then(r=>{if(r.error)return {data:null,error:r.error};let d=r.data;if(this.b.single)d=Array.isArray(d)?d[0]??null:d;if(this.b.op!=='select'&&!this.b.returning)d=null;return {data:d,error:null}}).then(res,rej)}}

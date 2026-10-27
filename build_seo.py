@@ -69,7 +69,7 @@ idx.write_text(new, encoding="utf-8")
 
 # robots.txt
 path = urlparse(base).path if base else "/"
-robots = ["User-agent: *", "Allow: /" if S.get("robotsIndex", True) else "Disallow: /", f"Disallow: {path}admin.html", f"Disallow: {path}crm.html"]
+robots = ["User-agent: *", "Allow: /" if S.get("robotsIndex", True) else "Disallow: /", f"Disallow: {path}crm.html"]
 if S.get("robotsExtra"): robots.append(S["robotsExtra"].strip())
 if base: robots += ["", f"Sitemap: {base}sitemap.xml"]
 (ROOT / "robots.txt").write_text("\n".join(robots) + "\n", encoding="utf-8")
