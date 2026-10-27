@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.13.1] — 2026-10-27
+- Migracja 006 wdrożona; migracja 007 — naprawa polskich znaków w funkcjach i etykietach po wdrożeniu 004/005 (m.in. powiadomienie o success fee)
+
 ## [1.13.0] — 2026-10-27
 - Zgodność ze specyfikacją v1.1: migracja 006 (czas polski, przypomnienie w dniu terminu od 8:00, dozwolone typy plików w aktach, raport w bazie — czeka na wdrożenie), raporty liczone w bazie z pamięcią 5 min, zapis kalkulacji z zakładki Analiza do bazy
 
