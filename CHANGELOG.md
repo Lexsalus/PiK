@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.12.1] — 2026-10-27
+- CRM: licznik powiadomień nie zgłasza błędu, gdy wylogowanie nastąpi w trakcie sprawdzania
+
 ## [1.12.0] — 2026-10-27
 - Treści strony w CRM (🌐 Treści strony, tylko Administrator): panel z admin.html przeniesiony do CRM, publikacja do bazy (migracja 005 — czeka na wdrożenie), strona czyta opublikowaną wersję (zapas: data.json), ⚙️ Panel → CRM, admin.html usunięty
 
