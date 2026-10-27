@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **27.10.2026**, wersja **1.12.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **27.10.2026**, wersja **1.14.1**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -20,8 +20,8 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 - Administrator CRM: `biuro@lekarzeiterapeuci.pl` (nazwa „Admin”), 2FA konfiguruje się przy pierwszym logowaniu.
 - Nowych pracowników zakłada się w Supabase → Authentication → Users (samodzielna rejestracja wyłączona), rolę i aktywację nadaje się w CRM → Ustawienia → Użytkownicy.
-- Klucz publiczny (`sb_publishable_…`) jest w `crm.html` i `data.json` — może być jawny. **Nigdy** nie umieszczać klucza `sb_secret_…`.
-- Zmiany w bazie (SQL) wykonuje się w Supabase SQL Editor albo przez API zarządzania z tokenem osobistym ograniczonym do projektu (Database read-write, krótka ważność, usunąć po użyciu).
+- Klucz publiczny (`sb_publishable_…`) jest w `crm.html`, `index.html` i `data.json` — może być jawny. **Nigdy** nie umieszczać klucza `sb_secret_…`.
+- Zmiany w bazie (SQL) wykonuje się w Supabase SQL Editor albo przez API zarządzania z tokenem osobistym ograniczonym do projektu (Database read-write, krótka ważność, usunąć po użyciu). Treść SQL wysyłać jako UTF-8 (inaczej giną polskie znaki — zob. migracja 007).
 
 ## Jak zacząć w nowej sesji
 
@@ -35,7 +35,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (116 testów reguł bazy) i `supabase/test/e2e/` (75 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (120 testów reguł bazy) i `supabase/test/e2e/` (81 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
 
 ## Zrobione
 
@@ -45,8 +45,9 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (27.10.2026)
 
-- 1.14.0 — podpowiedzi w CRM (dymki + [?], `crm-pomoc.js`), numer wersji przy nazwie CRM; migracja 006 wdrożona, 007 (naprawa polskich znaków po 004/005) czeka na wdrożenie; zasady haseł w Supabase ustawione (min. 12, małe/wielkie/cyfry, potwierdzenie przy zmianie).
-- 1.13.0 — przegląd zgodności ze specyfikacją v1.1 (opis w `CRM.md`): migracja `006_zgodnosc_specyfikacji.sql` (czas polski, przypomnienie 8:00, typy plików, raport w bazie — wdrożona 27.10.2026) ; `007_naprawa_kodowania.sql` (polskie znaki po wdrożeniu 004/005) — czeka na wdrożenie frazą „wdróż migrację 007 na bazie PiK”, raporty z bazy z pamięcią 5 min, naprawiony zapis kalkulacji z zakładki Analiza. Zasady haseł w Supabase — do potwierdzenia przez właściciela.
+- 1.14.1 — aktualizacja dokumentacji i podstawowy audyt bezpieczeństwa i zużycia (sekcja niżej).
+- 1.14.0 — podpowiedzi w CRM (dymki + [?], `crm-pomoc.js`), numer wersji przy nazwie CRM; zasady haseł w Supabase ustawione (min. 12, małe/wielkie/cyfry, potwierdzenie przy zmianie).
+- 1.13.0–1.13.1 — przegląd zgodności ze specyfikacją v1.1 (opis w `CRM.md`): migracja 006 (czas polski, przypomnienie 8:00, typy plików, raport w bazie — wdrożona), raporty z bazy z pamięcią 5 min, naprawiony zapis kalkulacji z zakładki Analiza; migracja 007 (naprawa polskich znaków po wdrożeniu 004/005).
 - 1.12.0 — **Treści strony w CRM**: panel z `admin.html` przeniesiony do CRM (`crm-strona.js`, tylko Administrator), publikacja do bazy (migracja `005_tresci_strony.sql`, wdrożona 27.10.2026 razem z 004), strona czyta opublikowaną wersję (zapas: `data.json`), ⚙️ Panel → CRM, `admin.html` usunięty. SEO dalej z `data.json`.
 
 ## Wcześniejsze zmiany (26.10.2026)
@@ -65,10 +66,23 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Do zrobienia po stronie właściciela
 
-
+- Zgoda na wdrożenie migracji 007 (naprawa polskich znaków): „wdróż migrację 007 na bazie PiK”.
 - Pierwsze logowanie Administratora do `crm.html` i konfiguracja 2FA (jeszcze nie sprawdzone na żywo).
-- Usunąć token API w Supabase (Account → Access Tokens) oraz z pulpitu: `tok.txt`, `crmkp.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
+- Usunąć tokeny API w Supabase (Account → Access Tokens) oraz pliki z pulpitu: `PiK.txt`, `tok.txt`, `crmkp.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
 - Podmienić przykładowe (fikcyjne) oferty w porównywarce na prawdziwe.
+
+## Bezpieczeństwo i zużycie — audyt 27.10.2026 (podstawowy)
+
+Dobrze: wszystkie tabele z RLS; niezalogowany może tylko dodać zgłoszenie (`leads`, z limitami długości) i czytać opublikowane treści strony; żadna funkcja nie jest wywoływalna bez logowania; magazyn `akta` prywatny, 25 MB, dozwolone typy plików; rejestracja wyłączona, 2FA w bazie, hasła min. 12 znaków; w repo i jego historii brak kluczy `sb_secret_`/tokenów; pg_cron tylko `przypomnienia-terminy`.
+
+Do decyzji (propozycje, nic nie zmienione):
+1. **Podpisy kontrolne (SRI)** bibliotek z CDN — supabase-js w `crm.html` oraz xlsx, pdf.js, mammoth, jszip ładowane na żądanie (w panelu pielęgniarek SRI już jest).
+2. **Formularz zgłoszeń bez ochrony przed spamem** — każdy może dodawać wiersze do `leads` (limit długości jest, limitu liczby nie ma); np. limit zgłoszeń z jednego numeru/e-maila na godzinę w bazie albo captcha.
+3. **CRM wczytuje całą bazę po każdej zmianie** — `reload()` pobiera 27 tabel (do 5000 wierszy każda) przy logowaniu, po każdym zapisie i przy zmianie liczby powiadomień. Główne źródło zużycia transferu; przy dłuższym używaniu: tylko zmienione tabele / ładowanie przyrostowe. Limit 5000 bez sortowania może też po cichu uciąć najstarsze/najnowsze wiersze (np. powiadomienia).
+4. **Powiadomienia i historia rosną bez końca** — brak czyszczenia przeczytanych powiadomień (np. po 90 dniach).
+5. **Strona publiczna pobiera treści z bazy przy każdym wejściu** (~90 KB) — darmowy plan ma 5 GB transferu miesięcznie (~50 tys. wejść); ewentualnie pamięć podręczna w przeglądarce.
+6. **Kto publikuje treści, ten uruchamia kod na stronie** — wzory kalkulatorów wykonują się jako JavaScript; dziś tylko Administrator z 2FA (zostaje tak przy nadawaniu uprawnień innym).
+7. **Doradcy Supabase:** 3 funkcje bez stałej `search_path` (`app.audit_readonly`, `app.member_guard`, `app.path_case`), 11 reguł RLS do przyspieszenia (`auth.uid()` → `(select auth.uid())`), 6 tabel z dwiema regułami odczytu, 58 kluczy obcych bez indeksów — bez znaczenia przy obecnej liczbie danych; sprawdzanie haseł z wycieków (HIBP) — plan płatny.
 
 ## Następne kroki (propozycja)
 
