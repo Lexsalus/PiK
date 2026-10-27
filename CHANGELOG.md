@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.15.1] — 2026-10-27
+- Migracja 008 wdrożona (limit zgłoszeń, porządki powiadomień, uwagi doradców Supabase)
+
 ## [1.15.0] — 2026-10-27
 - Poprawki po audycie: SRI bibliotek, limit zgłoszeń z e-maila, CRM pobiera po zapisie tylko zmienione tabele (stronami po 1000), porządki powiadomień, strona pamięta treści do kolejnej publikacji, uwagi doradców Supabase (migracja 008); migracja 007 wdrożona
 
