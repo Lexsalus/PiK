@@ -245,3 +245,18 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
+// --- 008: audyt bezpieczeństwa i zużycia
+{AAL='aal2';AMR=[];
+const L=(e)=>as('anon',`insert into public.leads(category,client_name,phone,email,consent) values('SKD','Test Spam','600100200',$1,true)`,[e]);
+let okN=0;for(let i=0;i<3;i++){try{await L('spam@x.pl');okN++}catch(e){}}
+R(okN===3&&!!await fails('anon',`insert into public.leads(category,client_name,phone,email,consent) values('SKD','Test Spam','600100200','SPAM@x.pl',true)`),'008: 4. zgłoszenie z tego samego e-maila w ciągu godziny → odmowa (bez względu na wielkość liter)');
+R(!await fails('anon',`insert into public.leads(category,client_name,phone,email,consent) values('SKD','Inny','600100201','inny@x.pl',true)`),'008: inny e-mail — zgłoszenie przechodzi');
+const bare=(await db.query(`select count(*)::int n from pg_policies where schemaname='public' and (coalesce(qual,'')||coalesce(with_check,'')) ~ '(?<!SELECT )auth\\.uid\\(\\)'`)).rows[0].n;
+R(bare===0,'008: reguły RLS liczą auth.uid() raz na zapytanie');
+const multi=(await db.query(`select count(*)::int n from (select tablename from pg_policies where schemaname='public' and cmd in ('SELECT','ALL') and 'authenticated'=any(roles) group by tablename having count(*)>1) x`)).rows[0].n;
+R(multi===0,'008: jedna reguła odczytu na tabelę');
+{const a1=await fails('kasia',`insert into public.currencies(code) values('XQZ')`),a2=await fails('admin',`insert into public.currencies(code) values('XQZ')`);if(!a1||a2)console.log('DBG',a1,'|',a2);R(!!a1&&!a2,'008: zapis słowników nadal tylko Administrator')}
+R((await as('jan',`select count(*)::int n from public.permission_overrides`)).rows[0].n===(await db.query(`select count(*)::int n from public.permission_overrides where user_id=$1`,[U.jan])).rows[0].n,'008: nadania uprawnień — pełnomocnik widzi tylko swoje');
+const noidx=(await db.query(`select count(*)::int n from pg_constraint c where c.contype='f' and c.connamespace='public'::regnamespace and not exists(select 1 from pg_index i where i.indrelid=c.conrelid and (string_to_array(i.indkey::text,' '))[1:array_length(c.conkey,1)]=(select array_agg(x::text) from unnest(c.conkey) x))`)).rows[0].n;
+R(noidx===0,'008: każdy klucz obcy ma indeks');
+R((await db.query(`select count(*)::int n from pg_proc where proname in ('audit_readonly','member_guard','path_case') and proconfig is not null`)).rows[0].n===3,'008: stała search_path w 3 funkcjach');}

@@ -36,7 +36,7 @@ async function handle(q){
     if(q.kind==='storage'){await db.query(`insert into storage.objects(bucket_id,name) values($1,$2)`,[q.bucket,q.path]);return {path:q.path}}
     const T='public.'+ident(q.table),params=[],ph=v=>{params.push(Array.isArray(v)&&v.every(x=>x===null||typeof x!=='object')?'{'+v.map(x=>JSON.stringify(String(x))).join(',')+'}':v!==null&&typeof v==='object'?JSON.stringify(v):v);return '$'+params.length};
     const where=(q.filters||[]).map(([op,c,v])=>op==='eq'?`${ident(c)} = ${ph(v)}`:op==='is'?`${ident(c)} is ${v===null?'null':v}`:'true').join(' and ')||'true';
-    if(q.op==='select'){let sql=`select * from ${T} where ${where}`;if(q.order)sql+=` order by ${ident(q.order[0])} ${q.order[1]?'asc':'desc'}`;if(q.limit)sql+=` limit ${+q.limit}`;const r=await db.query(sql,params);return r.rows}
+    if(q.op==='select'){let sql=`select * from ${T} where ${where}`;const ords=q.orders||(q.order?[q.order]:[]);if(ords.length)sql+=' order by '+ords.map(o=>`${ident(o[0])} ${o[1]?'asc':'desc'}`).join(',');if(q.limit)sql+=` limit ${+q.limit}`;if(q.offset)sql+=` offset ${+q.offset}`;const r=await db.query(sql,params);return r.rows}
     const rows=Array.isArray(q.values)?q.values:[q.values];
     if(q.op==='insert'||q.op==='upsert'){const out=[];for(const row of rows){params.length=0;const cols=Object.keys(row);let sql=`insert into ${T}(${cols.map(ident).join(',')}) values (${cols.map(c=>ph(row[c])).join(',')})`;
       if(q.op==='upsert'){const pk=q.onConflict?q.onConflict.split(',').map(ident):PK[q.table]||['id'];sql+=` on conflict (${pk.join(',')}) do update set ${cols.filter(c=>!pk.includes(c)).map(c=>`${c}=excluded.${c}`).join(',')}`}
