@@ -9,9 +9,9 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Element | Adres | Stan |
 |---------|-------|------|
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
-| Treści strony | CRM → **🌐 Treści strony** (tylko Administrator; przycisk ⚙️ Panel na stronie i link w stopce prowadzą do CRM) | szkic + „Opublikuj” do bazy (`site_content`, migracja 005 — czeka na wdrożenie); do tego czasu strona czyta `data.json`. `admin.html` usunięty |
+| Treści strony | CRM → **🌐 Treści strony** (tylko Administrator; przycisk ⚙️ Panel na stronie i link w stopce prowadzą do CRM) | szkic + „Opublikuj” do bazy (`site_content`, migracja 005 — wdrożona); dopóki nic nie opublikowano, strona czyta `data.json`. `admin.html` usunięty |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004 i 005 czekają na wdrożenie; Administrator aktywny |
+| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–005 wdrożone 27.10.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 
 Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
@@ -45,7 +45,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (27.10.2026)
 
-- 1.12.0 — **Treści strony w CRM**: panel z `admin.html` przeniesiony do CRM (`crm-strona.js`, tylko Administrator), publikacja do bazy (migracja `005_tresci_strony.sql` — czeka na wdrożenie frazą „wdróż migrację 005 na bazie PiK”), strona czyta opublikowaną wersję (zapas: `data.json`), ⚙️ Panel → CRM, `admin.html` usunięty. SEO dalej z `data.json`.
+- 1.12.0 — **Treści strony w CRM**: panel z `admin.html` przeniesiony do CRM (`crm-strona.js`, tylko Administrator), publikacja do bazy (migracja `005_tresci_strony.sql`, wdrożona 27.10.2026 razem z 004), strona czyta opublikowaną wersję (zapas: `data.json`), ⚙️ Panel → CRM, `admin.html` usunięty. SEO dalej z `data.json`.
 
 ## Wcześniejsze zmiany (26.10.2026)
 
