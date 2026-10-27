@@ -18,7 +18,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Migracja `006_zgodnosc_specyfikacji.sql` (wdrożona 27.10.2026) — czas polski w bazie (Europe/Warsaw), przypomnienie w dniu terminu od 8:00, dozwolone typy plików w magazynie `akta`, raport liczony w bazie (`report_summary`).
 - ✅ Migracja `007_naprawa_kodowania.sql` (wdrożona 27.10.2026) — naprawa polskich znaków po wdrożeniu 004 i 005 (wysłane w złym kodowaniu; m.in. powiadomienie o success fee nie powstawało). Przy wdrożeniach przez API wysyłać treść jako UTF-8.
 - ✅ Migracja `008_audyt_bezpieczenstwa.sql` (wdrożona 27.10.2026) — limit 3 zgłoszeń z jednego e-maila na godzinę, nocne porządki przeczytanych powiadomień (> 90 dni), uwagi doradców Supabase (search_path, reguły RLS, indeksy).
-- ⏳ Migracja `009_uprawnienia_akcje.sql` (czeka na zgodę: „wdróż migrację 009 na bazie PiK”) — uprawnienia: podgląd i zmiana osobno dla danych klienta, dokumentów, czynności, terminów i zgłoszeń; dla obecnych kont bez zmian w dostępie.
+- ✅ Migracja `009_uprawnienia_akcje.sql` (wdrożona 27.10.2026) — uprawnienia: podgląd i zmiana osobno dla danych klienta, dokumentów, czynności, terminów i zgłoszeń; dla obecnych kont bez zmian w dostępie.
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).
