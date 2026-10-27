@@ -47,7 +47,7 @@ crm.html        CRM kancelarii na żywo (Supabase)
 crm-pomoc.js    podpowiedzi w CRM (dymki i ikonki [?]) — słowniki tekstów w jednym miejscu
 crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawny admin.html)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–008), test/ — testy bazy 129/129, e2e CRM 84/84 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 87/87 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

@@ -26,7 +26,7 @@ for(const [e,[id,role,name]] of Object.entries(USERS))if(role)await db.query('up
 // zgłoszenie ze strony (anon)
 const asRole=async(sub,aal,fn,amr=[])=>{await db.exec('begin');try{await db.exec(`set local role ${sub?'authenticated':'anon'}`);await db.query(`select set_config('request.jwt.claim.sub',$1,true),set_config('request.jwt.claims',$2,true)`,[sub||'',JSON.stringify({aal,amr})]);const r=await fn();await db.exec('commit');return r}catch(e){await db.exec('rollback');throw e}};
 await asRole(null,'aal1',()=>db.query(`insert into public.leads(category,calc,client_name,phone,email,message,consent) values('SKD',$1,'Zofia Testowa','500100200','z@test.pl','Kredyt gotówkowy z 2023',true)`,[JSON.stringify({name:'Sankcja kredytu darmowego',inputs:[{label:'Kwota wypłacona do ręki',value:30000,unit:'zł'}],outputs:[{label:'Szacowana korzyść',value:15894,unit:'zł',main:true}]})]));
-const PK={permission_overrides:['user_id','perm'],currencies:['code'],case_categories:['code']};
+const PK={permission_overrides:['user_id','perm','action'],currencies:['code'],case_categories:['code']};
 const ident=s=>{if(!/^[a-z_][a-z0-9_]*$/.test(s))throw new Error('bad ident '+s);return s};
 async function handle(q){
   return asRole(q.sub,q.aal||'aal1',async()=>{
