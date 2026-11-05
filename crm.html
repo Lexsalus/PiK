@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>CRM Kancelarii</title>
+<link rel="manifest" href="crm.webmanifest">
+<meta name="theme-color" content="#0b0d14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CRM Kancelarii">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/crm-favicon-32.png">
+<link rel="apple-touch-icon" href="icons/crm-apple-touch.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js" integrity="sha384-KX6Y/AMIv9qA8TLCDul2JatZWeyrJVgj3Xu/0r30Nr05xO8md1+wHAgtdsRV9LoE" crossorigin="anonymous"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -184,18 +190,22 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--card2)}
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 38%,transparent);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
 ::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--accent) 70%,transparent);border:2px solid transparent;background-clip:padding-box}
 ::-webkit-scrollbar-corner{background:transparent}
+.lgtop{position:fixed;top:14px;right:16px;z-index:5;display:flex;gap:8px;align-items:center}
+.pwabtn[hidden]{display:none!important}
+@media(max-width:760px){.pwabtn .pwalbl{display:none}}
 .tabs::-webkit-scrollbar,.tw::-webkit-scrollbar,.sres::-webkit-scrollbar{height:6px;width:6px}
 @supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}}
 </style>
 </head>
 <body>
-<div id="login"><div class="lbox"></div></div>
+<div id="login"><div class="lgtop"><button class="btn sm pwabtn" type="button" hidden title="Dodaj CRM do ekranu telefonu lub komputera — otwiera się jak aplikacja, bez paska przeglądarki.">📲 Zainstaluj aplikację</button></div><div class="lbox"></div></div>
 <div id="app">
   <aside id="side"></aside>
   <main>
     <div class="top">
       <div class="search"><input id="q" placeholder="Szukaj sprawy, klienta, sygnatury…" autocomplete="off"><div class="sres" id="sres"></div></div>
       <div class="me">
+        <button class="btn sm pwabtn" type="button" hidden title="Dodaj CRM do ekranu telefonu lub komputera — otwiera się jak aplikacja, bez paska przeglądarki.">📲 <span class="pwalbl">Zainstaluj aplikację</span></button>
         <button class="icon-btn" id="bell" title="Powiadomienia">🔔</button>
         <button class="icon-btn" id="theme" title="Motyw">🌓</button>
         <div id="meBox" style="display:flex;gap:10px;align-items:center"></div>
@@ -1392,6 +1402,25 @@ addEventListener('DOMContentLoaded',async()=>{   // po wczytaniu wszystkich skry
 });
 setInterval(async()=>{if(ME&&DB&&document.visibilityState==='visible'){const r=await sb.from('notifications').select('id').eq('recipient_id',ME.id).is('read_at',null);if(!ME||!DB)return;const n=r.data?.length||0;if(n!==DB.notifications.filter(x=>x.recipient===ME.id&&!x.read).length){await reload();if(ME&&DB)renderShell()}}},30000); // liczniki „na żywo”
 
+</script>
+<script>
+/* --- aplikacja (PWA): przycisk „Zainstaluj aplikację” na ekranie logowania i w górnym pasku --- */
+if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('crm-sw.js').catch(e=>console.warn('sw',e)));
+let pwaPrompt=null,pwaJustInstalled=false;
+const PWA_MODES=['standalone','minimal-ui','fullscreen','window-controls-overlay'];
+const pwaInstalled=()=>pwaJustInstalled||PWA_MODES.some(m=>matchMedia(`(display-mode: ${m})`).matches)||navigator.standalone===true;
+const pwaIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const pwaShow=()=>$$('.pwabtn').forEach(b=>b.hidden=pwaInstalled());
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();pwaPrompt=e;pwaShow()});
+PWA_MODES.forEach(m=>matchMedia(`(display-mode: ${m})`).addEventListener?.('change',pwaShow));
+addEventListener('appinstalled',()=>{pwaPrompt=null;pwaJustInstalled=true;pwaShow();toast('Aplikacja zainstalowana')});
+document.addEventListener('click',async e=>{if(!e.target.closest?.('.pwabtn'))return;
+  if(pwaPrompt){const p=pwaPrompt;pwaPrompt=null;p.prompt();try{await p.userChoice}catch(x){}pwaShow();return}
+  modal('Zainstaluj aplikację',`<div class="note" style="line-height:1.6">${pwaIOS()
+    ?`<p>Na iPhonie / iPadzie (Safari):</p><p>1. Stuknij <b>Udostępnij</b> (kwadrat ze strzałką w górę).</p><p>2. Wybierz <b>Do ekranu początkowego</b>.</p><p>3. Stuknij <b>Dodaj</b>.</p>`
+    :`<p>Przeglądarka nie pokazała okna instalacji. Spróbuj tak:</p><p>Android (Chrome): menu <b>⋮</b> → <b>Zainstaluj aplikację</b> albo <b>Dodaj do ekranu głównego</b>.</p><p>Komputer (Chrome / Edge): ikona instalacji na końcu paska adresu albo menu → <b>Zainstaluj</b>.</p>`}</div>`,{ok:'',cancel:'Zamknij'});
+});
+addEventListener('DOMContentLoaded',pwaShow);addEventListener('load',()=>{pwaShow();setTimeout(pwaShow,1000)});
 </script>
 <script src="crm-strona.js"></script>
 <script src="crm-podglad.js"></script>

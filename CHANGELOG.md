@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.19.0] — 2026-11-05
+- CRM jako aplikacja (PWA): przycisk Zainstaluj aplikację na ekranie logowania i w górnym pasku, manifest, service worker, ikony
+
 ## [1.18.0] — 2026-10-27
 - Treści strony: przycisk „Pokaż różnice” (szkic ↔ opublikowana wersja); paski przewijania dopasowane do stylu (CRM i strona)
 

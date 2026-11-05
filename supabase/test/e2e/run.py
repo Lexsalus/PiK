@@ -7,7 +7,7 @@ res=[];ok=lambda c,m:(res.append(c),print(('✅ ' if c else '❌ ')+m))
 SITEQ=[]
 async def main():
   async with async_playwright() as p:
-    b=await p.chromium.launch(args=['--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests']); c=await b.new_context(locale='pl-PL',viewport={'width':1360,'height':900}); errs=[]
+    b=await p.chromium.launch(args=['--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests']); c=await b.new_context(service_workers='block',locale='pl-PL',viewport={'width':1360,'height':900}); errs=[]
     async def rt(r):
       u=r.request.url
       if 'supabase-js' in u: return await r.fulfill(path=SH,content_type='application/javascript')

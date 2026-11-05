@@ -6,6 +6,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 
 ## Logowanie i konta
 
+- **Aplikacja na telefonie / komputerze:** przycisk **📲 Zainstaluj aplikację** na ekranie logowania i w górnym pasku. Android i komputer (Chrome / Edge): okno instalacji; iPhone (Safari): Udostępnij → Do ekranu początkowego. Po instalacji przycisk znika.
 - **Logowanie:** e-mail + hasło. Administrator, pełnomocnicy i obsługa techniczna przy pierwszym logowaniu skanują kod QR aplikacją (Google / Microsoft Authenticator), potem podają 6-cyfrowy kod. Bez 2FA baza nie zwraca im żadnych danych.
 - **Nie pamiętam hasła:** link na ekranie logowania → e-mail → nowe hasło.
 - **Nowe konto:** Administrator zakłada je w Supabase (Authentication → Users → Add user), potem w CRM → Ustawienia → Użytkownicy nadaje rolę i aktywuje. Samodzielna rejestracja jest wyłączona; nieaktywne konto nic nie widzi.

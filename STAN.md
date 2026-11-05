@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **27.10.2026**, wersja **1.15.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **05.11.2026**, wersja **1.19.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -45,6 +45,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (27.10.2026)
 
+- 1.19.0 (05.11.2026) — CRM jako aplikacja na telefon/komputer (PWA, jak w panelu pielęgniarek): przycisk „📲 Zainstaluj aplikację” na ekranie logowania i w górnym pasku, `crm.webmanifest`, `crm-sw.js` (tylko pliki CRM, baza zawsze z sieci), ikony `icons/crm-*`. Test e2e blokuje service worker (inaczej podmiana bibliotek nie działa).
 - 1.18.0 — Treści strony: przycisk „🔍 Pokaż różnice” przy ostrzeżeniu o nieaktualnym szkicu; paski przewijania w stylu strony (CRM i strona publiczna).
 - 1.17.0 — **Podgląd panelu** jako rola lub osoba (Administrator, tylko do odczytu, `crm-podglad.js`).
 - 1.16.0 — uprawnienia: podgląd i zmiana osobno (wariant pośredni §9; migracja `009_uprawnienia_akcje.sql` — wdrożona 27.10.2026). Następny krok: pełna macierz akcji.
