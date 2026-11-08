@@ -23,6 +23,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 12 | Dokumentacja: README, INSTRUKCJA, CRM, STAN, CHANGELOG, PLAN | ✅ v1.21.0 |
 | 13 | Sprawdzenie po wysyłce: parser v4 (identyfikatory ELI) na danych z API, wygląd na telefonie | ✅ v1.21.2 |
 | 14 | Restrukturyzacja firmy: kalkulator długów przedsiębiorcy (raty po układzie, wstrzymanie, odsetki, umorzenie) + ścieżki postępowań z podstawami w CRM | ✅ v1.22.0 |
+| 16 | CRM: menu w grupach tematycznych z kolorami (Codzienna praca, Kancelaria, Prawo, Administracja), tylko pozycje z uprawnień, dymki z opisem i powodem dostępu | ✅ v1.23.0 |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później

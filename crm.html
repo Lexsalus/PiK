@@ -43,6 +43,12 @@ aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px
 .brand i{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#2fd6a0);display:grid;place-items:center;font-style:normal;color:#fff;font-size:.85rem}
 .nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--mut);font-weight:600;cursor:pointer;border:0;background:none;width:100%;text-align:left}
 .nav:hover{background:var(--card)}.nav.on{background:var(--card2);color:var(--txt)}
+.ngrp{display:flex;align-items:center;gap:8px;margin:14px 10px 4px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gc);cursor:default}
+.ngrp::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--gc) 35%,transparent)}
+.brand+.ngrp{margin-top:2px}
+#side .nav{position:relative;border-left:3px solid color-mix(in srgb,var(--gc,var(--line)) 45%,transparent);border-radius:0 10px 10px 0}
+#side .nav:hover{border-left-color:var(--gc,var(--line))}
+#side .nav.on{border-left-color:var(--gc,var(--accent));background:color-mix(in srgb,var(--gc,var(--accent)) 14%,var(--card2))}
 .nav .cnt{margin-left:auto;background:var(--bad);color:#fff;border-radius:20px;font-size:.72rem;padding:1px 7px;font-weight:700}
 .nav .cnt.n{background:var(--accent)}
 aside .sp{flex:1}
@@ -184,7 +190,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--card2)}
 .svgchart text{fill:var(--mut);font-size:11px;font-family:inherit}
 @media(max-width:980px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3,.g2,.calcbox{grid-template-columns:1fr}}
 @media print{aside,.top,.toolbar,.noprint,.toast,.modal{display:none!important}#app{display:block!important}body{background:#fff;color:#000}.card,.tile{break-inside:avoid;border-color:#ccc}}
-@media(max-width:760px){#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.brand{width:100%}aside .sp,.me small{display:none}.content{padding:16px}.top{padding:10px 16px}.kv{grid-template-columns:1fr}}
+@media(max-width:760px){.ngrp{display:none}#side .nav{border-left:0;border-bottom:3px solid color-mix(in srgb,var(--gc,var(--line)) 60%,transparent);border-radius:10px 10px 0 0}#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.brand{width:100%}aside .sp,.me small{display:none}.content{padding:16px}.top{padding:10px 16px}.kv{grid-template-columns:1fr}}
 /* paski przewijania w stylu strony */
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 38%,transparent);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
@@ -380,11 +386,27 @@ function menuItems(){
     isAdmin()&&['strona','🌐','Treści strony'],
     ['ustawienia','⚙️','Ustawienia']].filter(Boolean);
 }
+/* --- menu w grupach tematycznych z kolorem; w grupie tylko pozycje, do których masz uprawnienia --- */
+const NAV_GROUPS=[
+  {id:'praca',l:'Codzienna praca',c:'#5aa9ff',tip:'Sprawy, zgłoszenia ze strony, terminy i powiadomienia — to, czym zajmujesz się na co dzień.',k:['pulpit','sprawy','nowe','terminy','powiadomienia']},
+  {id:'kancelaria',l:'Kancelaria',c:'#2fd6a0',tip:'Zespół, pieniądze i wyniki kancelarii — zakres zależy od Twojej roli.',k:['zespol','finanse','raporty']},
+  {id:'prawo',l:'Prawo',c:'#c08cff',tip:'Zmiany w ustawach, projekty w Sejmie, odsetki i wyszukiwarka przepisów (dane z API Sejmu).',k:['prawo']},
+  {id:'admin',l:'Administracja',c:'#f5b84a',tip:'Strona publiczna, podgląd uprawnień i ustawienia systemu.',k:['strona','podglad','ustawienia']}];
+const NAV_WHY={pulpit:'masz dostęp do spraw',sprawy:'masz dostęp do spraw',nowe:'uprawnienie „Nowe sprawy”',terminy:'uprawnienie „Terminy”',powiadomienia:'każdy członek zespołu',zespol:'każdy członek zespołu',
+  finanse:'uprawnienia finansowe Twojej roli',raporty:'uprawnienie „Raporty”',prawo:'masz dostęp do spraw',strona:'tylko Administrator',podglad:'tylko Administrator',ustawienia:'każdy (zakres zależy od roli)'};
+function navGroups(items,cur){
+  const seen=new Set(),out=[];
+  const one=([k,ic,l,cnt,cl],g)=>`<a class="nav ${cur===k?'on':''}" href="#/${k}" style="--gc:${g.c}" data-why="${esc(NAV_WHY[k]||'')}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`;
+  NAV_GROUPS.forEach(g=>{const its=g.k.map(k=>items.find(x=>x[0]===k)).filter(Boolean);its.forEach(x=>seen.add(x[0]));
+    if(its.length)out.push(`<div class="ngrp" style="--gc:${g.c}" data-tip="${esc(g.tip)}">${esc(g.l)}</div>`+its.map(x=>one(x,g)).join(''))});
+  const rest=items.filter(x=>!seen.has(x[0]));if(rest.length)out.push(rest.map(x=>one(x,{c:'var(--line)'})).join(''));
+  return out.join('');
+}
 /* numer wersji przy nazwie (version.json, podbijany przy każdej wysyłce) */
 let APP_VER='';fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{APP_VER=v.version||'';if(ME)renderShell()}).catch(()=>{});
 function renderShell(){
   const cur=(location.hash.split('/')[1]||'pulpit').replace('sprawa','sprawy');
-  $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM${APP_VER?`<span class="ver" data-tip="Wersja CRM — lista zmian w CHANGELOG.md">v${esc(APP_VER)}</span>`:''}</div>`+menuItems().map(([k,ic,l,cnt,cl])=>`<a class="nav ${cur===k?'on':''}" href="#/${k}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`).join('')+
+  $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM${APP_VER?`<span class="ver" data-tip="Wersja CRM — lista zmian w CHANGELOG.md">v${esc(APP_VER)}</span>`:''}</div>`+navGroups(menuItems(),cur)+
     `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>`;
   $('#meBox').innerHTML=`${av(ME.id)}<div><b>${esc(ME.name)}</b><small>${esc(ROLES[ME.role])}</small></div>`;
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;

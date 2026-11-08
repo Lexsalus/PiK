@@ -38,6 +38,7 @@ const NAV={
   finanse:'Wpływy od klientów, podział środków i wynagrodzenia. Zakres zależy od uprawnień — pełnomocnik widzi tylko swoje rozliczenie.',
   raporty:'Raporty liczone w bazie, w zakresie Twoich uprawnień. Wynik jest pamiętany 5 minut.',
   strona:'Treści strony publicznej: porównywarka, kalkulatory, analiza umów, tłumaczenia, SEO. Zmiany są szkicem do czasu „Opublikuj”.',
+  prawo:'Zmiany w obserwowanych ustawach (ile Twoich spraw dotyczą), projekty w Sejmie, aktualne odsetki i wyszukiwarka przepisów. Licznik = nowe zmiany w kategoriach Twoich spraw.',
   podglad:'Podgląd panelu jako wybrana rola lub osoba — menu, sprawy, zakładki i przyciski. Tylko do odczytu.',
   ustawienia:'Kategorie, użytkownicy i uprawnienia, święta, powiadomienia, przypomnienia, system, dziennik audytu i Twoje konto.'};
 
@@ -195,7 +196,7 @@ function addHlp(el,t){if(!t||el.querySelector(':scope > .hlp,:scope > .lbt'))ret
   else if(tn)tn.after(h);else el.appendChild(h)}
 function apply(root){
   root.querySelectorAll('[title]:not([data-tip])').forEach(el=>{if(el.tagName==='svg'||el.closest('svg'))return;el.dataset.tip=el.title;el.removeAttribute('title')});
-  root.querySelectorAll('#side a.nav[href^="#/"]:not([data-tip])').forEach(a=>{const k=a.getAttribute('href').slice(2).split('/')[0];if(NAV[k])a.dataset.tip=NAV[k]});
+  root.querySelectorAll('#side a.nav[href^="#/"]:not([data-tip])').forEach(a=>{const k=a.getAttribute('href').slice(2).split('/')[0];if(NAV[k])a.dataset.tip=NAV[k]+(a.dataset.why?` · Widzisz to, bo: ${a.dataset.why}.`:'')});
   root.querySelectorAll('.tabs .tab:not([data-tip])').forEach(a=>{const t=TAB[textOf(a)];if(t)a.dataset.tip=t});
   root.querySelectorAll('button:not([data-tip]),a.btn:not([data-tip]),label.btn:not([data-tip])').forEach(b=>{const t=val(BTN[textOf(b)],b);if(t)b.dataset.tip=t});
   root.querySelectorAll('label').forEach(l=>{if(l.closest('#stTest'))return;const k=firstText(l)?.nodeValue.replace(/\s+/g,' ').trim();const t=k&&val(LAB[k],l);if(t)addHlp(l,t)});

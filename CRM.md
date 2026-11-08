@@ -88,6 +88,10 @@ Do decyzji właściciela:
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
 
+## Menu (v1.23.0)
+
+Menu jest podzielone na grupy z kolorami: **Codzienna praca** (niebieski: Pulpit, Sprawy, Nowe sprawy, Terminy, Powiadomienia), **Kancelaria** (zielony: Zespół, Finanse, Raporty), **Prawo** (fiolet), **Administracja** (pomarańcz: Treści strony, Podgląd, Ustawienia). Każdy widzi tylko pozycje ze swoich uprawnień; pusta grupa znika. Dymek przy pozycji opisuje zakładkę i mówi, dlaczego ją widzisz (np. „uprawnienie Terminy”). Na telefonie grupy są oznaczone kolorem paska pod pozycją.
+
 ## 📜 Prawo (v1.20–1.21, 08.11.2026)
 
 - **Zmiany w ustawach:** nowelizacje obserwowanych ustaw z datą wejścia w życie i liczbą otwartych spraw, których dotyczą (kategorie); znacznik „nowe” i licznik w menu, kafelek na pulpicie. Tabela obserwowanych ustaw: status, aktualny tekst jednolity, liczba nowelizacji.

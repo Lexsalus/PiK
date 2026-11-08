@@ -46,6 +46,9 @@ async def main():
     await pg.fill('#lf [name=code]','000000'); await pg.click('#lf button'); await pg.wait_for_timeout(400); ok('Nieprawidłowy kod' in await T('#lerr'),'zły kod 2FA → komunikat')
     await pg.fill('#lf [name=code]','123456'); await pg.click('#lf button'); await pg.wait_for_timeout(1200)
     ok(await pg.is_visible('#app') and 'Dzień dobry' in await T('#view'),'po 2FA: pulpit')
+    g=await pg.eval_on_selector_all('#side .ngrp','e=>e.map(x=>x.innerText.trim().toUpperCase())'); ok(g[:2]==['CODZIENNA PRACA','KANCELARIA'] and 'ADMINISTRACJA' in g,'menu w grupach tematycznych: '+', '.join(g))
+    await pg.hover('#side a.nav[href="#/terminy"]'); await pg.wait_for_timeout(300); ok('Widzisz to, bo' in await T('#tip'),'dymek przy pozycji menu z powodem dostępu')
+    if os.environ.get('E2E_SHOTS'): await pg.screenshot(path=os.environ['E2E_SHOTS']+'menu-admin.png')
     # --- zgłoszenie ze strony → sprawa
     await nav('#/nowe'); ok('Zofia Testowa' in await T('#view'),'zgłoszenie ze strony widoczne w „Nowe sprawy”')
     import urllib.request
@@ -133,6 +136,7 @@ async def main():
     ok('Wniosek o korektę' in await T('#view') and 'Edytuj (zapis wersji)' not in await T('#view'),'po zatwierdzeniu: tylko wniosek o korektę')
     # --- obsługa techniczna
     await login('tech@k.test'); m=await pg.eval_on_selector_all('#side a.nav','e=>e.map(x=>x.innerText)'); ok(not any('Sprawy' in x for x in m),'obsługa techniczna: bez spraw')
+    g=await pg.eval_on_selector_all('#side .ngrp','e=>e.map(x=>x.innerText.trim().toUpperCase())'); ok(g==['ADMINISTRACJA'],'obsługa techniczna: tylko grupa Administracja')
     await nav(f'#/sprawa/{caseid}'); ok(await pg.is_visible('.forbid'),'tech: karta sprawy → 403')
     # --- konto nieaktywne
     await login('nowy@k.test'); ok('nie jest jeszcze aktywne' in await T('#login'),'nowe konto: „nieaktywne — poproś Administratora”')
