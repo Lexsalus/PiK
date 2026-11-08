@@ -1562,7 +1562,11 @@
       "strona": "сторінка",
       "Nie udało się odczytać tekstu. Zrób wyraźniejsze zdjęcie (dobre światło, cała strona) albo wklej treść ręcznie.": "Не вдалося зчитати текст. Зробіть чіткіше фото (добре світло, вся сторінка) або вставте текст вручну.",
       "W umowie wykryto klauzule abuzywne — kwalifikujesz się do zwrotu pieniędzy.": "У договорі виявлено несправедливі умови — ви маєте право на повернення коштів.",
-      "Szacowana kwota": "Орієнтовна сума"
+      "Szacowana kwota": "Орієнтовна сума",
+      "Prawo": "Право",
+      "Dla firm": "Для бізнесу",
+      "Długi firmy? Policz restrukturyzację": "Борги компанії? Розрахуйте реструктуризацію",
+      "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Введіть борги, доходи та витрати компанії — покажемо, наскільки зменшаться платежі, скільки відсотків відпаде і на скільки можна зупинити стягнення."
     },
     "en": {
       "Porównaj": "Compare",
@@ -1882,7 +1886,11 @@
       "strona": "page",
       "Nie udało się odczytać tekstu. Zrób wyraźniejsze zdjęcie (dobre światło, cała strona) albo wklej treść ręcznie.": "Could not read the text. Take a clearer photo (good light, whole page) or paste the text manually.",
       "W umowie wykryto klauzule abuzywne — kwalifikujesz się do zwrotu pieniędzy.": "Unfair clauses were found in the contract — you qualify for a refund.",
-      "Szacowana kwota": "Estimated amount"
+      "Szacowana kwota": "Estimated amount",
+      "Prawo": "Law",
+      "Dla firm": "For business",
+      "Długi firmy? Policz restrukturyzację": "Business debts? Calculate a restructuring",
+      "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Enter your company debts, revenue and costs — we will show how much instalments drop, how much interest goes away and how long enforcement can be paused."
     }
   },
   "leads": {

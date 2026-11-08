@@ -95,7 +95,7 @@ Do decyzji właściciela:
 - **Odsetki:** stawki z obwieszczeń (Monitor Polski), maksymalne, kontrola kalkulatorów (które mają stawki na sztywno) i limitów analizy umów.
 - **Przepisy:** wyszukiwarka (numer artykułu z ustawą albo opis słowami); **📎 Dołącz do sprawy** — notatka „analiza” z treścią, stanem prawnym na dzień (tekst jednolity + nowelizacje w mocy, późniejsze zmiany).
 - **Karta sprawy → Analiza → 📜 Przepisy** — to samo dla bieżącej sprawy; przy sprawie ze strony: **Analiza umowy klienta** (wykryte zapisy, podstawa prawna, orzecznictwo, fragmenty, dane odczytane z umowy, ustawy powołane w umowie).
-- **Nowe sprawy:** zgłoszenie z analizy umowy pokazuje tę samą analizę. Klient na stronie widzi tylko komunikat o klauzulach abuzywnych i kwotę.
+- **Nowe sprawy:** zgłoszenie z analizy umowy pokazuje tę samą analizę; zgłoszenie z restrukturyzacji firmy — listę długów, wariant układu, wynik i ścieżki postępowań z podstawami. Klient na stronie widzi tylko komunikat o klauzulach abuzywnych i kwotę.
 - Przepisy w treści (np. „art. 385³ pkt 10 KC”) są klikalne — podgląd artykułu z aktualnego tekstu jednolitego.
 
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)

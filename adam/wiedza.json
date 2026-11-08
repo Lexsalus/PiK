@@ -198,6 +198,29 @@
       ]
     },
     {
+      "id": "firma",
+      "frazy": [
+        "firm*",
+        "przedsiebiorc*",
+        "dzialalnosc* gospodarcz*",
+        "spolk*",
+        "=zus",
+        "urzad skarbow*",
+        "leasing*",
+        "kontrahent*",
+        "faktur*",
+        "restrukturyzac* firm*",
+        "uklad z wierzyciel*"
+      ],
+      "odp": "Przy długach firmy (bank, leasing, ZUS, podatki, dostawcy) można wstrzymać egzekucje i raty na czas negocjacji z wierzycielami, a potem rozłożyć długi na raty, obniżyć odsetki i część umorzyć. Wpisz długi w kalkulatorze — pokaże, o ile spadną raty i ile zostanie umorzone.",
+      "przyciski": [
+        {
+          "label": "🏢 Policz restrukturyzację firmy",
+          "akcja": "href:#firma"
+        }
+      ]
+    },
+    {
       "id": "rst",
       "frazy": [
         "upadlosc*",
@@ -220,6 +243,10 @@
         {
           "label": "🧾 Sprawdź możliwość oddłużenia",
           "akcja": "calc:rst"
+        },
+        {
+          "label": "🏢 Długi firmy",
+          "akcja": "href:#firma"
         }
       ]
     },

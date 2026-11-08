@@ -17,6 +17,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Kalkulatory z suwakami, wyniki na żywo
 - Analiza umów (PDF, Word, ODT, RTF, TXT, HTML, **zdjęcie lub skan** — rozpoznawanie tekstu w przeglądarce) : ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
 - **Zwrot z umowy kredytu** (SKD, CHF/FX): gdy system wyliczy zwrot, klient widzi czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” i kwotę — **bez podstaw prawnych**; podstawy, orzecznictwo i wykryte zapisy trafiają ze zgłoszeniem do CRM
+- **Restrukturyzacja firmy** (sekcja „Dla firm”): przedsiębiorca wpisuje długi (bank, leasing, ZUS, podatki, dostawcy), przychody i koszty — widzi raty teraz i po układzie, raty wstrzymane w okresie ochrony, mniej odsetek, umorzenie; ścieżki postępowań z podstawami prawnymi idą ze zgłoszeniem do CRM
 - **Zmiany w prawie**: nowelizacje obserwowanych ustaw, projekty w Sejmie, aktualne odsetki (API Sejmu, codziennie)
 - Kalkulator odsetek i limity w analizie umów liczą się z aktualnych obwieszczeń
 - Wersje językowe PL / UA / EN (własne tłumaczenia lub Google Translate)
@@ -54,6 +55,7 @@ crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawn
 crm-prawo.js    CRM → 📜 Prawo + karta „Przepisy” w sprawie + analiza umowy klienta w zgłoszeniu
 prawo.js        wspólny moduł danych prawnych (przepisy z podglądem, odsetki, wyszukiwarka, stan prawny na dzień)
 prawo/          dane z API Sejmu (obserwowane.json — lista ustaw do edycji; reszta generowana codziennie)
+restrukturyzacja.js  kalkulator restrukturyzacji firmy (sekcja #firma)
 umowa-zwrot.js  ocena umowy kredytu i wyliczenie zwrotu (reguły z podstawami prawnymi i orzecznictwem)
 adam/           czat Adam (adam.js, wiedza.json)
 tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera

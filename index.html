@@ -207,6 +207,9 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .refund .rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px}.refund .rgrid label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut)}
 .refund .rgrid span{display:flex;align-items:center;gap:6px;color:var(--txt)}.refund .rgrid input{width:100%}
 .refund .rcta{margin-top:6px;background:var(--bad);border-color:var(--bad)}.refund .rcta[disabled]{opacity:.5;cursor:not-allowed}.refund .rnote{color:var(--mut);font-size:.8rem;margin-top:8px}
+#firmaCalc{grid-template-columns:1fr}.fpanel{overflow:hidden}.ftw{overflow-x:auto;margin:6px 0 10px}.ftab{width:100%;border-collapse:collapse;min-width:720px}.ftab th{font-size:.75rem;color:var(--mut);text-align:left;font-weight:600;padding:4px 6px}
+.ftab td{padding:4px 4px}.ftab .field{padding:7px 8px;width:100%;min-width:105px}.ftab select.field{min-width:150px}.ftab input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+.frow2,.frow3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}.frow2 label,.frow3 label{display:flex;flex-direction:column;gap:6px;font-size:.88rem;color:var(--mut)}
 .refrow{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}.refrow:last-child{border:0}.refrow i{font-style:normal}.refrow small{display:block;color:var(--mut)}
 @media(max-width:860px){.pgrid{grid-template-columns:1fr}}
 </style>
@@ -217,10 +220,11 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <a class="logo" href="#"><i>◆</i><span id="siteName">…</span><small class="ver-badge notranslate" id="verNav"></small></a>
   <div class="links">
     <a href="#nalezy" class="nav-claims" data-i18n>Co mi się należy</a>
+    <a href="#firma" data-i18n>Dla firm</a>
     <a href="#porownaj" data-i18n>Porównaj</a>
     <a href="#kalkulatory" data-i18n>Kalkulatory</a>
     <a href="#umowy" class="nav-umowy" data-i18n>Umowy</a>
-    <a href="#prawo" class="nav-prawo" data-i18n>Zmiany w prawie</a>
+    <a href="#prawo" class="nav-prawo" data-i18n>Prawo</a>
   </div>
   <div class="lang notranslate" id="lang"></div>
   <button class="icon-btn" id="theme" data-i18n-title="Motyw">🌓</button>
@@ -243,6 +247,11 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="sec-h"><div><h2 data-i18n>Sprawdź, co Ci się należy</h2><p data-i18n>Wstępny szacunek w kilka minut. Dokładną analizę Twojej sprawy przygotuje kancelaria.</p></div></div>
   <div class="cgrid" id="ncalcs"></div>
   <div class="calc" id="ncalc"></div>
+</div></section>
+
+<section id="firma" class="claims-sec"><div class="wrap">
+  <div class="sec-h"><div><h2 data-i18n>Długi firmy? Policz restrukturyzację</h2><p data-i18n>Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.</p></div></div>
+  <div class="calc" id="firmaCalc"></div>
 </div></section>
 
 <section id="porownaj"><div class="wrap">
@@ -293,6 +302,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
 <script src="prawo.js"></script>
 <script src="umowa-zwrot.js"></script>
+<script src="restrukturyzacja.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -398,6 +408,7 @@ function init(){
   initConsent();
   initChatbot();
   initPrawo().catch(e=>console.warn('prawo',e));
+  if(window.FIRMA)FIRMA.render();
 }
 
 /* ---------- chatbot (Adam — asystent prawny, adam/adam.js) ---------- */
@@ -751,7 +762,7 @@ async function collectRefs(text){
   if(!window.PRAWO||!lastRep)return;const rep=lastRep;let refs=null;try{refs=await PRAWO.contractRefs(text)}catch(e){}
   if(refs)rep.refs=refs.filter(r=>r.lvl!=='ok').slice(0,15).map(r=>({poziom:r.lvl,akt:r.title,uwaga:r.note,fragment:r.label}));
 }
-/* zwrot z umowy: klient widzi czerwony komunikat i kwoty — bez podstaw prawnych */
+/* zwrot z umowy: na stronie komunikat i kwoty; uzasadnienie prawne trafia do CRM ze zgłoszeniem */
 function renderZwrot(text){
   const box=$('#zwrot');if(!box||!window.ZWROT||!lastRep)return;
   const r=ZWROT.evaluate(text,D,compute);lastRep.zw=r;

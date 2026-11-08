@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.22.0] — 2026-11-08
+- Restrukturyzacja firmy (sekcja Dla firm): długi przedsiębiorcy, raty po układzie, wstrzymanie egzekucji, mniej odsetek, umorzenie; ścieżki postępowań z podstawami w CRM; Adam kieruje firmy do kalkulatora; nawigacja „Dla firm” i „Prawo”
+
 ## [1.21.2] — 2026-11-08
 - Parser tekstów v4: podział na artykuły po identyfikatorach ELI w HTML (pewny dla KPC i innych kodeksów), nagłówki rozdziałów ze struktury aktu
 

@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **08.11.2026**, wersja **1.21.2**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **08.11.2026**, wersja **1.22.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -49,6 +49,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 - 1.20.0–1.21.0 — **prawo z API Sejmu + Adam + zwrot z umowy** (szczegóły i status: `PLAN.md`): codzienna synchronizacja `tools/prawo_sync.py` → `prawo/*.json`; CRM → 📜 Prawo (zmiany, projekty, odsetki, przepisy, dołączanie przepisu do sprawy ze stanem na dzień); strona: „Zmiany w prawie”, odsetki automatyczne, OCR skanów umów, **zwrot z umowy kredytu: klient widzi czerwony komunikat + kwotę bez podstaw prawnych, podstawy/orzecznictwo idą ze zgłoszeniem do CRM**; czat **Adam** zamiast Ilony (Ilona to czat medyczny innego serwisu).
 - Na stronie wynik analizy umowy jest bez podstaw prawnych (komunikat i kwoty); pełne uzasadnienie w CRM.
+- Ustalenia biznesowe z rozmów (np. z klientami kancelarii) **nie trafiają do repozytorium** (repo jest publiczne) — w plikach tylko neutralny opis funkcji.
 
 ## Wcześniejsze zmiany (27.10–05.11.2026)
 

@@ -101,6 +101,12 @@ Przycisk zgłoszenia pokazuje się tylko, gdy wybrany sposób jest kompletnie sk
 
 **Panel → Kalkulatory:** pole *Gdzie na stronie* (Co mi się należy / Kalkulatory prawne), *Kategoria sprawy w CRM* i *Uwaga pod polami* (zastrzeżenia — **teksty uwag zweryfikuje prawnik przed startem**).
 
+## 5c. Restrukturyzacja firmy (sekcja „Dla firm”)
+
+Przedsiębiorca wpisuje długi: rodzaj (kredyt bankowy, leasing, pożyczka, dostawcy, podatki, ZUS, inne), kwotę do spłaty, ratę, oprocentowanie, zaległość, czy jest egzekucja i czy dług jest zabezpieczony (hipoteka, zastaw), a także przychód i koszty stałe miesięcznie. Suwaki ustawiają wariant układu: umorzenie części długu, liczbę rat, karencję.
+
+Wynik (tylko kwoty): łącznie mniej do zapłaty, raty teraz i po układzie, raty i egzekucje wstrzymane (do 4 miesięcy ochrony), mniej odsetek, umorzenie, czy firma udźwignie nowe raty. Model orientacyjny: długi zabezpieczone liczone jak dotąd, ZUS i podatki tylko rozłożone na raty (bez umorzenia), odsetki — z raty i oprocentowania do końca spłaty. Zgłoszenie trafia do CRM (kategoria RST) z listą długów, wariantem, ścieżkami postępowań (PZU, przyspieszone układowe, układowe, sanacja) z podstawami i zasadami do sprawdzenia. Kod: `restrukturyzacja.js`.
+
 ## 6. Analiza umów
 
 Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Plik nie opuszcza przeglądarki** — analiza działa lokalnie, bez serwera.

@@ -21,7 +21,9 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 10 | Bot **Adam** (zamiast Ilony na stronie): regułowy, w przeglądarce, wiedza w `adam/wiedza.json`, przepisy, odsetki, zmiany, projekty, kierowanie do kalkulatorów | ✅ |
 | 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 13/13, e2e 106/106 |
 | 12 | Dokumentacja: README, INSTRUKCJA, CRM, STAN, CHANGELOG, PLAN | ✅ v1.21.0 |
-| 13 | Sprawdzenie po wysyłce: nowa wersja parsera na danych z API (Actions), wygląd na telefonie | 🔄 |
+| 13 | Sprawdzenie po wysyłce: parser v4 (identyfikatory ELI) na danych z API, wygląd na telefonie | ✅ v1.21.2 |
+| 14 | Restrukturyzacja firmy: kalkulator długów przedsiębiorcy (raty po układzie, wstrzymanie, odsetki, umorzenie) + ścieżki postępowań z podstawami w CRM | ✅ v1.22.0 |
+| 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później
 
@@ -29,6 +31,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 
 - ❓ Adam na stronie pokazuje treść przepisu, gdy klient wprost o niego zapyta („art. 45 ukk”), a w kilku odpowiedziach dopisuje odnośnik do przepisu. Zostawić, czy wyłączyć (na stronie wynik analizy umowy pokazujemy bez podstaw prawnych)?
 - ⏳ Powiadomienia o zmianach w prawie zapisywane w bazie (dla każdego pełnomocnika) — wymaga migracji z `pg_net` albo Edge Function; teraz licznik i kafelek w CRM.
+- ⏳ Restrukturyzacja: harmonogram układu miesiąc po miesiącu (karencja w liczbach), wydruk planu dla wierzycieli.
 - ⏳ Kalkulator CHF z historycznymi kursami NBP (dokładniejszy szacunek z samej umowy, bez pytania klienta o ratę i saldo).
 - ⏳ Orzecznictwo (np. baza orzeczeń sądów powszechnych) jako źródło dla CRM — do sprawdzenia dostępność i warunki API.
 - ⏳ Lista obserwowanych ustaw do edycji z poziomu CRM (teraz plik `prawo/obserwowane.json`).
