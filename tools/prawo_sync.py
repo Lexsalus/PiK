@@ -36,7 +36,7 @@ OUT = os.path.join(ROOT, 'prawo')
 ELI = 'https://api.sejm.gov.pl/eli'
 SEJM = 'https://api.sejm.gov.pl/sejm'
 UA = 'PiK-prawo-sync/1.0 (+https://lexsalus.github.io/PiK/)'
-PARSER = 3  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
+PARSER = 4  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
 PAUSE = float(os.environ.get('PRAWO_PAUSE', '0.25'))  # odstęp między zapytaniami — nie obciążamy serwerów Sejmu
 TODAY = dt.date.today()
 LOG = []
@@ -224,6 +224,97 @@ def _art_key(nr):
     return int(m.group(1)) if m else 0
 
 
+VOID = {'br', 'img', 'hr', 'meta', 'input', 'link', 'col', 'area', 'base', 'wbr', 'source'}
+ART_ID = re.compile(r'(?:^|-)arti_([0-9]+[a-z]{0,3}(?:_[0-9]+)?)$')
+SEG = {'book': 'Księga', 'part': 'Część', 'titl': 'Tytuł', 'bran': 'Dział', 'chpt': 'Rozdział', 'sect': 'Oddział'}
+
+
+class ArtCollector(HTMLParser):
+    """Zbiera HTML każdego artykułu po identyfikatorach ELI (np. „titl_WSTĘPNY-arti_4_1”).
+    Pomija cytaty w treści obwieszczenia (identyfikatory zaczynające się od pass_/pint_)."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=False)
+        self.stack, self.cur, self.depth, self.buf, self.arts = [], None, 0, [], []
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        raw = self.get_starttag_text() or f'<{tag}>'
+        if self.cur is not None:
+            self.buf.append(raw)
+            if tag not in VOID:
+                self.depth += 1
+            return
+        i = a.get('id') or ''
+        m = ART_ID.search(i)
+        if m and not i.startswith(('pass_', 'pint_')) and tag not in VOID:
+            self.cur, self.depth, self.buf = (i, m.group(1)), 1, []
+
+    def handle_startendtag(self, tag, attrs):
+        if self.cur is not None:
+            self.buf.append(self.get_starttag_text() or '')
+
+    def handle_endtag(self, tag):
+        if self.cur is None or tag in VOID:
+            return
+        self.depth -= 1
+        if self.depth <= 0:
+            self.arts.append((self.cur[0], self.cur[1], ''.join(self.buf)))
+            self.cur = None
+        else:
+            self.buf.append(f'</{tag}>')
+
+    def handle_data(self, d):
+        if self.cur is not None:
+            self.buf.append(d)
+
+    def handle_entityref(self, name):
+        if self.cur is not None:
+            self.buf.append(f'&{name};')
+
+    def handle_charref(self, name):
+        if self.cur is not None:
+            self.buf.append(f'&#{name};')
+
+
+def art_number(name):
+    base, _, sup = name.partition('_')
+    return base + sup.translate(SUP)
+
+
+def split_articles_html(raw):
+    """HTML aktu z ELI → [[numer, treść, nagłówek]] na podstawie identyfikatorów elementów (pewniejsze niż tekst)."""
+    titles = dict(re.findall(r'"id"\s*:\s*"([^"]+)"\s*,\s*"symbol"\s*:\s*"[^"]*"\s*,\s*"type"\s*:\s*"[^"]*"\s*,\s*"name"\s*:\s*"[^"]*"\s*,\s*"title"\s*:\s*"([^"]*)"', raw))
+    p = ArtCollector()
+    p.feed(raw)
+    p.close()
+    out, seen = [], set()
+    for full, name, frag in p.arts:
+        nr = art_number(name)
+        if nr in seen:
+            continue
+        seen.add(nr)
+        txt = html_to_text(frag)
+        txt = re.sub(r'^\s*Art\.\s*[0-9]+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.\s*', '', txt)
+        body = '\n'.join(tidy(txt.split('\n')))
+        path = full.split('-')[:-1]
+        head = ''
+        for k in range(len(path), 0, -1):
+            key = '-'.join(path[:k])
+            if key in titles:
+                head = titles[key]
+                break
+            seg = path[k - 1].split('_', 1)
+            if seg[0] in SEG and len(seg) > 1:
+                head = f'{SEG[seg[0]]} {seg[1]}'
+                break
+        head = head.replace(' - ', ' – ')
+        if len(body) > 6000:
+            body = body[:6000].rsplit(' ', 1)[0] + ' […]'
+        out.append([nr, body or '(brak treści w tekście jednolitym — zobacz pełny tekst)', head])
+    return out
+
+
 def split_articles(text, is_obwieszczenie=True):
     """Tekst aktu -> [[numer, treść, nagłówek rozdziału], …].
     Obwieszczenie (tekst jednolity) zawiera przed załącznikiem cytaty przepisów ustaw zmieniających — właściwy tekst
@@ -398,25 +489,17 @@ def sync_teksty(teksty_do):
             continue  # ten sam tekst jednolity — nie pobieramy ponownie
         try:
             raw = http(f'{eli_url(eli)}/text.html')
-            if a['id'] == 'kpc' and os.environ.get('PRAWO_DEBUG', '1') == '1':  # diagnostyka parsera (tymczasowo)
-                ids = re.findall(r'id="([a-z]{4}_[^"]{1,30})"', raw)
-                pos = [m.start() for m in re.finditer(r'Art\.(?:&nbsp;|\s|\xa0)*1\.', raw)]
-                with open(os.path.join(OUT, 'debug-kpc.txt'), 'w', encoding='utf-8') as fdbg:
-                    fdbg.write(f'len={len(raw)} ids={len(ids)} sample_ids={ids[:40]}\nart1_positions={pos[:20]}\n')
-                    for p in pos[:4]:
-                        fdbg.write('\n----- @%d\n%s\n' % (p, raw[max(0, p - 600):p + 900]))
-                    t2 = html_to_text(raw)
-                    fdbg.write('\n===== TEXT around Art. 1.\n')
-                    for m in list(re.finditer(r'(?m)^Art\.\s*1\.', t2))[:5]:
-                        fdbg.write('\n-- @%d\n%s\n' % (m.start(), t2[max(0, m.start() - 300):m.start() + 500]))
-            text = html_to_text(raw)
-            arts = split_articles(text, eli != d.get('ELI'))
+            arts = split_articles_html(raw)
+            how = 'id'
+            if len(arts) < 3:  # starszy HTML bez identyfikatorów — podział po tekście
+                text = html_to_text(raw)
+                arts, how = split_articles(text, eli != d.get('ELI')), 'tekst'
             if len(arts) < 3:
-                log(f'  ⚠ {a["id"]}: rozpoznano tylko {len(arts)} artykułów — zostawiam poprzedni plik. Początek tekstu: {text[:300]!r}')
+                log(f'  ⚠ {a["id"]}: rozpoznano tylko {len(arts)} artykułów — zostawiam poprzedni plik.')
                 continue
             save(f'teksty/{a["id"]}.json', {'id': a['id'], 'nazwa': a['nazwa'], 'zrodlo': eli, 'adres': src['adres'] if src else d.get('displayAddress'),
                                             'stan': src.get('stan') if src else None, 'pobrano': TODAY.isoformat(), 'parser': PARSER, 'art': arts})
-            log(f'  ✓ tekst {a["id"]}: {len(arts)} artykułów z {eli} (np. art. {arts[0][0]}: {arts[0][1][:80]!r})')
+            log(f'  ✓ tekst {a["id"]}: {len(arts)} artykułów z {eli} [{how}] (np. art. {arts[0][0]}: {arts[0][1][:80]!r})')
         except Exception as e:
             log(f'  ⚠ tekst {a["id"]} {eli}: {e}')
 

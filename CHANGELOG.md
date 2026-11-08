@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.21.2] — 2026-11-08
+- Parser tekstów v4: podział na artykuły po identyfikatorach ELI w HTML (pewny dla KPC i innych kodeksów), nagłówki rozdziałów ze struktury aktu
+
 ## [1.21.1] — 2026-11-08
 - Parser tekstów v3 (przypisy w linii), diagnostyka KPC, zmiany w prawie na stronie bez powtórzeń (jedna ustawa zmieniająca kilka obserwowanych)
 
