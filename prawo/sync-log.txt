@@ -17,19 +17,16 @@
 ✓ uchylony? DU/2002/1176 — Ustawa z dnia 27 lipca 2002 r. o szczególnych warunkach sprzedaży konsumenckiej  [uchylony]
 ✓ uchylony? DU/2000/1319 — Ustawa z dnia 15 grudnia 2000 r. o ochronie konkurencji i konsumentów. [uchylony]
 ✓ uchylony? DU/1934/502 — Rozporządzenie Prezydenta Rzeczypospolitej z dnia 27 czerwca 1934 r. Kodeks hand [uchylony]
-✓ zmiany: +27, razem 27
-  ✓ tekst kc: 1289 artykułów z DU/2024/1061 (np. art. 16: 'Do umów o roboty budowlane zawartych przed dniem wejścia w życie niniejszej usta')
-  ✓ tekst kpc: 1933 artykułów z DU/2024/1568 (np. art. 1522: '')
-  ✓ tekst ukk: 109 artykułów z DU/2024/1497 (np. art. 14: 'Ustawa wchodzi w życie po upływie 6 miesięcy od dnia ogłoszenia, z wyjątkiem:\n1)')
+✓ zmiany: +0, razem 27
+  ✓ tekst kc: 1289 artykułów z DU/2024/1061 (np. art. 1: 'Kodeks niniejszy reguluje stosunki cywilnoprawne między osobami fizycznymi i oso')
+  ✓ tekst kpc: 1933 artykułów z DU/2024/1568 (np. art. 1522: '(brak treści w tekście jednolitym — zobacz pełny tekst)')
+  ✓ tekst ukk: 107 artykułów z DU/2024/1497 (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt konsumencki;\n2) obowią')
   – frank: brak tekstu HTML
-  ✓ tekst pb: 461 artykułów z DU/2024/1646 (np. art. 22: 'Ustawa wchodzi w życie z dniem 1 lipca 2024 r., z wyjątkiem:\n1)\nart. 6 pkt 1, kt')
-  ✓ tekst ukh: 92 artykułów z DU/2022/2245 (np. art. 166: 'Ustawa wchodzi w życie z dniem 5 października 2021 r., z wyjątkiem:\n1)\nart. 145 ')
-  ✓ tekst upk: 74 artykułów z DU/2024/1796 (np. art. 124: 'Ustawa wchodzi w życie po upływie 3 miesięcy od dnia ogłoszenia, z wyjątkiem:\n1)')
-  ✓ tekst kro: 239 artykułów z DU/2023/2809 (np. art. 36: 'Do spraw w przedmiocie określenia okresu osobistej styczności przysposabiającego')
-  ✓ tekst pu: 597 artykułów z DU/2024/794 (np. art. 26: 'Ustawa wchodzi w życie z dniem 1 października 2023 r., z wyjątkiem:\n1)\nart. 16, ')
-  ✓ tekst uksc: 167 artykułów z DU/2024/959 (np. art. 8: 'Ustawa wchodzi w życie z dniem następującym po dniu ogłoszenia.\n”\n;\n2)\nart. 37 i')
-✓ projekty: kadencja 10, przejrzano 498, pasuje 21
-✓ odsetki kapitalowe: 7.25% od 2026-03-05 (M.P. 2026 poz. 368)
-✓ odsetki opoznienie: 9.25% od 2026-03-05 (M.P. 2026 poz. 367)
-  ⚠ odsetki handlowe: nie odczytano stawki z PDF MP/2026/642
-✓ odsetki handlowe: None% od None (M.P. 2026 poz. 642)
+  ✓ tekst pb: 461 artykułów z DU/2024/1646 (np. art. 1: 'Ustawa określa:\n1) zasady prowadzenia działalności bankowej, tworzenia i organiz')
+  ✓ tekst ukh: 91 artykułów z DU/2022/2245 (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt hipoteczny;\n2) prawa i')
+  ✓ tekst upk: 73 artykułów z DU/2024/1796 (np. art. 1: 'Ustawa określa prawa przysługujące konsumentowi, w szczególności:\n1) obowiązki p')
+  ✓ tekst kro: 239 artykułów z DU/2023/2809 (np. art. 1: '§ 1. Małżeństwo zostaje zawarte, gdy mężczyzna i kobieta jednocześnie obecni zło')
+  ✓ tekst pu: 597 artykułów z DU/2024/794 (np. art. 1: '1. Ustawa reguluje:\n1) zasady wspólnego dochodzenia roszczeń wierzycieli od niew')
+  ✓ tekst uksc: 167 artykułów z DU/2024/959 (np. art. 1: 'Ustawa określa zasady i tryb pobierania kosztów sądowych w sprawach cywilnych, z')
+✓ projekty: kadencja 10, przejrzano 498, pasuje 13
+✓ odsetki handlowe: 13.75% od 2026-07-01 (M.P. 2026 poz. 642)
