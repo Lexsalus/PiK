@@ -95,6 +95,11 @@ async def main():
     ok('Art. 45' not in await T('#adRes'),'Czat Adam: wyłączone pokazywanie przepisów')
     await nav('#/strona/funkcje'); await pg.wait_for_timeout(500); v=await T('#view')
     ok('Zmiany w prawie' in v and 'Zwrot z umowy' in v and 'Restrukturyzacja firmy' in v and 'Skany umów' in v,'Treści strony → Nowe funkcje: ustawienia')
+    ok(await pg.locator('#stTabs .tab .tdot').count()>=1,'Treści strony: kropka przy zakładce ze zmianami w szkicu')
+    ok(await pg.locator('#stTabs .tab.gs').count()==4,'Treści strony: zakładki w 5 grupach z kolorami')
+    await nav('#/strona/tech'); await pg.wait_for_timeout(2500); v=await T('#view')
+    ok('Stan systemu' in v and 'Baza danych' in v and 'odpowiada' in v and 'Tryb serwisowy' in v and 'Połączenie z bazą' in v and 'Aplikacja na tym urządzeniu' in v,'Treści strony → Techniczne: stan systemu, serwis, limity, połączenie, aplikacja')
+    if os.environ.get('E2E_SHOTS'): await pg.screenshot(path=os.environ['E2E_SHOTS']+'tech.png')
     await nav('#/strona/export'); await pg.wait_for_timeout(500); await pg.click('[data-st="reset()"]'); await pg.wait_for_timeout(500)  # szkic z testu odrzucony
     # --- zespół: aplikantka bez finansów
     await nav(f'#/sprawa/{caseid}/zespol'); await pg.click('text=+ Dodaj osobę do sprawy'); await pg.wait_for_timeout(300)
@@ -149,6 +154,7 @@ async def main():
     # --- obsługa techniczna
     await login('tech@k.test'); m=await pg.eval_on_selector_all('#side a.nav','e=>e.map(x=>x.innerText)'); ok(not any('Sprawy' in x for x in m),'obsługa techniczna: bez spraw')
     g=await pg.eval_on_selector_all('#side .ngrp','e=>e.map(x=>x.innerText.trim().toUpperCase())'); ok(g==['ADMINISTRACJA'],'obsługa techniczna: tylko grupa Administracja')
+    await nav('#/ustawienia'); await pg.wait_for_timeout(400); tb=await pg.eval_on_selector_all('#view .tabs .tab','e=>e.map(x=>x.innerText.trim())'); ok(tb and tb[0]=='Moje konto','Ustawienia: zakładki w grupach (Moje konto pierwsze): '+', '.join(tb))
     await nav(f'#/sprawa/{caseid}'); ok(await pg.is_visible('.forbid'),'tech: karta sprawy → 403')
     # --- konto nieaktywne
     await login('nowy@k.test'); ok('nie jest jeszcze aktywne' in await T('#login'),'nowe konto: „nieaktywne — poproś Administratora”')

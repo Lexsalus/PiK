@@ -46,7 +46,7 @@ let D,ORIG,view='settings',ci=0,ki=0,BASE='',STALE=false,READY=false;
 const hash=t=>{let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(36)};
 const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ł/g,'l').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'id';
 const uid=p=>p+Math.random().toString(36).slice(2,7);
-const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂️ Kategorie','Kategorie porównywarki'],['calcs','🧮 Kalkulatory','Kalkulatory'],['contracts','📄 Analiza umów','Analiza umów'],['adam','💬 Czat Adam','Czat Adam — asystent na stronie'],['funkcje','✨ Nowe funkcje','Nowe funkcje strony'],['i18n','🌐 Tłumaczenia','Tłumaczenia'],['seo','🔎 SEO','Optymalizacja pod Google (SEO)'],['export','🚀 Publikacja','Publikacja']];
+const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂️ Kategorie','Kategorie porównywarki'],['calcs','🧮 Kalkulatory','Kalkulatory'],['contracts','📄 Analiza umów','Analiza umów'],['funkcje','✨ Nowe funkcje','Nowe funkcje strony'],['adam','💬 Czat Adam','Czat Adam — asystent na stronie'],['i18n','🌐 Tłumaczenia','Tłumaczenia'],['seo','🔎 SEO','Optymalizacja pod Google (SEO)'],['tech','🔧 Techniczne','Ustawienia techniczne'],['export','🚀 Publikacja','Publikacja']];
 
 async function load(){
   const p=await siteContent(true);ORIG=p?structuredClone(p):null;if(ORIG?.site)delete ORIG.site.adminHash;
@@ -59,7 +59,7 @@ async function load(){
   if(D){norm();READY=true}
 }
 /* lista różnic: szkic (ta przeglądarka) ↔ opublikowana wersja */
-const DIFF_TOP={adam:'Czat Adam',zmianyPrawa:'Zmiany w prawie (sekcja)',zwrot:'Zwrot z umowy',firma:'Restrukturyzacja firmy',site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
+const DIFF_TOP={serwis:'Tryb serwisowy',adam:'Czat Adam',zmianyPrawa:'Zmiany w prawie (sekcja)',zwrot:'Zwrot z umowy',firma:'Restrukturyzacja firmy',site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
 const DIFF_LN={uk:'ukraiński',en:'angielski'};
 const DIFF_KEY={items:'oferty',fields:'parametry',inputs:'pola',outputs:'wyniki',rules:'reguły',indicators:'wskaźniki',legal:'zgodność z prawem',suspicion:'podejrzana treść',name:'nazwa',tagline:'hasło (podtytuł)',accent:'kolor akcentu',formula:'wzór',label:'etykieta',description:'opis',note:'uwaga',unit:'jednostka',url:'link',badge:'etykieta oferty',patterns:'wzorce',advice:'porada',formats:'formaty',enabled:'włączone',languages:'języki',mode:'tryb',title:'tytuł',consent:'zgoda RODO'};
 function diffList(a,b){
@@ -90,8 +90,20 @@ function showDiff(){
 function useNew(){if(!confirm('Odrzucić szkic i wczytać opublikowaną wersję strony?'))return;D=structuredClone(ORIG);norm();STALE=false;render();toast('Wczytano opublikowaną wersję')}
 function keepDraft(){STALE=false;save();render();toast('Zostawiono szkic')}
 const dirty=()=>!!D&&JSON.stringify(D)!==JSON.stringify(ORIG);
+/* zakładki Treści strony w grupach; kropka = szkic różni się od opublikowanej wersji w tej części */
+const ST_GROUPS=[{l:'Strona',c:'#5aa9ff',tip:'Nazwa, kolor, formularz zgłoszeń, porównywarka.',k:['settings','cats']},
+  {l:'Narzędzia dla klienta',c:'#2fd6a0',tip:'Kalkulatory, analiza umów, zwrot z umowy, restrukturyzacja, zmiany w prawie.',k:['calcs','contracts','funkcje']},
+  {l:'Kontakt',c:'#c08cff',tip:'Czat Adam na stronie.',k:['adam']},
+  {l:'Zasięg',c:'#f5b84a',tip:'Wersje językowe i Google.',k:['i18n','seo']},
+  {l:'Technika i publikacja',c:'#ff6b81',tip:'Stan systemu, tryb serwisowy, limity, publikacja.',k:['tech','export']}];
+Object.assign(TAB_TIPS,{settings:'Nazwa strony, kolor, formularz zgłoszeń.',cats:'Kategorie i oferty porównywarki.',calcs:'Kalkulatory i ich wzory.',contracts:'Reguły analizy umów i limity odsetek.',funkcje:'Zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, skany.',
+  adam:'Ustawienia czatu Adam, tematy, tester.',i18n:'Tłumaczenia UA / EN.',seo:'Tytuł, opis, Google, analityka.',tech:'Stan systemu, synchronizacja prawa, tryb serwisowy, limity, połączenie z bazą, aplikacja.',export:'Opublikuj szkic, eksport i import data.json.'});
+const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators'],contracts:['contracts'],funkcje:['zmianyPrawa','zwrot','firma'],adam:['adam'],i18n:['i18n','translations'],seo:['seo'],tech:['serwis']};
+function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty();return (ST_KEYS[k]||[]).some(x=>JSON.stringify(D[x])!==JSON.stringify(ORIG[x]))}
+const stTabs=()=>groupTabs(TABS,ST_GROUPS,view,k=>'#/strona/'+k,k=>stDirtyTab(k)?'<span class="tdot" data-tip="Zmiany nieopublikowane"></span>':'');
 function save(){
   if(!D)return;
+  const T=$('#stTabs');if(T)T.innerHTML=stTabs();
   try{localStorage.setItem(KEY,JSON.stringify(D));if(!STALE)localStorage.setItem(KEY+'_base',BASE)}catch(e){}
   const st=$('#stStatus');if(st){const d=dirty();st.textContent=d?'Szkic — nieopublikowany':(SITE.src==='db'?'Zgodne z opublikowaną':'Zgodne z data.json');st.classList.toggle('dirty',d)}
 }
@@ -100,11 +112,12 @@ function render(){
   if(!READY){V.innerHTML='<div class="empty">Nie udało się wczytać treści strony.</div>';return}
   save();$('#stStale').style.display=STALE?'flex':'none';
   $('#stTitle').textContent=TABS.find(t=>t[0]===view)[2];
-  V.innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,adam:vAdam,funkcje:vFunkcje,i18n:vI18n,seo:vSeo,export:vExport})[view]();
+  V.innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,adam:vAdam,funkcje:vFunkcje,tech:vTech,i18n:vI18n,seo:vSeo,export:vExport})[view]();
   if(view==='calcs')testCalc();
   if(view==='i18n')renderTl();
   if(view==='seo')seoPreview();
   if(view==='contracts')testRules();
+  if(view==='tech')techCheck();
 }
 
 ROUTES.strona=sub=>{
@@ -112,7 +125,7 @@ ROUTES.strona=sub=>{
   view=TABS.some(t=>t[0]===sub)?sub:'settings';
   return `<div id="stWrap"><div class="ph"><div><h1>Treści strony</h1><p>Porównywarka, kalkulatory, analiza umów, tłumaczenia i SEO. Zmiany zapisują się jako szkic w tej przeglądarce — na stronie pojawią się po „Opublikuj”.</p></div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="stst" id="stStatus">…</span><a class="btn" href="index.html?preview" target="_blank" data-tip="Strona ze szkicem z tej przeglądarki (nieopublikowanym)">👁 Podgląd</a><a class="btn" href="index.html" target="_blank">🌐 Strona</a><button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj</button></div></div>
-    <div class="tabs">${TABS.map(([k,l])=>`<a class="tab ${k===view?'on':''}" href="#/strona/${k}">${l}</a>`).join('')}</div>
+    <div id="stTabs">${stTabs()}</div>
     <div id="stStale"><span style="flex:1;min-width:240px">⚠️ <b>Opublikowana wersja strony zmieniła się</b> od czasu utworzenia Twojego szkicu (np. publikacja z innego komputera). Szkic nie zawiera tych zmian.</span><button class="btn" type="button" data-st="showDiff()" data-tip="Co jest inne w szkicu z tej przeglądarki, a co w opublikowanej wersji">🔍 Pokaż różnice</button><button class="btn pri" type="button" data-st="useNew()">Użyj opublikowanej wersji</button><button class="btn" type="button" data-st="keepDraft()">Zostaw mój szkic</button></div>
     <h2 id="stTitle" style="font-size:1.15rem;margin-bottom:14px"></h2><div id="stView"><div class="empty">Wczytywanie…</div></div></div>`;
 };
@@ -185,11 +198,9 @@ function vSettings(){
   <div class="box"><h3>Formularz zgłoszenia sprawy</h3><div class="form">
     <label style="display:flex;align-items:center;gap:10px;color:var(--txt)"><input type="checkbox" data-p="leads.enabled" ${L.enabled?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">Przycisk „Chcę bezpłatną analizę” pod kalkulatorami</label>
     <label>Gdzie trafia zgłoszenie<select class="f" data-p="leads.mode"><option value="email" ${L.mode==='email'?'selected':''}>E-mail kancelarii (program pocztowy klienta)</option><option value="supabase" ${L.mode!=='email'?'selected':''}>Baza CRM (Supabase)</option></select></label>
-    <label>Supabase — adres projektu<input class="f code" data-p="leads.supabaseUrl" value="${esc(L.supabaseUrl||'')}" placeholder="https://xxxx.supabase.co"></label>
-    <label>Supabase — klucz publiczny (publishable)<input class="f code" data-p="leads.supabaseKey" value="${esc(L.supabaseKey||'')}" placeholder="sb_publishable_…"></label>
     <label>Adres e-mail kancelarii<input class="f" type="email" data-p="leads.email" value="${esc(L.email||'')}" placeholder="biuro@kancelaria.pl"></label>
     <label style="grid-column:1/-1">Treść zgody RODO<textarea class="f" data-p="leads.consent" rows="3">${esc(L.consent||'')}</textarea></label></div>
-    <p class="hint"><b>E-mail:</b> otwiera program pocztowy klienta z gotową wiadomością do kancelarii (klient musi ją wysłać).<br><b>Baza CRM:</b> zgłoszenie trafia od razu do CRM („Nowe sprawy”). Klucz publiczny może być jawny; <b>nigdy</b> nie wpisuj tu klucza <code>sb_secret_…</code>.</p></div>
+    <p class="hint"><b>E-mail:</b> otwiera program pocztowy klienta z gotową wiadomością do kancelarii (klient musi ją wysłać).<br><b>Baza CRM:</b> zgłoszenie trafia od razu do CRM („Nowe sprawy”). Adres bazy i klucz publiczny: zakładka <a href="#/strona/tech">🔧 Techniczne</a>.</p></div>
   <div class="box"><h3>Czat na stronie</h3><p class="hint" style="margin:0">Czat <b>Adam</b> i jego treści ustawiasz w zakładce <a href="#/strona/adam">💬 Czat Adam</a>.</p></div>`;
 }
 
@@ -237,6 +248,51 @@ async function adTest(){
   try{const a=await AdamEngine.answer(q);R.innerHTML=`<div class="card" style="background:var(--bg2)">${a.id?`<div class="mut small">Temat: <b>${esc(a.id)}</b></div>`:'<div class="mut small">Brak pasującego tematu</div>'}<div style="margin-top:6px">${a.html}</div>${(a.buttons||[]).length?`<div class="chips" style="margin-top:8px">${a.buttons.map(b=>`<span class="chip" data-tip="${esc(b.akcja)}">${esc(b.label)}</span>`).join('')}</div>`:''}</div>`}
   catch(e){R.textContent='Błąd: '+e.message}
 }
+
+/* ---------- Techniczne ---------- */
+const GH='https://github.com/Lexsalus/PiK';
+function vTech(){
+  const L=D.leads,S=D.serwis,C=D.contracts,num=(p,v,l,st=1)=>`<label>${l}<input class="f" type="number" min="0" step="${st}" data-t="num" data-p="${p}" value="${esc(v??'')}"></label>`;
+  return `<div class="box"><h3>🩺 Stan systemu <button class="btn sm" type="button" data-st="techCheck()">↻ Sprawdź</button></h3><div id="techStan" class="grid g2"><div class="mut">Sprawdzanie…</div></div></div>
+  <div class="box"><h3>📜 Synchronizacja prawa (API Sejmu)</h3><div id="techSync" class="small mut">…</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn sm" href="${GH}/actions/workflows/static.yml" target="_blank" rel="noopener" data-tip="GitHub → Actions → „Run workflow” uruchamia synchronizację od razu (wymaga konta z dostępem do repozytorium)">▶ Uruchom teraz (GitHub)</a>
+      <a class="btn sm" href="prawo/sync-log.txt" target="_blank">📄 Dziennik ostatniego przebiegu</a><a class="btn sm" href="${GH}/blob/main/prawo/obserwowane.json" target="_blank" rel="noopener">✏️ Lista obserwowanych ustaw</a><a class="btn sm" href="#/prawo/zmiany">📜 CRM → Prawo</a></div>
+    <p class="hint">Automatycznie codziennie ok. 6:17. Zmiana listy ustaw = edycja pliku w repozytorium (synchronizacja uruchomi się sama po zapisie).</p></div>
+  <div class="box"><h3>🚧 Tryb serwisowy strony</h3><div class="form">
+    ${chkBox('serwis.enabled',S.enabled,'Włącz baner o pracach serwisowych na stronie')}${chkBox('serwis.blokujFormularz',S.blokujFormularz!==false,'Na czas prac wyłącz wysyłanie zgłoszeń')}
+    <label style="grid-column:1/-1">Tekst banera<input class="f" data-p="serwis.tekst" value="${esc(S.tekst||'')}"></label></div>
+    <p class="hint">Działa po „🚀 Opublikuj”. Przy wyłączonych zgłoszeniach przyciski „Chcę bezpłatną analizę” pokazują komunikat z prośbą o kontakt później.</p></div>
+  <div class="box"><h3>📏 Limity</h3><div class="form">${num('contracts.maxMB',C.maxMB,'Maks. rozmiar pliku umowy (MB)')}${num('contracts.ocrMaxPages',C.ocrMaxPages,'Maks. stron skanu do rozpoznania (OCR)')}</div>
+    <p class="hint">Pilnuje baza (nie do zmiany tutaj): maks. <b>3 zgłoszenia na godzinę z jednego adresu e-mail</b>; rozmiar danych kalkulatora w zgłoszeniu do 20 kB; pliki w aktach sprawy do 25 MB.</p></div>
+  <div class="box"><h3>🔌 Połączenie z bazą (formularz zgłoszeń)</h3><div class="form">
+    <label>Supabase — adres projektu<input class="f code" data-p="leads.supabaseUrl" value="${esc(L.supabaseUrl||'')}" placeholder="https://xxxx.supabase.co"></label>
+    <label>Supabase — klucz publiczny (publishable)<input class="f code" data-p="leads.supabaseKey" value="${esc(L.supabaseKey||'')}" placeholder="sb_publishable_…"></label></div>
+    <p class="hint">Klucz publiczny może być jawny (baza pozwala nim tylko dodać zgłoszenie). <b>Nigdy</b> nie wpisuj klucza <code>sb_secret_…</code> — panel go odrzuci.</p></div>
+  <div class="box"><h3>📲 Aplikacja na tym urządzeniu</h3><div id="techApp" class="small mut">…</div>
+    <button class="btn sm" type="button" data-st="techClear()" style="margin-top:10px" data-tip="Usuwa zapisane pliki aplikacji CRM w tej przeglądarce i wczytuje najnowszą wersję. Dane w bazie i szkic treści zostają.">🧹 Wyczyść pamięć aplikacji i odśwież</button></div>`;
+}
+const ago=t=>{if(!t)return '—';const h=(Date.now()-new Date(t))/36e5;return h<1?Math.round(h*60)+' min temu':h<48?Math.round(h)+' godz. temu':Math.round(h/24)+' dni temu'};
+async function techCheck(){
+  const box=$('#techStan');if(!box)return;const row=(ok,l,v)=>`<div class="card" style="background:var(--bg2);padding:12px"><div class="mut small">${l}</div><b style="color:${ok===null?'var(--txt)':ok?'var(--good)':'var(--bad)'}">${ok===false?'⚠ ':ok?'✓ ':''}${v}</b></div>`;
+  const out=[];
+  let t0=performance.now(),db=null;try{const r=await sb.from('site_content').select('published_at').eq('id',1).maybeSingle();db=r.error?null:Math.round(performance.now()-t0)}catch(e){}
+  out.push(row(db!==null,'Baza danych (Supabase)',db!==null?`odpowiada · ${db} ms`:'brak odpowiedzi'));
+  let st=null;try{st=await (await fetch('prawo/stan.json',{cache:'no-store'})).json()}catch(e){}
+  const fresh=st?.ostatnio&&(Date.now()-new Date(st.ostatnio))<48*36e5,okAll=st&&Object.values(st.wynik||{}).every(v=>v==='ok');
+  out.push(row(!!(fresh&&okAll),'Dane prawne (API Sejmu)',st?`${ago(st.ostatnio)}${okAll?'':' · częściowo nieudana'}`:'brak danych'));
+  let v=null;try{v=await (await fetch('version.json',{cache:'no-store'})).json()}catch(e){}
+  out.push(row(v&&APP_VER?v.version===APP_VER:null,'Wersja strony / CRM',v?`${v.version} / ${APP_VER||'—'}${v&&APP_VER&&v.version!==APP_VER?' — odśwież CRM':''}`:'—'));
+  out.push(row(null,'Ostatnia publikacja treści',SITE.at?new Date(SITE.at).toLocaleString('pl-PL'):'jeszcze nie publikowano (strona używa data.json)'));
+  box.innerHTML=out.join('');
+  const sy=$('#techSync');if(sy)sy.innerHTML=st?`Ostatnio: <b>${new Date(st.ostatnio).toLocaleString('pl-PL')}</b> (${ago(st.ostatnio)}), czas ${st.czas_s||'?'} s · ${Object.entries(st.wynik||{}).map(([k,x])=>`${esc(k)}: ${x==='ok'?'✓':'<span class="st-overdue">'+esc(x)+'</span>'}`).join(' · ')}`:'Brak pliku prawo/stan.json.';
+  const ap=$('#techApp');if(ap){let cs=[],sw=false;try{cs=await caches.keys()}catch(e){}try{sw=!!(await navigator.serviceWorker?.getRegistration())}catch(e){}
+    const inst=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+    ap.innerHTML=`Zainstalowana jako aplikacja: <b>${inst?'tak':'nie'}</b> · pamięć aplikacji: <b>${sw?'aktywna':'brak'}</b>${cs.length?' ('+cs.map(esc).join(', ')+')':''} · wersja CRM: <b>${esc(APP_VER||'—')}</b>`}
+}
+async function techClear(){if(!confirm('Wyczyścić zapisane pliki aplikacji CRM w tej przeglądarce i odświeżyć?'))return;
+  try{for(const k of await caches.keys())if(k.startsWith('crm-'))await caches.delete(k)}catch(e){}
+  try{for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch(e){}
+  location.reload()}
 
 /* ---------- Nowe funkcje strony ---------- */
 function vFunkcje(){
@@ -370,6 +426,8 @@ function norm(){
   D.zwrot=D.zwrot||structuredClone(O.zwrot||ZWROT_DEF);
   D.firma=D.firma||structuredClone(O.firma||{enabled:true,red:30,mies:48,kar:6});
   if(D.contracts.ocr===undefined)D.contracts.ocr=O.contracts?.ocr??true;
+  if(D.contracts.ocrMaxPages===undefined)D.contracts.ocrMaxPages=O.contracts?.ocrMaxPages??15;
+  D.serwis=D.serwis||structuredClone(O.serwis||{enabled:false,tekst:'Trwają prace serwisowe — niektóre funkcje mogą chwilowo nie działać.',blokujFormularz:true});
 }
 const ADAM_DEF={imie:'Adam',podpis:'asystent prawny · odpowiada od razu',przycisk:'Zapytaj Adama',powitanie:'',zastrzezenie:'',przepisy:true,szukaj:true,
   start:[{label:'💰 Co mi się należy?',akcja:'ask:co mi sie nalezy'},{label:'🏢 Długi firmy',akcja:'href:#firma'},{label:'🆕 Zmiany w prawie',akcja:'info:zmiany'},{label:'📄 Sprawdź umowę',akcja:'href:#umowy'},{label:'📅 Odsetki',akcja:'info:odsetki'}],dodatkowe:[]};

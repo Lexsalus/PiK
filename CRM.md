@@ -48,7 +48,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 - **Raporty:** filtr statusu, eksport CSV / XLSX / PDF (drukowanie do pliku), każdy w audycie; aplikant widzi własne czynności i terminy.
 - **Wylogowanie po 30 min bezczynności**; kolejność kategorii także przeciąganiem.
 
-**Testy:** reguły bazy 137/137 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 113/113 (`supabase/test/e2e/`).
+**Testy:** reguły bazy 137/137 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 117/117 (`supabase/test/e2e/`).
 
 ## Treści strony (migracja 005, 27.10.2026)
 
@@ -87,6 +87,12 @@ Do decyzji właściciela:
 - **👁 Podgląd** w lewym menu: CRM oczami wybranej **roli** (domyślne uprawnienia, bez przypisań do spraw) albo **osoby** (rola, nadania indywidualne, sprawy z jej zespołów) — menu, sprawy, zakładki i przyciski.
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
+
+## Zakładki w grupach i 🔧 Techniczne (v1.25.0)
+
+- **Treści strony** — zakładki w grupach z kolorami: **Strona** (Ustawienia, Kategorie), **Narzędzia dla klienta** (Kalkulatory, Analiza umów, Nowe funkcje), **Kontakt** (Czat Adam), **Zasięg** (Tłumaczenia, SEO), **Technika i publikacja** (Techniczne, Publikacja). **Kropka** przy zakładce = w tej części szkic różni się od opublikowanej wersji. Dymki opisują zakładki.
+- **Ustawienia** — zakładki w grupach: **Moje** (Moje konto), **Sprawy i terminy** (Kategorie, Święta, Przypomnienia, Powiadomienia), **Dostęp i bezpieczeństwo** (Użytkownicy, Dziennik audytu, System); każdy widzi tylko swoje.
+- **🔧 Techniczne** (Treści strony): stan systemu (baza, świeżość danych z API Sejmu, zgodność wersji strony i CRM, ostatnia publikacja), synchronizacja prawa (wynik, dziennik, „Uruchom teraz” w GitHub Actions, lista ustaw), **tryb serwisowy** (baner na stronie, wstrzymanie zgłoszeń), limity (rozmiar pliku umowy, strony OCR; limity pilnowane przez bazę), połączenie z bazą (adres i klucz publiczny — przeniesione z Ustawień), aplikacja na tym urządzeniu (stan, „Wyczyść pamięć aplikacji”).
 
 ## Treści strony — nowe zakładki (v1.24.0)
 

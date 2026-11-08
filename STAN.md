@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **08.11.2026**, wersja **1.24.1**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **08.11.2026**, wersja **1.25.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -49,6 +49,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Ostatnie zmiany (08.11.2026)
 
+- 1.25.0 — zakładki Treści strony i Ustawień w grupach z kolorami (kropka = nieopublikowane zmiany), nowa zakładka **🔧 Techniczne** (stan systemu, synchronizacja prawa, tryb serwisowy z wstrzymaniem zgłoszeń, limity, połączenie z bazą, pamięć aplikacji). e2e 117/117.
 - 1.24.0 — CRM → Treści strony: **💬 Czat Adam** (imię, powitanie, przyciski, własne tematy, przełącznik pokazywania przepisów, tester) i **✨ Nowe funkcje** (zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, OCR). Ustawienia idą przez szkic → Opublikuj (bez wysyłki na GitHub).
 - 1.23.0 — menu CRM w grupach z kolorami (Codzienna praca, Kancelaria, Prawo, Administracja), tylko pozycje z uprawnień, dymki z powodem dostępu.
 - 1.22.0 — **Restrukturyzacja firmy** (sekcja „Dla firm”, `restrukturyzacja.js`): długi przedsiębiorcy → raty po układzie, wstrzymanie, odsetki, umorzenie; ścieżki postępowań z podstawami w CRM.
@@ -82,7 +83,6 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 ## Otwarte sprawy
 
 - Paski „Ryzyko prawne” i „Podejrzana treść” w analizie umów — właściciel przekaże wytyczne (PLAN.md, poz. 15).
-- Ustawienia CRM w grupach z kolorami — propozycja czeka na decyzję (PLAN.md, poz. 18).
 
 - **Uprawnienia do treści strony:** na razie tylko Administrator; inne uprawnienia do ustalenia później (decyzja właściciela).
 

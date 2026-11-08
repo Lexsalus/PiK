@@ -41,6 +41,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Analiza umów: reguły podstawowe i prawne (z podstawą prawną), limity odsetek, wskaźniki podejrzanej treści, tester reguł
 - Tłumaczenia: tryb własny/Google, wybór języków, tabela z postępem i filtrem brakujących
 - SEO: tytuł, opis, hreflang, Open Graph, schema.org, Search Console, Bing, GA4 z banerem zgody, robots.txt, sitemap.xml, podgląd wyniku Google i ocena
+- Zakładki w grupach z kolorami, kropka przy zmianach nieopublikowanych; 🔧 Techniczne: stan systemu, synchronizacja prawa, tryb serwisowy, limity, połączenie z bazą, pamięć aplikacji
 - 💬 Czat Adam: imię, powitanie, przyciski, własne tematy, pokazywanie przepisów, tester odpowiedzi
 - ✨ Nowe funkcje: Zmiany w prawie, zwrot z umowy (teksty, typy), restrukturyzacja firmy (wartości startowe), skany umów
 - Podgląd szkicu, eksport / import `data.json`
@@ -62,7 +63,7 @@ adam/           czat Adam (adam.js, wiedza.json)
 tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
 PLAN.md         plan prac (prowadzony na bieżąco)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 113/113 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 117/117 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

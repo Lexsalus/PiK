@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.25.0] — 2026-11-08
+- Zakładki Treści strony i Ustawień w grupach z kolorami (kropka = nieopublikowane zmiany); Treści strony → 🔧 Techniczne: stan systemu, synchronizacja prawa, tryb serwisowy (baner, wstrzymanie zgłoszeń), limity, połączenie z bazą, pamięć aplikacji; e2e 117/117
+
 ## [1.24.1] — 2026-11-08
 - Dokumentacja: STAN (ostatnie zmiany 1.21–1.24, otwarte sprawy), liczby testów (e2e 113/113, parser 17/17)
 

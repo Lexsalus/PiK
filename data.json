@@ -1242,7 +1242,8 @@
         }
       ]
     },
-    "ocr": true
+    "ocr": true,
+    "ocrMaxPages": 15
   },
   "translations": {
     "uk": {
@@ -1567,7 +1568,9 @@
       "Prawo": "Право",
       "Dla firm": "Для бізнесу",
       "Długi firmy? Policz restrukturyzację": "Борги компанії? Розрахуйте реструктуризацію",
-      "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Введіть борги, доходи та витрати компанії — покажемо, наскільки зменшаться платежі, скільки відсотків відпаде і на скільки можна зупинити стягнення."
+      "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Введіть борги, доходи та витрати компанії — покажемо, наскільки зменшаться платежі, скільки відсотків відпаде і на скільки можна зупинити стягнення.",
+      "Formularz chwilowo niedostępny": "Форма тимчасово недоступна",
+      "Trwają prace serwisowe. Spróbuj ponownie później albo zadzwoń do kancelarii.": "Тривають технічні роботи. Спробуйте пізніше або зателефонуйте до фірми."
     },
     "en": {
       "Porównaj": "Compare",
@@ -1891,7 +1894,9 @@
       "Prawo": "Law",
       "Dla firm": "For business",
       "Długi firmy? Policz restrukturyzację": "Business debts? Calculate a restructuring",
-      "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Enter your company debts, revenue and costs — we will show how much instalments drop, how much interest goes away and how long enforcement can be paused."
+      "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Enter your company debts, revenue and costs — we will show how much instalments drop, how much interest goes away and how long enforcement can be paused.",
+      "Formularz chwilowo niedostępny": "Form temporarily unavailable",
+      "Trwają prace serwisowe. Spróbuj ponownie później albo zadzwoń do kancelarii.": "Maintenance in progress. Please try later or call the law firm."
     }
   },
   "leads": {
@@ -1954,5 +1959,10 @@
     "red": 30,
     "mies": 48,
     "kar": 6
+  },
+  "serwis": {
+    "enabled": false,
+    "tekst": "Trwają prace serwisowe — niektóre funkcje mogą chwilowo nie działać.",
+    "blokujFormularz": true
   }
 }

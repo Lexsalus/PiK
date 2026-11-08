@@ -49,6 +49,11 @@ aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px
 #side .nav{position:relative;border-left:3px solid color-mix(in srgb,var(--gc,var(--line)) 45%,transparent);border-radius:0 10px 10px 0}
 #side .nav:hover{border-left-color:var(--gc,var(--line))}
 #side .nav.on{border-left-color:var(--gc,var(--accent));background:color-mix(in srgb,var(--gc,var(--accent)) 14%,var(--card2))}
+.tabs.gtabs{gap:0}.tabs.gtabs .tab{border-bottom:3px solid color-mix(in srgb,var(--gc) 30%,transparent);position:relative}
+.tabs.gtabs .tab:hover{border-bottom-color:color-mix(in srgb,var(--gc) 70%,transparent);color:var(--txt)}
+.tabs.gtabs .tab.on{border-bottom-color:var(--gc);color:var(--txt);background:color-mix(in srgb,var(--gc) 10%,transparent)}
+.tabs.gtabs .tab.gs{margin-left:14px}.tabs.gtabs .tab.gs::before{content:"";position:absolute;left:-8px;top:22%;bottom:22%;width:1px;background:var(--line)}
+.tabs.gtabs .tab .tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn,#f5b84a);margin-left:6px;vertical-align:middle}
 .nav .cnt{margin-left:auto;background:var(--bad);color:#fff;border-radius:20px;font-size:.72rem;padding:1px 7px;font-weight:700}
 .nav .cnt.n{background:var(--accent)}
 aside .sp{flex:1}
@@ -386,6 +391,15 @@ function menuItems(){
     isAdmin()&&['strona','🌐','Treści strony'],
     ['ustawienia','⚙️','Ustawienia']].filter(Boolean);
 }
+/* --- zakładki w grupach (Ustawienia, Treści strony): kolor grupy, separator, dymek --- */
+function groupTabs(list,groups,cur,href,extra){
+  let prev=null;
+  return `<div class="tabs gtabs">${list.map(([k,l])=>{const g=groups.find(x=>x.k.includes(k))||{c:'var(--line)',l:'',tip:''},gs=prev&&prev!==g;prev=g;
+    return `<a class="tab ${k===cur?'on':''} ${gs?'gs':''}" href="${href(k)}" style="--gc:${g.c}" data-tip="${esc((g.l?g.l+' — ':'')+(TAB_TIPS[k]||g.tip||''))}">${l}${extra?extra(k):''}</a>`}).join('')}</div>`;
+}
+const TAB_TIPS={konto:'Twoje dane, hasło i 2FA.',kategorie:'Kategorie spraw, kolory, kolejność, waluty.',swieta:'Dni wolne do liczenia terminów.',przypomnienia:'Harmonogram przypomnień o terminach.',powiadomienia:'Reguły powiadomień — kto dostaje i kiedy.',
+  uzytkownicy:'Konta, role i uprawnienia indywidualne.',audyt:'Dziennik zdarzeń z łańcuchem skrótów — tylko do odczytu.',system:'Stan systemu, dostęp awaryjny, kopie.'};
+const SET_GROUPS=[{l:'Moje',c:'#5aa9ff',k:['konto']},{l:'Sprawy i terminy',c:'#2fd6a0',k:['kategorie','swieta','przypomnienia','powiadomienia']},{l:'Dostęp i bezpieczeństwo',c:'#f5b84a',k:['uzytkownicy','audyt','system']}];
 /* --- menu w grupach tematycznych z kolorem; w grupie tylko pozycje, do których masz uprawnienia --- */
 const NAV_GROUPS=[
   {id:'praca',l:'Codzienna praca',c:'#5aa9ff',tip:'Sprawy, zgłoszenia ze strony, terminy i powiadomienia — to, czym zajmujesz się na co dzień.',k:['pulpit','sprawy','nowe','terminy','powiadomienia']},
@@ -820,9 +834,9 @@ async function loadCalcs(c){
 /* ===================== USTAWIENIA ===================== */
 const SET_TABS=[['kategorie','Kategorie',()=>isAdmin()],['uzytkownicy','Użytkownicy i uprawnienia',()=>can('users')],['swieta','Święta',()=>isAdmin()],['system','System',()=>can('config')],['audyt','Dziennik audytu',()=>can('audit')],['konto','Moje konto',()=>true]];
 ROUTES.ustawienia=sub=>{
-  const tabs=SET_TABS.filter(t=>t[2]());sub=sub||tabs[0][0];
+  const ord=SET_GROUPS.flatMap(g=>g.k),tabs=SET_TABS.filter(t=>t[2]()).sort((a,b)=>(ord.indexOf(a[0])+99*(ord.indexOf(a[0])<0))-(ord.indexOf(b[0])+99*(ord.indexOf(b[0])<0)));sub=sub||tabs[0][0];
   const t=SET_TABS.find(x=>x[0]===sub);need(t&&t[2](),'Ta część ustawień wymaga uprawnień Administratora.');
-  return `<div class="ph"><div><h1>Ustawienia</h1></div></div><div class="tabs">${tabs.map(([k,l])=>`<a class="tab ${k===sub?'on':''}" href="#/ustawienia/${k}">${l}</a>`).join('')}</div>${SET[sub]()}`;
+  return `<div class="ph"><div><h1>Ustawienia</h1></div></div>${groupTabs(tabs,SET_GROUPS,sub,k=>'#/ustawienia/'+k)}${SET[sub]()}`;
 };
 const SET={};
 /* --- Kategorie (§1) --- */

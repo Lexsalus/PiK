@@ -95,7 +95,7 @@ Pod wynikiem jest przycisk **Chcę bezpłatną analizę mojej sprawy** → formu
 
 **Panel → Ustawienia → Formularz zgłoszenia sprawy:**
 - **E-mail kancelarii** — otwiera program pocztowy klienta z gotową wiadomością; trzeba podać adres kancelarii,
-- **Baza CRM** (domyślnie) — zgłoszenie trafia od razu do CRM, zakładka „Nowe sprawy”. Wymaga adresu projektu Supabase i klucza publicznego `sb_publishable_…` (już wpisane); panel nie przyjmie klucza `sb_secret_…`.
+- **Baza CRM** (domyślnie) — zgłoszenie trafia od razu do CRM, zakładka „Nowe sprawy”. Wymaga adresu projektu Supabase i klucza publicznego `sb_publishable_…` (już wpisane, zakładka 🔧 Techniczne); panel nie przyjmie klucza `sb_secret_…`.
 
 Przycisk zgłoszenia pokazuje się tylko, gdy wybrany sposób jest kompletnie skonfigurowany.
 
@@ -200,6 +200,18 @@ Co umie: kieruje do kalkulatorów „Co mi się należy” (kredyt gotówkowy, f
 **Wiedza domyślna:** `adam/wiedza.json` — powitanie, przyciski startowe i intencje (frazy bez polskich znaków, `*` = początek słowa, `=` = bez literówek; przyciski `calc:<id>`, `href:#sekcja`, `ask:<pytanie>`, `info:odsetki|zmiany|projekty`).
 
 Pusty adres skryptu albo stary adres Ilony = Adam.
+
+## 9b. Ustawienia techniczne
+
+CRM → 🌐 Treści strony → **🔧 Techniczne**:
+- **Stan systemu** — baza (czas odpowiedzi), dane z API Sejmu (ostrzeżenie po 48 h bez synchronizacji), wersja strony i CRM (różnica = odśwież CRM), ostatnia publikacja treści. „↻ Sprawdź” odświeża.
+- **Synchronizacja prawa** — wynik ostatniego przebiegu, dziennik, „▶ Uruchom teraz” (GitHub → Actions → Run workflow), lista obserwowanych ustaw.
+- **Tryb serwisowy** — baner na górze strony z własnym tekstem; opcjonalnie wstrzymanie wysyłania zgłoszeń (przyciski pokazują prośbę o kontakt później). Działa po „Opublikuj”.
+- **Limity** — rozmiar pliku umowy, liczba stron skanu do OCR. Baza pilnuje: maks. 3 zgłoszenia na godzinę z jednego adresu e-mail, dane kalkulatora w zgłoszeniu do 20 kB, pliki w aktach do 25 MB.
+- **Połączenie z bazą** — adres i klucz publiczny Supabase dla formularza (wcześniej w Ustawieniach).
+- **Aplikacja na tym urządzeniu** — czy CRM jest zainstalowany, stan pamięci aplikacji; „🧹 Wyczyść pamięć aplikacji” gdy po aktualizacji widać starą wersję.
+
+Zakładki Treści strony i Ustawień są pogrupowane kolorami; kropka przy zakładce Treści strony = nieopublikowane zmiany w tej części.
 
 ## 9a. Nowe funkcje strony — ustawienia
 
