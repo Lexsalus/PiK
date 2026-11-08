@@ -18,14 +18,14 @@
 ✓ uchylony? DU/2000/1319 — Ustawa z dnia 15 grudnia 2000 r. o ochronie konkurencji i konsumentów. [uchylony]
 ✓ uchylony? DU/1934/502 — Rozporządzenie Prezydenta Rzeczypospolitej z dnia 27 czerwca 1934 r. Kodeks hand [uchylony]
 ✓ zmiany: +0, razem 27
-  ✓ tekst kc: 1289 artykułów z DU/2024/1061 (np. art. 1: 'Kodeks niniejszy reguluje stosunki cywilnoprawne między osobami fizycznymi i oso')
-  ✓ tekst kpc: 1933 artykułów z DU/2024/1568 (np. art. 1522: '(brak treści w tekście jednolitym — zobacz pełny tekst)')
-  ✓ tekst ukk: 107 artykułów z DU/2024/1497 (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt konsumencki;\n2) obowią')
+  ✓ tekst kc: 1296 artykułów z DU/2024/1061 [id] (np. art. 1: 'Kodeks niniejszy reguluje stosunki cywilnoprawne między osobami fizycznymi i oso')
+  ✓ tekst kpc: 1947 artykułów z DU/2024/1568 [id] (np. art. 1: 'Art. 1')
+  ✓ tekst ukk: 109 artykułów z DU/2024/1497 [id] (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt konsumencki;\n2) obowią')
   – frank: brak tekstu HTML
-  ✓ tekst pb: 461 artykułów z DU/2024/1646 (np. art. 1: 'Ustawa określa:\n1) zasady prowadzenia działalności bankowej, tworzenia i organiz')
-  ✓ tekst ukh: 91 artykułów z DU/2022/2245 (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt hipoteczny;\n2) prawa i')
-  ✓ tekst upk: 73 artykułów z DU/2024/1796 (np. art. 1: 'Ustawa określa prawa przysługujące konsumentowi, w szczególności:\n1) obowiązki p')
-  ✓ tekst kro: 239 artykułów z DU/2023/2809 (np. art. 1: '§ 1. Małżeństwo zostaje zawarte, gdy mężczyzna i kobieta jednocześnie obecni zło')
-  ✓ tekst pu: 597 artykułów z DU/2024/794 (np. art. 1: '1. Ustawa reguluje:\n1) zasady wspólnego dochodzenia roszczeń wierzycieli od niew')
-  ✓ tekst uksc: 167 artykułów z DU/2024/959 (np. art. 1: 'Ustawa określa zasady i tryb pobierania kosztów sądowych w sprawach cywilnych, z')
+  ✓ tekst pb: 461 artykułów z DU/2024/1646 [id] (np. art. 1: 'Ustawa określa:\n1) zasady prowadzenia działalności bankowej, tworzenia i organiz')
+  ✓ tekst ukh: 91 artykułów z DU/2022/2245 [id] (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt hipoteczny;\n2) prawa i')
+  ✓ tekst upk: 74 artykułów z DU/2024/1796 [id] (np. art. 1: 'Ustawa określa prawa przysługujące konsumentowi, w szczególności:\n1) obowiązki p')
+  ✓ tekst kro: 245 artykułów z DU/2023/2809 [id] (np. art. 1: '§ 1. Małżeństwo zostaje zawarte, gdy mężczyzna i kobieta jednocześnie obecni zło')
+  ✓ tekst pu: 597 artykułów z DU/2024/794 [id] (np. art. 1: '1. Ustawa reguluje:\n1) zasady wspólnego dochodzenia roszczeń wierzycieli od niew')
+  ✓ tekst uksc: 171 artykułów z DU/2024/959 [id] (np. art. 1: 'Ustawa określa zasady i tryb pobierania kosztów sądowych w sprawach cywilnych, z')
 ✓ projekty: kadencja 10, przejrzano 498, pasuje 13
