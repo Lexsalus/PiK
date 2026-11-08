@@ -1,0 +1,35 @@
+✓ kc       Dz.U. 1964 nr 16 poz. 93 — Ustawa z dnia 23 kwietnia 1964 r. - Kodeks cywilny. [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 795; nowelizacji: 113
+✓ kpc      Dz.U. 1964 nr 43 poz. 296 — Ustawa z dnia 17 listopada 1964 r. - Kodeks postępowania cywilnego. [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 468; nowelizacji: 356
+✓ ukk      Dz.U. 2011 nr 126 poz. 715 — Ustawa z dnia 12 maja 2011 r. o kredycie konsumenckim [akt posiada tekst jednolity] tj: Dz.U. 2025 poz. 1362; nowelizacji: 20
+✓ frank    Dz.U. 2026 poz. 985 — Ustawa z dnia 29 maja 2026 r. o szczególnych rozwiązaniach w zakresie rozpoznawania spraw  [obowiązujący] tj: —; nowelizacji: 0
+✓ pb       Dz.U. 1997 nr 140 poz. 939 — Ustawa z dnia 29 sierpnia 1997 r. - Prawo bankowe. [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 38; nowelizacji: 196
+✓ ukh      Dz.U. 2017 poz. 819 — Ustawa z dnia 23 marca 2017 r. o kredycie hipotecznym oraz o nadzorze nad pośrednikami kre [akt posiada tekst jednolity] tj: Dz.U. 2025 poz. 720; nowelizacji: 9
+✓ upk      Dz.U. 2014 poz. 827 — Ustawa z dnia 30 maja 2014 r. o prawach konsumenta [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 1244; nowelizacji: 14
+✓ uokik    Dz.U. 2007 nr 50 poz. 331 — Ustawa z dnia 16 lutego 2007 r. o ochronie konkurencji i konsumentów [akt posiada tekst jednolity] tj: Dz.U. 2025 poz. 1714; nowelizacji: 29
+✓ kro      Dz.U. 1964 nr 9 poz. 59 — Ustawa z dnia 25 lutego 1964 r. - Kodeks rodzinny i opiekuńczy. [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 236; nowelizacji: 39
+✓ pu       Dz.U. 2003 nr 60 poz. 535 — Ustawa z dnia 28 lutego 2003 r. Prawo upadłościowe [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 913; nowelizacji: 89
+✓ pr       Dz.U. 2015 poz. 978 — Ustawa z dnia 15 maja 2015 r. - Prawo restrukturyzacyjne [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 533; nowelizacji: 34
+✓ uksc     Dz.U. 2005 nr 167 poz. 1398 — Ustawa z dnia 28 lipca 2005 r. o kosztach sądowych w sprawach cywilnych [akt posiada tekst jednolity] tj: Dz.U. 2025 poz. 1228; nowelizacji: 89
+✓ utz      Dz.U. 2013 poz. 403 — Ustawa z dnia 8 marca 2013 r. o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach han [akt posiada tekst jednolity] tj: Dz.U. 2023 poz. 1790; nowelizacji: 8
+✓ rozpadw  Dz.U. 2015 poz. 1800 — Rozporządzenie Ministra Sprawiedliwości z dnia 22 października 2015 r. w sprawie opłat za  [akt posiada tekst jednolity] tj: Dz.U. 2026 poz. 215; nowelizacji: 8
+✓ uchylony? DU/2001/1081 — Ustawa z dnia 20 lipca 2001 r. o kredycie konsumenckim. [uchylony]
+✓ uchylony? DU/2000/271 — Ustawa z dnia 2 marca 2000 r. o ochronie niektórych praw konsumentów oraz o odpo [uchylony]
+✓ uchylony? DU/2002/1176 — Ustawa z dnia 27 lipca 2002 r. o szczególnych warunkach sprzedaży konsumenckiej  [uchylony]
+✓ uchylony? DU/2000/1319 — Ustawa z dnia 15 grudnia 2000 r. o ochronie konkurencji i konsumentów. [uchylony]
+✓ uchylony? DU/1934/502 — Rozporządzenie Prezydenta Rzeczypospolitej z dnia 27 czerwca 1934 r. Kodeks hand [uchylony]
+✓ zmiany: +27, razem 27
+  ✓ tekst kc: 1289 artykułów z DU/2024/1061 (np. art. 16: 'Do umów o roboty budowlane zawartych przed dniem wejścia w życie niniejszej usta')
+  ✓ tekst kpc: 1933 artykułów z DU/2024/1568 (np. art. 1522: '')
+  ✓ tekst ukk: 109 artykułów z DU/2024/1497 (np. art. 14: 'Ustawa wchodzi w życie po upływie 6 miesięcy od dnia ogłoszenia, z wyjątkiem:\n1)')
+  – frank: brak tekstu HTML
+  ✓ tekst pb: 461 artykułów z DU/2024/1646 (np. art. 22: 'Ustawa wchodzi w życie z dniem 1 lipca 2024 r., z wyjątkiem:\n1)\nart. 6 pkt 1, kt')
+  ✓ tekst ukh: 92 artykułów z DU/2022/2245 (np. art. 166: 'Ustawa wchodzi w życie z dniem 5 października 2021 r., z wyjątkiem:\n1)\nart. 145 ')
+  ✓ tekst upk: 74 artykułów z DU/2024/1796 (np. art. 124: 'Ustawa wchodzi w życie po upływie 3 miesięcy od dnia ogłoszenia, z wyjątkiem:\n1)')
+  ✓ tekst kro: 239 artykułów z DU/2023/2809 (np. art. 36: 'Do spraw w przedmiocie określenia okresu osobistej styczności przysposabiającego')
+  ✓ tekst pu: 597 artykułów z DU/2024/794 (np. art. 26: 'Ustawa wchodzi w życie z dniem 1 października 2023 r., z wyjątkiem:\n1)\nart. 16, ')
+  ✓ tekst uksc: 167 artykułów z DU/2024/959 (np. art. 8: 'Ustawa wchodzi w życie z dniem następującym po dniu ogłoszenia.\n”\n;\n2)\nart. 37 i')
+✓ projekty: kadencja 10, przejrzano 498, pasuje 21
+✓ odsetki kapitalowe: 7.25% od 2026-03-05 (M.P. 2026 poz. 368)
+✓ odsetki opoznienie: 9.25% od 2026-03-05 (M.P. 2026 poz. 367)
+  ⚠ odsetki handlowe: nie odczytano stawki z PDF MP/2026/642
+✓ odsetki handlowe: None% od None (M.P. 2026 poz. 642)
