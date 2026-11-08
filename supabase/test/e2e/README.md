@@ -11,4 +11,4 @@ python3 -m http.server 8765 &               # z katalogu głównego repo
 python3 e2e/run.py                          # wymaga: pip install playwright
 ```
 Dane i konta są fikcyjne, tylko w lokalnej bazie (hasło `Haslo-testowe-123`, kod 2FA `123456`): admin@k.test, jan@k.test, piotr@k.test (pełnomocnicy), anna@k.test (aplikant), kasia@k.test (biuro), tech@k.test, nowy@k.test (nieaktywne).
-Wynik 27.10.2026: 96/96.
+Wynik 08.11.2026: 113/113 (w tym: menu w grupach, 📜 Prawo, przepis w sprawie, analiza umowy klienta w zgłoszeniu, Czat Adam i Nowe funkcje w Treściach strony). Testy parsera danych z API Sejmu: `python3 tools/test/test_prawo_sync.py` (17/17).

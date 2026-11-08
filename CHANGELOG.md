@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.24.1] — 2026-11-08
+- Dokumentacja: STAN (ostatnie zmiany 1.21–1.24, otwarte sprawy), liczby testów (e2e 113/113, parser 17/17)
+
 ## [1.24.0] — 2026-11-08
 - CRM → Treści strony: 💬 Czat Adam (imię, powitanie, przyciski, własne tematy, przepisy wł./wył., tester) i ✨ Nowe funkcje (zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, OCR); e2e 113/113
 
