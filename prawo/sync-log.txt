@@ -29,4 +29,3 @@
   ✓ tekst pu: 597 artykułów z DU/2024/794 (np. art. 1: '1. Ustawa reguluje:\n1) zasady wspólnego dochodzenia roszczeń wierzycieli od niew')
   ✓ tekst uksc: 167 artykułów z DU/2024/959 (np. art. 1: 'Ustawa określa zasady i tryb pobierania kosztów sądowych w sprawach cywilnych, z')
 ✓ projekty: kadencja 10, przejrzano 498, pasuje 13
-✓ odsetki handlowe: 13.75% od 2026-07-01 (M.P. 2026 poz. 642)
