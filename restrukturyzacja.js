@@ -61,8 +61,9 @@ function pseudoCalc(R){
     inputs:[{key:'dlugi',label:'Suma długów',unit:'zł'},{key:'raty',label:'Raty miesięcznie teraz',unit:'zł'},{key:'przychod',label:'Przychód miesięcznie',unit:'zł'},{key:'koszty',label:'Koszty stałe miesięcznie',unit:'zł'},{key:'red',label:'Umorzenie w wariancie',unit:'%'},{key:'mies',label:'Liczba rat w układzie',unit:'mies.'},{key:'kar',label:'Karencja',unit:'mies.'}],
     outputs:[o('razem','Łącznie mniej do zapłaty',R.razem,true),o('rataPo','Raty po układzie (mies.)',R.rAfter),o('wstrz','Raty wstrzymane w okresie ochrony (do 4 mies.)',R.wstrz),o('odsetki','Mniej odsetek',R.odsetki),o('umorz','Umorzenie części długu',R.umorz)]};
 }
-function render(){
+function render(cfg){
   const box=$('#firmaCalc');if(!box)return;
+  if(cfg&&!S.init){['red','mies','kar'].forEach(k=>{if(Number.isFinite(+cfg[k])&&cfg[k]!=='')S[k]=+cfg[k]})}
   const R=calc(),opt=TYPES.map(x=>`<option value="${x.k}">${e(tt(x.l))}</option>`).join('');
   if(!S.init){S.init=true;
     box.innerHTML=`<div class="panel fade fpanel">

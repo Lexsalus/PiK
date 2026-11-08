@@ -46,7 +46,7 @@ let D,ORIG,view='settings',ci=0,ki=0,BASE='',STALE=false,READY=false;
 const hash=t=>{let h=5381;for(let i=0;i<t.length;i++)h=(h*33^t.charCodeAt(i))>>>0;return h.toString(36)};
 const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ł/g,'l').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'id';
 const uid=p=>p+Math.random().toString(36).slice(2,7);
-const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂️ Kategorie','Kategorie porównywarki'],['calcs','🧮 Kalkulatory','Kalkulatory'],['contracts','📄 Analiza umów','Analiza umów'],['i18n','🌐 Tłumaczenia','Tłumaczenia'],['seo','🔎 SEO','Optymalizacja pod Google (SEO)'],['export','🚀 Publikacja','Publikacja']];
+const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂️ Kategorie','Kategorie porównywarki'],['calcs','🧮 Kalkulatory','Kalkulatory'],['contracts','📄 Analiza umów','Analiza umów'],['adam','💬 Czat Adam','Czat Adam — asystent na stronie'],['funkcje','✨ Nowe funkcje','Nowe funkcje strony'],['i18n','🌐 Tłumaczenia','Tłumaczenia'],['seo','🔎 SEO','Optymalizacja pod Google (SEO)'],['export','🚀 Publikacja','Publikacja']];
 
 async function load(){
   const p=await siteContent(true);ORIG=p?structuredClone(p):null;if(ORIG?.site)delete ORIG.site.adminHash;
@@ -59,7 +59,7 @@ async function load(){
   if(D){norm();READY=true}
 }
 /* lista różnic: szkic (ta przeglądarka) ↔ opublikowana wersja */
-const DIFF_TOP={site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
+const DIFF_TOP={adam:'Czat Adam',zmianyPrawa:'Zmiany w prawie (sekcja)',zwrot:'Zwrot z umowy',firma:'Restrukturyzacja firmy',site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
 const DIFF_LN={uk:'ukraiński',en:'angielski'};
 const DIFF_KEY={items:'oferty',fields:'parametry',inputs:'pola',outputs:'wyniki',rules:'reguły',indicators:'wskaźniki',legal:'zgodność z prawem',suspicion:'podejrzana treść',name:'nazwa',tagline:'hasło (podtytuł)',accent:'kolor akcentu',formula:'wzór',label:'etykieta',description:'opis',note:'uwaga',unit:'jednostka',url:'link',badge:'etykieta oferty',patterns:'wzorce',advice:'porada',formats:'formaty',enabled:'włączone',languages:'języki',mode:'tryb',title:'tytuł',consent:'zgoda RODO'};
 function diffList(a,b){
@@ -100,7 +100,7 @@ function render(){
   if(!READY){V.innerHTML='<div class="empty">Nie udało się wczytać treści strony.</div>';return}
   save();$('#stStale').style.display=STALE?'flex':'none';
   $('#stTitle').textContent=TABS.find(t=>t[0]===view)[2];
-  V.innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,i18n:vI18n,seo:vSeo,export:vExport})[view]();
+  V.innerHTML=({settings:vSettings,cats:vCats,calcs:vCalcs,contracts:vContracts,adam:vAdam,funkcje:vFunkcje,i18n:vI18n,seo:vSeo,export:vExport})[view]();
   if(view==='calcs')testCalc();
   if(view==='i18n')renderTl();
   if(view==='seo')seoPreview();
@@ -190,10 +190,71 @@ function vSettings(){
     <label>Adres e-mail kancelarii<input class="f" type="email" data-p="leads.email" value="${esc(L.email||'')}" placeholder="biuro@kancelaria.pl"></label>
     <label style="grid-column:1/-1">Treść zgody RODO<textarea class="f" data-p="leads.consent" rows="3">${esc(L.consent||'')}</textarea></label></div>
     <p class="hint"><b>E-mail:</b> otwiera program pocztowy klienta z gotową wiadomością do kancelarii (klient musi ją wysłać).<br><b>Baza CRM:</b> zgłoszenie trafia od razu do CRM („Nowe sprawy”). Klucz publiczny może być jawny; <b>nigdy</b> nie wpisuj tu klucza <code>sb_secret_…</code>.</p></div>
-  <div class="box"><h3>Chatbot (Ilona)</h3><div class="form">
-    <label style="display:flex;align-items:center;gap:10px;color:var(--txt)"><input type="checkbox" data-p="site.chatbot.enabled" ${s.chatbot?.enabled?'checked':''} style="accent-color:var(--accent);width:18px;height:18px">Pokaż chatbota na stronie</label>
-    <label style="grid-column:1/-1">Adres skryptu osadzającego<input class="f code" data-p="site.chatbot.src" value="${esc(s.chatbot?.src||'')}"></label></div>
-    <p class="hint">Skrypt ładuje się na stronie publicznej (także w podglądzie). Dostaje atrybut <code>data-lang</code> z aktualnym językiem strony.</p></div>`;
+  <div class="box"><h3>Czat na stronie</h3><p class="hint" style="margin:0">Czat <b>Adam</b> i jego treści ustawiasz w zakładce <a href="#/strona/adam">💬 Czat Adam</a>.</p></div>`;
+}
+
+/* ---------- Czat Adam ---------- */
+const AKCJE='calc:&lt;id kalkulatora&gt; · href:#sekcja lub adres · ask:pytanie do Adama · info:odsetki|zmiany|projekty';
+let ADAM_BASE=null;
+function vAdam(){
+  const A=D.adam,c=D.site.chatbot||{};
+  if(!ADAM_BASE)fetch('adam/wiedza.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{ADAM_BASE=j;if(view==='adam')render()}).catch(()=>{});
+  const B=ADAM_BASE||{};
+  const row=(p,i,x)=>`<tr><td><input class="f" data-p="${p}.${i}.label" value="${esc(x.label||'')}"></td><td><input class="f code" data-p="${p}.${i}.akcja" value="${esc(x.akcja||'')}"></td><td style="white-space:nowrap"><button class="btn sm" type="button" data-st="adMv('${p}',${i},-1)">↑</button> <button class="btn sm" type="button" data-st="adMv('${p}',${i},1)">↓</button> <button class="btn sm del" type="button" data-st="adDel('${p}',${i})">✕</button></td></tr>`;
+  return `<div class="box"><h3>Podstawowe</h3><div class="form">
+    ${chkBox('site.chatbot.enabled',c.enabled!==false,'Pokaż czat na stronie')}
+    ${chkBox('adam.przepisy',A.przepisy!==false,'Pokazuje treść przepisów i odnośniki (np. „art. 45 ukk”)')}
+    ${chkBox('adam.szukaj',A.szukaj!==false,'Gdy nie zna odpowiedzi — szuka pasujących przepisów')}
+    <label>Imię<input class="f" data-p="adam.imie" value="${esc(A.imie||'')}" placeholder="Adam"></label>
+    <label>Podpis pod imieniem<input class="f" data-p="adam.podpis" value="${esc(A.podpis||'')}"></label>
+    <label>Tekst przycisku na stronie<input class="f" data-p="adam.przycisk" value="${esc(A.przycisk||'')}" placeholder="Zapytaj Adama"></label>
+    <label style="grid-column:1/-1">Powitanie <span class="mut small">(puste = domyślne)</span><textarea class="f" data-p="adam.powitanie" rows="3" placeholder="${esc(B.powitanie||'')}">${esc(A.powitanie||'')}</textarea></label>
+    <label style="grid-column:1/-1">Zastrzeżenie przy wynikach wyszukiwania <span class="mut small">(puste = domyślne)</span><textarea class="f" data-p="adam.zastrzezenie" rows="2" placeholder="${esc(B.zastrzezenie||'')}">${esc(A.zastrzezenie||'')}</textarea></label></div>
+    <p class="hint">Przy wyłączonym pokazywaniu przepisów Adam nie wyświetla treści artykułów ani odnośników — odpowiada opisowo i kieruje do kalkulatorów lub kancelarii.</p></div>
+  <div class="box"><h3>Przyciski na powitanie <button class="btn sm pri" type="button" data-st="adAdd('adam.start')">+ Przycisk</button></h3>
+    <div class="tw"><table><tr><th>Napis</th><th>Akcja</th><th></th></tr>${A.start.map((x,i)=>row('adam.start',i,x)).join('')}</table></div><p class="hint">Akcje: ${AKCJE}. Kalkulatory: ${D.calculators.map(k=>`<code>calc:${esc(k.id)}</code>`).join(' ')}; sekcje: <code>href:#nalezy</code> <code>href:#firma</code> <code>href:#umowy</code> <code>href:#prawo</code> <code>href:#kalkulatory</code>.</p></div>
+  <div class="box"><h3>Własne tematy (${A.dodatkowe.length}) <button class="btn sm pri" type="button" data-st="adAddT()">+ Temat</button></h3>
+    ${A.dodatkowe.length?A.dodatkowe.map((x,i)=>`<div class="card" style="background:var(--bg2);margin-bottom:10px"><div class="form">
+      <label style="grid-column:1/-1">Frazy — po przecinku <span class="mut small">(bez polskich znaków; * = początek słowa, np. <code>pozycz*</code>)</span><input class="f" data-adfr="${i}" value="${esc((x.frazy||[]).join(', '))}"></label>
+      <label style="grid-column:1/-1">Odpowiedź<textarea class="f" data-p="adam.dodatkowe.${i}.odp" rows="3">${esc(x.odp||'')}</textarea></label>
+      <label style="grid-column:1/-1">Przyciski — każdy w nowej linii: <code>Napis | akcja</code><textarea class="f code" data-adbt="${i}" rows="2">${esc((x.przyciski||[]).map(b=>b.label+' | '+b.akcja).join('\n'))}</textarea></label></div>
+      <div style="display:flex;gap:6px;margin-top:8px"><button class="btn sm" type="button" data-st="adMv('adam.dodatkowe',${i},-1)">↑</button><button class="btn sm" type="button" data-st="adMv('adam.dodatkowe',${i},1)">↓</button><button class="btn sm del" type="button" data-st="adDel('adam.dodatkowe',${i})">Usuń temat</button></div></div>`).join(''):'<div class="empty">Brak własnych tematów — Adam używa tylko domyślnych.</div>'}
+    <p class="hint">Własne tematy mają pierwszeństwo przed domyślnymi. Domyślne (${(B.intencje||[]).length}): ${(B.intencje||[]).map(x=>`<code>${esc(x.id)}</code>`).join(' ')} — w pliku <code>adam/wiedza.json</code>.</p></div>
+  <div class="box"><h3>Tester odpowiedzi</h3><div class="toolbar"><input class="f" id="adQ" placeholder="np. mam kredyt gotówkowy z prowizją" style="flex:1;min-width:220px"><button class="btn pri" type="button" data-st="adTest()">Zapytaj</button></div><div id="adRes" class="mut small">Tester używa ustawień ze szkicu (także nieopublikowanych).</div></div>`;
+}
+function adAdd(p){getP(p).push({label:'Nowy przycisk',akcja:'href:#nalezy'});render()}
+function adAddT(){D.adam.dodatkowe.push({id:uid('t_'),frazy:['nowa fraza'],odp:'Odpowiedź Adama.',przyciski:[]});render()}
+function adDel(p,i){getP(p).splice(i,1);render()}
+function adMv(p,i,d){const a=getP(p),j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()}
+VIEW.addEventListener('input',e=>{const el=e.target;
+  if(el.dataset.adfr!==undefined){D.adam.dodatkowe[+el.dataset.adfr].frazy=el.value.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);save()}
+  if(el.dataset.adbt!==undefined){D.adam.dodatkowe[+el.dataset.adbt].przyciski=el.value.split('\n').map(l=>l.split('|')).filter(p=>p.length>1&&p[0].trim()).map(([l,...a])=>({label:l.trim(),akcja:a.join('|').trim()}));save()}});
+async function adTest(){
+  const q=$('#adQ').value.trim(),R=$('#adRes');if(!q)return;R.textContent='…';
+  window.ADAM_CFG=D.adam;
+  if(!window.AdamEngine){window.ADAM_NO_WIDGET=true;await new Promise((ok,no)=>{const x=document.createElement('script');x.src='adam/adam.js';x.onload=ok;x.onerror=no;document.head.appendChild(x)}).catch(()=>{})}
+  if(!window.AdamEngine){R.textContent='Nie udało się wczytać silnika Adama.';return}
+  try{const a=await AdamEngine.answer(q);R.innerHTML=`<div class="card" style="background:var(--bg2)">${a.id?`<div class="mut small">Temat: <b>${esc(a.id)}</b></div>`:'<div class="mut small">Brak pasującego tematu</div>'}<div style="margin-top:6px">${a.html}</div>${(a.buttons||[]).length?`<div class="chips" style="margin-top:8px">${a.buttons.map(b=>`<span class="chip" data-tip="${esc(b.akcja)}">${esc(b.label)}</span>`).join('')}</div>`:''}</div>`}
+  catch(e){R.textContent='Błąd: '+e.message}
+}
+
+/* ---------- Nowe funkcje strony ---------- */
+function vFunkcje(){
+  const Z=D.zmianyPrawa,W=D.zwrot,F=D.firma,num=(p,v,l,st=1)=>`<label>${l}<input class="f" type="number" step="${st}" data-t="num" data-p="${p}" value="${esc(v??'')}"></label>`,txt=(p,v,l)=>`<label style="grid-column:1/-1">${l}<input class="f" data-p="${p}" value="${esc(v||'')}"></label>`;
+  return `<div class="box"><h3>📜 Zmiany w prawie (sekcja strony)</h3><div class="form">
+    ${chkBox('zmianyPrawa.enabled',Z.enabled!==false,'Pokaż sekcję „Zmiany w prawie” i link w menu')}${chkBox('zmianyPrawa.odsetki',Z.odsetki!==false,'Pokaż aktualne odsetki')}
+    ${num('zmianyPrawa.zmian',Z.zmian,'Ile nowelizacji pokazać')}${num('zmianyPrawa.projektow',Z.projektow,'Ile projektów z Sejmu pokazać')}</div>
+    <p class="hint">Dane pobierane codziennie z API Sejmu. Lista ustaw: plik <code>prawo/obserwowane.json</code>; podgląd danych w CRM → 📜 Prawo.</p></div>
+  <div class="box"><h3>💰 Zwrot z umowy kredytu (analiza umów)</h3><div class="form">
+    ${chkBox('zwrot.enabled',W.enabled!==false,'Pokaż komunikat o zwrocie i kwotę po analizie umowy')}${chkBox('zwrot.skd',W.skd!==false,'Kredyt konsumencki (sankcja kredytu darmowego)')}${chkBox('zwrot.chf',W.chf!==false,'Kredyt frankowy / walutowy')}
+    ${txt('zwrot.naglowek',W.naglowek,'Nagłówek komunikatu (czerwony)')}${txt('zwrot.podtytul',W.podtytul,'Drugi wiersz')}${txt('zwrot.cta',W.cta,'Przycisk')}${txt('zwrot.nota',W.nota,'Dopisek pod przyciskiem')}</div>
+    <p class="hint">Klient widzi tylko komunikat i kwoty. Podstawy prawne, orzecznictwo i wykryte zapisy trafiają ze zgłoszeniem do CRM → Nowe sprawy. Reguły: <code>umowa-zwrot.js</code>.</p></div>
+  <div class="box"><h3>🏢 Restrukturyzacja firmy (sekcja „Dla firm”)</h3><div class="form">
+    ${chkBox('firma.enabled',F.enabled!==false,'Pokaż sekcję i link „Dla firm”')}
+    ${num('firma.red',F.red,'Domyślne umorzenie części długu (%)',5)}${num('firma.mies',F.mies,'Domyślna liczba rat (mies.)',6)}${num('firma.kar',F.kar,'Domyślna karencja (mies.)')}</div>
+    <p class="hint">Wartości startowe suwaków — przedsiębiorca może je zmienić. Zgłoszenie z listą długów i ścieżkami postępowań trafia do CRM (kategoria RST).</p></div>
+  <div class="box"><h3>📷 Skany umów</h3><div class="form">${chkBox('contracts.ocr',D.contracts.ocr!==false,'Rozpoznawanie tekstu ze zdjęć i skanów (w przeglądarce klienta)')}</div>
+    <p class="hint">Przy pierwszym użyciu przeglądarka klienta pobiera słownik języka polskiego (kilka MB). Plik nie opuszcza urządzenia.</p></div>`;
 }
 
 /* ---------- Kategorie ---------- */
@@ -303,7 +364,16 @@ function norm(){
   if(O.calculators&&!D.calculators.some(c=>c.kind==='claim'))D.calculators=[...structuredClone(O.calculators.filter(c=>c.kind==='claim')),...D.calculators];
   delete D.site.adminHash;
   D.site.chatbot=D.site.chatbot||structuredClone(O.site?.chatbot||{enabled:false,src:''});
+  // nowe funkcje (v1.24): domyślne wartości, gdy opublikowana wersja ich jeszcze nie ma
+  D.adam=D.adam||structuredClone(O.adam||ADAM_DEF);['start','dodatkowe'].forEach(k=>{if(!Array.isArray(D.adam[k]))D.adam[k]=structuredClone(ADAM_DEF[k])});
+  D.zmianyPrawa=D.zmianyPrawa||structuredClone(O.zmianyPrawa||{enabled:true,zmian:7,projektow:6,odsetki:true});
+  D.zwrot=D.zwrot||structuredClone(O.zwrot||ZWROT_DEF);
+  D.firma=D.firma||structuredClone(O.firma||{enabled:true,red:30,mies:48,kar:6});
+  if(D.contracts.ocr===undefined)D.contracts.ocr=O.contracts?.ocr??true;
 }
+const ADAM_DEF={imie:'Adam',podpis:'asystent prawny · odpowiada od razu',przycisk:'Zapytaj Adama',powitanie:'',zastrzezenie:'',przepisy:true,szukaj:true,
+  start:[{label:'💰 Co mi się należy?',akcja:'ask:co mi sie nalezy'},{label:'🏢 Długi firmy',akcja:'href:#firma'},{label:'🆕 Zmiany w prawie',akcja:'info:zmiany'},{label:'📄 Sprawdź umowę',akcja:'href:#umowy'},{label:'📅 Odsetki',akcja:'info:odsetki'}],dodatkowe:[]};
+const ZWROT_DEF={enabled:true,skd:true,chf:true,naglowek:'W Twojej umowie wykryliśmy klauzule abuzywne (niedozwolone zapisy).',podtytul:'Kwalifikujesz się do zwrotu pieniędzy.',cta:'Chcę odzyskać pieniądze — bezpłatna analiza →',nota:'Szacunek na podstawie treści umowy. Dokładną kwotę bezpłatnie ustali kancelaria.'};
 
 /* ---------- Tłumaczenia ---------- */
 const LN={uk:'Ukraiński',en:'Angielski'};

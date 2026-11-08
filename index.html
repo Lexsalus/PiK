@@ -408,7 +408,8 @@ function init(){
   initConsent();
   initChatbot();
   initPrawo().catch(e=>console.warn('prawo',e));
-  if(window.FIRMA)FIRMA.render();
+  const F=D.firma||{};$('#firma').style.display=F.enabled===false?'none':'';document.querySelectorAll('a[href="#firma"]').forEach(e=>e.style.display=F.enabled===false?'none':'');
+  if(window.FIRMA&&F.enabled!==false)FIRMA.render(F);
 }
 
 /* ---------- chatbot (Adam — asystent prawny, adam/adam.js) ---------- */
@@ -416,6 +417,7 @@ function init(){
 function initChatbot(){
   const c=D.site?.chatbot;if(c&&c.enabled===false)return;
   const src=!c?.src||/\/Ilona\//i.test(c.src)?'adam/adam.js':c.src;
+  window.ADAM_CFG=D.adam||null;
   const s=document.createElement('script');s.src=src;s.defer=true;s.dataset.lang=mode==='own'?lang:'pl';document.body.appendChild(s);
 }
 
@@ -572,7 +574,7 @@ const LIB={  // podpisy kontrolne (SRI): przeglądarka odrzuci zmieniony plik; p
   zip:['https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'],
   // rozpoznawanie tekstu ze skanów (OCR) w przeglądarce — model języka polskiego pobiera się przy pierwszym użyciu
   tess:['https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js','sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F']};
-const IMG=['jpg','jpeg','png','webp'];
+let IMG=['jpg','jpeg','png','webp'];
 const libs={};
 const needLib=([src,sri])=>libs[src]??=new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.integrity=sri;s.crossOrigin='anonymous';s.onload=res;s.onerror=()=>{delete libs[src];rej(new Error(t('Nie udało się wczytać pliku.')))};document.head.appendChild(s)});
 /* worker pdf.js nie obsługuje atrybutu integrity — pobieramy go, sprawdzamy odcisk i uruchamiamy z lokalnej kopii */
@@ -587,8 +589,9 @@ function initContracts(){
   const C=D.contracts;const on=!!C?.enabled;
   $('#umowy').style.display=on?'':'none';document.querySelectorAll('.nav-umowy').forEach(e=>e.style.display=on?'':'none');
   if(!on)return;
-  const f=[...new Set([...(C.formats||[]),...IMG])];$('#fmts').textContent=f.map(x=>'.'+x).join(' ')+' · '+t('także zdjęcie lub skan umowy');
-  $('#file').accept=f.map(x=>'.'+x).join(',')+',image/*';
+  if(C.ocr===false)IMG=[];
+  const f=[...new Set([...(C.formats||[]),...IMG])];$('#fmts').textContent=f.map(x=>'.'+x).join(' ')+(IMG.length?' · '+t('także zdjęcie lub skan umowy'):'');
+  $('#file').accept=f.map(x=>'.'+x).join(',')+(IMG.length?',image/*':'');
   if(lastRep)renderReport(lastRep);
 }
 const dz=$('#drop');
@@ -765,17 +768,18 @@ async function collectRefs(text){
 /* zwrot z umowy: na stronie komunikat i kwoty; uzasadnienie prawne trafia do CRM ze zgłoszeniem */
 function renderZwrot(text){
   const box=$('#zwrot');if(!box||!window.ZWROT||!lastRep)return;
+  const ZW=D.zwrot||{};if(ZW.enabled===false){box.innerHTML='';return}
   const r=ZWROT.evaluate(text,D,compute);lastRep.zw=r;
-  if(!r||!r.kwalifikuje||!r.calc){box.innerHTML='';return}
+  if(!r||!r.kwalifikuje||!r.calc||ZW[r.typ]===false){box.innerHTML='';return}
   const c=r.calc,vals={...r.vals},OL=x=>window.PRAWO?PRAWO.odsLabel(x):x;
   const miss0=c.inputs.some(i=>!Number.isFinite(vals[i.key]));
   box.innerHTML=`<div class="refund">
-    <div class="rhead">⚠️ <b>${esc(t('W Twojej umowie wykryliśmy klauzule abuzywne (niedozwolone zapisy).'))}</b><br>${esc(t('Kwalifikujesz się do zwrotu pieniędzy.'))}</div>
+    <div class="rhead">⚠️ <b>${esc(t(ZW.naglowek||'W Twojej umowie wykryliśmy klauzule abuzywne (niedozwolone zapisy).'))}</b><br>${esc(t(ZW.podtytul||'Kwalifikujesz się do zwrotu pieniędzy.'))}</div>
     <div class="rres"></div>
     <details class="rdata" ${miss0?'open':''}><summary>${esc(t(miss0?'Uzupełnij dane z umowy':'Sprawdź dane odczytane z umowy'))}</summary>
       <div class="rgrid">${c.inputs.map(i=>`<label>${esc(t(i.label))}<span><input class="field" type="number" step="any" data-zk="${esc(i.key)}" value="${vals[i.key]??''}" placeholder="${esc(t('wpisz'))}"> ${esc(t(i.unit||''))}</span></label>`).join('')}</div></details>
-    <button class="btn pri rcta">${esc(t('Chcę odzyskać pieniądze — bezpłatna analiza →'))}</button>
-    <p class="rnote">${esc(t('Szacunek na podstawie treści umowy. Dokładną kwotę bezpłatnie ustali kancelaria.'))}</p></div>`;
+    <button class="btn pri rcta">${esc(t(ZW.cta||'Chcę odzyskać pieniądze — bezpłatna analiza →'))}</button>
+    <p class="rnote">${esc(t(ZW.nota||'Szacunek na podstawie treści umowy. Dokładną kwotę bezpłatnie ustali kancelaria.'))}</p></div>`;
   const upd=()=>{
     const miss=c.inputs.some(i=>!Number.isFinite(vals[i.key]));
     const out=miss?null:compute(c,Object.fromEntries(c.inputs.map(i=>[i.key,vals[i.key]]))),main=out&&(out.find(o=>o.main)||out[0]);
@@ -792,18 +796,19 @@ function renderZwrot(text){
 const PCAT={SKD:'Kredyty konsumenckie',CHF:'Kredyty frankowe',PLN:'Kredyty złotówkowe',FX:'Kredyty walutowe',RST:'Oddłużanie',ROD:'Sprawy rodzinne',CIV:'Sprawy cywilne',INNE:'Konsumenci'};
 async function initPrawo(){
   if(!window.PRAWO)return;
+  const ZP=D.zmianyPrawa||{};document.querySelectorAll('.nav-prawo').forEach(e=>e.style.display=ZP.enabled===false?'none':'');
   await PRAWO.loadOds();if(typeof renderCalcs==='function'){Object.keys(BOX).forEach(k=>{if(BOX[k].cur&&$(BOX[k].panel).querySelector('.resv'))calcBox(k)})}
   const [z,p,o]=await Promise.allSettled([PRAWO.load('zmiany'),PRAWO.load('projekty'),PRAWO.load('odsetki'),PRAWO.acts()]);
   const Z=[],byEli={};(z.value?.zmiany||[]).forEach(x=>{const y=byEli[x.eli];if(y){if(!y.nazwa.includes(x.nazwa))y.nazwa+=', '+x.nazwa;y.kategorie=[...new Set([...y.kategorie,...x.kategorie])]}else{byEli[x.eli]={...x};Z.push(byEli[x.eli])}}); // jedna ustawa zmieniająca kilka obserwowanych — jeden wpis
   const PR=p.value?.projekty||[],O=o.value;
-  if(!Z.length&&!PR.length&&!O)return;
+  if(ZP.enabled===false||(!Z.length&&!PR.length&&!O))return;
   const d=PRAWO.fmtD,tags=ks=>[...new Set((ks||[]).map(k=>PCAT[k]||k))].slice(0,3).map(x=>`<span class="ptag">${esc(t(x))}</span>`).join('');
   const recent=new Date(Date.now()-30*864e5).toISOString().slice(0,10),today=new Date().toISOString().slice(0,10);
-  $('#przm').innerHTML=Z.slice(0,7).map(x=>`<div class="pitem"><a href="${esc(PRAWO.isapUrl(x.eli))}" target="_blank" rel="noopener">${esc(x.nazwa)}</a><small>${esc(x.tytul)}</small><small>${x.wejscie?(x.wejscie>today?esc(t('wejdzie w życie'))+' ':esc(t('w życie od'))+' ')+d(x.wejscie):''}</small>${(x.wykryto||'')>=recent?`<span class="ptag new">${esc(t('nowe'))}</span>`:''}${tags(x.kategorie)}</div>`).join('')||`<div class="pitem"><small>${esc(t('Brak nowelizacji w ostatnim czasie.'))}</small></div>`;
-  $('#prpr').innerHTML=PR.slice(0,6).map(x=>`<div class="pitem"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.tytul)}</a><small>${x.etap?esc(x.etap)+' · '+d(x.etap_data):''}${x.uchwalony?' · '+esc(t('uchwalony')):''}</small>${tags(x.kategorie)}</div>`).join('')||`<div class="pitem"><small>${esc(t('Brak projektów w tej chwili.'))}</small></div>`;
+  $('#przm').innerHTML=Z.slice(0,ZP.zmian||7).map(x=>`<div class="pitem"><a href="${esc(PRAWO.isapUrl(x.eli))}" target="_blank" rel="noopener">${esc(x.nazwa)}</a><small>${esc(x.tytul)}</small><small>${x.wejscie?(x.wejscie>today?esc(t('wejdzie w życie'))+' ':esc(t('w życie od'))+' ')+d(x.wejscie):''}</small>${(x.wykryto||'')>=recent?`<span class="ptag new">${esc(t('nowe'))}</span>`:''}${tags(x.kategorie)}</div>`).join('')||`<div class="pitem"><small>${esc(t('Brak nowelizacji w ostatnim czasie.'))}</small></div>`;
+  $('#prpr').innerHTML=PR.slice(0,ZP.projektow||6).map(x=>`<div class="pitem"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.tytul)}</a><small>${x.etap?esc(x.etap)+' · '+d(x.etap_data):''}${x.uchwalony?' · '+esc(t('uchwalony')):''}</small>${tags(x.kategorie)}</div>`).join('')||`<div class="pitem"><small>${esc(t('Brak projektów w tej chwili.'))}</small></div>`;
   const od=O?.opoznienie,kp=O?.kapitalowe;
   $('#prods').innerHTML=O?`<div><span>${esc(t('Odsetki ustawowe za opóźnienie'))}</span><br><b>${esc(String(od?.stawka??'—').replace('.',','))}%</b></div><div><span>${esc(t('Odsetki ustawowe'))}</span><br><b>${esc(String(kp?.stawka??'—').replace('.',','))}%</b></div><div><span>${esc(t('Odsetki maksymalne'))}</span><br><b>${esc(String(PRAWO.ods.ODS_MAX).replace('.',','))}%</b></div><div><span>${od?.od?esc(t('obowiązują od'))+' '+d(od.od):''}</span></div>`:'';
-  $('#prods').style.display=O?'':'none';
+  $('#prods').style.display=O&&ZP.odsetki!==false?'':'none';
   $('#prawo').style.display='';
 }
 

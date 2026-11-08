@@ -24,13 +24,15 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 13 | Sprawdzenie po wysyłce: parser v4 (identyfikatory ELI) na danych z API, wygląd na telefonie | ✅ v1.21.2 |
 | 14 | Restrukturyzacja firmy: kalkulator długów przedsiębiorcy (raty po układzie, wstrzymanie, odsetki, umorzenie) + ścieżki postępowań z podstawami w CRM | ✅ v1.22.0 |
 | 16 | CRM: menu w grupach tematycznych z kolorami (Codzienna praca, Kancelaria, Prawo, Administracja), tylko pozycje z uprawnień, dymki z opisem i powodem dostępu | ✅ v1.23.0 |
+| 17 | CRM → Treści strony → 💬 Czat Adam (podstawowe ustawienia, przyciski, własne tematy, przepisy wł./wył., tester) i ✨ Nowe funkcje (zmiany w prawie, zwrot z umowy, restrukturyzacja, OCR) | ✅ v1.24.0 |
+| 18 | Ustawienia CRM: zakładki w grupach z kolorami (Moje / Sprawy i terminy / Dostęp i bezpieczeństwo) | ❓ propozycja czeka na decyzję |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później
 
 - ❓ Reguły zwrotu (`umowa-zwrot.js`) — przegląd przez prawnika: wzorce zapisów, podstawy, orzecznictwo, próg „kwalifikuje się”.
 
-- ❓ Adam na stronie pokazuje treść przepisu, gdy klient wprost o niego zapyta („art. 45 ukk”), a w kilku odpowiedziach dopisuje odnośnik do przepisu. Zostawić, czy wyłączyć (na stronie wynik analizy umowy pokazujemy bez podstaw prawnych)?
+- ✅ Adam a przepisy: przełącznik w CRM → Treści strony → Czat Adam („Pokazuje treść przepisów i odnośniki”); domyślnie włączony — decyzja kancelarii.
 - ⏳ Powiadomienia o zmianach w prawie zapisywane w bazie (dla każdego pełnomocnika) — wymaga migracji z `pg_net` albo Edge Function; teraz licznik i kafelek w CRM.
 - ⏳ Restrukturyzacja: harmonogram układu miesiąc po miesiącu (karencja w liczbach), wydruk planu dla wierzycieli.
 - ⏳ Kalkulator CHF z historycznymi kursami NBP (dokładniejszy szacunek z samej umowy, bez pytania klienta o ratę i saldo).

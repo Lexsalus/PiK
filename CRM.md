@@ -88,6 +88,11 @@ Do decyzji właściciela:
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
 
+## Treści strony — nowe zakładki (v1.24.0)
+
+- **💬 Czat Adam**: włączenie, imię, podpis, przycisk, powitanie, zastrzeżenie, pokazywanie przepisów, szukanie w przepisach, przyciski na powitanie, własne tematy (frazy, odpowiedź, przyciski), tester odpowiedzi na szkicu.
+- **✨ Nowe funkcje**: sekcja „Zmiany w prawie”, komunikat o zwrocie z umowy (typy kredytów, teksty), restrukturyzacja firmy (pokaż/ukryj, wartości startowe), skany umów (OCR).
+
 ## Menu (v1.23.0)
 
 Menu jest podzielone na grupy z kolorami: **Codzienna praca** (niebieski: Pulpit, Sprawy, Nowe sprawy, Terminy, Powiadomienia), **Kancelaria** (zielony: Zespół, Finanse, Raporty), **Prawo** (fiolet), **Administracja** (pomarańcz: Treści strony, Podgląd, Ustawienia). Każdy widzi tylko pozycje ze swoich uprawnień; pusta grupa znika. Dymek przy pozycji opisuje zakładkę i mówi, dlaczego ją widzisz (np. „uprawnienie Terminy”). Na telefonie grupy są oznaczone kolorem paska pod pozycją.

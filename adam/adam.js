@@ -38,7 +38,14 @@ function matchesPhrase(words,phrase){
 
 /* ---------- dane ---------- */
 let W=null;
-const wiedza=()=>W||(W=fetch(BASE+'wiedza.json',{cache:'no-cache'}).then(r=>r.json()));
+const baseW=()=>W||(W=fetch(BASE+'wiedza.json',{cache:'no-cache'}).then(r=>r.json()));
+/* ustawienia z CRM → Treści strony → Czat Adam (window.ADAM_CFG) nadpisują domyślną wiedzę z pliku */
+const wiedza=()=>baseW().then(B=>{const C=window.ADAM_CFG||{},K={...B};
+  ['imie','podpis','powitanie','zastrzezenie','przycisk'].forEach(k=>{if(C[k])K[k]=C[k]});
+  if(Array.isArray(C.start)&&C.start.length)K.start=C.start;
+  if(Array.isArray(C.intencje)&&C.intencje.length)K.intencje=C.intencje;
+  if(Array.isArray(C.dodatkowe))K.intencje=[...C.dodatkowe,...K.intencje];
+  K.przepisy=C.przepisy!==false;K.szukaj=C.szukaj!==false;return K});
 const prawo=()=>window.PRAWO?Promise.resolve(window.PRAWO):new Promise((ok,no)=>{const s=document.createElement('script');s.src=ROOT+'prawo.js';s.onload=()=>ok(window.PRAWO);s.onerror=no;document.head.appendChild(s)});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtD=d=>{if(!d)return '';const [y,m,dd]=String(d).slice(0,10).split('-');return `${dd}.${m}.${y}`};
@@ -50,8 +57,8 @@ function score(words,it){let best=0,n=0;for(const p of it.frazy){if(matchesPhras
 async function answer(q){
   const K=await wiedza(),P=await prawo().catch(()=>null);
   const n=normalize(q),words=n.split(' ').filter(Boolean);
-  // 1) bezpośrednie odwołanie do przepisu: „art. 45 ukk”
-  if(P&&/\bart\.?\s*\d/i.test(q)){
+  // 1) bezpośrednie odwołanie do przepisu: „art. 45 ukk” (gdy w ustawieniach włączone pokazywanie przepisów)
+  if(P&&K.przepisy&&/\bart\.?\s*\d/i.test(q)){
     await P.acts().catch(()=>{});
     const qq=q.replace(/\bart\s+(\d)/i,'art. $1');
     const refs=P.findRefs(P.supNum(qq)).filter(r=>r.id);
@@ -61,17 +68,18 @@ async function answer(q){
       return{html:out.map(o=>o.html).join('<hr>')+`<div class="mut small">Tekst informacyjny z ISAP. Wiążący jest Dziennik Ustaw.</div>`,buttons:[{label:'📞 Bezpłatna analiza sprawy',akcja:'href:#nalezy'}]};
     }
   }
+  if(!K.przepisy&&/\bart\.?\s*\d/i.test(q))return{html:'Treść i znaczenie przepisów omówi z Tobą prawnik kancelarii — bezpłatnie. Opisz w kilku słowach swoją sprawę, a podpowiem, od czego zacząć.',buttons:[{label:'📞 Bezpłatna analiza sprawy',akcja:'href:#nalezy'},...(K.start||[]).slice(0,2)],id:'przepis_ukryty'};
   // 2) intencje z wiedzy
   let best=null,bs=0;
   for(const it of K.intencje){const s=score(words,it);if(s>bs||(s===bs&&s>0&&it.id==='nagle')){best=it;bs=s}}
   if(best&&bs>0){
     let html=best.odp.startsWith('@')?await dynamic(best.odp.slice(1),P):esc(best.odp);
-    if(P&&best.przepisy?.length){await P.acts().catch(()=>{});html+=`<div class="refs">📜 ${best.przepisy.map(x=>P.linkify(esc(x))).join(' · ')}</div>`}
+    if(P&&K.przepisy&&best.przepisy?.length){await P.acts().catch(()=>{});html+=`<div class="refs">📜 ${best.przepisy.map(x=>P.linkify(esc(x))).join(' · ')}</div>`}
     const buttons=best.przyciski==='start'?K.start:(best.przyciski||[]);
     return{html,buttons,id:best.id};
   }
   // 3) wyszukiwanie w przepisach
-  if(P&&words.length>=2){
+  if(P&&K.przepisy&&K.szukaj&&words.length>=2){
     let res=[];try{res=await P.search(q,{limit:3})}catch(e){}
     res=res.filter(r=>r.score>2.5);
     if(res.length){
@@ -169,7 +177,7 @@ function mount(){
       m.buttons.forEach(b=>{const x=document.createElement('button');x.className='q';x.type='button';x.textContent=b.label;x.onclick=()=>run(b);q.appendChild(x)});ms.appendChild(q)}
     scroll();
   }
-  async function greet(){const K=await wiedza().catch(()=>null);if(!K)return;$('.sub').textContent=K.podpis||'asystent prawny';
+  async function greet(){const K=await wiedza().catch(()=>null);if(!K)return;
     add({who:'b',html:esc(K.powitanie),buttons:K.start})}
   function clearQuick(){sh.querySelectorAll('.qs').forEach(x=>x.remove())}
   async function ask(text){
@@ -193,9 +201,12 @@ function mount(){
   ms.addEventListener('mouseover',e=>{const a=e.target.closest('a.przepis');if(a&&window.PRAWO&&!matchMedia('(hover: none)').matches)PRAWO.showTip(a)});
   ms.addEventListener('mouseout',e=>{const a=e.target.closest('a.przepis');if(a&&window.PRAWO&&!a.contains(e.relatedTarget))PRAWO.hideTip(250)});
   ms.addEventListener('click',e=>{const a=e.target.closest('a.przepis');if(a&&window.PRAWO&&matchMedia('(hover: none)').matches&&!a.dataset.shown){e.preventDefault();a.dataset.shown=1;PRAWO.showTip(a)}});
+  wiedza().then(K=>{$('.sub').textContent=K.podpis||'asystent prawny';sh.querySelector('.hd b').textContent=K.imie||'Adam';sh.querySelector('.av').textContent=(K.imie||'A')[0].toUpperCase();sh.querySelector('.fab span').textContent=K.przycisk||`Zapytaj ${K.imie==='Adam'||!K.imie?'Adama':K.imie}`}).catch(()=>{});
   render();if(state.open)setOpen(true);
   window.Adam={open:()=>setOpen(true),close:()=>setOpen(false),ask:q=>{setOpen(true);ask(q)},answer};
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+window.AdamEngine={answer,wiedza,normalize,matchesPhrase};
+if(window.ADAM_NO_WIDGET){} // CRM: tylko silnik do testera odpowiedzi
+else if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 prawo().catch(()=>{});
 })();

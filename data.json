@@ -1241,7 +1241,8 @@
           "explain": "Mogą maskować rzeczywiste znaczenie zapisu."
         }
       ]
-    }
+    },
+    "ocr": true
   },
   "translations": {
     "uk": {
@@ -1900,5 +1901,58 @@
     "consent": "Wyrażam zgodę na przetwarzanie moich danych osobowych przez kancelarię w celu kontaktu i wstępnej analizy mojej sprawy. Zgodę mogę wycofać w każdej chwili.",
     "supabaseUrl": "https://eamobnucjsavahpxilrt.supabase.co",
     "supabaseKey": "sb_publishable_jwyxht3egYyB_dAPrWHkRw_68bmBctB"
+  },
+  "adam": {
+    "imie": "Adam",
+    "podpis": "asystent prawny · odpowiada od razu",
+    "przycisk": "Zapytaj Adama",
+    "powitanie": "",
+    "zastrzezenie": "",
+    "przepisy": true,
+    "szukaj": true,
+    "start": [
+      {
+        "label": "💰 Co mi się należy?",
+        "akcja": "ask:co mi sie nalezy"
+      },
+      {
+        "label": "🏢 Długi firmy",
+        "akcja": "href:#firma"
+      },
+      {
+        "label": "🆕 Zmiany w prawie",
+        "akcja": "info:zmiany"
+      },
+      {
+        "label": "📄 Sprawdź umowę",
+        "akcja": "href:#umowy"
+      },
+      {
+        "label": "📅 Odsetki",
+        "akcja": "info:odsetki"
+      }
+    ],
+    "dodatkowe": []
+  },
+  "zmianyPrawa": {
+    "enabled": true,
+    "zmian": 7,
+    "projektow": 6,
+    "odsetki": true
+  },
+  "zwrot": {
+    "enabled": true,
+    "skd": true,
+    "chf": true,
+    "naglowek": "W Twojej umowie wykryliśmy klauzule abuzywne (niedozwolone zapisy).",
+    "podtytul": "Kwalifikujesz się do zwrotu pieniędzy.",
+    "cta": "Chcę odzyskać pieniądze — bezpłatna analiza →",
+    "nota": "Szacunek na podstawie treści umowy. Dokładną kwotę bezpłatnie ustali kancelaria."
+  },
+  "firma": {
+    "enabled": true,
+    "red": 30,
+    "mies": 48,
+    "kar": 6
   }
 }

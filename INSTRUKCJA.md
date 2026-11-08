@@ -190,9 +190,26 @@ Na stronie działa **Adam** — asystent prawny (`adam/adam.js`). Bot regułowy:
 
 Co umie: kieruje do kalkulatorów „Co mi się należy” (kredyt gotówkowy, frankowy, WIBOR, długi), pokazuje treść przepisu na żądanie („art. 45 ukk”, „art. 118 KC”), aktualne odsetki, ostatnie nowelizacje i projekty z Sejmu, kieruje do analizy umowy; przy zagrożeniu życia podaje 112. Gdy nie zna odpowiedzi, szuka pasujących przepisów.
 
-**Wiedza:** `adam/wiedza.json` — powitanie, przyciski startowe i intencje (frazy bez polskich znaków, `*` = początek słowa, `=` = bez literówek; przyciski `calc:<id>`, `href:#sekcja`, `ask:<pytanie>`, `info:odsetki|zmiany|projekty`).
+**Ustawienia w CRM → 🌐 Treści strony → 💬 Czat Adam** (szkic → Opublikuj, bez wysyłki na GitHub):
+- włączenie czatu, imię, podpis, tekst przycisku, powitanie, zastrzeżenie,
+- **Pokazuje treść przepisów i odnośniki** — po wyłączeniu Adam nie pokazuje artykułów ani linków do przepisów (na pytanie „art. …” odsyła do prawnika), **Szukanie w przepisach** gdy nie zna odpowiedzi,
+- **Przyciski na powitanie** (napis + akcja), kolejność strzałkami,
+- **Własne tematy**: frazy po przecinku, odpowiedź, przyciski (`Napis | akcja` w liniach) — mają pierwszeństwo przed domyślnymi,
+- **Tester odpowiedzi** — wpisz pytanie, zobacz temat i odpowiedź według szkicu.
 
-**Ustawienia → Chatbot:** włączenie/wyłączenie. Pusty adres albo stary adres Ilony = Adam.
+**Wiedza domyślna:** `adam/wiedza.json` — powitanie, przyciski startowe i intencje (frazy bez polskich znaków, `*` = początek słowa, `=` = bez literówek; przyciski `calc:<id>`, `href:#sekcja`, `ask:<pytanie>`, `info:odsetki|zmiany|projekty`).
+
+Pusty adres skryptu albo stary adres Ilony = Adam.
+
+## 9a. Nowe funkcje strony — ustawienia
+
+CRM → 🌐 Treści strony → **✨ Nowe funkcje**:
+- **📜 Zmiany w prawie** — pokaż/ukryj sekcję i link w menu, ile nowelizacji i projektów, czy pokazywać odsetki.
+- **💰 Zwrot z umowy kredytu** — włącz/wyłącz komunikat i kwotę po analizie umowy, osobno dla kredytu konsumenckiego i frankowego, teksty: nagłówek, drugi wiersz, przycisk, dopisek.
+- **🏢 Restrukturyzacja firmy** — pokaż/ukryj sekcję „Dla firm”, wartości startowe suwaków (umorzenie %, liczba rat, karencja).
+- **📷 Skany umów** — rozpoznawanie tekstu ze zdjęć i skanów.
+
+Wszystko zapisuje się w szkicu i działa na stronie po „🚀 Opublikuj”.
 
 ## 10. Publikacja zmian
 

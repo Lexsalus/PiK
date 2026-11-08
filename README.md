@@ -41,7 +41,8 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Analiza umów: reguły podstawowe i prawne (z podstawą prawną), limity odsetek, wskaźniki podejrzanej treści, tester reguł
 - Tłumaczenia: tryb własny/Google, wybór języków, tabela z postępem i filtrem brakujących
 - SEO: tytuł, opis, hreflang, Open Graph, schema.org, Search Console, Bing, GA4 z banerem zgody, robots.txt, sitemap.xml, podgląd wyniku Google i ocena
-- Włączanie/wyłączanie chatbota
+- 💬 Czat Adam: imię, powitanie, przyciski, własne tematy, pokazywanie przepisów, tester odpowiedzi
+- ✨ Nowe funkcje: Zmiany w prawie, zwrot z umowy (teksty, typy), restrukturyzacja firmy (wartości startowe), skany umów
 - Podgląd szkicu, eksport / import `data.json`
 
 ## Struktura

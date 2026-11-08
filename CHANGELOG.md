@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.24.0] — 2026-11-08
+- CRM → Treści strony: 💬 Czat Adam (imię, powitanie, przyciski, własne tematy, przepisy wł./wył., tester) i ✨ Nowe funkcje (zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, OCR); e2e 113/113
+
 ## [1.23.0] — 2026-11-08
 - CRM: menu w grupach tematycznych z kolorami (Codzienna praca, Kancelaria, Prawo, Administracja), tylko pozycje z uprawnień, dymki z opisem i powodem dostępu; e2e 109/109
 

@@ -84,6 +84,18 @@ async def main():
     await nav('#/prawo/projekty'); await pg.wait_for_timeout(800); ok('Projekty ustaw w Sejmie' in await T('#view'),'Prawo: projekty z Sejmu')
     await nav('#/prawo/przepisy'); await pg.wait_for_timeout(500); await pg.fill('#ppQ','przedawnienie roszczeń'); await pg.click('#ppGo'); await pg.wait_for_timeout(2500)
     ok('Art.' in await T('#ppRes'),'Prawo: wyszukiwarka przepisów słowami')
+    # --- treści strony: czat Adam i nowe funkcje
+    await nav('#/strona/adam'); await pg.wait_for_timeout(1500); v=await T('#view')
+    ok('Przyciski na powitanie' in v and 'Własne tematy' in v and 'Tester odpowiedzi' in v,'Treści strony → Czat Adam: ustawienia')
+    await pg.click('text=+ Temat'); await pg.wait_for_timeout(300)
+    await pg.fill('[data-adfr="0"]','godziny otwarcia, kiedy pracujecie'); await pg.fill('[data-p="adam.dodatkowe.0.odp"]','Pracujemy od 9 do 17.')
+    await pg.fill('#adQ','jakie macie godziny otwarcia'); await pg.click('text=Zapytaj'); await pg.wait_for_timeout(2500)
+    ok('Pracujemy od 9 do 17' in await T('#adRes'),'Czat Adam: własny temat działa w testerze')
+    await pg.uncheck('[data-p="adam.przepisy"]'); await pg.fill('#adQ','art. 45 ukk'); await pg.click('text=Zapytaj'); await pg.wait_for_timeout(1500)
+    ok('Art. 45' not in await T('#adRes'),'Czat Adam: wyłączone pokazywanie przepisów')
+    await nav('#/strona/funkcje'); await pg.wait_for_timeout(500); v=await T('#view')
+    ok('Zmiany w prawie' in v and 'Zwrot z umowy' in v and 'Restrukturyzacja firmy' in v and 'Skany umów' in v,'Treści strony → Nowe funkcje: ustawienia')
+    await nav('#/strona/export'); await pg.wait_for_timeout(500); await pg.click('[data-st="reset()"]'); await pg.wait_for_timeout(500)  # szkic z testu odrzucony
     # --- zespół: aplikantka bez finansów
     await nav(f'#/sprawa/{caseid}/zespol'); await pg.click('text=+ Dodaj osobę do sprawy'); await pg.wait_for_timeout(300)
     await pg.select_option('#mmU',label='Anna Kowalska (Aplikant)'); await submit()
