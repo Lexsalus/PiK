@@ -1,28 +1,24 @@
-# Simple workflow for deploying static content to GitHub Pages
+# Publikacja strony na GitHub Pages + codzienna synchronizacja danych prawnych z API Sejmu.
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
+  # codziennie ok. 6:17 czasu polskiego — strażnik zmian w prawie (tools/prawo_sync.py)
+  schedule:
+    - cron: "17 5 * * *"
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write   # synchronizacja zapisuje prawo/*.json z powrotem do repozytorium
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
     environment:
       name: github-pages
@@ -31,6 +27,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Czy synchronizować prawo?
+        id: want
+        run: |
+          if [ "${{ github.event_name }}" != "push" ]; then echo "run=1" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # przy wysyłce: tylko gdy zmieniła się lista ustaw lub skrypt, albo danych jeszcze nie ma
+          if [ ! -f prawo/akty.json ] || git diff --name-only HEAD~1 HEAD | grep -qE '^(prawo/obserwowane\.json|tools/prawo_sync\.py)$'; then echo "run=1" >> "$GITHUB_OUTPUT"; else echo "run=0" >> "$GITHUB_OUTPUT"; fi
+      - name: Synchronizacja z API Sejmu (ELI + procesy legislacyjne)
+        if: steps.want.outputs.run == '1'
+        continue-on-error: true
+        timeout-minutes: 25
+        run: |
+          pip install --quiet pypdf
+          python3 tools/prawo_sync.py
+      - name: Zapis danych prawnych do repozytorium
+        if: steps.want.outputs.run == '1'
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prawo
+          if git diff --cached --quiet; then echo "bez zmian"; exit 0; fi
+          git commit -m "Dane prawne z API Sejmu ($(date -u +%F)) [automat]"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
       - name: Build SEO (meta tagi, robots.txt, sitemap.xml z data.json)
         run: python3 build_seo.py
       - name: Setup Pages
@@ -38,7 +59,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: '.'
       - name: Deploy to GitHub Pages
         id: deployment

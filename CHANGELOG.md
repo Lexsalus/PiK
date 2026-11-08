@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.20.0] — 2026-11-08
+- Strażnik prawa — etap 1: codzienna synchronizacja z API Sejmu (tools/prawo_sync.py → prawo/*.json: akty, nowelizacje, projekty ustaw, odsetki, teksty artykułów)
+
 ## [1.19.0] — 2026-11-05
 - CRM jako aplikacja (PWA): przycisk Zainstaluj aplikację na ekranie logowania i w górnym pasku, manifest, service worker, ikony
 
