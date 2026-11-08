@@ -1,0 +1,431 @@
+{
+  "_info": "Wiedza czatu Adam (asystent prawny strony Porównaj.to). Frazy: małe litery bez polskich znaków, * = początek słowa, = na początku = bez tolerancji literówek. Przyciski: calc:<id kalkulatora>, href:<adres lub #sekcja>, ask:<pytanie wysyłane do Adama>, info:<odsetki|zmiany|projekty>.",
+  "imie": "Adam",
+  "podpis": "asystent prawny · odpowiada od razu",
+  "powitanie": "Dzień dobry, jestem Adam 👋 Pomogę sprawdzić, co może Ci się należeć, znajdę przepis i powiem, co zmienia się w prawie. Napisz, czego dotyczy Twoja sprawa — np. „kredyt gotówkowy”, „frankowy”, „art. 45 ukk”.",
+  "zastrzezenie": "Odpowiadam na podstawie przepisów i kalkulatorów strony — to informacja, nie porada prawna. Twoją sprawę bezpłatnie oceni kancelaria.",
+  "start": [
+    {
+      "label": "💰 Co mi się należy?",
+      "akcja": "ask:co mi sie nalezy"
+    },
+    {
+      "label": "📜 Znajdź przepis",
+      "akcja": "ask:jak znalezc przepis"
+    },
+    {
+      "label": "🆕 Zmiany w prawie",
+      "akcja": "info:zmiany"
+    },
+    {
+      "label": "📄 Sprawdź umowę",
+      "akcja": "href:#umowy"
+    },
+    {
+      "label": "📅 Odsetki",
+      "akcja": "info:odsetki"
+    }
+  ],
+  "intencje": [
+    {
+      "id": "nagle",
+      "frazy": [
+        "przemoc*",
+        "bije mnie",
+        "grozi mi",
+        "groz* smierc*",
+        "zagrozeni* zycia",
+        "boje sie o zycie",
+        "porwan*"
+      ],
+      "odp": "Jeśli grozi Ci niebezpieczeństwo, zadzwoń natychmiast pod numer alarmowy 112. Pomoc dla osób doznających przemocy: Niebieska Linia 800 120 002 (całodobowo, bezpłatnie). Gdy będziesz bezpiecznie, kancelaria pomoże w dalszych krokach prawnych.",
+      "przyciski": [
+        {
+          "label": "📞 Zadzwoń 112",
+          "akcja": "href:tel:112"
+        }
+      ],
+      "waga": 3
+    },
+    {
+      "id": "powitanie",
+      "frazy": [
+        "=czesc",
+        "=hej",
+        "dzien dobry",
+        "dobry wieczor",
+        "=witam",
+        "=siema",
+        "=hello",
+        "=hi"
+      ],
+      "odp": "Dzień dobry! W czym mogę pomóc? Możesz opisać swoją sprawę albo wybrać temat poniżej.",
+      "przyciski": "start"
+    },
+    {
+      "id": "kto",
+      "frazy": [
+        "kim jestes",
+        "kto ty",
+        "jestes botem",
+        "jestes czlowiek*",
+        "czy jestes prawnik*",
+        "co potrafisz",
+        "co umiesz",
+        "w czym pomozesz"
+      ],
+      "odp": "Jestem Adam — automatyczny asystent strony. Działam w Twojej przeglądarce i nie wysyłam Twoich pytań na zewnątrz. Umiem: oszacować roszczenie (kredyty, oddłużanie), znaleźć i pokazać przepis (np. „art. 385¹ KC”), podać aktualne odsetki ustawowe, pokazać nowelizacje i projekty ustaw z Sejmu oraz pokierować do analizy umowy. Nie jestem prawnikiem — ostatecznie oceni to kancelaria.",
+      "przyciski": "start"
+    },
+    {
+      "id": "dzieki",
+      "frazy": [
+        "dziek*",
+        "=dzieki",
+        "=dzk",
+        "super",
+        "=ok dzieki",
+        "=thx"
+      ],
+      "odp": "Proszę bardzo! Gdyby coś jeszcze — pisz śmiało."
+    },
+    {
+      "id": "nalezy",
+      "frazy": [
+        "co mi sie nalezy",
+        "ile moge odzyskac",
+        "czy moge odzyskac",
+        "odzyskac pieniadze",
+        "odszkodowan*",
+        "roszczeni*",
+        "czy mam sprawe"
+      ],
+      "odp": "Najczęściej pomagamy w sprawach kredytów i oddłużania. Wybierz, czego dotyczy Twoja sprawa — kalkulator pokaże wstępny szacunek w kilka minut:",
+      "przyciski": [
+        {
+          "label": "💳 Kredyt gotówkowy / karta",
+          "akcja": "calc:skd"
+        },
+        {
+          "label": "🇨🇭 Kredyt frankowy / walutowy",
+          "akcja": "calc:chf"
+        },
+        {
+          "label": "📈 Kredyt złotówkowy (WIBOR)",
+          "akcja": "calc:wibor"
+        },
+        {
+          "label": "🧾 Długi i oddłużanie",
+          "akcja": "calc:rst"
+        }
+      ],
+      "waga": 0.6
+    },
+    {
+      "id": "skd",
+      "frazy": [
+        "sankcj* kredyt* darmow*",
+        "=skd",
+        "kredyt* gotowkow*",
+        "kredy* konsumen*",
+        "kredyt ratal*",
+        "pozyczk*",
+        "chwilowk*",
+        "karta kredytow*",
+        "rrso",
+        "prowizj*",
+        "kredyt darmowy"
+      ],
+      "odp": "Przy kredycie konsumenckim (gotówkowym, ratalnym, karcie) bank musi podać w umowie m.in. RRSO, całkowity koszt i zasady zmiany opłat. Jeśli naruszył te obowiązki, możesz złożyć oświadczenie o sankcji kredytu darmowego — wtedy zwracasz tylko kapitał, bez odsetek i prowizji (art. 45 ukk). Masz na to rok od wykonania umowy.",
+      "przepisy": [
+        "art. 45 ukk",
+        "art. 30 ukk"
+      ],
+      "przyciski": [
+        {
+          "label": "💳 Policz sankcję kredytu darmowego",
+          "akcja": "calc:skd"
+        },
+        {
+          "label": "📄 Sprawdź umowę kredytu",
+          "akcja": "href:#umowy"
+        }
+      ]
+    },
+    {
+      "id": "chf",
+      "frazy": [
+        "frank*",
+        "=chf",
+        "kredyt* walut*",
+        "indeksowan*",
+        "denominowan*",
+        "kredyt* we frankach",
+        "klauzul* abuzywn*",
+        "klauzul* niedozwolon*"
+      ],
+      "odp": "W kredytach indeksowanych lub denominowanych do franka sądy masowo uznają klauzule przeliczeniowe za niedozwolone — skutkiem bywa unieważnienie umowy i rozliczenie kapitału. Od 2026 r. obowiązuje ustawa o szczególnych rozwiązaniach w sprawach frankowych. Kalkulator pokaże orientacyjną korzyść:",
+      "przepisy": [
+        "art. 385¹ KC"
+      ],
+      "przyciski": [
+        {
+          "label": "🇨🇭 Policz kredyt frankowy",
+          "akcja": "calc:chf"
+        },
+        {
+          "label": "📜 Projekty i zmiany",
+          "akcja": "info:zmiany"
+        }
+      ]
+    },
+    {
+      "id": "wibor",
+      "frazy": [
+        "=wibor",
+        "wskaznik* referencyjn*",
+        "kredyt* zlotowkow*",
+        "kredyt* hipoteczn* w pln",
+        "wiron*",
+        "polstr"
+      ],
+      "odp": "W kredytach złotówkowych z WIBOR-em kwestionuje się m.in. sposób informowania o ryzyku zmiennej stopy. To sprawy nowsze i mniej przesądzone niż frankowe — kalkulator pokaże, ile wynosi część odsetkowa oparta na WIBOR:",
+      "przyciski": [
+        {
+          "label": "📈 Policz kredyt z WIBOR",
+          "akcja": "calc:wibor"
+        }
+      ]
+    },
+    {
+      "id": "rst",
+      "frazy": [
+        "upadlosc*",
+        "upadlos* konsumenck*",
+        "oddluz*",
+        "=dlug",
+        "=dlugi",
+        "zadluz*",
+        "komornik*",
+        "egzekucj*",
+        "nie stac mnie na raty",
+        "restrukturyzac*",
+        "windykac*"
+      ],
+      "odp": "Przy dużych długach możliwa jest restrukturyzacja albo upadłość konsumencka — sąd ustala plan spłaty, a po jego wykonaniu pozostałe długi są umarzane. Wniosek może złożyć każdy niewypłacalny konsument (prawo upadłościowe).",
+      "przepisy": [
+        "art. 491¹ p.u."
+      ],
+      "przyciski": [
+        {
+          "label": "🧾 Sprawdź możliwość oddłużenia",
+          "akcja": "calc:rst"
+        }
+      ]
+    },
+    {
+      "id": "odsetki",
+      "frazy": [
+        "odset*",
+        "odsetki ustawowe",
+        "odsetki za opoznienie",
+        "odsetki maksymalne",
+        "ile odsetek"
+      ],
+      "odp": "@odsetki",
+      "przyciski": [
+        {
+          "label": "📅 Kalkulator odsetek",
+          "akcja": "calc:odsetki"
+        }
+      ]
+    },
+    {
+      "id": "oplata",
+      "frazy": [
+        "oplat* sadow*",
+        "koszt* sadow*",
+        "wpis od pozwu",
+        "ile kosztuje pozew",
+        "oplata od pozwu",
+        "koszty procesu"
+      ],
+      "odp": "Opłata od pozwu o zapłatę zależy od wartości sporu — do 20 000 zł jest stała, powyżej to zwykle 5% (ustawa o kosztach sądowych w sprawach cywilnych). Policz dokładnie:",
+      "przepisy": [
+        "art. 13 uksc"
+      ],
+      "przyciski": [
+        {
+          "label": "🧮 Opłata sądowa",
+          "akcja": "calc:oplata"
+        },
+        {
+          "label": "⚖️ Koszty zastępstwa",
+          "akcja": "calc:zastepstwo"
+        }
+      ]
+    },
+    {
+      "id": "zastepstwo",
+      "frazy": [
+        "zastepstw* procesow*",
+        "koszt* adwokat*",
+        "koszt* radc*",
+        "stawk* minimaln*",
+        "zwrot kosztow"
+      ],
+      "odp": "Przegrywający zwraca wygranemu koszty zastępstwa według stawek minimalnych z rozporządzenia o opłatach za czynności adwokackie (zależą od wartości sporu).",
+      "przyciski": [
+        {
+          "label": "⚖️ Policz koszty zastępstwa",
+          "akcja": "calc:zastepstwo"
+        }
+      ]
+    },
+    {
+      "id": "kara",
+      "frazy": [
+        "kar* umown*",
+        "odstepne",
+        "rażąco wygorowan*",
+        "razaco wygorowan*",
+        "miarkowani*"
+      ],
+      "odp": "Karę umowną rażąco wygórowaną sąd może obniżyć (miarkowanie, art. 484 § 2 KC). Kalkulator porówna karę z wartością umowy:",
+      "przepisy": [
+        "art. 484 KC"
+      ],
+      "przyciski": [
+        {
+          "label": "🧮 Kara a wartość umowy",
+          "akcja": "calc:kara"
+        }
+      ]
+    },
+    {
+      "id": "umowa",
+      "frazy": [
+        "sprawdz* umow*",
+        "analiz* umow*",
+        "przeczytaj umowe",
+        "czy umowa jest",
+        "umowa jest uczciwa",
+        "zapis w umowie",
+        "podpisac umowe",
+        "klauzul*"
+      ],
+      "odp": "Wgraj umowę (PDF, Word, tekst) w sekcji „Analiza umów” — wskażę ryzykowne zapisy, zgodność z prawem konsumenta, podejrzane sformułowania i sprawdzę, czy powołane ustawy wciąż obowiązują. Plik nie opuszcza Twojej przeglądarki.",
+      "przyciski": [
+        {
+          "label": "📄 Przejdź do analizy umów",
+          "akcja": "href:#umowy"
+        }
+      ]
+    },
+    {
+      "id": "zmiany",
+      "frazy": [
+        "zmian* w prawie",
+        "nowelizac*",
+        "co nowego",
+        "nowe przepis*",
+        "zmienil* sie prawo",
+        "nowe prawo"
+      ],
+      "odp": "@zmiany"
+    },
+    {
+      "id": "projekty",
+      "frazy": [
+        "=sejm",
+        "projekt* ustaw*",
+        "co uchwal*",
+        "nad czym pracuje sejm",
+        "nowa ustawa"
+      ],
+      "odp": "@projekty"
+    },
+    {
+      "id": "przepis_help",
+      "frazy": [
+        "jak znalezc przepis",
+        "znajdz przepis",
+        "pokaz przepis",
+        "jaki przepis",
+        "podstaw* prawn*"
+      ],
+      "odp": "Napisz numer artykułu z nazwą ustawy, np. „art. 385¹ KC”, „art. 45 ukk”, „art. 187 kpc” — pokażę aktualną treść. Możesz też opisać problem słowami, np. „przedawnienie roszczeń” albo „odstąpienie od umowy zawartej przez internet”, a poszukam pasujących przepisów."
+    },
+    {
+      "id": "kontakt",
+      "frazy": [
+        "kontakt*",
+        "porad* prawn*",
+        "rozmow* z prawnik*",
+        "chce z prawnikiem",
+        "adwokat*",
+        "radca prawny",
+        "zadzwon*",
+        "telefon*",
+        "spotkan*",
+        "bezplatn* analiz*"
+      ],
+      "odp": "Chętnie przekażę sprawę kancelarii. Najszybciej: wybierz kalkulator w „Co mi się należy”, wpisz dane i kliknij „Chcę bezpłatną analizę mojej sprawy” — prawnik odezwie się z oceną.",
+      "przyciski": [
+        {
+          "label": "💰 Co mi się należy",
+          "akcja": "href:#nalezy"
+        }
+      ],
+      "waga": 0.6
+    },
+    {
+      "id": "przedawnienie",
+      "frazy": [
+        "przedawni*",
+        "termin przedawnienia",
+        "czy to sie przedawnilo"
+      ],
+      "odp": "Ogólny termin przedawnienia roszczeń majątkowych to 6 lat, a dla świadczeń okresowych i roszczeń z działalności gospodarczej — 3 lata; koniec terminu przypada na ostatni dzień roku kalendarzowego (art. 118 KC). Po upływie przedawnienia roszczenia nie można dochodzić przeciwko konsumentowi — sąd uwzględnia to z urzędu (art. 117 § 2¹ KC).",
+      "przepisy": [
+        "art. 118 KC",
+        "art. 117 KC"
+      ]
+    },
+    {
+      "id": "odstapienie",
+      "frazy": [
+        "odstapi* od umowy",
+        "zwrot towaru",
+        "14 dni",
+        "zakup przez internet",
+        "zakup online",
+        "zwrocic towar"
+      ],
+      "odp": "Umowę zawartą na odległość (np. przez internet) lub poza lokalem firmy konsument może odstąpić bez podania przyczyny w ciągu 14 dni (art. 27 ustawy o prawach konsumenta).",
+      "przepisy": [
+        "art. 27 ustawy o prawach konsumenta"
+      ]
+    },
+    {
+      "id": "alimenty",
+      "frazy": [
+        "aliment*",
+        "rozwod*",
+        "opiek* nad dzieckiem",
+        "wladz* rodzicielsk*",
+        "kontakty z dzieckiem"
+      ],
+      "odp": "Sprawy rodzinne zależą mocno od okoliczności. Zakres alimentów wyznaczają usprawiedliwione potrzeby uprawnionego oraz możliwości zarobkowe zobowiązanego (art. 135 KRO).",
+      "przepisy": [
+        "art. 135 KRO"
+      ],
+      "przyciski": [
+        {
+          "label": "📞 Bezpłatna analiza sprawy",
+          "akcja": "href:#nalezy"
+        }
+      ]
+    }
+  ]
+}

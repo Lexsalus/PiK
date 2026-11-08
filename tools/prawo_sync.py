@@ -36,6 +36,7 @@ OUT = os.path.join(ROOT, 'prawo')
 ELI = 'https://api.sejm.gov.pl/eli'
 SEJM = 'https://api.sejm.gov.pl/sejm'
 UA = 'PiK-prawo-sync/1.0 (+https://lexsalus.github.io/PiK/)'
+PARSER = 2  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
 PAUSE = float(os.environ.get('PRAWO_PAUSE', '0.25'))  # odstęp między zapytaniami — nie obciążamy serwerów Sejmu
 TODAY = dt.date.today()
 LOG = []
@@ -187,35 +188,83 @@ HEAD_RX = re.compile(r'^(KSIĘGA|Księga|TYTUŁ|Tytuł|DZIAŁ|Dział|ROZDZIAŁ|R
 ART_RX = re.compile(r'(?m)^Art\.\s*([0-9]+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*)\.\s*')
 
 
-def split_articles(text, is_obwieszczenie):
-    """Tekst aktu -> [[numer, treść, nagłówek rozdziału], …]."""
-    if is_obwieszczenie:
-        m = re.search(r'Załącznik\s+do\s+obwieszczenia', text, re.I)
-        if m:
-            text = text[m.end():]
+MARK_ALONE = re.compile(r'^(§\s*\d+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.|\d+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.|\d+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\)|[a-z]{1,2}\)|[–-])$')
+MARK_START = re.compile(r'^(§\s*\d+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.|\d+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.\s|\d+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\)\s|[a-z]{1,2}\)\s|[–-]\s|\(uchyl)')
+FOOT_LINE = re.compile(r'^\d{1,3}\)\S')          # „12)Oznaczenie ust. 1 nadane przez…” — przypis redakcyjny
+FOOT_REF = re.compile(r'(?<=[A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ.,;:”])\d{1,3}\)(?=[\s.,;:]|$)')  # „konsumenckim12)” — odsyłacz do przypisu
+
+
+def tidy(lines):
+    """Złam linie jak w ustawie: § 1., 1., 1), a) od nowej linii; zawinięte wiersze sklejone; przypisy usunięte."""
+    out, skip = [], False
+    for raw in lines:
+        l = raw.strip()
+        if not l:
+            continue
+        if FOOT_LINE.match(l):
+            skip = True
+            continue
+        if skip and not MARK_START.match(l) and not MARK_ALONE.match(l):
+            continue
+        skip = False
+        l = FOOT_REF.sub('', l)
+        if out and MARK_ALONE.match(out[-1]):
+            out[-1] += ' ' + l
+        elif not out or MARK_ALONE.match(l) or MARK_START.match(l):
+            out.append(l)
+        else:
+            out[-1] = (out[-1][:-1] if out[-1].endswith('-') and not out[-1].endswith(' -') else out[-1] + ' ') + l
+    return [re.sub(r'\s{2,}', ' ', x) for x in out]
+
+
+def _art_key(nr):
+    m = re.match(r'(\d+)', nr)
+    return int(m.group(1)) if m else 0
+
+
+def split_articles(text, is_obwieszczenie=True):
+    """Tekst aktu -> [[numer, treść, nagłówek rozdziału], …].
+    Obwieszczenie (tekst jednolity) zawiera przed załącznikiem cytaty przepisów ustaw zmieniających — właściwy tekst
+    ustawy zaczyna się od tego „Art. 1.”, po którym numeracja idzie po kolei najdłużej."""
     ms = list(ART_RX.finditer(text))
-    out, seen = [], set()
-    head = ''
-    pending_head = []
-    last_end = 0
+    if not ms:
+        return []
+    starts = [i for i, m in enumerate(ms) if m.group(1) == '1']
+    if starts:
+        def run(i):
+            n, last, prev = 0, 0, None
+            for m in ms[i:i + 400]:
+                k = _art_key(m.group(1))
+                if k < last or k > last + 25 or m.group(1) == prev:
+                    break
+                n, last, prev = n + 1, k, m.group(1)
+            return n
+        best = max(starts, key=run)
+        ms = ms[best:]
+        # koniec ustawy: numeracja wraca do małych liczb (np. przypisy/załączniki z cytatami) — utnij
+        last, cut = 0, len(ms)
+        for j, m in enumerate(ms):
+            k = _art_key(m.group(1))
+            if k + 50 < last:
+                cut = j
+                break
+            last = max(last, k)
+        ms = ms[:cut]
+    out, seen, head = [], set(), ''
+    last_end = ms[0].start()
     for i, m in enumerate(ms):
-        # nagłówki (Rozdział, Dział…) między artykułami — zapamiętujemy jako kontekst
-        between = text[last_end:m.start()].split('\n')
-        hs = []
+        between = [x.strip() for x in text[last_end:m.start()].split('\n')]
         for j, line in enumerate(between):
-            if HEAD_RX.match(line.strip()):
-                nxt = between[j + 1].strip() if j + 1 < len(between) else ''
-                hs.append((line.strip() + (' – ' + nxt if nxt and not ART_RX.match(nxt) and len(nxt) < 160 else '')).strip())
-        if hs:
-            head = hs[-1]
+            if HEAD_RX.match(line):
+                nxt = between[j + 1] if j + 1 < len(between) else ''
+                head = (line + (' – ' + nxt if nxt and not HEAD_RX.match(nxt) and len(nxt) < 160 else '')).strip()
         end = ms[i + 1].start() if i + 1 < len(ms) else len(text)
         body_lines = [l.strip() for l in text[m.end():end].split('\n') if l.strip()]
-        # obetnij nagłówki następnego rozdziału z końca artykułu („Rozdział II” + jego tytuł)
         for k, line in enumerate(body_lines):
             if HEAD_RX.match(line) and all(HEAD_RX.match(x) or (len(x) < 160 and not x.endswith(('.', ';', ':'))) for x in body_lines[k:]):
                 body_lines = body_lines[:k]
                 break
-        body = '\n'.join(body_lines)
+        body = '\n'.join(tidy(body_lines))
         last_end = m.end()
         nr = m.group(1)
         if nr in seen:
@@ -223,7 +272,7 @@ def split_articles(text, is_obwieszczenie):
         seen.add(nr)
         if len(body) > 6000:
             body = body[:6000].rsplit(' ', 1)[0] + ' […]'
-        out.append([nr, body, head])
+        out.append([nr, body or '(brak treści w tekście jednolitym — zobacz pełny tekst)', head])
     return out
 
 
@@ -288,7 +337,7 @@ def sync_akty(cfg):
                     log(f'  ⚠ akt zmieniający {rid}: {e}')
             zm.append(item)
         zm.sort(key=lambda z: (z.get('wejscie') or '', eli_key(z['eli'])), reverse=True)
-        rec = {'id': a['id'], 'nazwa': a['nazwa'], 'skrot': a.get('skrot', []), 'kategorie': a.get('kategorie', []),
+        rec = {'id': a['id'], 'nazwa': a['nazwa'], 'skrot': a.get('skrot', []), 'kategorie': a.get('kategorie', []), 'tekst': bool(a.get('teksty')),
                **slim(d), 'tj': tj, 'zmieniajace': zm[:60], 'liczba_zmian': len(zm)}
         akty.append(rec)
         log(f'✓ {a["id"]:8} {d.get("displayAddress")} — {d.get("title")[:90]} [{d.get("status")}] tj: {tj[0]["adres"] if tj else "—"}; nowelizacji: {len(zm)}')
@@ -343,7 +392,7 @@ def sync_teksty(teksty_do):
             log(f'  – {a["id"]}: brak tekstu HTML')
             continue
         cur = load(f'teksty/{a["id"]}.json', {})
-        if cur.get('zrodlo') == eli and cur.get('art'):
+        if cur.get('zrodlo') == eli and cur.get('art') and cur.get('parser') == PARSER:
             continue  # ten sam tekst jednolity — nie pobieramy ponownie
         try:
             raw = http(f'{eli_url(eli)}/text.html')
@@ -353,7 +402,7 @@ def sync_teksty(teksty_do):
                 log(f'  ⚠ {a["id"]}: rozpoznano tylko {len(arts)} artykułów — zostawiam poprzedni plik. Początek tekstu: {text[:300]!r}')
                 continue
             save(f'teksty/{a["id"]}.json', {'id': a['id'], 'nazwa': a['nazwa'], 'zrodlo': eli, 'adres': src['adres'] if src else d.get('displayAddress'),
-                                            'stan': src.get('stan') if src else None, 'pobrano': TODAY.isoformat(), 'art': arts})
+                                            'stan': src.get('stan') if src else None, 'pobrano': TODAY.isoformat(), 'parser': PARSER, 'art': arts})
             log(f'  ✓ tekst {a["id"]}: {len(arts)} artykułów z {eli} (np. art. {arts[0][0]}: {arts[0][1][:80]!r})')
         except Exception as e:
             log(f'  ⚠ tekst {a["id"]} {eli}: {e}')
@@ -380,7 +429,9 @@ def sync_projekty(cfg):
         items = [p for p in items if (p.get('changeDate') or p.get('documentDate') or '') >= since]
     out = []
     for p in items:
-        t = norm((p.get('title') or '') + ' ' + (p.get('description') or ''))
+        t = norm(p.get('title') or '')
+        if 'projekt ustawy' not in t and 'projekt uchwaly' not in t:
+            continue  # tylko projekty aktów (bez np. wniosków o uchylenie immunitetu)
         cats = [k for k, ph in words.items() if any(phrase_match(t, x) for x in ph)]
         if not cats:
             continue
@@ -422,14 +473,25 @@ def pdf_text(data):
 
 
 def parse_rate(text):
+    """„od dnia 5 marca 2026 r. … wynosi 9,25 %” → {od, stawka}; dla transakcji handlowych dwie stawki
+    (dłużnik — publiczny podmiot leczniczy / pozostali): stawka = ogólna, stawka_leczniczy = szczególna."""
     t = re.sub(r'\s+', ' ', text)
-    m = re.search(r'od dnia (\d{1,2}) (\w+) (\d{4}) r\.?.{0,200}?wynosi\s*([\d]+(?:[,.]\d+)?)\s*%', t)
-    if not m:
+    m = re.search(r'od dnia (\d{1,2}) (\w+) (\d{4}) r\.?(?: do dnia (\d{1,2}) (\w+) (\d{4}) r\.?)?,?.{0,200}?wynosi\s*:?\s*(.{0,700})', t)
+    if not m or m.group(2) not in MIES:
         return None
-    d, mies, y, v = m.groups()
-    if mies not in MIES:
+    d, mies, y = m.group(1), m.group(2), m.group(3)
+    rates = re.findall(r'(\d+(?:[,.]\d+)?)\s*%([^%;]{0,220})', m.group(7))
+    if not rates:
         return None
-    return {'od': f'{int(y):04d}-{MIES[mies]:02d}-{int(d):02d}', 'stawka': float(v.replace(',', '.'))}
+    val = lambda v: float(v.replace(',', '.'))
+    general = next((r for r in rates if 'nie jest' in r[1]), rates[0])
+    res = {'od': f'{int(y):04d}-{MIES[mies]:02d}-{int(d):02d}', 'stawka': val(general[0])}
+    if m.group(4) and m.group(5) in MIES:
+        res['do'] = f'{int(m.group(6)):04d}-{MIES[m.group(5)]:02d}-{int(m.group(4)):02d}'
+    spec = next((r for r in rates if 'jest podmiot' in r[1] and 'nie jest' not in r[1]), None)
+    if spec:
+        res['stawka_leczniczy'] = val(spec[0])
+    return res
 
 
 def sync_odsetki():

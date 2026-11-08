@@ -493,6 +493,7 @@ ROUTES.nowe=()=>{
       <div><div class="mut small">${esc(l.calc?.name||'Kalkulator')}</div><b style="font-size:1.25rem">${m?`${(+m.value).toLocaleString('pl-PL')} ${esc(m.unit||'')}`:'—'}</b><div class="mut small">${esc(m?.label||'')}</div></div>
       <div><div class="mut small">Wpisane dane</div><div class="small">${(l.calc?.inputs||[]).map(i=>`${esc(i.label)}: <b>${(+i.value).toLocaleString('pl-PL')} ${esc(i.unit||'')}</b>`).join('<br>')}</div></div></div>
     ${l.message?`<div class="note info" style="margin-top:10px">${esc(l.message)}</div>`:''}
+    ${l.calc?.analiza&&window.leadAnaliza?leadAnaliza(l.calc.analiza):''}
     <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'&&canChange('new_cases')?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`};
   return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia z formularza „Co mi się należy” na stronie · ${open.length} do obsłużenia</p></div></div>
     
@@ -780,16 +781,16 @@ async function loadCalcs(c){
   const pref=CALCS.find(x=>x.crmCategory===c.category)||CALCS[0];
   $('#calcArea').innerHTML=`<div class="toolbar"><select class="f" id="caSel">${CALCS.map(x=>`<option value="${x.id}" ${x.id===pref.id?'selected':''}>${esc(x.icon||'')} ${esc(x.name)}</option>`).join('')}</select></div><div id="caBox"></div>`;
   const draw=()=>{const k=CALCS.find(x=>x.id===$('#caSel').value),pre=c.leadData&&k.name===c.leadData.name?Object.fromEntries(c.leadData.inputs.map(i=>[i.label,i.value])):{};
-    $('#caBox').innerHTML=`<div class="calcbox"><div class="form">${k.inputs.map(i=>`<label>${esc(i.label)} (${esc(i.unit||'')})<input class="f" type="number" step="any" data-k="${esc(i.key)}" value="${pre[i.label]??i.default}"></label>`).join('')}</div><div class="card res" id="caRes" style="background:var(--bg2)"></div></div>${k.note?`<p class="hint">${esc(k.note)}</p>`:''}
+    $('#caBox').innerHTML=`<div class="calcbox"><div class="form">${k.inputs.map(i=>`<label>${esc(i.label)} (${esc(i.unit||'')})<input class="f" type="number" step="any" data-k="${esc(i.key)}" value="${pre[i.label]??i.default}"></label>`).join('')}</div><div class="card res" id="caRes" style="background:var(--bg2)"></div></div>${k.note?`<p class="hint">${window.PRAWO?PRAWO.linkify(esc(k.note)):esc(k.note)}</p>`:''}
       ${caseFlags(c).actionsChange&&c.status==='open'?'<button class="btn pri" id="caSave" style="margin-top:12px">Zapisz wynik jako czynność „analiza”</button>':''}`;
-    const run=()=>{const vals=Object.fromEntries($$('#caBox [data-k]').map(i=>[i.dataset.k,parseFloat(i.value)||0])),scope={...vals};
+    const run=()=>{const vals=Object.fromEntries($$('#caBox [data-k]').map(i=>[i.dataset.k,parseFloat(i.value)||0])),scope={...(window.PRAWO?PRAWO.odsScope():{}),...vals};
       const out=k.outputs.map(o=>{let v=NaN;try{v=Number(new Function(...Object.keys(scope),'with(Math){return ('+o.formula+')}')(...Object.values(scope)))}catch(e){}scope[o.key]=v;return{...o,v}});
       const main=out.find(o=>o.main)||out[0],f=(v,d)=>Number.isFinite(v)?v.toLocaleString('pl-PL',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}):'—';
-      $('#caRes').innerHTML=`<span class="mut">${esc(main.label)}</span><div class="main">${f(main.v,main.decimals)} ${esc(main.unit||'')}</div>${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(o.label)}</span><b>${f(o.v,o.decimals)} ${esc(o.unit||'')}</b></div>`).join('')}`;
+      const OL=x=>window.PRAWO?PRAWO.odsLabel(x):x;$('#caRes').innerHTML=`<span class="mut">${esc(OL(main.label))}</span><div class="main">${f(main.v,main.decimals)} ${esc(main.unit||'')}</div>${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(OL(o.label))}</span><b>${f(o.v,o.decimals)} ${esc(o.unit||'')}</b></div>`).join('')}`;
       return{vals,out,main,f}};
     $$('#caBox [data-k]').forEach(i=>i.oninput=run);run();
     const sv=$('#caSave');if(sv)sv.onclick=()=>{const r=run(),st=DB.stages.find(s=>s.caseId===c.id&&s.status==='open');if(!st)return toast('Brak otwartego etapu',true);
-      const desc=`${r.main.label}: ${r.f(r.main.v,r.main.decimals)} ${r.main.unit||''}\n`+k.inputs.map(i=>`${i.label}: ${r.vals[i.key]} ${i.unit||''}`).join('\n');
+      const desc=`${window.PRAWO?PRAWO.odsLabel(r.main.label):r.main.label}: ${r.f(r.main.v,r.main.decimals)} ${r.main.unit||''}\n`+k.inputs.map(i=>`${i.label}: ${r.vals[i.key]} ${i.unit||''}`).join('\n');
       actSafe(async()=>chk(await sb.from('case_entries').insert({case_id:c.id,stage_id:st.id,type:'czynność',kind:'analiza',title:`Kalkulacja: ${k.name}`,description:desc,performed_on:iso(today())})),`Zapisano w etapie „${st.name}”`)}};
   $('#caSel').onchange=draw;draw();
 }
@@ -1423,6 +1424,8 @@ document.addEventListener('click',async e=>{if(!e.target.closest?.('.pwabtn'))re
 addEventListener('DOMContentLoaded',pwaShow);addEventListener('load',()=>{pwaShow();setTimeout(pwaShow,1000)});
 </script>
 <script src="crm-strona.js"></script>
+<script src="prawo.js"></script>
+<script src="crm-prawo.js"></script>
 <script src="crm-podglad.js"></script>
 <script src="crm-pomoc.js"></script>
 </body>

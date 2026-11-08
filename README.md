@@ -15,9 +15,12 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - „Co mi się należy”: kalkulatory roszczeń SKD, CHF/FX, WIBOR, restrukturyzacja + formularz zgłoszenia sprawy (z wynikiem i zgodą RODO)
 - Porównywarka: kategorie, wyszukiwarka, sortowanie, ★ przy najlepszej wartości, porównanie do 4 ofert w tabeli
 - Kalkulatory z suwakami, wyniki na żywo
-- Analiza umów (PDF, Word, ODT, RTF, TXT, HTML) w przeglądarce: ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
+- Analiza umów (PDF, Word, ODT, RTF, TXT, HTML, **zdjęcie lub skan** — rozpoznawanie tekstu w przeglądarce) : ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
+- **Zwrot z umowy kredytu** (SKD, CHF/FX): gdy system wyliczy zwrot, klient widzi czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” i kwotę — **bez podstaw prawnych**; podstawy, orzecznictwo i wykryte zapisy trafiają ze zgłoszeniem do CRM
+- **Zmiany w prawie**: nowelizacje obserwowanych ustaw, projekty w Sejmie, aktualne odsetki (API Sejmu, codziennie)
+- Kalkulator odsetek i limity w analizie umów liczą się z aktualnych obwieszczeń
 - Wersje językowe PL / UA / EN (własne tłumaczenia lub Google Translate)
-- Chatbot Ilona osadzony na stronie
+- Czat **Adam** — asystent prawny w przeglądarce (bez AI, pytania nie wychodzą na zewnątrz): kieruje do kalkulatorów, pokazuje przepis na żądanie, odsetki, zmiany w prawie
 - Motyw ciemny/jasny, responsywność (telefon/desktop)
 - Przycisk ⚙️ Panel w górnym pasku i link w stopce
 
@@ -26,7 +29,8 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - Sprawy z kategoriami i numeracją, karta sprawy, etapy z blokadą i korektami, dokumenty z wersjami, zespół sprawy
 - Terminy procesowe: kalkulator ze świętami, druga osoba, przypomnienia i eskalacja
 - Finanse (podział wpłat, wynagrodzenie pełnomocnika), raporty, powiadomienia
-- Role i uprawnienia, dziennik audytu z łańcuchem skrótów; zgłoszenia z formularza → „Nowe sprawy”
+- Role i uprawnienia, dziennik audytu z łańcuchem skrótów; zgłoszenia z formularza → „Nowe sprawy” (z analizą umowy klienta i podstawami prawnymi)
+- **📜 Prawo**: strażnik zmian w ustawach (ile spraw dotyczy, licznik „nowe”), projekty w Sejmie, odsetki i kontrola stawek w kalkulatorach, wyszukiwarka przepisów; w karcie sprawy → Analiza: dołączenie przepisu ze stanem prawnym na dzień
 
 **CRM → 🌐 Treści strony** (tylko Administrator; dawny panel `admin.html`)
 - Ustawienia strony (nazwa, kolor akcentu, podtytuł)
@@ -47,8 +51,15 @@ crm.html        CRM kancelarii na żywo (Supabase)
 crm-pomoc.js    podpowiedzi w CRM (dymki i ikonki [?]) — słowniki tekstów w jednym miejscu
 crm-podglad.js  CRM → Podgląd: panel oczami wybranej roli lub osoby (tylko Administrator, tylko do odczytu)
 crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawny admin.html)
+crm-prawo.js    CRM → 📜 Prawo + karta „Przepisy” w sprawie + analiza umowy klienta w zgłoszeniu
+prawo.js        wspólny moduł danych prawnych (przepisy z podglądem, odsetki, wyszukiwarka, stan prawny na dzień)
+prawo/          dane z API Sejmu (obserwowane.json — lista ustaw do edycji; reszta generowana codziennie)
+umowa-zwrot.js  ocena umowy kredytu i wyliczenie zwrotu (reguły z podstawami prawnymi i orzecznictwem)
+adam/           czat Adam (adam.js, wiedza.json)
+tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
+PLAN.md         plan prac (prowadzony na bieżąco)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 96/96 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 106/106 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)
@@ -57,7 +68,7 @@ CHANGELOG.md    historia wersji
 bump.py         podbijanie wersji
 build_seo.py    SEO z data.json -> index.html, robots.txt, sitemap.xml (uruchamia Actions)
 INSTRUKCJA.md   instrukcja obsługi
-.github/        workflow publikacji na GitHub Pages
+.github/        workflow publikacji na GitHub Pages + codzienna synchronizacja prawa (ok. 6:17)
 ```
 
 ## Jak to działa

@@ -194,6 +194,21 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 ::-webkit-scrollbar-corner{background:transparent}
 .tabs::-webkit-scrollbar,.tw::-webkit-scrollbar,.sres::-webkit-scrollbar{height:6px;width:6px}
 @supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pgrid .panel{padding:20px}.pgrid h3{margin-bottom:10px}
+.pitem{padding:10px 0;border-bottom:1px solid var(--line)}.pitem:last-child{border:0}.pitem a{color:var(--txt);font-weight:600}.pitem a:hover{color:var(--accent)}
+.pitem small{display:block;color:var(--mut);margin-top:3px}.ptag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:20px;background:var(--card2);color:var(--mut);margin:4px 4px 0 0}
+.ptag.new{background:color-mix(in srgb,var(--accent) 20%,var(--card2));color:var(--txt)}
+.pods{margin-top:16px;display:flex;gap:22px;flex-wrap:wrap;align-items:center}.pods b{font-size:1.3rem}.pods span{color:var(--mut);font-size:.85rem}
+.refund{border:2px solid var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--card));border-radius:16px;padding:18px 20px;margin:4px 0 18px}
+.refund .rhead{color:var(--bad);font-size:1.02rem;line-height:1.45}.refund .rhead b{font-size:1.08rem}
+.refund .ramt{display:flex;flex-direction:column;margin:12px 0 4px}.refund .ramt span{color:var(--mut);font-size:.88rem}.refund .ramt b{font-size:2.1rem;color:var(--bad);line-height:1.15}
+.refund .rsub{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px}.refund .rsub div{display:flex;flex-direction:column}.refund .rsub span{color:var(--mut);font-size:.8rem}
+.refund .rmiss{margin:10px 0;font-weight:600}.refund .rdata{margin:10px 0}.refund summary{cursor:pointer;color:var(--mut);font-weight:600;font-size:.9rem}
+.refund .rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px}.refund .rgrid label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut)}
+.refund .rgrid span{display:flex;align-items:center;gap:6px;color:var(--txt)}.refund .rgrid input{width:100%}
+.refund .rcta{margin-top:6px;background:var(--bad);border-color:var(--bad)}.refund .rcta[disabled]{opacity:.5;cursor:not-allowed}.refund .rnote{color:var(--mut);font-size:.8rem;margin-top:8px}
+.refrow{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}.refrow:last-child{border:0}.refrow i{font-style:normal}.refrow small{display:block;color:var(--mut)}
+@media(max-width:860px){.pgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -205,6 +220,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
     <a href="#porownaj" data-i18n>Porównaj</a>
     <a href="#kalkulatory" data-i18n>Kalkulatory</a>
     <a href="#umowy" class="nav-umowy" data-i18n>Umowy</a>
+    <a href="#prawo" class="nav-prawo" data-i18n>Zmiany w prawie</a>
   </div>
   <div class="lang notranslate" id="lang"></div>
   <button class="icon-btn" id="theme" data-i18n-title="Motyw">🌓</button>
@@ -257,6 +273,16 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="ares" id="ares"></div>
 </div></section>
 
+<section id="prawo" style="display:none"><div class="wrap">
+  <div class="sec-h"><div><h2 data-i18n>Zmiany w prawie</h2><p data-i18n>Nowelizacje ustaw i projekty w Sejmie w sprawach, którymi się zajmujemy. Dane z oficjalnego API Sejmu, aktualizowane codziennie.</p></div></div>
+  <div class="pgrid">
+    <div class="panel"><h3 data-i18n>Ostatnie nowelizacje</h3><div id="przm"></div></div>
+    <div class="panel"><h3 data-i18n>Projekty w Sejmie</h3><div id="prpr"></div></div>
+  </div>
+  <div class="panel pods" id="prods"></div>
+  <p class="priv" style="margin-top:12px">ℹ️ <span data-i18n>Teksty aktów z ISAP mają charakter informacyjny — prawnie wiążący jest tekst ogłoszony w Dzienniku Ustaw. To nie jest porada prawna.</span></p>
+</div></section>
+
 <footer><div class="wrap"><span>© <span id="yr"></span> <span id="fName"></span> · <span id="ver" class="notranslate"></span></span><a href="crm.html" data-i18n>Panel administracyjny</a></div></footer>
 
 <div class="cbar" id="cbar"><span id="cbarTxt"></span><button class="btn" id="cClear" data-i18n>Wyczyść</button><button class="btn pri" id="cGo" data-i18n>Porównaj</button></div>
@@ -265,6 +291,8 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 <div class="consent" id="consent"><span data-i18n>Używamy plików cookie do analityki.</span><div><button class="btn pri" id="cYes" data-i18n>Akceptuję</button><button class="btn" id="cNo" data-i18n>Odrzuć</button></div></div>
 <div id="gt"></div>
 
+<script src="prawo.js"></script>
+<script src="umowa-zwrot.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -369,12 +397,15 @@ function init(){
   applyLang(false);
   initConsent();
   initChatbot();
+  initPrawo().catch(e=>console.warn('prawo',e));
 }
 
-/* ---------- chatbot (Ilona) ---------- */
+/* ---------- chatbot (Adam — asystent prawny, adam/adam.js) ---------- */
+// Wcześniej osadzany był czat Ilona (czat medyczny innego serwisu) — jego adres zamieniamy na Adama.
 function initChatbot(){
-  const c=D.site?.chatbot;if(!c?.enabled||!c.src)return;
-  const s=document.createElement('script');s.src=c.src;s.defer=true;s.dataset.lang=mode==='own'?lang:'pl';document.body.appendChild(s);
+  const c=D.site?.chatbot;if(c&&c.enabled===false)return;
+  const src=!c?.src||/\/Ilona\//i.test(c.src)?'adam/adam.js':c.src;
+  const s=document.createElement('script');s.src=src;s.defer=true;s.dataset.lang=mode==='own'?lang:'pl';document.body.appendChild(s);
 }
 
 /* ---------- porównywarka ---------- */
@@ -445,7 +476,7 @@ const kindOf=c=>c.kind==='claim'?'claim':'tool';
 function renderCalcs(){
   Object.entries(BOX).forEach(([k,b])=>{
     const list=D.calculators.filter(c=>kindOf(c)===k);
-    $(b.grid).innerHTML=list.map(c=>`<div class="ccard ${k==='claim'?'claim':''}" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(t(c.name))}</h3><p>${esc(t(c.description||''))}</p></div>`).join('');
+    $(b.grid).innerHTML=list.map(c=>`<div class="ccard ${k==='claim'?'claim':''}" data-id="${esc(c.id)}"><div class="ic">${esc(c.icon||'🧮')}</div><h3>${esc(t(c.name))}</h3><p>${esc(window.PRAWO?PRAWO.odsLabel(t(c.description||'')):t(c.description||''))}</p></div>`).join('');
     $(b.grid).onclick=e=>{const c=e.target.closest('.ccard');if(c)openCalc(c.dataset.id,true)};
   });
   const hasClaims=D.calculators.some(c=>kindOf(c)==='claim');
@@ -453,7 +484,7 @@ function renderCalcs(){
   $('#kalkulatory').style.display=D.calculators.some(c=>kindOf(c)==='tool')?'':'none';
 }
 function compute(c,vals){
-  const scope={...vals};
+  const scope={...(window.PRAWO?PRAWO.odsScope():{}),...vals};
   return c.outputs.map(o=>{
     let v=NaN;
     try{v=Number(new Function(...Object.keys(scope),'with(Math){return ('+o.formula+')}')(...Object.values(scope)))}catch(e){}
@@ -477,13 +508,14 @@ function readVals(P){const v={};P.querySelectorAll('input[type=range]').forEach(
 function calcBox(k){
   const b=BOX[k],P=$(b.panel);if(!b.cur||!P.querySelector('.resv'))return;
   const out=compute(b.cur,readVals(P)),main=out.find(o=>o.main)||out[0];
-  P.querySelector('.resv').innerHTML=main?`<span style="color:var(--mut)">${esc(t(main.label))}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</div>
-   ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(t(o.label))}</span><b>${fmt(o.v,o.decimals)} ${esc(t(o.unit||''))}</b></div>`).join('')}`:'';
+  const OL=x=>window.PRAWO?PRAWO.odsLabel(x):x;
+  P.querySelector('.resv').innerHTML=main?`<span style="color:var(--mut)">${esc(OL(t(main.label)))}</span><div class="main">${fmt(main.v,main.decimals)} ${esc(t(main.unit||''))}</div>
+   ${out.filter(o=>o!==main).map(o=>`<div class="sub"><span>${esc(OL(t(o.label)))}</span><b>${fmt(o.v,o.decimals)} ${esc(t(o.unit||''))}</b></div>`).join('')}`:'';
 }
 const calc=()=>calcBox('tool');
 
 /* ---------- zgłoszenie sprawy (lead) ---------- */
-function openLead(c,vals){
+function openLead(c,vals,extra){
   const L=D.leads||{},out=compute(c,vals),main=out.find(o=>o.main)||out[0];
   const mail=L.mode==='email'&&L.email,sb=!mail&&L.supabaseUrl&&L.supabaseKey;
   $('#lBody').innerHTML=`<form class="lform" id="lForm">
@@ -498,8 +530,9 @@ function openLead(c,vals){
   $('#lead').classList.add('show');
   $('#lForm').onsubmit=async e=>{
     e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const btn=e.target.querySelector('button.pri');
-    const lead={id:'L'+Date.now().toString(36),created:new Date().toISOString(),lang,category:c.crmCategory||'INNE',calc:{id:c.id,name:c.name,inputs:c.inputs.map(i=>({label:i.label,unit:i.unit,value:vals[i.key]})),outputs:out.map(o=>({label:o.label,unit:o.unit,value:Number.isFinite(o.v)?Math.round(o.v*100)/100:null,main:!!o.main}))},
+    const lead={id:'L'+Date.now().toString(36),created:new Date().toISOString(),lang,category:c.crmCategory||'INNE',calc:{id:c.id,name:c.name,inputs:c.inputs.map(i=>({label:i.label,unit:i.unit,value:vals[i.key]})),outputs:out.map(o=>({label:o.label,unit:o.unit,value:Number.isFinite(o.v)?Math.round(o.v*100)/100:null,main:!!o.main})),...(extra||{})},
       client:{name:f.name.trim(),phone:f.phone.trim(),email:(f.email||'').trim()},message:(f.msg||'').trim(),consent:true,status:'nowe'};
+    while(extra?.analiza&&JSON.stringify(lead.calc).length>18000){const A=lead.calc.analiza;if(A.podstawy_w_umowie?.length)A.podstawy_w_umowie.pop();else if(A.zgodnosc?.length)A.zgodnosc.pop();else if(A.klauzule.length>1)A.klauzule.pop();else break}
     if(sb){
       // zapis do Supabase: rola anonimowa może tylko DODAĆ zgłoszenie (RLS), bez odczytu
       btn.disabled=true;btn.textContent=t('Wysyłanie…');
@@ -525,7 +558,10 @@ const LIB={  // podpisy kontrolne (SRI): przeglądarka odrzuci zmieniony plik; p
   pdf:['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e'],
   pdfW:['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js','sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2'],
   docx:['https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js','sha384-nFoSjZIoH3CCp8W639jJyQkuPHinJ2NHe7on1xvlUA7SuGfJAfvMldrsoAVm6ECz'],
-  zip:['https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG']};
+  zip:['https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'],
+  // rozpoznawanie tekstu ze skanów (OCR) w przeglądarce — model języka polskiego pobiera się przy pierwszym użyciu
+  tess:['https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js','sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F']};
+const IMG=['jpg','jpeg','png','webp'];
 const libs={};
 const needLib=([src,sri])=>libs[src]??=new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.integrity=sri;s.crossOrigin='anonymous';s.onload=res;s.onerror=()=>{delete libs[src];rej(new Error(t('Nie udało się wczytać pliku.')))};document.head.appendChild(s)});
 /* worker pdf.js nie obsługuje atrybutu integrity — pobieramy go, sprawdzamy odcisk i uruchamiamy z lokalnej kopii */
@@ -540,8 +576,8 @@ function initContracts(){
   const C=D.contracts;const on=!!C?.enabled;
   $('#umowy').style.display=on?'':'none';document.querySelectorAll('.nav-umowy').forEach(e=>e.style.display=on?'':'none');
   if(!on)return;
-  const f=C.formats||[];$('#fmts').textContent=f.map(x=>'.'+x).join(' ');
-  $('#file').accept=f.map(x=>'.'+x).join(',');
+  const f=[...new Set([...(C.formats||[]),...IMG])];$('#fmts').textContent=f.map(x=>'.'+x).join(' ')+' · '+t('także zdjęcie lub skan umowy');
+  $('#file').accept=f.map(x=>'.'+x).join(',')+',image/*';
   if(lastRep)renderReport(lastRep);
 }
 const dz=$('#drop');
@@ -556,15 +592,25 @@ async function handleFile(f){
   const err=m=>{$('#ares').innerHTML=`<div class="err">⚠ ${esc(m)}</div>`};
   if(f.size>(C.maxMB||15)*1048576)return err(`${t('Plik jest za duży. Maksymalny rozmiar:')} ${C.maxMB} MB`);
   if(ext==='doc')return err(t('Stary format .doc nie jest obsługiwany — zapisz plik jako .docx lub PDF.'));
-  if(!(C.formats||[]).includes(ext==='htm'?'html':ext==='md'?'txt':ext))return err(t('Nieobsługiwany format pliku.'));
+  if(!(C.formats||[]).includes(ext==='htm'?'html':ext==='md'?'txt':ext)&&!IMG.includes(ext))return err(t('Nieobsługiwany format pliku.'));
   $('#ares').innerHTML=`<div class="priv"><span class="spin"></span> ${esc(t('Wczytywanie pliku…'))}</div>`;
   try{
-    const {text,pages}=await extractText(f,ext);
-    if(text.replace(/\s/g,'').length<20)return err(t('Nie udało się odczytać tekstu — plik może być skanem (obraz). Wklej treść ręcznie.'));
-    analyze(text,f.name,pages);
+    const {text,pages,ocr}=await extractText(f,ext);
+    if(text.replace(/\s/g,'').length<20)return err(t('Nie udało się odczytać tekstu. Zrób wyraźniejsze zdjęcie (dobre światło, cała strona) albo wklej treść ręcznie.'));
+    analyze(text,f.name,pages,ocr);
   }catch(e){console.error(e);err(e.message||t('Nie udało się wczytać pliku.'))}
 }
+/* OCR: zdjęcia i zeskanowane PDF — rozpoznawanie w przeglądarce (Tesseract), plik nie opuszcza urządzenia */
+async function ocr(images){
+  const say=m=>{const b=$('#ares');if(b)b.innerHTML=`<div class="priv"><span class="spin"></span> ${esc(m)}</div>`};
+  say(t('Rozpoznawanie tekstu ze skanu… (przy pierwszym użyciu pobiera się słownik języka polskiego)'));
+  await needLib(LIB.tess);let page=0;
+  const w=await Tesseract.createWorker('pol',1,{logger:m=>{if(m.status==='recognizing text')say(`${t('Rozpoznawanie tekstu ze skanu…')} ${images.length>1?`${t('strona')} ${page}/${images.length} · `:''}${Math.round(m.progress*100)}%`)}});
+  const out=[];try{for(const im of images){page++;out.push((await w.recognize(im)).data.text)}}finally{await w.terminate()}
+  return out.join('\n\n');
+}
 async function extractText(f,ext){
+  if(IMG.includes(ext))return{text:await ocr([f]),pages:1,ocr:true};
   if(ext==='txt'||ext==='md')return{text:await f.text()};
   if(ext==='html'||ext==='htm'){const d=new DOMParser().parseFromString(await f.text(),'text/html');d.querySelectorAll('script,style').forEach(x=>x.remove());
     d.querySelectorAll('p,div,br,li,tr,h1,h2,h3,h4').forEach(x=>x.append('\n'));return{text:d.body.textContent}}
@@ -573,7 +619,12 @@ async function extractText(f,ext){
     await needLib(LIB.pdf);pdfjsLib.GlobalWorkerOptions.workerSrc=await pdfWorker(LIB.pdfW);
     const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,out=[];
     for(let i=1;i<=pdf.numPages;i++){const c=await (await pdf.getPage(i)).getTextContent();out.push(c.items.map(x=>x.str+(x.hasEOL?'\n':' ')).join(''))}
-    return{text:out.join('\n\n').replace(/(\p{L})-\n(\p{L})/gu,'$1$2'),pages:pdf.numPages};
+    const txt=out.join('\n\n').replace(/(\p{L})-\n(\p{L})/gu,'$1$2');
+    if(txt.replace(/\s/g,'').length<40*pdf.numPages){ // skan bez warstwy tekstu → OCR (do 15 stron)
+      const imgs=[];for(let i=1;i<=Math.min(pdf.numPages,15);i++){const p=await pdf.getPage(i),v=p.getViewport({scale:2}),cv=document.createElement('canvas');cv.width=v.width;cv.height=v.height;await p.render({canvasContext:cv.getContext('2d'),viewport:v}).promise;imgs.push(cv)}
+      return{text:await ocr(imgs),pages:pdf.numPages,ocr:true};
+    }
+    return{text:txt,pages:pdf.numPages};
   }
   if(ext==='docx'){await needLib(LIB.docx);return{text:(await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value}}
   if(ext==='odt'){
@@ -600,18 +651,19 @@ const RX={
   periods:/\b\d+\s?(?:dni|dnia|tygodni\w*|miesi[ąę]c\w*|mies\.|lat|lata|rok\w*|days?|months?|years?)\b/gi,
   percents:/\d+(?:[.,]\d+)?\s?%/g};
 function compileRule(r){return (r.patterns||[]).map(p=>{try{return new RegExp(p,'gi')}catch(e){return null}}).filter(Boolean)}
-function analyze(raw,name,pages){
+function analyze(raw,name,pages,ocr){
   const text=raw.replace(/\r/g,'').replace(/[ \t ]+/g,' ').replace(/ ?\n ?/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
   const flat=text.replace(/\n/g,' ');// dopasowania przez złamania linii, te same indeksy
   const C=D.contracts,findings=runRules(C.rules||[],flat);
-  const legal=C.legal?.enabled?runRules(C.legal.rules||[],flat,C.legal):null;
+  const LC=C.legal&&window.PRAWO?.ods._zrodlo?{...C.legal,maxInterest:PRAWO.ods.ODS_MAX,maxDefault:PRAWO.ods.ODS_MAX_OPOZN,auto:true}:C.legal;
+  const legal=C.legal?.enabled?runRules(C.legal.rules||[],flat,LC):null;
   const sus=C.suspicion?.enabled?suspicion(text,flat,C.suspicion):null;
   const ex={};Object.entries(RX).forEach(([k,rx])=>ex[k]=[...new Set((text.match(rx)||[]).map(s=>s.replace(/\s+/g,' ').trim()))].slice(0,30));
   const pts=findings.reduce((a,f)=>a+(LV[f.r.level]?.w||0),0),max=(D.contracts.rules||[]).reduce((a,r)=>a+(LV[r.level]?.w||0),0)||1;
   const score=Math.min(100,Math.round(pts/max*100*1.6));
   const lscore=legal?Math.min(100,legal.reduce((a,f)=>a+({high:30,medium:15,info:5}[f.r.level]||0),0)):0;
-  lastRep={name,pages,text,findings,ex,score,legal,lscore,sus,words:(text.match(/\S+/g)||[]).length};
-  renderReport(lastRep);
+  lastRep={name,pages,ocr,text,findings,ex,score,legal,lscore,sus,words:(text.match(/\S+/g)||[]).length};
+  renderReport(lastRep);renderZwrot(text);collectRefs(text);
   $('#ares').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function runRules(rules,flat,cfg){
@@ -655,8 +707,9 @@ function renderReport(R){
   const cnt=k=>R.findings.filter(f=>f.r.level===k).length;
   const exNames={amounts:'Kwoty',dates:'Daty',periods:'Okresy',percents:'Procenty'};
   $('#ares').innerHTML=`<div class="panel fade">
-    <div class="ahead"><div><h3>📄 ${esc(R.name)}</h3><small>${R.pages?R.pages+' '+esc(t('stron'))+' · ':''}${R.words.toLocaleString(loc())} ${esc(t('słów'))}</small></div>
+    <div class="ahead"><div><h3>📄 ${esc(R.name)}</h3><small>${R.pages?R.pages+' '+esc(t('stron'))+' · ':''}${R.words.toLocaleString(loc())} ${esc(t('słów'))}${R.ocr?' · '+esc(t('tekst rozpoznany ze skanu')):''}</small></div>
       </div>
+    <div id="zwrot"></div>
     <div class="bars">${bar('Ryzyko zapisów',R.score)}${R.legal?bar('Ryzyko prawne',R.lscore):''}${R.sus?bar('Podejrzana treść',R.sus.score):''}</div>
     <div class="asec" style="border:0;margin:0;padding:0"><h4>📋 ${esc(t('Podstawowa analiza'))}</h4></div>
     <div class="counts">${['high','medium','info'].map(k=>`<span style="color:${LV[k].c}">${esc(t(LV[k].l))}: ${cnt(k)}</span>`).join('')}</div>
@@ -665,7 +718,7 @@ function renderReport(R){
     <h4 style="margin:18px 0 6px">${esc(t('Wykryte dane'))}</h4>
     ${Object.entries(R.ex).filter(([,v])=>v.length).map(([k,v])=>`<small style="color:var(--mut)">${esc(t(exNames[k]))}</small><div class="chips">${v.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`).join('')||'<small style="color:var(--mut)">—</small>'}
     ${R.legal?`<div class="asec"><h4>⚖️ ${esc(t('Zgodność z prawem'))}</h4>
-      ${R.legal.length?[...R.legal].sort((a,b)=>order[a.r.level]-order[b.r.level]).map(f=>{const c=LV[f.r.level].c;return `<div class="finding" style="--lc:${c}"><h4>${esc(t(f.r.name))}<small>${f.missing?esc(t('Brak zapisu')):f.hits.length+'×'}</small></h4><p>${esc(t(f.r.advice))}${f.r.lim?` (${esc(t('limit:'))} ${fmt(f.r.lim.maxInterest,1)}% / ${fmt(f.r.lim.maxDefault,1)}% ${esc(t('za opóźnienie'))})`:''}</p>${f.r.basis?`<div class="basis">${esc(t('Podstawa:'))} ${esc(f.r.basis)}</div>`:''}${f.hits.slice(0,3).map(h=>snippet(R.text,h,c)).join('')}</div>`}).join('')
+      ${R.legal.length?[...R.legal].sort((a,b)=>order[a.r.level]-order[b.r.level]).map(f=>{const c=LV[f.r.level].c;return `<div class="finding" style="--lc:${c}"><h4>${esc(t(f.r.name))}<small>${f.missing?esc(t('Brak zapisu')):f.hits.length+'×'}</small></h4><p>${esc(t(f.r.advice))}${f.r.lim?` (${esc(t('limit:'))} ${fmt(f.r.lim.maxInterest,2)}% / ${fmt(f.r.lim.maxDefault,2)}% ${esc(t('za opóźnienie'))}${f.r.lim.auto?' — '+esc(t('wg aktualnego obwieszczenia')):''})`:''}</p>${f.hits.slice(0,3).map(h=>snippet(R.text,h,c)).join('')}</div>`}).join('')
         :`<p class="priv">✅ ${esc(t('Nie wykryto naruszeń z listy kontrolnej.'))}</p>`}</div>`:''}
     ${R.sus?`<div class="asec"><h4>🔍 ${esc(t('Styl i przejrzystość treści'))}</h4>
       <p class="priv" style="margin:0 0 12px">${esc(t('Średnia długość zdania:'))} ${R.sus.avg} ${esc(t('słów'))}</p>
@@ -683,11 +736,63 @@ function renderReport(R){
     fs.forEach(f=>{L.push(`[${t(LV[f.r.level].l)}] ${t(f.r.name)}${f.missing?' — '+t('Brak zapisu'):' ('+f.hits.length+'×)'}`,'  '+t(f.r.advice));
       f.hits.slice(0,3).forEach(([a,b])=>L.push('  > '+R.text.slice(Math.max(0,a-80),b+80).replace(/\s+/g,' ')));L.push('')});
     Object.entries(R.ex).forEach(([k,v])=>v.length&&L.push(`${t(exNames[k])}: ${v.join('; ')}`));
-    if(R.legal){L.push('',`== ${t('Zgodność z prawem')} — ${t('Ryzyko prawne')}: ${R.lscore}/100`);R.legal.forEach(f=>L.push(`[${t(LV[f.r.level].l)}] ${t(f.r.name)}${f.r.basis?' — '+f.r.basis:''}`,'  '+t(f.r.advice)))}
+    if(R.legal){L.push('',`== ${t('Zgodność z prawem')} — ${t('Ryzyko prawne')}: ${R.lscore}/100`);R.legal.forEach(f=>L.push(`[${t(LV[f.r.level].l)}] ${t(f.r.name)}`,'  '+t(f.r.advice)))}
+    if(R.zw?.kwalifikuje&&R.zw.main)L.splice(4,0,`!!! ${t('W umowie wykryto klauzule abuzywne — kwalifikujesz się do zwrotu pieniędzy.')} ${t('Szacowana kwota')}: ${fmt(R.zw.main.v,0)} zł`,'');
     if(R.sus){L.push('',`== ${t('Podejrzana treść')}: ${R.sus.score}/100`,`${t('Średnia długość zdania:')} ${R.sus.avg}`);if(R.sus.long)L.push(`${t('Długie zdania')}: ${R.sus.long}`);R.sus.items.forEach(x=>L.push(`${t(x.r.name)} (${x.hits.length}×, +${x.p})`))}
     L.push('',t(D.contracts.disclaimer||''));
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\n')],{type:'text/plain'}));a.download='raport-umowy.txt';a.click();URL.revokeObjectURL(a.href);
   };
+}
+
+/* ---------- prawo: przepisy, podstawy prawne w umowie, zmiany w prawie (prawo.js + prawo/*.json) ---------- */
+const PL=h=>window.PRAWO?PRAWO.linkify(h):h;
+/* podstawy prawne z umowy (uchylone ustawy, nieistniejące artykuły) — NIE pokazujemy klientowi; idą do CRM ze zgłoszeniem */
+async function collectRefs(text){
+  if(!window.PRAWO||!lastRep)return;const rep=lastRep;let refs=null;try{refs=await PRAWO.contractRefs(text)}catch(e){}
+  if(refs)rep.refs=refs.filter(r=>r.lvl!=='ok').slice(0,15).map(r=>({poziom:r.lvl,akt:r.title,uwaga:r.note,fragment:r.label}));
+}
+/* zwrot z umowy: klient widzi czerwony komunikat i kwoty — bez podstaw prawnych */
+function renderZwrot(text){
+  const box=$('#zwrot');if(!box||!window.ZWROT||!lastRep)return;
+  const r=ZWROT.evaluate(text,D,compute);lastRep.zw=r;
+  if(!r||!r.kwalifikuje||!r.calc){box.innerHTML='';return}
+  const c=r.calc,vals={...r.vals},OL=x=>window.PRAWO?PRAWO.odsLabel(x):x;
+  const miss0=c.inputs.some(i=>!Number.isFinite(vals[i.key]));
+  box.innerHTML=`<div class="refund">
+    <div class="rhead">⚠️ <b>${esc(t('W Twojej umowie wykryliśmy klauzule abuzywne (niedozwolone zapisy).'))}</b><br>${esc(t('Kwalifikujesz się do zwrotu pieniędzy.'))}</div>
+    <div class="rres"></div>
+    <details class="rdata" ${miss0?'open':''}><summary>${esc(t(miss0?'Uzupełnij dane z umowy':'Sprawdź dane odczytane z umowy'))}</summary>
+      <div class="rgrid">${c.inputs.map(i=>`<label>${esc(t(i.label))}<span><input class="field" type="number" step="any" data-zk="${esc(i.key)}" value="${vals[i.key]??''}" placeholder="${esc(t('wpisz'))}"> ${esc(t(i.unit||''))}</span></label>`).join('')}</div></details>
+    <button class="btn pri rcta">${esc(t('Chcę odzyskać pieniądze — bezpłatna analiza →'))}</button>
+    <p class="rnote">${esc(t('Szacunek na podstawie treści umowy. Dokładną kwotę bezpłatnie ustali kancelaria.'))}</p></div>`;
+  const upd=()=>{
+    const miss=c.inputs.some(i=>!Number.isFinite(vals[i.key]));
+    const out=miss?null:compute(c,Object.fromEntries(c.inputs.map(i=>[i.key,vals[i.key]]))),main=out&&(out.find(o=>o.main)||out[0]);
+    r.main=main;r.out=out;r.vals={...vals};
+    box.querySelector('.rres').innerHTML=main&&Number.isFinite(main.v)?`<div class="ramt"><span>${esc(t('Szacowana kwota do odzyskania'))}</span><b>${fmt(Math.max(0,main.v),0)} zł</b></div>
+      <div class="rsub">${out.filter(o=>o!==main&&o.unit==='zł'&&!/^rata|^wplaty$/i.test(o.key)&&Number.isFinite(o.v)&&o.v>0).map(o=>`<div><span>${esc(OL(t(o.label)))}</span><b>${fmt(o.v,0)} zł</b></div>`).join('')}</div>`
+      :`<div class="rmiss">${esc(t('Uzupełnij dane poniżej, aby zobaczyć kwotę.'))}</div>`;
+    box.querySelector('.rcta').disabled=!main;
+  };
+  box.querySelectorAll('[data-zk]').forEach(x=>x.oninput=()=>{const v=parseFloat(String(x.value).replace(',','.'));if(Number.isFinite(v))vals[x.dataset.zk]=v;else delete vals[x.dataset.zk];upd()});
+  box.querySelector('.rcta').onclick=()=>openLead(c,Object.fromEntries(c.inputs.map(i=>[i.key,vals[i.key]])),{analiza:ZWROT.forCrm(r,{plik:lastRep.name,ryzyko:{zapisy:lastRep.score,prawne:lastRep.lscore},podstawy_w_umowie:lastRep.refs||[],zgodnosc:(lastRep.legal||[]).slice(0,10).map(f=>({nazwa:f.r.name,podstawa:f.r.basis||'',brak:!!f.missing})),ocr:!!lastRep.ocr})});
+  upd();
+}
+const PCAT={SKD:'Kredyty konsumenckie',CHF:'Kredyty frankowe',PLN:'Kredyty złotówkowe',FX:'Kredyty walutowe',RST:'Oddłużanie',ROD:'Sprawy rodzinne',CIV:'Sprawy cywilne',INNE:'Konsumenci'};
+async function initPrawo(){
+  if(!window.PRAWO)return;
+  await PRAWO.loadOds();if(typeof renderCalcs==='function'){Object.keys(BOX).forEach(k=>{if(BOX[k].cur&&$(BOX[k].panel).querySelector('.resv'))calcBox(k)})}
+  const [z,p,o]=await Promise.allSettled([PRAWO.load('zmiany'),PRAWO.load('projekty'),PRAWO.load('odsetki'),PRAWO.acts()]);
+  const Z=z.value?.zmiany||[],PR=p.value?.projekty||[],O=o.value;
+  if(!Z.length&&!PR.length&&!O)return;
+  const d=PRAWO.fmtD,tags=ks=>[...new Set((ks||[]).map(k=>PCAT[k]||k))].slice(0,3).map(x=>`<span class="ptag">${esc(t(x))}</span>`).join('');
+  const recent=new Date(Date.now()-30*864e5).toISOString().slice(0,10),today=new Date().toISOString().slice(0,10);
+  $('#przm').innerHTML=Z.slice(0,7).map(x=>`<div class="pitem"><a href="${esc(PRAWO.isapUrl(x.eli))}" target="_blank" rel="noopener">${esc(x.nazwa)}</a><small>${esc(x.tytul)}</small><small>${x.wejscie?(x.wejscie>today?esc(t('wejdzie w życie'))+' ':esc(t('w życie od'))+' ')+d(x.wejscie):''}</small>${(x.wykryto||'')>=recent?`<span class="ptag new">${esc(t('nowe'))}</span>`:''}${tags(x.kategorie)}</div>`).join('')||`<div class="pitem"><small>${esc(t('Brak nowelizacji w ostatnim czasie.'))}</small></div>`;
+  $('#prpr').innerHTML=PR.slice(0,6).map(x=>`<div class="pitem"><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.tytul)}</a><small>${x.etap?esc(x.etap)+' · '+d(x.etap_data):''}${x.uchwalony?' · '+esc(t('uchwalony')):''}</small>${tags(x.kategorie)}</div>`).join('')||`<div class="pitem"><small>${esc(t('Brak projektów w tej chwili.'))}</small></div>`;
+  const od=O?.opoznienie,kp=O?.kapitalowe;
+  $('#prods').innerHTML=O?`<div><span>${esc(t('Odsetki ustawowe za opóźnienie'))}</span><br><b>${esc(String(od?.stawka??'—').replace('.',','))}%</b></div><div><span>${esc(t('Odsetki ustawowe'))}</span><br><b>${esc(String(kp?.stawka??'—').replace('.',','))}%</b></div><div><span>${esc(t('Odsetki maksymalne'))}</span><br><b>${esc(String(PRAWO.ods.ODS_MAX).replace('.',','))}%</b></div><div><span>${od?.od?esc(t('obowiązują od'))+' '+d(od.od):''}</span></div>`:'';
+  $('#prods').style.display=O?'':'none';
+  $('#prawo').style.display='';
 }
 
 /* ---------- Google Analytics + zgoda ---------- */

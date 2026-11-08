@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **05.11.2026**, wersja **1.19.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **08.11.2026**, wersja **1.21.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -31,6 +31,8 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 ## Zasady pracy
 
+- **Plan:** `PLAN.md` — uzupełniać na bieżąco (status zadań, decyzje).
+
 - **Jedna wersja, bez demo:** pracujemy na oryginale; w razie problemu cofamy przez historię gita (`git revert` / poprzednia wersja z `CHANGELOG.md`). Cofnięcie to też nowa wersja.
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
@@ -43,7 +45,12 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Baza: 29 tabel z RLS, 60+ reguł, numeracja spraw, blokada etapów, wersje, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia o terminach co 15 min (pg_cron), 2FA egzekwowane w bazie (aal2 dla Administratora, pełnomocnika, obsługi technicznej), prywatny magazyn akt `akta`.
 - CRM na żywo: wszystkie moduły specyfikacji podłączone do bazy (sprawy, zgłoszenia, karta, etapy, wpisy, korekty, dokumenty w Storage, zespół, terminy, powiadomienia, finanse, raporty, uprawnienia, kategorie, święta, audyt, dostęp awaryjny).
 
-## Ostatnie zmiany (27.10.2026)
+## Ostatnie zmiany (08.11.2026)
+
+- 1.20.0–1.21.0 — **prawo z API Sejmu + Adam + zwrot z umowy** (szczegóły i status: `PLAN.md`): codzienna synchronizacja `tools/prawo_sync.py` → `prawo/*.json`; CRM → 📜 Prawo (zmiany, projekty, odsetki, przepisy, dołączanie przepisu do sprawy ze stanem na dzień); strona: „Zmiany w prawie”, odsetki automatyczne, OCR skanów umów, **zwrot z umowy kredytu: klient widzi czerwony komunikat + kwotę bez podstaw prawnych, podstawy/orzecznictwo idą ze zgłoszeniem do CRM**; czat **Adam** zamiast Ilony (Ilona to czat medyczny innego serwisu).
+- Na stronie wynik analizy umowy jest bez podstaw prawnych (komunikat i kwoty); pełne uzasadnienie w CRM.
+
+## Wcześniejsze zmiany (27.10–05.11.2026)
 
 - 1.19.0 (05.11.2026) — CRM jako aplikacja na telefon/komputer (PWA, jak w panelu pielęgniarek): przycisk „📲 Zainstaluj aplikację” na ekranie logowania i w górnym pasku, `crm.webmanifest`, `crm-sw.js` (tylko pliki CRM, baza zawsze z sieci), ikony `icons/crm-*`. Test e2e blokuje service worker (inaczej podmiana bibliotek nie działa).
 - 1.18.0 — Treści strony: przycisk „🔍 Pokaż różnice” przy ostrzeżeniu o nieaktualnym szkicu; paski przewijania w stylu strony (CRM i strona publiczna).

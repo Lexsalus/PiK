@@ -5,7 +5,7 @@ import prawo_sync as P
 
 HTML = '''<html><head><style>x{}</style></head><body>
 <p>Obwieszczenie Marszałka Sejmu w sprawie ogłoszenia jednolitego tekstu ustawy - Kodeks cywilny</p>
-<p>Art. 1. To nie jest artykuł ustawy (treść obwieszczenia).</p>
+<p>Art. 1. To nie jest artykuł ustawy (treść obwieszczenia).</p><p>2. Tekst nie obejmuje: art. 16 ustawy zmieniającej, który stanowi:</p><p>„Art. 16. Do umów zawartych przed dniem wejścia w życie stosuje się przepisy dotychczasowe.”</p>
 <div>Załącznik do obwieszczenia Marszałka Sejmu</div>
 <div>USTAWA z dnia 23 kwietnia 1964 r. Kodeks cywilny</div>
 <div>KSIĘGA PIERWSZA</div><div>CZĘŚĆ OGÓLNA</div>
@@ -13,7 +13,9 @@ HTML = '''<html><head><style>x{}</style></head><body>
 <p>Art. 1. Kodeks niniejszy reguluje stosunki cywilnoprawne między osobami fizycznymi i osobami prawnymi.</p>
 <p>Art. 2. (uchylony)</p>
 <div>Rozdział II</div><div>Zdolność</div>
-<p>Art. 8. § 1. Każdy człowiek od chwili urodzenia ma zdolność prawną.</p><p>§ 2. Zdolność prawną ma również dziecko poczęte.</p>
+<p>Art. 3. Ustawa nie ma mocy wstecznej, chyba że to wynika z jej brzmienia lub</p><p>celu.</p>
+<p>Art. 8. § 1.</p><p>Każdy człowiek od chwili urodzenia ma zdolność prawną.</p><p>§ 2. Zdolność prawną ma również dziecko poczęte<sup>12)</sup>.</p><p>12)Dodany przez art. 1 ustawy z dnia 1 stycznia 2020 r.</p><p>(Dz. U. poz. 1).</p>
+<p>Art. 16. Prawdziwy art. 16 kodeksu.</p>
 <p>Art. 385<sup>1</sup>. § 1. Postanowienia umowy zawieranej z konsumentem nieuzgodnione indywidualnie nie wiążą go.</p>
 <p>Art. 385<sup>3</sup>. W razie wątpliwości uważa się, że niedozwolonymi postanowieniami umownymi są te, które w szczególności:</p><p>1) wyłączają lub ograniczają odpowiedzialność;</p>
 <p>Art. 359. § 2<sup>1</sup>. Maksymalna wysokość odsetek wynikających z czynności prawnej nie może w stosunku rocznym przekraczać dwukrotności wysokości odsetek ustawowych (odsetki maksymalne).</p>
@@ -23,15 +25,18 @@ arts = P.split_articles(t, True)
 nums = [a[0] for a in arts]
 ok = lambda c, m: print(('✅ ' if c else '❌ ') + m) or c
 res = [
-  ok(nums == ['1', '2', '8', '385¹', '385³', '359'], f'numery artykułów (indeksy górne): {nums}'),
+  ok(nums == ['1', '2', '3', '8', '16', '385¹', '385³', '359'], f'numery artykułów (indeksy górne): {nums}'),
   ok(arts[0][1].startswith('Kodeks niniejszy'), 'pominięto treść obwieszczenia przed załącznikiem'),
   ok(arts[1][1] == '(uchylony)' and 'Rozdział' not in arts[1][1], 'nagłówek rozdziału odcięty z końca artykułu'),
-  ok(arts[2][2].startswith('Rozdział II') and 'Zdolność' in arts[2][2], f'kontekst rozdziału: {arts[2][2]!r}'),
-  ok('§ 2. Zdolność prawną ma również' in arts[2][1], 'artykuł wieloakapitowy'),
-  ok('§ 2¹.' in arts[5][1], 'indeks górny w paragrafie'),
+  ok(arts[3][2].startswith('Rozdział II') and 'Zdolność' in arts[3][2], f'kontekst rozdziału: {arts[3][2]!r}'),
+  ok(arts[3][1]=='§ 1. Każdy człowiek od chwili urodzenia ma zdolność prawną.\n§ 2. Zdolność prawną ma również dziecko poczęte.', 'artykuł wieloakapitowy'),
+  ok('§ 2¹.' in arts[7][1], 'indeks górny w paragrafie'),
   ok(P.parse_rate('ogłasza się, że od dnia 5 marca 2026 r. wysokość odsetek ustawowych za opóźnienie wynosi 9,25 % w stosunku rocznym.') == {'od': '2026-03-05', 'stawka': 9.25}, 'odczyt stawki odsetek z obwieszczenia'),
   ok(P.phrase_match(P.norm('Projekt ustawy o zmianie ustawy o kredycie konsumenckim'), 'kredy* konsumen*'), 'dopasowanie słów projektów (bez polskich znaków)'),
   ok(not P.phrase_match(P.norm('ustawa o kredycie hipotecznym'), 'kredy* konsumen*'), 'brak fałszywego dopasowania'),
+  ok(arts[2][1]=='Ustawa nie ma mocy wstecznej, chyba że to wynika z jej brzmienia lub celu.', 'sklejanie zawiniętych wierszy'),
+  ok(arts[4][1]=='Prawdziwy art. 16 kodeksu.', 'cytaty z obwieszczenia pominięte (właściwy art. 16)'),
+  ok(P.parse_rate('wysokość odsetek ustawowych za opóźnienie w transakcjach handlowych, od dnia 1 lipca 2026 r. do dnia 31 grudnia 2026 r., wynosi: 1) 11,75 % w stosunku rocznym ‒ w przypadku transakcji handlowych, w których dłużnikiem jest podmiot publiczny będący podmiotem leczniczym; 2) 13,75 % w stosunku rocznym ‒ w przypadku transakcji handlowych, w których dłużnikiem nie jest podmiot publiczny będący podmiotem leczniczym.')=={'od':'2026-07-01','do':'2026-12-31','stawka':13.75,'stawka_leczniczy':11.75}, 'odsetki handlowe: dwie stawki'),
   ok(P.eli_key('DU/2024/1061') == (2024, 1061), 'sortowanie adresów ELI'),
 ]
 print(f'WYNIK: {sum(res)}/{len(res)}'); sys.exit(0 if all(res) else 1)

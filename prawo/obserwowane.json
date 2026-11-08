@@ -1,37 +1,336 @@
 {
   "_info": "Lista ustaw obserwowanych przez strażnika zmian w prawie. Edytujesz ten plik, a codzienna synchronizacja (tools/prawo_sync.py) pobiera dla nich dane z API Sejmu (ELI). Pola: id — krótki identyfikator, eli — adres aktu pierwotnego (wydawca/rok/pozycja), skrot — skróty i nazwy, po których rozpoznajemy przepisy w tekście (art. 45 ukk), kategorie — kategorie spraw CRM, teksty — czy pobierać treść artykułów (wyszukiwarka, Adam, podgląd przepisu).",
   "akty": [
-    {"id": "kc", "eli": "DU/1964/93", "nazwa": "Kodeks cywilny", "skrot": ["KC", "k.c.", "kc", "Kodeksu cywilnego", "kodeksu cywilnego", "Kodeks cywilny", "kodeks cywilny"], "kategorie": ["SKD", "CHF", "PLN", "FX", "CIV", "INNE"], "teksty": true},
-    {"id": "kpc", "eli": "DU/1964/296", "nazwa": "Kodeks postępowania cywilnego", "skrot": ["KPC", "k.p.c.", "kpc", "Kodeksu postępowania cywilnego", "kodeksu postępowania cywilnego"], "kategorie": ["SKD", "CHF", "PLN", "FX", "ROD", "CIV", "INNE"], "teksty": true},
-    {"id": "ukk", "eli": "DU/2011/715", "nazwa": "Ustawa o kredycie konsumenckim", "skrot": ["ukk", "u.k.k.", "UKK", "ustawy o kredycie konsumenckim", "ustawa o kredycie konsumenckim"], "kategorie": ["SKD"], "teksty": true},
-    {"id": "frank", "eli": "DU/2026/985", "nazwa": "Ustawa o rozpoznawaniu spraw frankowych", "skrot": ["ustawy frankowej", "ustawa frankowa"], "kategorie": ["CHF"], "teksty": true},
-    {"id": "pb", "eli": "DU/1997/939", "nazwa": "Prawo bankowe", "skrot": ["pr. bank.", "p.b.", "Prawa bankowego", "prawa bankowego", "Prawo bankowe"], "kategorie": ["CHF", "PLN", "FX", "SKD"], "teksty": true},
-    {"id": "ukh", "eli": "DU/2017/819", "nazwa": "Ustawa o kredycie hipotecznym", "skrot": ["ukh", "u.k.h.", "ustawy o kredycie hipotecznym", "ustawa o kredycie hipotecznym"], "kategorie": ["CHF", "PLN", "FX"], "teksty": true},
-    {"id": "upk", "eli": "DU/2014/827", "nazwa": "Ustawa o prawach konsumenta", "skrot": ["upk", "u.p.k.", "ustawy o prawach konsumenta", "ustawa o prawach konsumenta"], "kategorie": ["SKD", "CIV", "INNE"], "teksty": true},
-    {"id": "uokik", "eli": "DU/2007/331", "nazwa": "Ustawa o ochronie konkurencji i konsumentów", "skrot": ["uokik", "u.o.k.k.", "ustawy o ochronie konkurencji i konsumentów"], "kategorie": ["SKD", "CHF", "PLN"], "teksty": false},
-    {"id": "kro", "eli": "DU/1964/59", "nazwa": "Kodeks rodzinny i opiekuńczy", "skrot": ["KRO", "k.r.o.", "kro", "Kodeksu rodzinnego i opiekuńczego", "kodeksu rodzinnego i opiekuńczego"], "kategorie": ["ROD"], "teksty": true},
-    {"id": "pu", "eli": "DU/2003/535", "nazwa": "Prawo upadłościowe", "skrot": ["p.u.", "pr. upadł.", "Prawa upadłościowego", "prawa upadłościowego", "Prawo upadłościowe"], "kategorie": ["RST"], "teksty": true},
-    {"id": "pr", "eli": "DU/2015/978", "nazwa": "Prawo restrukturyzacyjne", "skrot": ["p.r.", "pr. restr.", "Prawa restrukturyzacyjnego", "prawa restrukturyzacyjnego", "Prawo restrukturyzacyjne"], "kategorie": ["RST"], "teksty": false},
-    {"id": "uksc", "eli": "DU/2005/1398", "nazwa": "Ustawa o kosztach sądowych w sprawach cywilnych", "skrot": ["uksc", "u.k.s.c.", "ustawy o kosztach sądowych w sprawach cywilnych"], "kategorie": ["SKD", "CHF", "PLN", "FX", "ROD", "CIV", "INNE"], "teksty": true},
-    {"id": "utz", "eli": "DU/2013/403", "nazwa": "Ustawa o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych", "skrot": ["ustawy o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych"], "kategorie": ["CIV", "INNE"], "teksty": false},
-    {"id": "rozpadw", "eli": "DU/2015/1800", "nazwa": "Rozporządzenie w sprawie opłat za czynności adwokackie", "skrot": ["rozporządzenia w sprawie opłat za czynności adwokackie"], "kategorie": ["SKD", "CHF", "PLN", "FX", "ROD", "CIV", "INNE"], "teksty": false}
+    {
+      "id": "kc",
+      "eli": "DU/1964/93",
+      "nazwa": "Kodeks cywilny",
+      "skrot": [
+        "KC",
+        "k.c.",
+        "kc",
+        "Kodeksu cywilnego",
+        "kodeksu cywilnego",
+        "Kodeks cywilny",
+        "kodeks cywilny"
+      ],
+      "kategorie": [
+        "SKD",
+        "CHF",
+        "PLN",
+        "FX",
+        "CIV",
+        "INNE"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "kpc",
+      "eli": "DU/1964/296",
+      "nazwa": "Kodeks postępowania cywilnego",
+      "skrot": [
+        "KPC",
+        "k.p.c.",
+        "kpc",
+        "Kodeksu postępowania cywilnego",
+        "kodeksu postępowania cywilnego"
+      ],
+      "kategorie": [
+        "SKD",
+        "CHF",
+        "PLN",
+        "FX",
+        "ROD",
+        "CIV",
+        "INNE"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "ukk",
+      "eli": "DU/2011/715",
+      "nazwa": "Ustawa o kredycie konsumenckim",
+      "skrot": [
+        "ukk",
+        "u.k.k.",
+        "UKK",
+        "ustawy o kredycie konsumenckim",
+        "ustawa o kredycie konsumenckim"
+      ],
+      "kategorie": [
+        "SKD"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "frank",
+      "eli": "DU/2026/985",
+      "nazwa": "Ustawa o rozpoznawaniu spraw frankowych",
+      "skrot": [
+        "ustawy frankowej",
+        "ustawa frankowa"
+      ],
+      "kategorie": [
+        "CHF"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "pb",
+      "eli": "DU/1997/939",
+      "nazwa": "Prawo bankowe",
+      "skrot": [
+        "pr. bank.",
+        "p.b.",
+        "Prawa bankowego",
+        "prawa bankowego",
+        "Prawo bankowe"
+      ],
+      "kategorie": [
+        "CHF",
+        "PLN",
+        "FX",
+        "SKD"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "ukh",
+      "eli": "DU/2017/819",
+      "nazwa": "Ustawa o kredycie hipotecznym",
+      "skrot": [
+        "ukh",
+        "u.k.h.",
+        "ustawy o kredycie hipotecznym",
+        "ustawa o kredycie hipotecznym"
+      ],
+      "kategorie": [
+        "CHF",
+        "PLN",
+        "FX"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "upk",
+      "eli": "DU/2014/827",
+      "nazwa": "Ustawa o prawach konsumenta",
+      "skrot": [
+        "upk",
+        "u.p.k.",
+        "ustawy o prawach konsumenta",
+        "ustawa o prawach konsumenta"
+      ],
+      "kategorie": [
+        "SKD",
+        "CIV",
+        "INNE"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "uokik",
+      "eli": "DU/2007/331",
+      "nazwa": "Ustawa o ochronie konkurencji i konsumentów",
+      "skrot": [
+        "uokik",
+        "u.o.k.k.",
+        "ustawy o ochronie konkurencji i konsumentów"
+      ],
+      "kategorie": [
+        "SKD",
+        "CHF",
+        "PLN"
+      ],
+      "teksty": false
+    },
+    {
+      "id": "kro",
+      "eli": "DU/1964/59",
+      "nazwa": "Kodeks rodzinny i opiekuńczy",
+      "skrot": [
+        "KRO",
+        "k.r.o.",
+        "kro",
+        "Kodeksu rodzinnego i opiekuńczego",
+        "kodeksu rodzinnego i opiekuńczego"
+      ],
+      "kategorie": [
+        "ROD"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "pu",
+      "eli": "DU/2003/535",
+      "nazwa": "Prawo upadłościowe",
+      "skrot": [
+        "p.u.",
+        "pr. upadł.",
+        "Prawa upadłościowego",
+        "prawa upadłościowego",
+        "Prawo upadłościowe"
+      ],
+      "kategorie": [
+        "RST"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "pr",
+      "eli": "DU/2015/978",
+      "nazwa": "Prawo restrukturyzacyjne",
+      "skrot": [
+        "p.r.",
+        "pr. restr.",
+        "Prawa restrukturyzacyjnego",
+        "prawa restrukturyzacyjnego",
+        "Prawo restrukturyzacyjne"
+      ],
+      "kategorie": [
+        "RST"
+      ],
+      "teksty": false
+    },
+    {
+      "id": "uksc",
+      "eli": "DU/2005/1398",
+      "nazwa": "Ustawa o kosztach sądowych w sprawach cywilnych",
+      "skrot": [
+        "uksc",
+        "u.k.s.c.",
+        "ustawy o kosztach sądowych w sprawach cywilnych"
+      ],
+      "kategorie": [
+        "SKD",
+        "CHF",
+        "PLN",
+        "FX",
+        "ROD",
+        "CIV",
+        "INNE"
+      ],
+      "teksty": true
+    },
+    {
+      "id": "utz",
+      "eli": "DU/2013/403",
+      "nazwa": "Ustawa o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych",
+      "skrot": [
+        "ustawy o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych"
+      ],
+      "kategorie": [
+        "CIV",
+        "INNE"
+      ],
+      "teksty": false
+    },
+    {
+      "id": "rozpadw",
+      "eli": "DU/2015/1800",
+      "nazwa": "Rozporządzenie w sprawie opłat za czynności adwokackie",
+      "skrot": [
+        "rozporządzenia w sprawie opłat za czynności adwokackie"
+      ],
+      "kategorie": [
+        "SKD",
+        "CHF",
+        "PLN",
+        "FX",
+        "ROD",
+        "CIV",
+        "INNE"
+      ],
+      "teksty": false
+    }
   ],
   "uchylone": [
-    {"eli": "DU/2001/1081", "nazwa": "Ustawa o kredycie konsumenckim z 20 lipca 2001 r.", "wzorce": ["ustaw\\w* z dnia 20 lipca 2001\\s*r?\\.? o kredycie konsumenckim"], "zastapiony": "ukk"},
-    {"eli": "DU/2000/271", "nazwa": "Ustawa o ochronie niektórych praw konsumentów (2000)", "wzorce": ["ochronie niektórych praw konsumentów"], "zastapiony": "upk"},
-    {"eli": "DU/2002/1176", "nazwa": "Ustawa o szczególnych warunkach sprzedaży konsumenckiej (2002)", "wzorce": ["szczególnych warunkach sprzedaży konsumenckiej"], "zastapiony": "kc"},
-    {"eli": "DU/2000/1319", "nazwa": "Ustawa o ochronie konkurencji i konsumentów z 15 grudnia 2000 r.", "wzorce": ["ustaw\\w* z dnia 15 grudnia 2000\\s*r?\\.? o ochronie konkurencji i konsumentów"], "zastapiony": "uokik"},
-    {"eli": "DU/1934/502", "nazwa": "Kodeks handlowy (1934)", "wzorce": ["\\bKodeks\\w* handlow\\w*\\b(?!\\s+spółek)"], "zastapiony": null}
+    {
+      "eli": "DU/2001/1081",
+      "nazwa": "Ustawa o kredycie konsumenckim z 20 lipca 2001 r.",
+      "wzorce": [
+        "ustaw\\w* z dnia 20 lipca 2001\\s*r?\\.? o kredycie konsumenckim"
+      ],
+      "zastapiony": "ukk"
+    },
+    {
+      "eli": "DU/2000/271",
+      "nazwa": "Ustawa o ochronie niektórych praw konsumentów (2000)",
+      "wzorce": [
+        "ochronie niektórych praw konsumentów"
+      ],
+      "zastapiony": "upk"
+    },
+    {
+      "eli": "DU/2002/1176",
+      "nazwa": "Ustawa o szczególnych warunkach sprzedaży konsumenckiej (2002)",
+      "wzorce": [
+        "szczególnych warunkach sprzedaży konsumenckiej"
+      ],
+      "zastapiony": "kc"
+    },
+    {
+      "eli": "DU/2000/1319",
+      "nazwa": "Ustawa o ochronie konkurencji i konsumentów z 15 grudnia 2000 r.",
+      "wzorce": [
+        "ustaw\\w* z dnia 15 grudnia 2000\\s*r?\\.? o ochronie konkurencji i konsumentów"
+      ],
+      "zastapiony": "uokik"
+    },
+    {
+      "eli": "DU/1934/502",
+      "nazwa": "Kodeks handlowy (1934)",
+      "wzorce": [
+        "\\bKodeks\\w* handlow\\w*\\b(?!\\s+spółek)"
+      ],
+      "zastapiony": null
+    }
   ],
   "projekty": {
-    "_info": "Słowa (bez polskich znaków, * = początek słowa) wyszukiwane w tytułach i opisach projektów ustaw w Sejmie.",
-    "SKD": ["kredy* konsumen*", "pozycz*", "kredy* darmow*"],
-    "CHF": ["frank*", "kredy* walut*", "kredy* indeksowan*", "kredy* denominowan*"],
-    "PLN": ["wibor", "wskaznik* referencyjn*", "kredy* hipoteczn*"],
-    "FX": ["kredy* walut*", "kredy* indeksowan*"],
-    "RST": ["upadlos*", "restrukturyzac*", "oddluzen*"],
-    "ROD": ["kodeks rodzinny", "alimen*", "rozwod*", "wladz* rodzicielsk*"],
-    "CIV": ["kodeks cywilny", "postepowani* cywiln*", "koszt* sadow*", "przedawnieni*"],
-    "INNE": ["prawa konsumenta", "ochronie konkurencji i konsumentow", "adwokat*", "radc* prawn*"]
+    "_info": "Słowa (bez polskich znaków, * = początek słowa) wyszukiwane w tytułach projektów ustaw w Sejmie.",
+    "SKD": [
+      "kredy* konsumen*",
+      "konsumenck* pozyczk*",
+      "pozyczk* lombard*",
+      "kredy* darmow*"
+    ],
+    "CHF": [
+      "frank*",
+      "kredy* walut*",
+      "kredy* indeksowan*",
+      "kredy* denominowan*"
+    ],
+    "PLN": [
+      "wibor",
+      "wskaznik* referencyjn*",
+      "kredy* hipoteczn*"
+    ],
+    "FX": [
+      "kredy* walut*",
+      "kredy* indeksowan*"
+    ],
+    "RST": [
+      "upadlos*",
+      "restrukturyzac*",
+      "oddluzen*"
+    ],
+    "ROD": [
+      "kodeks rodzinny",
+      "alimen*",
+      "rozwod*",
+      "wladz* rodzicielsk*"
+    ],
+    "CIV": [
+      "kodeks cywilny",
+      "postepowani* cywiln*",
+      "koszt* sadow*",
+      "przedawnieni*"
+    ],
+    "INNE": [
+      "prawach konsumenta",
+      "ochronie konkurencji i konsumentow",
+      "prawo o adwokaturze",
+      "radcach prawnych"
+    ]
   }
 }

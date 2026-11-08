@@ -69,7 +69,7 @@ odsetki = suma-kwota
 
 ## 5a. Stawki w kalkulatorach prawnych — do aktualizacji
 
-Kalkulatory mają stawki wpisane we wzorach (Panel → Kalkulatory → Wyniki). Sprawdzaj je przy zmianach przepisów:
+**Odsetki ustawowe aktualizują się same** (od v1.21): we wzorach używaj zmiennych `ODS_KAP` (kapitałowe), `ODS_OPOZN` (za opóźnienie), `ODS_HANDL` (transakcje handlowe), `ODS_MAX` i `ODS_MAX_OPOZN` (maksymalne), a w etykietach `{ODS_OPOZN}` itd. Wartości pochodzą z obwieszczeń w Monitorze Polskim, sprawdzanych codziennie. CRM → 📜 Prawo → Odsetki pokazuje, który kalkulator ma jeszcze stawki wpisane na sztywno. Pozostałe stawki sprawdzaj przy zmianach przepisów:
 
 | Kalkulator | Stawka | Źródło | Kiedy zmienić |
 |------------|--------|--------|---------------|
@@ -105,7 +105,9 @@ Przycisk zgłoszenia pokazuje się tylko, gdy wybrany sposób jest kompletnie sk
 
 Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Plik nie opuszcza przeglądarki** — analiza działa lokalnie, bez serwera.
 
-**Formaty:** PDF, Word `.docx`, OpenDocument `.odt`, `.rtf`, `.txt` / `.md`, `.html`. Nieobsługiwane: stary `.doc` oraz skany (PDF bez tekstu) — strona prosi wtedy o zapis jako `.docx`/PDF albo wklejenie treści.
+**Formaty:** PDF, Word `.docx`, OpenDocument `.odt`, `.rtf`, `.txt` / `.md`, `.html` oraz **zdjęcia i skany** (`.jpg`, `.png`, `.webp`, PDF bez warstwy tekstu — do 15 stron). Tekst ze skanu rozpoznaje przeglądarka (Tesseract); przy pierwszym użyciu pobiera się słownik języka polskiego (kilka MB), plik dalej nie opuszcza urządzenia. Na telefonie można od razu zrobić zdjęcie umowy. Nieobsługiwany: stary `.doc`.
+
+**Zwrot pieniędzy (umowy kredytu).** Jeśli umowa to kredyt konsumencki (SKD) albo kredyt indeksowany/denominowany (CHF, waluta) i system wykryje kwalifikujące zapisy, klient widzi **czerwony komunikat** „W Twojej umowie wykryliśmy klauzule abuzywne… Kwalifikujesz się do zwrotu pieniędzy” oraz **szacowaną kwotę** (kalkulator „Co mi się należy” na danych odczytanych z umowy; klient może je poprawić, przy CHF podaje ratę i saldo). **Klient nie widzi podstaw prawnych.** Po kliknięciu „Chcę odzyskać pieniądze” zgłoszenie trafia do CRM → Nowe sprawy razem z: wykrytymi zapisami, podstawą prawną, orzecznictwem, fragmentami umowy, danymi odczytanymi z umowy i ustawami powołanymi w umowie (czy obowiązują). Reguły: `umowa-zwrot.js`. Kredyt złotówkowy z WIBOR nie daje automatycznej kwalifikacji (wyrok TSUE C‑471/24).
 
 **Wynik** to trzy paski od zielonego do czerwonego (0–29 dobrze, 30–59 uwaga, 60+ źle) i trzy działy:
 
@@ -115,7 +117,7 @@ Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Pli
 | ⚖️ Zgodność z prawem | możliwe klauzule niedozwolone (art. 385¹ i 385³ KC), odsetki ponad limit ustawowy, brak danych stron i daty | Ryzyko prawne |
 | 🔍 Styl i przejrzystość | nieostre sformułowania, odesłania do regulaminów, zawiłe odesłania, presja czasu, ukryte opłaty, podwójne zaprzeczenia, bardzo długie zdania | Podejrzana treść |
 
-Przy każdym zapisie jest porada, podstawa prawna (dział prawny) i cytaty z umowy z podświetleniem. **Pokaż pełny tekst** — cała umowa z zaznaczeniami; **Pobierz raport** — plik `.txt`.
+Przy każdym zapisie jest porada i cytaty z umowy z podświetleniem. Podstawa prawna z reguł jest widoczna tylko w CRM (Treści strony → Analiza umów i w zgłoszeniu), nie na stronie. **Pokaż pełny tekst** — cała umowa z zaznaczeniami; **Pobierz raport** — plik `.txt`.
 
 ### Panel → 📄 Analiza umów
 
@@ -176,15 +178,15 @@ Tytuł i opis tłumaczysz w zakładce Tłumaczenia (grupa „SEO”).
 
 > Na adresie `github.io/PiK/` Google czyta `robots.txt` tylko z głównej domeny, dlatego mapę witryny trzeba zgłosić ręcznie (krok 4). Po podpięciu własnej domeny `robots.txt` zacznie działać automatycznie.
 
-## 9. Chatbot (Ilona)
+## 9. Czat Adam
 
-Na stronie jest osadzony chatbot z `lexsalus.github.io/Ilona/embed.js`.
+Na stronie działa **Adam** — asystent prawny (`adam/adam.js`). Bot regułowy: działa w przeglądarce, bez AI, pytania nie są nigdzie wysyłane. Z czatu Ilona przejęte są tylko: rozpoznawanie fraz z tolerancją literówek, okno czatu odseparowane od stylów strony, pełny ekran na telefonie i pamięć rozmowy w karcie.
 
-**Ustawienia → Chatbot (Ilona):**
-- **Pokaż chatbota na stronie** — włącza / wyłącza,
-- **Adres skryptu** — można podmienić na inną wersję.
+Co umie: kieruje do kalkulatorów „Co mi się należy” (kredyt gotówkowy, frankowy, WIBOR, długi), pokazuje treść przepisu na żądanie („art. 45 ukk”, „art. 118 KC”), aktualne odsetki, ostatnie nowelizacje i projekty z Sejmu, kieruje do analizy umowy; przy zagrożeniu życia podaje 112. Gdy nie zna odpowiedzi, szuka pasujących przepisów.
 
-Skrypt dostaje atrybut `data-lang` z aktualnym językiem strony.
+**Wiedza:** `adam/wiedza.json` — powitanie, przyciski startowe i intencje (frazy bez polskich znaków, `*` = początek słowa, `=` = bez literówek; przyciski `calc:<id>`, `href:#sekcja`, `ask:<pytanie>`, `info:odsetki|zmiany|projekty`).
+
+**Ustawienia → Chatbot:** włączenie/wyłączenie. Pusty adres albo stary adres Ilony = Adam.
 
 ## 10. Publikacja zmian
 
@@ -230,6 +232,14 @@ py bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe
 | CRM: „Konto nieaktywne” | Administrator aktywuje konto w CRM → Ustawienia → Użytkownicy |
 | CRM: zgubiony telefon z kodami 2FA | Administrator usuwa czynnik w Supabase → Authentication → Users → użytkownik → MFA; przy następnym logowaniu nowy kod QR |
 | CRM: nie pamiętam hasła | „Nie pamiętam hasła” na ekranie logowania → link e-mailem |
+
+## 12a. Zmiany w prawie (API Sejmu)
+
+Codziennie ok. 6:17 GitHub Actions uruchamia `tools/prawo_sync.py`: pobiera z oficjalnego API Sejmu stan obserwowanych ustaw, nowelizacje, teksty jednolite (artykuły), projekty ustaw z Sejmu i obwieszczenia o odsetkach, i zapisuje je w `prawo/*.json`. Ręcznie: GitHub → Actions → „Deploy static content to Pages” → Run workflow.
+
+**Lista ustaw:** `prawo/obserwowane.json` — `id`, adres ELI aktu pierwotnego (np. `DU/1964/93` = Kodeks cywilny), skróty rozpoznawane w tekście (`KC`, `ukk`…), kategorie spraw CRM, `teksty` (czy pobierać artykuły). Sekcja `uchylone` — ustawy uchylone, których powołanie w umowie oznaczamy w CRM. Sekcja `projekty` — słowa szukane w tytułach projektów. Po zmianie pliku synchronizacja uruchamia się sama przy wysyłce.
+
+Dziennik ostatniego przebiegu: `prawo/sync-log.txt`, wynik: `prawo/stan.json` (widać też w CRM → Prawo). Teksty z ISAP są informacyjne — wiążący jest Dziennik Ustaw.
 
 ## 13. CRM kancelarii
 

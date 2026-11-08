@@ -1,0 +1,34 @@
+# Plan prac — PiK (Porównaj.to + CRM kancelarii)
+
+Plik prowadzony na bieżąco: co jest w planie, co w toku, co zrobione. Status: ✅ zrobione · 🔄 w toku · ⏳ do zrobienia · ❓ decyzja właściciela.
+Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
+
+## Etap: Prawo z API Sejmu + bot Adam (od 08.11.2026)
+
+Źródło danych: oficjalne API Sejmu (ELI — akty prawne, Sejm — projekty ustaw). Akty normatywne i ich projekty nie są chronione prawem autorskim (art. 4 ustawy o prawie autorskim). Teksty z ISAP mają charakter informacyjny — wiążący jest Dziennik Ustaw.
+
+| # | Zadanie | Status |
+|---|---------|--------|
+| 1 | Codzienna synchronizacja z API Sejmu (`tools/prawo_sync.py`, GitHub Actions) → `prawo/*.json`: obserwowane ustawy, nowelizacje, projekty, odsetki, teksty artykułów | ✅ v1.20.0 (pierwsze dane pobrane 08.11.2026) |
+| 2 | Parser tekstów jednolitych: pominięcie cytatów z obwieszczenia, sklejanie zawiniętych wierszy, przypisy, dwie stawki odsetek handlowych | ✅ (wersja parsera 2) |
+| 3 | CRM → **📜 Prawo**: strażnik zmian (liczba spraw, których dotyczy zmiana, licznik „nowe” w menu, kafelek na pulpicie), projekty w Sejmie, odsetki + kontrola stawek w kalkulatorach, wyszukiwarka przepisów | ✅ |
+| 4 | CRM → karta sprawy → Analiza → **Przepisy**: wyszukanie i dołączenie przepisu ze stanem prawnym na dzień (tekst jednolity + nowelizacje) | ✅ |
+| 5 | Kalkulatory: odsetki ustawowe aktualizowane same (zmienne `ODS_KAP`, `ODS_OPOZN`, `ODS_HANDL`, `ODS_MAX`, `ODS_MAX_OPOZN`, w etykietach `{ODS_…}`) | ✅ |
+| 6 | Strona: sekcja „Zmiany w prawie” (nowelizacje, projekty, odsetki) | ✅ |
+| 7 | Analiza umów: limit odsetek maksymalnych z aktualnego obwieszczenia; kontrola powołanych ustaw i artykułów (uchylone, nieistniejące) — **tylko w CRM** (w zgłoszeniu) | ✅ v1.21.0 |
+| 8 | Zwrot z umowy: z umowy (wpisanej / pliku / skanu) system liczy zwrot (SKD, CHF/FX) wg przepisów i orzecznictwa; klient widzi **czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” + kwotę, bez podstawy prawnej**; podstawy, zapisy i orzecznictwo trafiają ze zgłoszeniem do CRM | ✅ v1.21.0 (`umowa-zwrot.js`) |
+| 9 | Skany umów: rozpoznawanie tekstu (OCR) w przeglądarce — zdjęcia JPG/PNG/WEBP i zeskanowane PDF | ✅ v1.21.0 |
+| 10 | Bot **Adam** (zamiast Ilony na stronie): regułowy, w przeglądarce, wiedza w `adam/wiedza.json`, przepisy, odsetki, zmiany, projekty, kierowanie do kalkulatorów | ✅ |
+| 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 13/13, e2e 106/106 |
+| 12 | Dokumentacja: README, INSTRUKCJA, CRM, STAN, CHANGELOG, PLAN | ✅ v1.21.0 |
+| 13 | Sprawdzenie po wysyłce: nowa wersja parsera na danych z API (Actions), wygląd na telefonie | 🔄 |
+
+## Do decyzji / później
+
+- ❓ Reguły zwrotu (`umowa-zwrot.js`) — przegląd przez prawnika: wzorce zapisów, podstawy, orzecznictwo, próg „kwalifikuje się”.
+
+- ❓ Adam na stronie pokazuje treść przepisu, gdy klient wprost o niego zapyta („art. 45 ukk”), a w kilku odpowiedziach dopisuje odnośnik do przepisu. Zostawić, czy wyłączyć (na stronie wynik analizy umowy pokazujemy bez podstaw prawnych)?
+- ⏳ Powiadomienia o zmianach w prawie zapisywane w bazie (dla każdego pełnomocnika) — wymaga migracji z `pg_net` albo Edge Function; teraz licznik i kafelek w CRM.
+- ⏳ Kalkulator CHF z historycznymi kursami NBP (dokładniejszy szacunek z samej umowy, bez pytania klienta o ratę i saldo).
+- ⏳ Orzecznictwo (np. baza orzeczeń sądów powszechnych) jako źródło dla CRM — do sprawdzenia dostępność i warunki API.
+- ⏳ Lista obserwowanych ustaw do edycji z poziomu CRM (teraz plik `prawo/obserwowane.json`).

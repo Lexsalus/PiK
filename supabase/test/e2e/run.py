@@ -48,6 +48,11 @@ async def main():
     ok(await pg.is_visible('#app') and 'Dzień dobry' in await T('#view'),'po 2FA: pulpit')
     # --- zgłoszenie ze strony → sprawa
     await nav('#/nowe'); ok('Zofia Testowa' in await T('#view'),'zgłoszenie ze strony widoczne w „Nowe sprawy”')
+    import urllib.request
+    A={'zrodlo':'analiza umowy','typ':'skd','kwalifikuje':True,'klauzule':[{'nazwa':'Odsetki naliczane od kredytowanych kosztów','podstawa':'art. 30 ust. 1 pkt 7 i art. 45 ust. 1 ukk','orzecznictwo':'wyrok TSUE C‑472/23','fragment':'prowizja zostaje kredytowana','brak':False,'kwal':True}],'odczytane':{'kwota':'30 000,00 zł'},'plik':'umowa.pdf'}
+    urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':"insert into public.leads(category,calc,client_name,phone,consent) values('SKD',$1::jsonb,'Klient Umowy','600100200',true)",'params':[json.dumps({'id':'skd','name':'Sankcja kredytu darmowego','inputs':[],'outputs':[{'label':'Szacowana korzyść','unit':'zł','value':13474,'main':True}],'analiza':A})]}).encode(),method='POST')).read()
+    await pg.evaluate("reload().then(()=>rerender())"); await pg.wait_for_timeout(1200); v=await T('#view')
+    ok('Analiza umowy klienta' in v and 'art. 30 ust. 1 pkt 7' in v and 'C‑472/23' in v,'Nowe sprawy: analiza umowy klienta z podstawami prawnymi (tylko CRM)')
     await pg.click('text=Załóż sprawę'); await pg.wait_for_timeout(300)
     ok('Brak aktywnych' not in await T('#toast') ,'formularz nowej sprawy')
     await pg.fill('#mform [name=pesel]','80010112345'); await submit(); await pg.wait_for_timeout(500)
@@ -59,6 +64,23 @@ async def main():
     await pg.wait_for_timeout(600); ok(await pg.is_visible('#caSave'),'Analiza: przycisk zapisu kalkulacji'); await pg.click('#caSave'); await pg.wait_for_timeout(1200)
     import urllib.request
     ok(len(json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':"select 1 from public.case_entries where kind='analiza' and title like 'Kalkulacja:%'",'params':[]}).encode(),method='POST')).read()).get('data'))==1,'Analiza: kalkulacja zapisana w bazie jako czynność')
+    # --- prawo: przepisy w karcie sprawy, zakładka Prawo (dane prawo/*.json)
+    await nav(f'#/sprawa/{caseid}/analiza'); await pg.wait_for_timeout(800)
+    ok(await pg.is_visible('#cpQ'),'Analiza: karta „Przepisy” w sprawie')
+    await pg.fill('#cpQ','art. 45 ukk'); await pg.click('#cpGo'); await pg.wait_for_timeout(1500)
+    ok('Art. 45' in await T('#cpRes'),'Przepisy: art. 45 ukk znaleziony (tekst jednolity)')
+    await pg.click('#cpRes [data-attach]'); await pg.wait_for_timeout(400); await pg.fill('#mform [name=date]','2020-05-04'); await submit(); await pg.wait_for_timeout(800)
+    rows=json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':"select description from public.case_entries where title like 'Przepis: art. 45%'",'params':[]}).encode(),method='POST')).read()).get('data')
+    ok(len(rows)==1 and 'Stan prawny na dzień: 04.05.2020' in rows[0]['description'] and 'Tekst jednolity obowiązujący w tym dniu' in rows[0]['description'],'Przepis dołączony do sprawy ze stanem prawnym na dzień')
+    await nav('#/prawo/zmiany'); await pg.wait_for_timeout(1200)
+    ok('Nowelizacje obserwowanych ustaw' in await T('#view') and 'Kodeks cywilny' in await T('#view'),'Prawo: zmiany w ustawach i obserwowane ustawy')
+    ok('Prawo' in await T('#side'),'Prawo: pozycja w menu')
+    await nav('#/prawo/odsetki'); await pg.wait_for_timeout(1500); v=await T('#view')
+    ok('Odsetki ustawowe za opóźnienie' in v and '%' in v,'Prawo: odsetki ustawowe z obwieszczeń')
+    ok('Odsetki ustawowe' in v and ('stawki automatyczne' in v or 'stałe stawki' in v),'Prawo: kontrola stawek w kalkulatorach')
+    await nav('#/prawo/projekty'); await pg.wait_for_timeout(800); ok('Projekty ustaw w Sejmie' in await T('#view'),'Prawo: projekty z Sejmu')
+    await nav('#/prawo/przepisy'); await pg.wait_for_timeout(500); await pg.fill('#ppQ','przedawnienie roszczeń'); await pg.click('#ppGo'); await pg.wait_for_timeout(2500)
+    ok('Art.' in await T('#ppRes'),'Prawo: wyszukiwarka przepisów słowami')
     # --- zespół: aplikantka bez finansów
     await nav(f'#/sprawa/{caseid}/zespol'); await pg.click('text=+ Dodaj osobę do sprawy'); await pg.wait_for_timeout(300)
     await pg.select_option('#mmU',label='Anna Kowalska (Aplikant)'); await submit()
@@ -149,7 +171,7 @@ async def main():
     ok(len(sql("select 1 from public.audit_log where action='eksport.raport' and target in ('XLSX','PDF')"))==2,'eksporty XLSX i PDF w audycie')
     # --- zużycie: po zapisie pobierane tylko zmienione tabele; SRI w kodzie
     raw=open(HERE+'../../../crm.html',encoding='utf-8').read(); ix=open(HERE+'../../../index.html',encoding='utf-8').read()
-    ok(raw.count('integrity=')>=1 and "x.integrity='sha384-" in raw and ix.count("'sha384-")==4,'SRI: supabase-js i xlsx w CRM, pdf.js/worker/mammoth/jszip na stronie')
+    ok(raw.count('integrity=')>=1 and "x.integrity='sha384-" in raw and ix.count("'sha384-")==5,'SRI: supabase-js i xlsx w CRM, pdf.js/worker/mammoth/jszip/tesseract (OCR) na stronie')
     await pg.evaluate("window.__fa=[];{const o=fetchAll;fetchAll=t=>{__fa.push(t);return o(t)}};0")
     await nav('#/powiadomienia'); await pg.wait_for_timeout(500)
     if await pg.locator('text=Oznacz wszystkie jako przeczytane').count(): await pg.click('text=Oznacz wszystkie jako przeczytane'); await pg.wait_for_timeout(900)

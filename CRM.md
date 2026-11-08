@@ -88,6 +88,16 @@ Do decyzji właściciela:
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
 
+## 📜 Prawo (v1.20–1.21, 08.11.2026)
+
+- **Zmiany w ustawach:** nowelizacje obserwowanych ustaw z datą wejścia w życie i liczbą otwartych spraw, których dotyczą (kategorie); znacznik „nowe” i licznik w menu, kafelek na pulpicie. Tabela obserwowanych ustaw: status, aktualny tekst jednolity, liczba nowelizacji.
+- **Projekty w Sejmie:** projekty ustaw z ostatnich 6 miesięcy pasujące do kategorii spraw, z etapem.
+- **Odsetki:** stawki z obwieszczeń (Monitor Polski), maksymalne, kontrola kalkulatorów (które mają stawki na sztywno) i limitów analizy umów.
+- **Przepisy:** wyszukiwarka (numer artykułu z ustawą albo opis słowami); **📎 Dołącz do sprawy** — notatka „analiza” z treścią, stanem prawnym na dzień (tekst jednolity + nowelizacje w mocy, późniejsze zmiany).
+- **Karta sprawy → Analiza → 📜 Przepisy** — to samo dla bieżącej sprawy; przy sprawie ze strony: **Analiza umowy klienta** (wykryte zapisy, podstawa prawna, orzecznictwo, fragmenty, dane odczytane z umowy, ustawy powołane w umowie).
+- **Nowe sprawy:** zgłoszenie z analizy umowy pokazuje tę samą analizę. Klient na stronie widzi tylko komunikat o klauzulach abuzywnych i kwotę.
+- Przepisy w treści (np. „art. 385³ pkt 10 KC”) są klikalne — podgląd artykułu z aktualnego tekstu jednolitego.
+
 ## Decyzje do podjęcia przed pełnym startem (ze specyfikacji)
 
 - Zakres roli Biuro: wszystkie sprawy czy tylko przypisane (obecnie: przypisane).
