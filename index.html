@@ -783,7 +783,8 @@ async function initPrawo(){
   if(!window.PRAWO)return;
   await PRAWO.loadOds();if(typeof renderCalcs==='function'){Object.keys(BOX).forEach(k=>{if(BOX[k].cur&&$(BOX[k].panel).querySelector('.resv'))calcBox(k)})}
   const [z,p,o]=await Promise.allSettled([PRAWO.load('zmiany'),PRAWO.load('projekty'),PRAWO.load('odsetki'),PRAWO.acts()]);
-  const Z=z.value?.zmiany||[],PR=p.value?.projekty||[],O=o.value;
+  const Z=[],byEli={};(z.value?.zmiany||[]).forEach(x=>{const y=byEli[x.eli];if(y){if(!y.nazwa.includes(x.nazwa))y.nazwa+=', '+x.nazwa;y.kategorie=[...new Set([...y.kategorie,...x.kategorie])]}else{byEli[x.eli]={...x};Z.push(byEli[x.eli])}}); // jedna ustawa zmieniająca kilka obserwowanych — jeden wpis
+  const PR=p.value?.projekty||[],O=o.value;
   if(!Z.length&&!PR.length&&!O)return;
   const d=PRAWO.fmtD,tags=ks=>[...new Set((ks||[]).map(k=>PCAT[k]||k))].slice(0,3).map(x=>`<span class="ptag">${esc(t(x))}</span>`).join('');
   const recent=new Date(Date.now()-30*864e5).toISOString().slice(0,10),today=new Date().toISOString().slice(0,10);

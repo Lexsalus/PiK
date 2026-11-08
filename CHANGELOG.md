@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.21.1] — 2026-11-08
+- Parser tekstów v3 (przypisy w linii), diagnostyka KPC, zmiany w prawie na stronie bez powtórzeń (jedna ustawa zmieniająca kilka obserwowanych)
+
 ## [1.21.0] — 2026-11-08
 - Prawo z API Sejmu: CRM → 📜 Prawo (zmiany, projekty, odsetki, przepisy, przepis w sprawie ze stanem na dzień), strona: Zmiany w prawie, odsetki automatyczne, OCR skanów umów, zwrot z umowy kredytu (klient: komunikat + kwota bez podstaw prawnych; podstawy i orzecznictwo w CRM), czat Adam zamiast Ilony, PLAN.md
 

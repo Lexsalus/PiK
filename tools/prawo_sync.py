@@ -36,7 +36,7 @@ OUT = os.path.join(ROOT, 'prawo')
 ELI = 'https://api.sejm.gov.pl/eli'
 SEJM = 'https://api.sejm.gov.pl/sejm'
 UA = 'PiK-prawo-sync/1.0 (+https://lexsalus.github.io/PiK/)'
-PARSER = 2  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
+PARSER = 3  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
 PAUSE = float(os.environ.get('PRAWO_PAUSE', '0.25'))  # odstęp między zapytaniami — nie obciążamy serwerów Sejmu
 TODAY = dt.date.today()
 LOG = []
@@ -214,7 +214,9 @@ def tidy(lines):
             out.append(l)
         else:
             out[-1] = (out[-1][:-1] if out[-1].endswith('-') and not out[-1].endswith(' -') else out[-1] + ' ') + l
-    return [re.sub(r'\s{2,}', ' ', x) for x in out]
+    # przypis doklejony w tej samej linii: „(uchylony)3)Dodany przez art. …” → „(uchylony)”
+    out = [re.sub(r'(?<=\S)\d{1,3}\)(?=[A-ZĄĆĘŁŃÓŚŹŻ])[^\n]*$', '', x) for x in out]
+    return [re.sub(r'\s{2,}', ' ', x).strip() for x in out if x.strip()]
 
 
 def _art_key(nr):
@@ -396,6 +398,17 @@ def sync_teksty(teksty_do):
             continue  # ten sam tekst jednolity — nie pobieramy ponownie
         try:
             raw = http(f'{eli_url(eli)}/text.html')
+            if a['id'] == 'kpc' and os.environ.get('PRAWO_DEBUG', '1') == '1':  # diagnostyka parsera (tymczasowo)
+                ids = re.findall(r'id="([a-z]{4}_[^"]{1,30})"', raw)
+                pos = [m.start() for m in re.finditer(r'Art\.(?:&nbsp;|\s|\xa0)*1\.', raw)]
+                with open(os.path.join(OUT, 'debug-kpc.txt'), 'w', encoding='utf-8') as fdbg:
+                    fdbg.write(f'len={len(raw)} ids={len(ids)} sample_ids={ids[:40]}\nart1_positions={pos[:20]}\n')
+                    for p in pos[:4]:
+                        fdbg.write('\n----- @%d\n%s\n' % (p, raw[max(0, p - 600):p + 900]))
+                    t2 = html_to_text(raw)
+                    fdbg.write('\n===== TEXT around Art. 1.\n')
+                    for m in list(re.finditer(r'(?m)^Art\.\s*1\.', t2))[:5]:
+                        fdbg.write('\n-- @%d\n%s\n' % (m.start(), t2[max(0, m.start() - 300):m.start() + 500]))
             text = html_to_text(raw)
             arts = split_articles(text, eli != d.get('ELI'))
             if len(arts) < 3:
