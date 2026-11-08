@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **08.11.2026**, wersja **1.22.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **08.11.2026**, wersja **1.22.1**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -30,6 +30,8 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 3. Zmiany w bazie produkcyjnej tylko po uzgodnieniu z właścicielem (nowy token, migracja, testy przed uruchomieniem).
 
 ## Zasady pracy
+
+- **08.11.2026 historia gita została nadpisana** (usunięte notatki biznesowe z dawnych commitów). Istniejące klony: `git fetch origin && git reset --hard origin/main` (lokalne niewysłane zmiany najpierw zapisać).
 
 - **Plan:** `PLAN.md` — uzupełniać na bieżąco (status zadań, decyzje).
 
