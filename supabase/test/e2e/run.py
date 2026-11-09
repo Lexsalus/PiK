@@ -84,6 +84,14 @@ async def main():
     await nav('#/prawo/projekty'); await pg.wait_for_timeout(800); ok('Projekty ustaw w Sejmie' in await T('#view'),'Prawo: projekty z Sejmu')
     await nav('#/prawo/przepisy'); await pg.wait_for_timeout(500); await pg.fill('#ppQ','przedawnienie roszczeń'); await pg.click('#ppGo'); await pg.wait_for_timeout(2500)
     ok('Art.' in await T('#ppRes'),'Prawo: wyszukiwarka przepisów słowami')
+    # --- nowe konto z CRM (funkcja serwera „konta”)
+    await nav('#/ustawienia/uzytkownicy'); await pg.wait_for_timeout(600); await pg.click('text=+ Dodaj'); await pg.wait_for_timeout(300)
+    ok('Hasło tymczasowe' in await T('#mbox') and len(await pg.input_value('#mform [name=password]'))>=12,'Nowe konto: formularz z wygenerowanym hasłem tymczasowym')
+    await pg.fill('#mform [name=name]','Ewa Nowa'); await pg.fill('#mform [name=email]','ewa@k.test'); await pg.select_option('#mform [name=role]','office'); await pg.fill('#mform [name=password]','Haslo-testowe-123'); await submit(); await pg.wait_for_timeout(1500)
+    ok('Konto utworzone' in await T('#mbox') and 'Haslo-testowe-123' in await T('#mbox'),'Nowe konto: utworzone, hasło pokazane raz')
+    rows=json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':"select role,active,must_change_password m from public.profiles where email='ewa@k.test'",'params':[]}).encode(),method='POST')).read())['data']
+    ok(rows and rows[0]['role']=='office' and rows[0]['active'] and rows[0]['m'],'Nowe konto: rola, aktywne, wymagana zmiana hasła')
+    await pg.keyboard.press('Escape')
     # --- treści strony: czat Adam i nowe funkcje
     await nav('#/strona/adam'); await pg.wait_for_timeout(1500); v=await T('#view')
     ok('Przyciski na powitanie' in v and 'Własne tematy' in v and 'Tester odpowiedzi' in v,'Treści strony → Czat Adam: ustawienia')
@@ -274,6 +282,11 @@ async def main():
       await nav(f"#/sprawa/{acase[0]['case_id']}/etapy"); await pg.wait_for_timeout(600)
       ok(await pg.locator('#view button:has-text("+ Wpis")').count()==0 and 'Etap' in await T('#view'),'aplikant z samym podglądem: widzi etapy, nie ma „+ Wpis”')
     await login('anna@k.test'); await nav('#/raporty'); ok('Moje czynności w okresie' in await T('#view') and 'Moje terminy' in await T('#view'),'aplikant: raport własnych czynności i terminów')
+    await login('ewa@k.test',code=False); await pg.wait_for_timeout(500)
+    ok('Pierwsze logowanie' in await T('#login'),'nowe konto: przy pierwszym logowaniu wymuszona zmiana hasła tymczasowego')
+    await pg.fill('#lf [name=p1]','Nowe-haslo-ewy-123'); await pg.fill('#lf [name=p2]','Nowe-haslo-ewy-123'); await pg.click('#lf button'); await pg.wait_for_timeout(1500)
+    rows=json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':"select must_change_password m from public.profiles where email='ewa@k.test'",'params':[]}).encode(),method='POST')).read())['data']
+    ok(await pg.is_visible('#app') and rows[0]['m']==False,'nowe konto: po zmianie hasła wejście do CRM, flaga zdjęta')
     await pg.evaluate("idleAt=Date.now()-31*60000"); await pg.wait_for_timeout(31500); ok(await pg.is_visible('#login'),'wylogowanie po 30 min bezczynności')
     print('ERR',[e for e in errs if 'favicon' not in e]); print(f'WYNIK: {sum(res)}/{len(res)}')
     await b.close()

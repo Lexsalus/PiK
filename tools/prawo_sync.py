@@ -36,7 +36,7 @@ OUT = os.path.join(ROOT, 'prawo')
 ELI = 'https://api.sejm.gov.pl/eli'
 SEJM = 'https://api.sejm.gov.pl/sejm'
 UA = 'PiK-prawo-sync/1.0 (+https://lexsalus.github.io/PiK/)'
-PARSER = 4  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
+PARSER = 5  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
 PAUSE = float(os.environ.get('PRAWO_PAUSE', '0.25'))  # odstęp między zapytaniami — nie obciążamy serwerów Sejmu
 TODAY = dt.date.today()
 LOG = []
@@ -289,13 +289,21 @@ def split_articles_html(raw):
     p.feed(raw)
     p.close()
     out, seen = [], set()
+    pos = {full: raw.find(f'id="{full}"') for full, _, _ in p.arts}
+    order = sorted(v for v in pos.values() if v >= 0)
     for full, name, frag in p.arts:
+        # treść poza elementem artykułu (nietypowy HTML, np. art. 1 KPC) — bierzemy HTML do następnego artykułu
+        if len(re.sub(r'<[^>]+>|Art\.\s*[0-9a-z_]+\.?|\s', '', frag)) < 3 and pos.get(full, -1) >= 0:
+            st = raw.rfind('<', 0, pos[full])
+            nxt = next((v for v in order if v > pos[full]), -1)
+            end = raw.rfind('<', 0, nxt) if nxt > 0 else len(raw)
+            frag = raw[st:end]
         nr = art_number(name)
         if nr in seen:
             continue
         seen.add(nr)
         txt = html_to_text(frag)
-        txt = re.sub(r'^\s*Art\.\s*[0-9]+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.\s*', '', txt)
+        txt = re.sub(r'^\s*Art\.\s*[0-9]+[a-z]{0,3}[⁰¹²³⁴⁵⁶⁷⁸⁹]*\.?\s*', '', txt)
         body = '\n'.join(tidy(txt.split('\n')))
         path = full.split('-')[:-1]
         head = ''

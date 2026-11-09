@@ -18,6 +18,7 @@ window.supabase={createClient(){
   const listeners=[];
   return {
     from:t=>new B(t),
+    functions:{invoke:(name,{body}={})=>post('/'+name,{body,sub:st.user?.id||null,aal:st.aal}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null})},
     rpc:(name,args)=>q({kind:'rpc',name,args}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null}),
     storage:{from:bucket=>({upload:(path,file)=>q({kind:'storage',bucket,path}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null}),
       createSignedUrl:(path)=>Promise.resolve({data:{signedUrl:'about:blank#'+encodeURIComponent(path)},error:null})})},
@@ -25,7 +26,7 @@ window.supabase={createClient(){
       async signInWithPassword({email,password}){const r=await post('/login',{email,password});if(r.error)return {error:r.error};st.user=r.data;st.aal='aal1';st.amr=[{method:'password',timestamp:Math.floor(Date.now()/1000)}];saveSt();return {data:{user:r.data},error:null}},
       async getUser(){return {data:{user:st.user}}},async getSession(){return {data:{session:st.user?{user:st.user}:null}}},
       async signOut(){st.user=null;st.aal='aal1';saveSt();return {}},onAuthStateChange(){return {data:{subscription:{unsubscribe(){}}}}},
-      async resetPasswordForEmail(){return {}},async updateUser(){return {}},
+      async resetPasswordForEmail(){return {}},async updateUser(){sessionStorage.setItem('shim_pw_changed',1);return {data:{},error:null}},
       mfa:{
         async getAuthenticatorAssuranceLevel(){return {data:{currentLevel:st.aal,nextLevel:factors()[st.user?.id]?'aal2':'aal1'}}},
         async listFactors(){const f=factors()[st.user?.id];return {data:{totp:f&&f.verified?[{id:f.id,status:'verified'}]:[],all:f?[{id:f.id,factor_type:'totp',status:f.verified?'verified':'unverified'}]:[]}}},

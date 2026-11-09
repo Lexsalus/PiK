@@ -28,6 +28,9 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 18 | Ustawienia CRM: zakładki w grupach z kolorami (Moje / Sprawy i terminy / Dostęp i bezpieczeństwo) | ✅ v1.25.0 |
 | 19 | Treści strony: zakładki w grupach z kolorami + kropka zmian; 🔧 Techniczne (stan systemu, synchronizacja, tryb serwisowy, limity, połączenie, pamięć aplikacji) | ✅ v1.25.0 |
 | 20 | OCR: kilka zdjęć stron naraz, przygotowanie obrazu (EXIF, kontrast, prostowanie przekosu), wykrywanie stron do góry nogami / obróconych, poprawki typowych pomyłek | ✅ v1.26.0 |
+| 21 | Usterki: art. 1 KPC bez treści (parser v5), limit zgłoszeń bez e-maila (telefon 3/h, ogólny 40/10 min) | ✅ v1.27.0 |
+| 22 | Powiadomienia o zmianach w prawie w bazie (migracja 010: pg_cron + pg_net, zapasowo z CRM Administratora) | ✅ v1.27.0 — wdrożenie w Supabase |
+| 23 | Zakładanie kont pracowników z CRM (funkcja serwera `konta`, hasło tymczasowe, wymuszona zmiana) | ✅ v1.27.0 — wdrożenie w Supabase |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później
@@ -35,7 +38,6 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 - ❓ Reguły zwrotu (`umowa-zwrot.js`) — przegląd przez prawnika: wzorce zapisów, podstawy, orzecznictwo, próg „kwalifikuje się”.
 
 - ✅ Adam a przepisy: przełącznik w CRM → Treści strony → Czat Adam („Pokazuje treść przepisów i odnośniki”); domyślnie włączony — decyzja kancelarii.
-- ⏳ Powiadomienia o zmianach w prawie zapisywane w bazie (dla każdego pełnomocnika) — wymaga migracji z `pg_net` albo Edge Function; teraz licznik i kafelek w CRM.
 - ⏳ Restrukturyzacja: harmonogram układu miesiąc po miesiącu (karencja w liczbach), wydruk planu dla wierzycieli.
 - ⏳ Kalkulator CHF z historycznymi kursami NBP (dokładniejszy szacunek z samej umowy, bez pytania klienta o ratę i saldo).
 - ⏳ Orzecznictwo (np. baza orzeczeń sądów powszechnych) jako źródło dla CRM — do sprawdzenia dostępność i warunki API.

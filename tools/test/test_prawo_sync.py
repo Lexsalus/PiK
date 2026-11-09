@@ -43,10 +43,12 @@ H2='''<html><body><script>var s={"id": "titl_I","symbol": "titl_I","type": "titl
 <div id="part_1"><div id="pass_2-pint_1-arti_155"><p>Art. 155. Cytat z ustawy zmieniającej.</p></div></div>
 <div id="titl_I"><h3>Tytuł I</h3><div id="titl_I-arti_1"><p>Art. 1.</p><p>Kodeks reguluje</p><p>stosunki cywilnoprawne.</p></div>
 <div id="titl_I-arti_4_1"><span>Art. 4<sup>1</sup>.</span><div id="titl_I-arti_4_1-para_1"><p>§ 1. Pierwszy.</p></div><div id="titl_I-arti_4_1-para_2"><p>§ 2. Drugi<sup>5)</sup>.</p></div></div>
+<div id="titl_I-arti_7"><span>Art. 7</span></div><p>Treść poza elementem artykułu.</p>
 <div id="chpt_II-arti_155"><p>Art. 155. Prawdziwy art. 155 &amp; treść.</p><br></div></div></body></html>'''
 a2=P.split_articles_html(H2)
-res+=[ok([x[0] for x in a2]==['1','4¹','155'],f'podział po identyfikatorach ELI: {[x[0] for x in a2]}'),
+res+=[ok([x[0] for x in a2]==['1','4¹','7','155'],f'podział po identyfikatorach ELI: {[x[0] for x in a2]}'),
   ok(a2[0][1]=='Kodeks reguluje stosunki cywilnoprawne.' and a2[0][2]=='Tytuł I – Przepisy wstępne',f'treść i nagłówek z identyfikatorów: {a2[0][1]!r} / {a2[0][2]!r}'),
   ok(a2[1][1]=='§ 1. Pierwszy.\n§ 2. Drugi.' ,f'paragrafy i przypisy w artykule: {a2[1][1]!r}'),
-  ok(a2[2][1]=='Prawdziwy art. 155 & treść.' and a2[2][2]=='Rozdział II','cytaty z obwieszczenia (pass_/pint_) pominięte; nagłówek z identyfikatora')]
+  ok(a2[2][1]=='Treść poza elementem artykułu.','treść artykułu poza jego elementem (jak art. 1 KPC)'),
+  ok(a2[3][1]=='Prawdziwy art. 155 & treść.' and a2[3][2]=='Rozdział II','cytaty z obwieszczenia (pass_/pint_) pominięte; nagłówek z identyfikatora')]
 print(f'WYNIK: {sum(res)}/{len(res)}'); sys.exit(0 if all(res) else 1)

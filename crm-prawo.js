@@ -18,6 +18,16 @@ async function loadAll(force){
   [Z,A,PR,O,S]=r.map(x=>x.status==='fulfilled'?x.value:null);
   loadErr=r.every(x=>x.status==='rejected')?'Dane prawne nie zostały jeszcze pobrane — synchronizacja z API Sejmu działa raz dziennie (GitHub Actions).':'';
   if(Z&&!Z.zmiany)Z.zmiany=[];
+  lawNotify();
+}
+/* powiadomienia o zmianach w prawie w bazie: automat w Supabase (pg_cron + pg_net) raz dziennie;
+   zapasowo — gdy Administrator otworzy CRM, wysyłamy świeże zmiany (baza powiadamia każdą zmianę tylko raz) */
+async function lawNotify(){
+  try{if(!Z?.zmiany?.length||!ME||!isAdmin()||sessionStorage.getItem('crm_law_notify')===String(Z.pobrano))return;
+    sessionStorage.setItem('crm_law_notify',String(Z.pobrano));
+    const od=new Date(Date.now()-14*864e5).toISOString().slice(0,10),z=Z.zmiany.filter(x=>(x.wykryto||'')>=od);if(!z.length)return;
+    const r=await sb.rpc('law_notify',{p:{zmiany:z}});if(!r.error&&r.data>0){toast(`Wysłano ${r.data} powiadomień o zmianach w prawie`);if(typeof reload==='function'){await reload();renderShell()}}}
+  catch(e){console.warn('law_notify',e)}
 }
 loadAll().then(()=>{if(ME)renderShell()}).catch(()=>{});
 
@@ -38,7 +48,7 @@ ROUTES.prawo=(sub)=>{
 };
 ROUTES.prawo.after=async(sub)=>{
   sub=TABS.some(t=>t[0]===sub)?sub:'zmiany';
-  await loadAll();const V=$('#prawoView');if(!V)return;
+  await loadAll();lawNotify();const V=$('#prawoView');if(!V)return;
   if(loadErr){V.innerHTML=`<div class="empty">${esc(loadErr)}</div>`;return}
   try{V.innerHTML=await VIEW[sub]();VIEW[sub].after?.()}catch(e){console.error(e);V.innerHTML=`<div class="empty">Błąd: ${esc(e.message)}</div>`}
   if(sub==='zmiany'&&Z?.zmiany?.length){setTimeout(()=>{setSeen(Z.zmiany[0].wykryto||'');renderShell()},1500)}
@@ -158,6 +168,6 @@ ROUTES.sprawa.after=(id,tab)=>{origAfter?.(id,tab);if((tab||'')==='analiza'&&$('
 
 /* --- pulpit: zmiany w prawie dotyczące moich spraw --- */
 const origPulpitAfter=ROUTES.pulpit.after;
-ROUTES.pulpit.after=(...a)=>{origPulpitAfter?.(...a);loadAll().then(()=>{const n=prawoNew();if(!n||!location.hash.startsWith('#/pulpit'))return;const V=$('#view .ph');if(!V||$('#prawoPulpit'))return;
+ROUTES.pulpit.after=(...a)=>{origPulpitAfter?.(...a);loadAll().then(()=>{lawNotify();const n=prawoNew();if(!n||!location.hash.startsWith('#/pulpit'))return;const V=$('#view .ph');if(!V||$('#prawoPulpit'))return;
   V.insertAdjacentHTML('afterend',`<a id="prawoPulpit" class="card" href="#/prawo/zmiany" style="display:flex;gap:12px;align-items:center;margin-bottom:16px;border-color:var(--accent)"><span style="font-size:1.4rem">📜</span><span><b>${n} ${n===1?'nowa zmiana':'nowe zmiany'} w prawie</b> w kategoriach Twoich spraw<br><small class="mut">Zobacz w zakładce Prawo</small></span></a>`)}).catch(()=>{})};
 })();

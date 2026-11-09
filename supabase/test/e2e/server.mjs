@@ -51,6 +51,14 @@ http.createServer(async(req,res)=>{
   let body='';for await(const ch of req)body+=ch;const q=body?JSON.parse(body):{};
   try{
     if(req.url==='/login'){const u=USERS[q.email];if(!u||q.password!=='Haslo-testowe-123'){res.end(JSON.stringify({error:{message:'Invalid login credentials'}}));return}res.end(JSON.stringify({data:{id:u[0],email:q.email}}));return}
+    if(req.url==='/konta'){ // jak funkcja serwera supabase/functions/konta: Administrator z 2FA zakłada konto
+      const me=(await db.query('select role,active from public.profiles where id=$1',[q.sub])).rows[0];
+      if(q.aal!=='aal2'){res.end(JSON.stringify({data:{error:'Wymagane logowanie z 2FA'}}));return}
+      if(!me||me.role!=='admin'||!me.active){res.end(JSON.stringify({data:{error:'Konta zakłada tylko Administrator'}}));return}
+      const b=q.body||{},email=String(b.email||'').trim().toLowerCase();if(USERS[email]){res.end(JSON.stringify({data:{error:'Konto z tym adresem już istnieje'}}));return}
+      const id=(await db.query('select gen_random_uuid() id')).rows[0].id;await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[id,email,JSON.stringify({full_name:b.full_name})]);
+      await db.query('select public.account_created($1,$2,$3,$4,$5)',[id,q.sub,b.full_name,b.role,b.active!==false]);USERS[email]=[id,b.role,b.full_name];
+      res.end(JSON.stringify({data:{ok:true,id}}));return}
     if(req.url==='/sql'){const r=await db.query(q.sql,q.params||[]);res.end(JSON.stringify({data:r.rows}));return}
     const data=await handle(q);res.end(JSON.stringify({data}));
   }catch(e){res.end(JSON.stringify({error:{message:e.message,code:e.code}}))}

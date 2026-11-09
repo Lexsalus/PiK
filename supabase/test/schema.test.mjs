@@ -242,7 +242,7 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
 // --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
 {await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
  await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
- for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
+ for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
@@ -278,3 +278,32 @@ await ov('jan','documents',0);R(!!await fails('jan',`insert into public.document
 await ov('jan','deadlines',0);R(!!await fails('jan',`insert into public.deadlines(case_id,type,title,final_due_date,responsible_user_id) values($1,'internal','t',current_date+5,$2)`,[cc,U.jan]),'009: terminy — bez „zmiany” nie można dodać terminu');await dov('jan','deadlines');
 await ov('kasia','new_cases',0);R((await as('kasia',`update public.leads set reason='x' where status='nowe' returning id`)).rows.length===0&&(await as('kasia',`select count(*)::int n from public.leads`)).rows[0].n>0,'009: zgłoszenia — z samym podglądem widzi, ale nie obsługuje');await dov('kasia','new_cases');
 R((await db.query(`select details from public.audit_log where action='uprawnienia.zmiana' order by id desc limit 1`)).rows[0].details.includes('(zmiana)'),'009: audyt rozróżnia podgląd i zmianę');}
+{ // --- 010: limity zgłoszeń, powiadomienia o zmianach w prawie, konta z CRM
+const lead=(ph,em)=>as('anon',`insert into public.leads(category,calc,client_name,phone,email,consent) values('SKD','{}','Limit Test',$1,$2,true)`,[ph,em]);
+await db.exec(`delete from public.leads where client_name='Limit Test'`);
+for(let i=0;i<3;i++)await lead('+48 601 700 800',null);
+const e4=await fails('anon',`insert into public.leads(category,calc,client_name,phone,consent) values('SKD','{}','Limit Test','601-700-800',true)`);
+R(!!e4&&e4.includes('numeru telefonu'),'010: 4. zgłoszenie z tego samego numeru w godzinę (inny zapis numeru) → odmowa');
+R(!await fails('anon',`insert into public.leads(category,calc,client_name,phone,consent) values('SKD','{}','Limit Test','602 111 222',true)`),'010: inny numer — zgłoszenie przyjęte');
+// powiadomienia o zmianach w prawie
+const cat=(await db.query(`select c.category_code, c.id from public.cases c join public.case_members m on m.case_id=c.id and m.revoked_at is null where c.status='open' and m.user_id=$1 limit 1`,[U.jan])).rows[0];
+const today=new Date().toISOString().slice(0,10);
+const P={zmiany:[{akt:'kc',nazwa:'Kodeks cywilny',kategorie:[cat.category_code],eli:'DU/2026/9999',tytul:'Ustawa z dnia 1 listopada 2026 r. o zmianie ustawy – Kodeks cywilny',wejscie:'2026-12-01',wykryto:today},
+  {akt:'kc',nazwa:'Kodeks cywilny',kategorie:[cat.category_code],eli:'DU/2020/1',tytul:'stara',wejscie:'2020-01-01',wykryto:'2020-01-01'}]};
+R(!!await fails('jan',`select public.law_notify($1::jsonb)`,[JSON.stringify(P)]),'010: powiadomienia o zmianach w prawie — ręcznie tylko Administrator');
+const n1=(await as('admin',`select public.law_notify($1::jsonb) n`,[JSON.stringify(P)])).rows[0].n;
+const nj=(await as('jan',`select title,body,link from public.notifications where event_type='law.change'`)).rows;
+R(n1>=1&&nj.length===1&&nj[0].link==='#/prawo/zmiany'&&/dotyczy \d+ Twoich spraw/.test(nj[0].body),'010: zmiana w prawie → powiadomienie dla członka zespołu sprawy w tej kategorii ('+n1+')');
+const n2=(await as('admin',`select public.law_notify($1::jsonb) n`,[JSON.stringify(P)])).rows[0].n;
+R(n2===0&&(await db.query(`select count(*)::int n from public.notifications where event_type='law.change' and recipient_id=$1`,[U.jan])).rows[0].n===1,'010: ta sama zmiana nie powiadamia drugi raz; stare (ponad 14 dni) pomijane');
+R((await as('jan',`select count(*)::int n from public.law_change_notices`)).rows[0].n>=1&&!!await fails('anon',`select * from public.law_change_notices`),'010: rejestr powiadomionych zmian — zespół czyta, niezalogowany nie');
+// konta
+R(!!await fails('admin',`select public.account_created($1,$2,'X','att',true)`,[U.piotr,U.admin]),'010: rejestracja konta (account_created) niedostępna z przeglądarki — tylko funkcja serwera');
+await db.query(`select public.account_created($1,$2,'Piotr Nowy','att',true)`,[U.piotr,U.admin]);
+R((await db.query(`select must_change_password m from public.profiles where id=$1`,[U.piotr])).rows[0].m===true&&(await db.query(`select count(*)::int n from public.audit_log where action='konto.utworzenie'`)).rows[0].n===1,'010: konto z CRM → wymagana zmiana hasła, wpis w audycie');
+let eNotAdmin=null;try{await db.query(`select public.account_created($1,$2,'X','admin',true)`,[U.piotr,U.jan])}catch(e){eNotAdmin=e.message}
+R(!!eNotAdmin,'010: konto może zakładać tylko aktywny Administrator');
+await as('piotr',`select public.password_changed()`);
+R((await db.query(`select must_change_password m from public.profiles where id=$1`,[U.piotr])).rows[0].m===false,'010: po zmianie hasła flaga zdjęta');
+}
+

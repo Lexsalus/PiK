@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.27.0] — 2026-11-09
+- Migracja 010: powiadomienia o zmianach w prawie w bazie (pg_cron+pg_net, zapasowo z CRM), zakładanie kont z CRM (funkcja serwera konta, hasło tymczasowe, wymuszona zmiana), limity zgłoszeń po telefonie i ogólny; parser v5 (art. 1 KPC); testy bazy 148/148, e2e 122/122
+
 ## [1.26.0] — 2026-11-09
 - OCR: kilka zdjęć stron umowy naraz (kolejność wg nazw), przygotowanie obrazu (EXIF, skala, kontrast, prostowanie przekosu ±12°), wykrywanie stron do góry nogami i obróconych o 90°, poprawka „$”→„§”
 

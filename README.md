@@ -63,7 +63,7 @@ adam/           czat Adam (adam.js, wiedza.json)
 tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
 PLAN.md         plan prac (prowadzony na bieżąco)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 137/137, e2e CRM 117/117 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–009), test/ — testy bazy 148/148, e2e CRM 122/122 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

@@ -1019,7 +1019,7 @@ function loginView(step,extra={}){
     <div class="small mut" style="text-align:center;word-break:break-all">Klucz: <code>${esc(extra.secret)}</code></div>
     <form id="lf" class="form" style="grid-template-columns:1fr;margin-top:12px"><label>Kod z aplikacji<input class="f" name="code" required pattern="\\d{6}" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label><button class="btn pri" style="justify-content:center">Potwierdź</button><div id="lerr" class="small" style="color:var(--bad)"></div></form>`);
   if(step==='verify')L.innerHTML=head+`<p>Wpisz kod z aplikacji 2FA.</p>`+box(`<form id="lf" class="form" style="grid-template-columns:1fr"><label>Kod (6 cyfr)<input class="f" name="code" required pattern="\\d{6}" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></label><button class="btn pri" style="justify-content:center">Zaloguj</button><div id="lerr" class="small" style="color:var(--bad)"></div><a href="#" id="lback" class="small" style="color:var(--accent);text-align:center">Wyloguj</a></form>`);
-  if(step==='newpass')L.innerHTML=head+`<p>Ustaw nowe hasło.</p>`+box(`<form id="lf" class="form" style="grid-template-columns:1fr"><label>Nowe hasło (min. 12 znaków)<input class="f" type="password" name="p1" required minlength="12" autocomplete="new-password"></label><label>Powtórz<input class="f" type="password" name="p2" required minlength="12" autocomplete="new-password"></label><button class="btn pri" style="justify-content:center">Zapisz hasło</button><div id="lerr" class="small" style="color:var(--bad)"></div></form>`);
+  if(step==='newpass')L.innerHTML=head+`<p>${extra?.first?'Pierwsze logowanie — ustaw własne hasło w miejsce tymczasowego.':'Ustaw nowe hasło.'}</p>`+box(`<form id="lf" class="form" style="grid-template-columns:1fr"><label>Nowe hasło (min. 12 znaków)<input class="f" type="password" name="p1" required minlength="12" autocomplete="new-password"></label><label>Powtórz<input class="f" type="password" name="p2" required minlength="12" autocomplete="new-password"></label><button class="btn pri" style="justify-content:center">Zapisz hasło</button><div id="lerr" class="small" style="color:var(--bad)"></div></form>`);
   if(step==='inactive')L.innerHTML=head+box(`<p>Konto <b>${esc(extra.email||'')}</b> nie jest jeszcze aktywne. Poproś Administratora o nadanie roli i aktywację.</p><button class="btn" id="lback" style="margin-top:12px">Wyloguj</button>`);
   if(step==='loading')L.innerHTML=head+`<p>Wczytywanie danych…</p>`;
   const f=$('#lf'),err=m=>{const x=$('#lerr');if(x)x.textContent=m};
@@ -1032,7 +1032,7 @@ function loginView(step,extra={}){
       if(step==='password'){const r=await sb.auth.signInWithPassword({email:v.email.trim(),password:v.password});if(r.error)throw r.error;await afterSignIn()}
       if(step==='enroll'){const r=await sb.auth.mfa.challengeAndVerify({factorId:extra.factorId,code:v.code});if(r.error)throw r.error;await sb.rpc('log_login',{p_action:'logowanie.2fa_konfiguracja'});await afterSignIn()}
       if(step==='verify'){const r=await sb.auth.mfa.challengeAndVerify({factorId:extra.factorId,code:v.code});if(r.error)throw r.error;await afterSignIn()}
-      if(step==='newpass'){if(v.p1!==v.p2)throw new Error('Hasła się różnią');const r=await sb.auth.updateUser({password:v.p1});if(r.error)throw r.error;toast('Hasło zmienione');await afterSignIn()}
+      if(step==='newpass'){if(v.p1!==v.p2)throw new Error('Hasła się różnią');const r=await sb.auth.updateUser({password:v.p1});if(r.error)throw r.error;try{await sb.rpc('password_changed')}catch(e){}sessionStorage.setItem('crm_pw_ok',1);toast('Hasło zmienione');await afterSignIn()}
     }catch(x){err(/Invalid login/i.test(x.message)?'Nieprawidłowy e-mail lub hasło.':/invalid totp|Invalid TOTP/i.test(x.message)?'Nieprawidłowy kod — sprawdź czas w telefonie i spróbuj ponownie.':errMsg(x))}finally{b.disabled=false}};
 }
 async function afterSignIn(){
@@ -1049,6 +1049,7 @@ async function afterSignIn(){
     if(en.error){loginView('password');return toast(errMsg(en.error),true)}
     return loginView('enroll',{factorId:en.data.id,qr:en.data.totp.qr_code,secret:en.data.totp.secret});
   }
+  if(p.must_change_password&&!sessionStorage.getItem('crm_pw_ok'))return loginView('newpass',{first:true});
   loginView('loading');
   ME={id:p.id,name:p.full_name||p.email,role:p.role,email:p.email,color:p.color};
   try{await reload()}catch(e){console.error(e);return toast('Nie udało się wczytać danych: '+errMsg(e),true)}
@@ -1321,12 +1322,26 @@ function delHoliday(id){actSafe(async()=>chk(await sb.from('holidays').delete().
   .replace(/<form onsubmit="event\.preventDefault\(\);const f=this;DB\.holidays\.push[^"]*"/,`<form onsubmit="event.preventDefault();addHoliday(this)"`)}
 
 /* --- użytkownicy i uprawnienia --- */
+/* nowe konto pracownika z CRM — funkcja serwera „konta” (klucz serwisowy tylko w Supabase) */
+const genPass=()=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789',S='!#%+=?@';const r=crypto.getRandomValues(new Uint32Array(16));let p=[...r].slice(0,13).map(x=>A[x%A.length]).join('');return p.slice(0,6)+S[r[14]%S.length]+p.slice(6)+(r[15]%10)};
+function newAccountModal(){
+  modal('Nowe konto pracownika',`<div class="form"><label>Imię i nazwisko<input class="f" name="name" required></label><label>E-mail<input class="f" type="email" name="email" required></label>
+    <label>Rola<select class="f" name="role">${Object.entries(ROLES).map(([k,l])=>`<option value="${k}" ${k==='office'?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="chk" style="align-self:end"><input type="checkbox" name="active" checked>Konto aktywne od razu</label>
+    <label class="full">Hasło tymczasowe<input class="f code" name="password" required minlength="12" value="${genPass()}"></label></div>
+    <p class="hint">Pracownik zmieni hasło przy pierwszym logowaniu; Administrator, pełnomocnik i obsługa techniczna skonfigurują też 2FA. Hasło przekaż osobno (np. telefonicznie), nie tym samym kanałem co adres CRM. Utworzenie konta trafia do audytu.</p>`,
+  {ok:'Utwórz konto',onOk:async v=>{if(v.role==='admin'&&!await reauth())return false;
+    const r=await sb.functions.invoke('konta',{body:{email:v.email,full_name:v.name,role:v.role,active:!!v.active,password:v.password}});
+    let err=r.error?((await r.error.context?.json?.().catch(()=>null))?.error||errMsg(r.error)):r.data?.error;
+    if(err){toast(err,true);return false}
+    await reload();rerender();selUser=r.data.id;
+    setTimeout(()=>modal('Konto utworzone',`<p>Konto <b>${esc(v.email)}</b> (${esc(ROLES[v.role])}) jest gotowe${v.active?'':' — nieaktywne, aktywuj je, gdy pracownik ma zacząć'}.</p>
+      <div class="card" style="background:var(--bg2);margin-top:10px"><div class="mut small">Hasło tymczasowe</div><b class="code" style="font-size:1.1rem">${esc(v.password)}</b> <button class="btn sm" type="button" onclick="navigator.clipboard.writeText('${esc(v.password)}').then(()=>toast('Skopiowano'))">Kopiuj</button></div>
+      <p class="hint">Adres logowania: ${esc(location.origin+location.pathname)}. Hasło zobaczysz tylko teraz.</p>`,{ok:'Zamknij',cancel:''}),50)}});
+}
 function userModal(id){
   const u=id&&U(id);
-  if(!u)return modal('Nowy użytkownik',`<ol class="small" style="padding-left:18px;line-height:1.8">
-    <li>Otwórz <a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/auth/users" target="_blank" style="color:var(--accent)">Supabase → Authentication → Users</a> → <b>Add user</b> → <b>Create new user</b> (zaznacz <i>Auto Confirm User</i>) albo <b>Send invitation</b>.</li>
-    <li>Wróć tutaj i odśwież — konto pojawi się na liście jako <b>nieaktywne</b>.</li><li>Ustaw rolę, nazwę i aktywuj konto przyciskiem „Rola / konto”.</li></ol>
-    <p class="hint">Konta zakłada tylko Administrator; samodzielna rejestracja jest wyłączona. Pełnomocnik, Administrator i Obsługa techniczna przy pierwszym logowaniu skonfigurują 2FA.</p>`,{ok:'Odśwież listę',onOk:()=>act(async()=>{})});
+  if(!u)return newAccountModal();
   modal(`Konto — ${u.name}`,`<div class="form"><label>Imię i nazwisko<input class="f" name="name" required value="${esc(u.name||'')}"></label><label>E-mail<input class="f" value="${esc(u.email||'')}" disabled></label>
     <label>Rola<select class="f" name="role">${Object.entries(ROLES).map(([k,l])=>`<option value="${k}" ${u.role===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class="chk" style="align-self:end"><input type="checkbox" name="active" ${u.active!==false?'checked':''}>Konto aktywne</label></div><p class="hint">W systemie musi zostać co najmniej jeden aktywny Administrator (pilnuje tego baza). Zmiana trafia do audytu.</p>`,
