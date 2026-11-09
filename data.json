@@ -1570,7 +1570,14 @@
       "Długi firmy? Policz restrukturyzację": "Борги компанії? Розрахуйте реструктуризацію",
       "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Введіть борги, доходи та витрати компанії — покажемо, наскільки зменшаться платежі, скільки відсотків відпаде і на скільки можна зупинити стягнення.",
       "Formularz chwilowo niedostępny": "Форма тимчасово недоступна",
-      "Trwają prace serwisowe. Spróbuj ponownie później albo zadzwoń do kancelarii.": "Тривають технічні роботи. Спробуйте пізніше або зателефонуйте до фірми."
+      "Trwają prace serwisowe. Spróbuj ponownie później albo zadzwoń do kancelarii.": "Тривають технічні роботи. Спробуйте пізніше або зателефонуйте до фірми.",
+      "Kilka plików naraz można wgrać tylko jako zdjęcia stron umowy (JPG, PNG, WEBP). Inne formaty — po jednym pliku.": "Кілька файлів одночасно можна завантажити лише як фото сторінок договору (JPG, PNG, WEBP). Інші формати — по одному.",
+      "Za dużo zdjęć naraz. Maksymalnie:": "Забагато фото одночасно. Максимум:",
+      "zdjęć": "фото",
+      "Przygotowanie obrazu…": "Підготовка зображення…",
+      "także zdjęcia lub skan umowy — kilka zdjęć stron naraz": "також фото або скан договору — кілька фото сторінок одночасно",
+      "Sprawdzanie obrotu strony…": "Перевірка орієнтації сторінки…",
+      "zdjęcia": "фото"
     },
     "en": {
       "Porównaj": "Compare",
@@ -1896,7 +1903,14 @@
       "Długi firmy? Policz restrukturyzację": "Business debts? Calculate a restructuring",
       "Wpisz długi firmy, przychody i koszty — pokażemy, o ile spadną raty, ile odsetek odpadnie i na jak długo można wstrzymać egzekucję.": "Enter your company debts, revenue and costs — we will show how much instalments drop, how much interest goes away and how long enforcement can be paused.",
       "Formularz chwilowo niedostępny": "Form temporarily unavailable",
-      "Trwają prace serwisowe. Spróbuj ponownie później albo zadzwoń do kancelarii.": "Maintenance in progress. Please try later or call the law firm."
+      "Trwają prace serwisowe. Spróbuj ponownie później albo zadzwoń do kancelarii.": "Maintenance in progress. Please try later or call the law firm.",
+      "Kilka plików naraz można wgrać tylko jako zdjęcia stron umowy (JPG, PNG, WEBP). Inne formaty — po jednym pliku.": "Several files at once only as photos of contract pages (JPG, PNG, WEBP). Other formats — one file at a time.",
+      "Za dużo zdjęć naraz. Maksymalnie:": "Too many photos at once. Maximum:",
+      "zdjęć": "photos",
+      "Przygotowanie obrazu…": "Preparing image…",
+      "także zdjęcia lub skan umowy — kilka zdjęć stron naraz": "also photos or a scan of the contract — several page photos at once",
+      "Sprawdzanie obrotu strony…": "Checking page orientation…",
+      "zdjęcia": "photos"
     }
   },
   "leads": {

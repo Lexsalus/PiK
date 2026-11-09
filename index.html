@@ -274,7 +274,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 <section id="umowy"><div class="wrap">
   <div class="sec-h"><div><h2 data-i18n>Analiza umów</h2><p data-i18n>Wgraj umowę, a wskażemy ryzykowne zapisy, kwoty, terminy i daty.</p></div></div>
   <div class="an">
-    <label class="drop" id="drop"><input type="file" id="file" hidden>
+    <label class="drop" id="drop"><input type="file" id="file" multiple hidden>
       <div class="big">📄</div><b data-i18n>Przeciągnij plik tutaj lub kliknij, aby wybrać</b>
       <small><span data-i18n>Obsługiwane formaty:</span> <span id="fmts" class="notranslate"></span></small></label>
     <div class="paste"><textarea class="field" id="ptext" data-i18n-ph="lub wklej treść umowy"></textarea><button class="btn pri" id="pgo" data-i18n>Analizuj</button></div>
@@ -593,17 +593,30 @@ function initContracts(){
   $('#umowy').style.display=on?'':'none';document.querySelectorAll('.nav-umowy').forEach(e=>e.style.display=on?'':'none');
   if(!on)return;
   if(C.ocr===false)IMG=[];
-  const f=[...new Set([...(C.formats||[]),...IMG])];$('#fmts').textContent=f.map(x=>'.'+x).join(' ')+(IMG.length?' · '+t('także zdjęcie lub skan umowy'):'');
+  const f=[...new Set([...(C.formats||[]),...IMG])];$('#fmts').textContent=f.map(x=>'.'+x).join(' ')+(IMG.length?' · '+t('także zdjęcia lub skan umowy — kilka zdjęć stron naraz'):'');
   $('#file').accept=f.map(x=>'.'+x).join(',')+(IMG.length?',image/*':'');
   if(lastRep)renderReport(lastRep);
 }
 const dz=$('#drop');
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
-dz.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)handleFile(f)});
-$('#file').onchange=e=>{const f=e.target.files[0];if(f)handleFile(f);e.target.value=''};
+dz.addEventListener('drop',e=>{const fs=[...e.dataTransfer.files];if(fs.length)handleFiles(fs)});
+$('#file').onchange=e=>{const fs=[...e.target.files];if(fs.length)handleFiles(fs);e.target.value=''};
 $('#pgo').onclick=()=>{const v=$('#ptext').value.trim();if(v)analyze(v,t('Wklej tekst'),0)};
 
+/* kilka plików naraz: zdjęcia kolejnych stron umowy → jeden tekst (kolejność wg nazw plików, np. IMG_001, IMG_002) */
+async function handleFiles(fs){
+  if(fs.length===1)return handleFile(fs[0]);
+  const C=D.contracts,err=m=>{$('#ares').innerHTML=`<div class="err">⚠ ${esc(m)}</div>`},ext=f=>(f.name.split('.').pop()||'').toLowerCase();
+  if(!IMG.length||!fs.every(f=>IMG.includes(ext(f))))return err(t('Kilka plików naraz można wgrać tylko jako zdjęcia stron umowy (JPG, PNG, WEBP). Inne formaty — po jednym pliku.'));
+  const max=+C.ocrMaxPages||15;if(fs.length>max)return err(`${t('Za dużo zdjęć naraz. Maksymalnie:')} ${max}`);
+  const big=fs.find(f=>f.size>(C.maxMB||15)*1048576);if(big)return err(`${t('Plik jest za duży. Maksymalny rozmiar:')} ${C.maxMB} MB (${big.name})`);
+  fs.sort((a,b)=>a.name.localeCompare(b.name,'pl',{numeric:true,sensitivity:'base'}));
+  try{const text=await ocr(fs);
+    if(text.replace(/\s/g,'').length<20)return err(t('Nie udało się odczytać tekstu. Zrób wyraźniejsze zdjęcie (dobre światło, cała strona) albo wklej treść ręcznie.'));
+    analyze(text,`${fs.length} ${t(fs.length<5?'zdjęcia':'zdjęć')}: ${fs[0].name} …`,fs.length,true)}
+  catch(e){console.error(e);err(e.message||t('Nie udało się wczytać pliku.'))}
+}
 async function handleFile(f){
   const C=D.contracts,ext=(f.name.split('.').pop()||'').toLowerCase();
   const err=m=>{$('#ares').innerHTML=`<div class="err">⚠ ${esc(m)}</div>`};
@@ -618,12 +631,46 @@ async function handleFile(f){
   }catch(e){console.error(e);err(e.message||t('Nie udało się wczytać pliku.'))}
 }
 /* OCR: zdjęcia i zeskanowane PDF — rozpoznawanie w przeglądarce (Tesseract), plik nie opuszcza urządzenia */
+/* przygotowanie obrazu do OCR: obrót wg EXIF (zdjęcia z telefonu), skala ~2400 px, odcienie szarości,
+   rozciągnięcie kontrastu (1–99 percentyl) i wyprostowanie przekosu (±12°, metoda profilu wierszy) */
+async function prepImage(src){
+  let bmp;
+  try{bmp=src instanceof HTMLCanvasElement?src:await createImageBitmap(src,{imageOrientation:'from-image'})}catch(e){return src}
+  const W0=bmp.width,H0=bmp.height,sc=Math.min(3,Math.max(.4,2400/Math.max(W0,H0)));
+  const W=Math.round(W0*sc),H=Math.round(H0*sc),cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const cx=cv.getContext('2d',{willReadFrequently:true});cx.fillStyle='#fff';cx.fillRect(0,0,W,H);cx.drawImage(bmp,0,0,W,H);
+  const im=cx.getImageData(0,0,W,H),d=im.data,hist=new Uint32Array(256),g=new Uint8ClampedArray(W*H);
+  for(let i=0,j=0;i<d.length;i+=4,j++){const v=(d[i]*299+d[i+1]*587+d[i+2]*114)/1000|0;g[j]=v;hist[v]++}
+  let lo=0,hi=255,acc=0;const n=W*H;for(let v=0;v<256;v++){acc+=hist[v];if(acc>n*.01){lo=v;break}}acc=0;for(let v=255;v>=0;v--){acc+=hist[v];if(acc>n*.01){hi=v;break}}
+  const k=hi>lo+10?255/(hi-lo):1;for(let i=0,j=0;i<d.length;i+=4,j++){const v=Math.max(0,Math.min(255,(g[j]-lo)*k));d[i]=d[i+1]=d[i+2]=v;g[j]=v}
+  cx.putImageData(im,0,0);
+  // przekos: na pomniejszonej kopii szukamy kąta, przy którym wiersze tekstu dają najostrzejszy profil
+  const s2=Math.min(1,700/Math.max(W,H)),w=Math.round(W*s2),h=Math.round(H*s2),sm=document.createElement('canvas');sm.width=w;sm.height=h;
+  const sx=sm.getContext('2d',{willReadFrequently:true});sx.drawImage(cv,0,0,w,h);const sd=sx.getImageData(0,0,w,h).data,pts=[];
+  for(let y=0;y<h;y+=1)for(let x=0;x<w;x+=1){if(sd[(y*w+x)*4]<110)pts.push(x-w/2,y-h/2)}
+  let best=0,bestV=-1;
+  if(pts.length>200&&pts.length<w*h*.5){for(let a=-12;a<=12;a+=.5){const r=a*Math.PI/180,c=Math.cos(r),sn=Math.sin(r),rows=new Float32Array(h*2);
+      for(let i=0;i<pts.length;i+=2){const yy=Math.round(-pts[i]*sn+pts[i+1]*c+h);if(yy>=0&&yy<h*2)rows[yy]++}
+      let sum=0,sq=0;for(const v of rows){sum+=v;sq+=v*v}const varr=sq/rows.length-(sum/rows.length)**2;if(varr>bestV){bestV=varr;best=a}}}
+  if(Math.abs(best)<.4)return cv;
+  const r=-best*Math.PI/180,c=Math.abs(Math.cos(r)),sn=Math.abs(Math.sin(r)),RW=Math.round(W*c+H*sn),RH=Math.round(W*sn+H*c),rc=document.createElement('canvas');rc.width=RW;rc.height=RH;
+  const rx=rc.getContext('2d');rx.fillStyle='#fff';rx.fillRect(0,0,RW,RH);rx.translate(RW/2,RH/2);rx.rotate(r);rx.drawImage(cv,-W/2,-H/2);return rc;
+}
+function rotCanvas(cv,deg){const q=deg%180!==0,c=document.createElement('canvas');c.width=q?cv.height:cv.width;c.height=q?cv.width:cv.height;
+  const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(cv,-cv.width/2,-cv.height/2);return c}
+/* typowe pomyłki OCR w umowach: „$ 1.” zamiast „§ 1.” */
+const fixOcr=t=>String(t||'').replace(/(^|[\s(])\$\s?(?=\d)/gm,'$1§ ').replace(/(^|[\s(])S\s(?=\d+\.)/gm,'$1§ ');
 async function ocr(images){
   const say=m=>{const b=$('#ares');if(b)b.innerHTML=`<div class="priv"><span class="spin"></span> ${esc(m)}</div>`};
   say(t('Rozpoznawanie tekstu ze skanu… (przy pierwszym użyciu pobiera się słownik języka polskiego)'));
   await needLib(LIB.tess);let page=0;
   const w=await Tesseract.createWorker('pol',1,{logger:m=>{if(m.status==='recognizing text')say(`${t('Rozpoznawanie tekstu ze skanu…')} ${images.length>1?`${t('strona')} ${page}/${images.length} · `:''}${Math.round(m.progress*100)}%`)}});
-  const out=[];try{for(const im of images){page++;out.push((await w.recognize(im)).data.text)}}finally{await w.terminate()}
+  const out=[];try{for(const im of images){page++;say(`${t('Przygotowanie obrazu…')} ${images.length>1?`${t('strona')} ${page}/${images.length}`:''}`);
+    const cv=await prepImage(im);let best=await w.recognize(cv);
+    // strona do góry nogami lub obrócona: przy niskiej pewności próbujemy 180°, potem 90° i 270° — zostaje wynik z najwyższą pewnością
+    if(best.data.confidence<65&&cv instanceof HTMLCanvasElement){for(const deg of [180,90,270]){say(`${t('Sprawdzanie obrotu strony…')} ${deg}°`);const r=await w.recognize(rotCanvas(cv,deg));
+      if(r.data.confidence>best.data.confidence+5)best=r;if(best.data.confidence>=75)break}}
+    out.push(fixOcr(best.data.text))}}finally{await w.terminate()}
   return out.join('\n\n');
 }
 async function extractText(f,ext){

@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.26.0] — 2026-11-09
+- OCR: kilka zdjęć stron umowy naraz (kolejność wg nazw), przygotowanie obrazu (EXIF, skala, kontrast, prostowanie przekosu ±12°), wykrywanie stron do góry nogami i obróconych o 90°, poprawka „$”→„§”
+
 ## [1.25.0] — 2026-11-08
 - Zakładki Treści strony i Ustawień w grupach z kolorami (kropka = nieopublikowane zmiany); Treści strony → 🔧 Techniczne: stan systemu, synchronizacja prawa, tryb serwisowy (baner, wstrzymanie zgłoszeń), limity, połączenie z bazą, pamięć aplikacji; e2e 117/117
 

@@ -27,6 +27,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 17 | CRM → Treści strony → 💬 Czat Adam (podstawowe ustawienia, przyciski, własne tematy, przepisy wł./wył., tester) i ✨ Nowe funkcje (zmiany w prawie, zwrot z umowy, restrukturyzacja, OCR) | ✅ v1.24.0 |
 | 18 | Ustawienia CRM: zakładki w grupach z kolorami (Moje / Sprawy i terminy / Dostęp i bezpieczeństwo) | ✅ v1.25.0 |
 | 19 | Treści strony: zakładki w grupach z kolorami + kropka zmian; 🔧 Techniczne (stan systemu, synchronizacja, tryb serwisowy, limity, połączenie, pamięć aplikacji) | ✅ v1.25.0 |
+| 20 | OCR: kilka zdjęć stron naraz, przygotowanie obrazu (EXIF, kontrast, prostowanie przekosu), wykrywanie stron do góry nogami / obróconych, poprawki typowych pomyłek | ✅ v1.26.0 |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później

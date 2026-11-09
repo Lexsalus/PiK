@@ -15,7 +15,7 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 - „Co mi się należy”: kalkulatory roszczeń SKD, CHF/FX, WIBOR, restrukturyzacja + formularz zgłoszenia sprawy (z wynikiem i zgodą RODO)
 - Porównywarka: kategorie, wyszukiwarka, sortowanie, ★ przy najlepszej wartości, porównanie do 4 ofert w tabeli
 - Kalkulatory z suwakami, wyniki na żywo
-- Analiza umów (PDF, Word, ODT, RTF, TXT, HTML, **zdjęcie lub skan** — rozpoznawanie tekstu w przeglądarce) : ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
+- Analiza umów (PDF, Word, ODT, RTF, TXT, HTML, **zdjęcie, kilka zdjęć stron albo skan** — rozpoznawanie tekstu w przeglądarce z prostowaniem, kontrastem i wykrywaniem obróconych stron) : ryzykowne zapisy, zgodność z prawem, ocena podejrzanej treści — paski od zielonego do czerwonego, raport do pobrania
 - **Zwrot z umowy kredytu** (SKD, CHF/FX): gdy system wyliczy zwrot, klient widzi czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” i kwotę — **bez podstaw prawnych**; podstawy, orzecznictwo i wykryte zapisy trafiają ze zgłoszeniem do CRM
 - **Restrukturyzacja firmy** (sekcja „Dla firm”): przedsiębiorca wpisuje długi (bank, leasing, ZUS, podatki, dostawcy), przychody i koszty — widzi raty teraz i po układzie, raty wstrzymane w okresie ochrony, mniej odsetek, umorzenie; ścieżki postępowań z podstawami prawnymi idą ze zgłoszeniem do CRM
 - **Zmiany w prawie**: nowelizacje obserwowanych ustaw, projekty w Sejmie, aktualne odsetki (API Sejmu, codziennie)

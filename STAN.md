@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **08.11.2026**, wersja **1.25.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **08.11.2026**, wersja **1.26.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -47,8 +47,9 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Baza: 29 tabel z RLS, 60+ reguł, numeracja spraw, blokada etapów, wersje, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia o terminach co 15 min (pg_cron), 2FA egzekwowane w bazie (aal2 dla Administratora, pełnomocnika, obsługi technicznej), prywatny magazyn akt `akta`.
 - CRM na żywo: wszystkie moduły specyfikacji podłączone do bazy (sprawy, zgłoszenia, karta, etapy, wpisy, korekty, dokumenty w Storage, zespół, terminy, powiadomienia, finanse, raporty, uprawnienia, kategorie, święta, audyt, dostęp awaryjny).
 
-## Ostatnie zmiany (08.11.2026)
+## Ostatnie zmiany (08–09.11.2026)
 
+- 1.26.0 — OCR: kilka zdjęć stron umowy naraz, przygotowanie obrazu (obrót z aparatu, kontrast, prostowanie przekosu), wykrywanie stron do góry nogami i obróconych o 90°.
 - 1.25.0 — zakładki Treści strony i Ustawień w grupach z kolorami (kropka = nieopublikowane zmiany), nowa zakładka **🔧 Techniczne** (stan systemu, synchronizacja prawa, tryb serwisowy z wstrzymaniem zgłoszeń, limity, połączenie z bazą, pamięć aplikacji). e2e 117/117.
 - 1.24.0 — CRM → Treści strony: **💬 Czat Adam** (imię, powitanie, przyciski, własne tematy, przełącznik pokazywania przepisów, tester) i **✨ Nowe funkcje** (zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, OCR). Ustawienia idą przez szkic → Opublikuj (bez wysyłki na GitHub).
 - 1.23.0 — menu CRM w grupach z kolorami (Codzienna praca, Kancelaria, Prawo, Administracja), tylko pozycje z uprawnień, dymki z powodem dostępu.
