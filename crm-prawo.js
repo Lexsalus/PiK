@@ -72,7 +72,7 @@ VIEW.zmiany=async()=>{
   <div class="card" style="margin-top:14px"><h3>Obserwowane ustawy</h3><div class="tw"><table><tr><th>Ustawa</th><th>Status</th><th>Tekst jednolity</th><th>Nowelizacje</th><th>Kategorie</th></tr>${(A?.akty||[]).map(a=>{const tj=P.curTj(a);
     return `<tr><td><b>${esc(a.nazwa)}</b><div class="mut small">${esc(a.adres||a.eli)}</div></td><td>${a.obowiazuje==='IN_FORCE'?'<span class="badge st-open">obowiązuje</span>':`<span class="badge">${esc(a.status||'—')}</span>`}</td>
       <td>${tj?`<a href="${esc(P.textUrl(tj.eli))}" target="_blank" rel="noopener">${esc(tj.adres)}</a>`:'—'}</td><td>${a.liczba_zmian||0}${a.zmieniajace?.[0]?.wejscie?`<div class="mut small">ostatnia: ${dl(a.zmieniajace[0].wejscie)}</div>`:''}</td><td>${catChips(a.kategorie)}</td></tr>`}).join('')}</table></div>
-    <p class="hint">Lista ustaw: plik <code>prawo/obserwowane.json</code> w repozytorium (opis w INSTRUKCJA.md).</p></div>${stanLine()}`;
+    <p class="hint">Listę ustaw zmieniasz w CRM → Treści strony → ✨ Nowe funkcje → Obserwowane ustawy (Administrator).</p></div>${stanLine()}`;
 };
 VIEW.zmiany.after=()=>{const s=$('#pzCat');if(s)s.onchange=()=>{fCat=s.value;ROUTES.prawo.after('zmiany')}};
 
@@ -81,7 +81,7 @@ VIEW.projekty=async()=>{
   return `<div class="card"><h3>Projekty ustaw w Sejmie <span class="mut small">kadencja ${esc(PR?.kadencja||'—')} · zmienione od ${dl(PR?.od)} · dopasowane do kategorii spraw</span></h3>
   ${list.length?list.map(p=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b><a href="${esc(p.url)}" target="_blank" rel="noopener">Druk ${esc(p.nr)}: ${esc(p.tytul)}</a></b><span>${p.uchwalony?'<span class="badge st-open">uchwalony</span>':''} ${catChips(p.kategorie)}</span></div>
     ${p.opis?`<div class="small mut" style="margin-top:4px">${esc(p.opis)}</div>`:''}<div class="small" style="margin-top:4px">${p.etap?`Etap: <b>${esc(p.etap)}</b> (${dl(p.etap_data)})`:''}${p.data?` · wniesiony ${dl(p.data)}`:''}</div></div>`).join(''):'<div class="empty">Brak projektów pasujących do kategorii spraw.</div>'}
-  <p class="hint">Słowa wyszukiwane w projektach: <code>prawo/obserwowane.json</code> → „projekty”.</p></div>${stanLine()}`;
+  <p class="hint">Słowa wyszukiwane w projektach: CRM → Treści strony → ✨ Nowe funkcje → Projekty w Sejmie.</p></div>${stanLine()}`;
 };
 
 VIEW.odsetki=async()=>{

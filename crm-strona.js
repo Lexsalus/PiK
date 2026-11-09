@@ -98,7 +98,7 @@ const ST_GROUPS=[{l:'Strona',c:'#5aa9ff',tip:'Nazwa, kolor, formularz zgłoszeń
   {l:'Technika i publikacja',c:'#ff6b81',tip:'Stan systemu, tryb serwisowy, limity, publikacja.',k:['tech','export']}];
 Object.assign(TAB_TIPS,{settings:'Nazwa strony, kolor, formularz zgłoszeń.',cats:'Kategorie i oferty porównywarki.',calcs:'Kalkulatory i ich wzory.',contracts:'Reguły analizy umów i limity odsetek.',funkcje:'Zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, skany.',
   adam:'Ustawienia czatu Adam, tematy, tester.',i18n:'Tłumaczenia UA / EN.',seo:'Tytuł, opis, Google, analityka.',tech:'Stan systemu, synchronizacja prawa, tryb serwisowy, limity, połączenie z bazą, aplikacja.',export:'Opublikuj szkic, eksport i import data.json.'});
-const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators'],contracts:['contracts'],funkcje:['zmianyPrawa','zwrot','firma'],adam:['adam'],i18n:['i18n','translations'],seo:['seo'],tech:['serwis']};
+const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators'],contracts:['contracts'],funkcje:['zmianyPrawa','zwrot','firma','obserwowane'],adam:['adam'],i18n:['i18n','translations'],seo:['seo'],tech:['serwis']};
 function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty();return (ST_KEYS[k]||[]).some(x=>JSON.stringify(D[x])!==JSON.stringify(ORIG[x]))}
 const stTabs=()=>groupTabs(TABS,ST_GROUPS,view,k=>'#/strona/'+k,k=>stDirtyTab(k)?'<span class="tdot" data-tip="Zmiany nieopublikowane"></span>':'');
 function save(){
@@ -300,7 +300,8 @@ function vFunkcje(){
   return `<div class="box"><h3>📜 Zmiany w prawie (sekcja strony)</h3><div class="form">
     ${chkBox('zmianyPrawa.enabled',Z.enabled!==false,'Pokaż sekcję „Zmiany w prawie” i link w menu')}${chkBox('zmianyPrawa.odsetki',Z.odsetki!==false,'Pokaż aktualne odsetki')}
     ${num('zmianyPrawa.zmian',Z.zmian,'Ile nowelizacji pokazać')}${num('zmianyPrawa.projektow',Z.projektow,'Ile projektów z Sejmu pokazać')}</div>
-    <p class="hint">Dane pobierane codziennie z API Sejmu. Lista ustaw: plik <code>prawo/obserwowane.json</code>; podgląd danych w CRM → 📜 Prawo.</p></div>
+    <p class="hint">Dane pobierane codziennie z API Sejmu. Listę ustaw ustawiasz niżej; podgląd danych w CRM → 📜 Prawo.</p></div>
+  ${vObs()}
   <div class="box"><h3>💰 Zwrot z umowy kredytu (analiza umów)</h3><div class="form">
     ${chkBox('zwrot.enabled',W.enabled!==false,'Pokaż komunikat o zwrocie i kwotę po analizie umowy')}${chkBox('zwrot.skd',W.skd!==false,'Kredyt konsumencki (sankcja kredytu darmowego)')}${chkBox('zwrot.chf',W.chf!==false,'Kredyt frankowy / walutowy')}
     ${txt('zwrot.naglowek',W.naglowek,'Nagłówek komunikatu (czerwony)')}${txt('zwrot.podtytul',W.podtytul,'Drugi wiersz')}${txt('zwrot.cta',W.cta,'Przycisk')}${txt('zwrot.nota',W.nota,'Dopisek pod przyciskiem')}</div>
@@ -311,6 +312,62 @@ function vFunkcje(){
     <p class="hint">Wartości startowe suwaków — przedsiębiorca może je zmienić. Zgłoszenie z listą długów i ścieżkami postępowań trafia do CRM (kategoria RST).</p></div>
   <div class="box"><h3>📷 Skany umów</h3><div class="form">${chkBox('contracts.ocr',D.contracts.ocr!==false,'Rozpoznawanie tekstu ze zdjęć i skanów (w przeglądarce klienta)')}</div>
     <p class="hint">Przy pierwszym użyciu przeglądarka klienta pobiera słownik języka polskiego (kilka MB). Plik nie opuszcza urządzenia.</p></div>`;
+}
+
+/* ---------- Obserwowane ustawy (strażnik zmian w prawie) ----------
+   Opublikowana lista (data.obserwowane) jest czytana przez codzienną synchronizację (tools/prawo_sync.py,
+   klucz publiczny) i zapisywana do prawo/obserwowane.json. Bez listy w CRM — plik z repozytorium. */
+const OBS_ID=/^[a-z0-9_]{1,20}$/,OBS_ELI=/^(DU|MP)\/\d{4}\/\d{1,5}$/;
+function obsErrors(o){
+  const e=[],ids=new Set(),elis=new Set();if(!o?.akty?.length)return['Lista jest pusta — synchronizacja użyje pliku z repozytorium.'];
+  o.akty.forEach((a,i)=>{const n=`Pozycja ${i+1}${a.nazwa?' ('+a.nazwa+')':''}`;
+    if(!OBS_ID.test(a.id||''))e.push(`${n}: identyfikator — małe litery, cyfry, _ (do 20 znaków)`);
+    if(!OBS_ELI.test(a.eli||''))e.push(`${n}: adres ELI w postaci DU/rok/pozycja, np. DU/1964/93`);
+    if(!String(a.nazwa||'').trim())e.push(`${n}: brak nazwy`);
+    if(ids.has(a.id)||elis.has(a.eli))e.push(`${n}: powtórzony identyfikator lub adres ELI`);ids.add(a.id);elis.add(a.eli)});
+  return e;
+}
+function vObs(){
+  const O=D.obserwowane,cats=(typeof DB!=='undefined'&&DB.categories?[...DB.categories].sort((a,b)=>a.order-b.order):[]);
+  if(!O?.akty)return `<div class="box"><h3>⚖️ Obserwowane ustawy</h3><p class="hint" style="margin-bottom:12px">Teraz strażnik używa listy z pliku <code>prawo/obserwowane.json</code>. Możesz ją przejąć do edycji tutaj — po opublikowaniu codzienna synchronizacja użyje listy z CRM.</p><button class="btn pri" type="button" data-st="obsStart()">✏️ Edytuj listę ustaw</button></div>`;
+  const err=obsErrors(O),P='obserwowane.akty';
+  const rows=O.akty.map((a,i)=>`<div class="box" style="background:var(--bg2);padding:14px;margin-bottom:10px"><div class="form">
+    <label style="grid-column:span 2">Nazwa<input class="f" data-rerender data-p="${P}.${i}.nazwa" value="${esc(a.nazwa||'')}"></label>
+    <label>Adres ELI (wydawca/rok/pozycja)<span style="display:flex;gap:6px"><input class="f code" data-rerender data-p="${P}.${i}.eli" value="${esc(a.eli||'')}" placeholder="DU/1964/93"><button class="btn sm" type="button" data-st="obsCheck(${i})" data-tip="Sprawdź w API Sejmu tytuł i status aktu">🔎</button></span></label>
+    <label>Identyfikator<input class="f code" data-rerender data-p="${P}.${i}.id" value="${esc(a.id||'')}" placeholder="kc"></label>
+    <label style="grid-column:1/-1">Skróty i nazwy, po których rozpoznajemy przepisy w tekście (po przecinku)<input class="f" data-stch="obsList(${i},'skrot',this.value)" value="${esc((a.skrot||[]).join(', '))}" placeholder="KC, k.c., Kodeksu cywilnego"></label></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 4px;align-items:center"><span class="mut small">Kategorie spraw:</span>${cats.map(c=>`<label style="display:flex;gap:5px;align-items:center;font-size:.85rem"><input type="checkbox" data-stch="obsCat(${i},'${esc(c.code)}',this.checked)" ${(a.kategorie||[]).includes(c.code)?'checked':''}>${esc(c.name)}</label>`).join('')}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:8px">${chkBox(`${P}.${i}.teksty`,a.teksty!==false,'Pobieraj treść artykułów (wyszukiwarka, Adam, podgląd przepisu)')}
+    <span style="display:flex;gap:6px"><button class="btn sm" type="button" data-st="obsMv(${i},-1)">↑</button><button class="btn sm" type="button" data-st="obsMv(${i},1)">↓</button><button class="btn sm del" type="button" data-st="obsDel(${i})">Usuń</button></span></div></div>`).join('');
+  const pr=O.projekty||{};
+  return `<div class="box"><h3>⚖️ Obserwowane ustawy (${O.akty.length}) <span style="display:flex;gap:6px"><button class="btn sm pri" type="button" data-st="obsAdd()">+ Ustawa</button><button class="btn sm" type="button" data-st="obsReset()" data-tip="Usuń listę z CRM — synchronizacja wróci do pliku z repozytorium">↺ Lista z pliku</button></span></h3>
+    ${err.length?`<div class="hint" style="color:var(--bad);margin-bottom:12px">⚠️ ${err.map(esc).join('<br>')}<br>Z błędami synchronizacja zostanie przy poprzedniej liście.</div>`:''}
+    ${rows}
+    <p class="hint">Zmiany działają po <b>opublikowaniu</b>, przy najbliższej codziennej synchronizacji (ok. 6:17). Adres ELI znajdziesz na isap.sejm.gov.pl (np. „WDU19640160093” → <code>DU/1964/93</code>). Nowa ustawa: pierwsze dane i teksty pojawią się po synchronizacji.</p></div>
+  <div class="box"><h3>🏛️ Projekty w Sejmie — słowa w tytułach</h3><div class="form">${cats.map(c=>`<label>${esc(c.name)}<textarea class="f" rows="2" data-stch="obsProj('${esc(c.code)}',this.value)" placeholder="np. kredy* konsumen*">${esc((pr[c.code]||[]).join(', '))}</textarea></label>`).join('')}</div>
+    <p class="hint">Po przecinku; bez polskich znaków; <code>*</code> = początek słowa (kredy* → kredyt, kredytu…).</p></div>`;
+}
+async function obsStart(){
+  try{const j=await (await fetch('prawo/obserwowane.json',{cache:'no-store'})).json();
+    const pr={};Object.entries(j.projekty||{}).forEach(([k,v])=>{if(!k.startsWith('_')&&Array.isArray(v))pr[k]=v});
+    D.obserwowane={akty:structuredClone(j.akty||[]),projekty:pr};save();render();toast('Lista przejęta do szkicu — opublikuj, by działała')}
+  catch(e){toast('Nie udało się wczytać prawo/obserwowane.json',true)}
+}
+function obsReset(){if(!confirm('Usunąć listę ustaw z CRM? Synchronizacja wróci do pliku z repozytorium (po opublikowaniu).'))return;delete D.obserwowane;save();render()}
+function obsAdd(){D.obserwowane.akty.push({id:'',eli:'',nazwa:'',skrot:[],kategorie:[],teksty:true});save();render()}
+function obsDel(i){const a=D.obserwowane.akty[i];if(!confirm(`Usunąć „${a.nazwa||'nową ustawę'}” z obserwowanych?`))return;D.obserwowane.akty.splice(i,1);save();render()}
+function obsMv(i,d){const a=D.obserwowane.akty,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
+const obsSplit=v=>String(v).split(/[,\n]/).map(x=>x.trim()).filter(Boolean);
+function obsList(i,k,v){D.obserwowane.akty[i][k]=obsSplit(v);save()}
+function obsCat(i,c,on){const a=D.obserwowane.akty[i],k=new Set(a.kategorie||[]);on?k.add(c):k.delete(c);a.kategorie=[...k];save()}
+function obsProj(c,v){const p=D.obserwowane.projekty||(D.obserwowane.projekty={}),w=obsSplit(v);if(w.length)p[c]=w;else delete p[c];save()}
+async function obsCheck(i){
+  const a=D.obserwowane.akty[i];if(!OBS_ELI.test(a.eli||''))return toast('Wpisz adres ELI, np. DU/1964/93',true);
+  try{const r=await fetch('https://api.sejm.gov.pl/eli/acts/'+a.eli);if(!r.ok)throw r.status;const j=await r.json();
+    if(!a.nazwa){a.nazwa=(j.title||'').replace(/^Ustawa z dnia [^ ]+ [^ ]+ \d{4} r\.\s*/,'').replace(/^-\s*/,'');a.nazwa=a.nazwa.charAt(0).toUpperCase()+a.nazwa.slice(1)}
+    if(!a.id)a.id=slug(a.nazwa).split('_').filter(w=>w.length>2).map(w=>w[0]).join('').slice(0,20)||'akt';
+    save();render();toast(`${j.title} · ${j.status||''}${j.inForce==='IN_FORCE'?' · obowiązuje':''}`)}
+  catch(e){toast(e===404?'Nie ma takiego aktu w API Sejmu — sprawdź adres ELI':'Nie udało się połączyć z API Sejmu — sprawdź na isap.sejm.gov.pl',true)}
 }
 
 /* ---------- Kategorie ---------- */

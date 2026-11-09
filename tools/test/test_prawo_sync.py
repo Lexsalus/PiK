@@ -51,4 +51,12 @@ res+=[ok([x[0] for x in a2]==['1','4¹','7','155'],f'podział po identyfikatorac
   ok(a2[1][1]=='§ 1. Pierwszy.\n§ 2. Drugi.' ,f'paragrafy i przypisy w artykule: {a2[1][1]!r}'),
   ok(a2[2][1]=='Treść poza elementem artykułu.','treść artykułu poza jego elementem (jak art. 1 KPC)'),
   ok(a2[3][1]=='Prawdziwy art. 155 & treść.' and a2[3][2]=='Rozdział II','cytaty z obwieszczenia (pass_/pint_) pominięte; nagłówek z identyfikatora')]
+def bad(o):
+  try: P.clean_cfg(o); return False
+  except ValueError: return True
+A=lambda **k:{'id':'kc','eli':'DU/1964/93','nazwa':'Kodeks cywilny','skrot':['KC',' '],'kategorie':['SKD'],**k}
+ak,pr=P.clean_cfg({'akty':[A(teksty=False)],'projekty':{'_info':'x','SKD':['kredy*',''],'X':'zle'}})
+res += [
+  ok(ak==[{'id':'kc','eli':'DU/1964/93','nazwa':'Kodeks cywilny','skrot':['KC'],'kategorie':['SKD'],'teksty':False}] and pr=={'SKD':['kredy*']},'lista z CRM: czyszczenie pozycji i słów do projektów'),
+  ok(bad({'akty':[]}) and bad({'akty':[A(eli='1964/93')]}) and bad({'akty':[A(id='K C')]}) and bad({'akty':[A(),A(id='kc2')]}) and bad({'akty':[A(nazwa='')]}),'lista z CRM: błędne ELI, identyfikator, duplikat, brak nazwy odrzucone')]
 print(f'WYNIK: {sum(res)}/{len(res)}'); sys.exit(0 if all(res) else 1)

@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.29.0] — 2026-11-09
+- Lista obserwowanych ustaw i słów do projektów w Sejmie edytowana w CRM (Treści strony → Nowe funkcje), sprawdzanie adresu ELI w API Sejmu; synchronizacja czyta listę z bazy
+
 ## [1.28.0] — 2026-11-09
 - Restrukturyzacja: harmonogram miesiąc po miesiącu, plan dla wierzycieli, wydruk/PDF, plan w CRM; zakładki karty sprawy i Prawa w grupach z kolorami i dymkami
 

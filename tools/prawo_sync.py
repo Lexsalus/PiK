@@ -5,7 +5,9 @@
   * ELI  https://api.sejm.gov.pl/eli  — akty prawne (Dziennik Ustaw, Monitor Polski)
   * Sejm https://api.sejm.gov.pl/sejm — projekty ustaw (procesy legislacyjne)
 
-Wejście:  prawo/obserwowane.json (lista ustaw, kategorie spraw, słowa do projektów)
+Wejście:  lista ustaw z CRM (Treści strony → Nowe funkcje → Obserwowane ustawy; opublikowana w bazie),
+          a gdy jej nie ma lub jest błędna — prawo/obserwowane.json (lista ustaw, kategorie spraw, słowa do projektów).
+          Lista z CRM jest zapisywana z powrotem do prawo/obserwowane.json (jedno źródło dla strony i CRM).
 Wyjście:  prawo/akty.json        — stan obserwowanych i uchylonych aktów, teksty jednolite, akty zmieniające
           prawo/zmiany.json      — nowelizacje obserwowanych ustaw (z datą wykrycia)
           prawo/projekty.json    — projekty ustaw w Sejmie pasujące do kategorii spraw
@@ -641,11 +643,83 @@ def sync_odsetki():
     save('odsetki.json', out)
 
 
+# ---------------------------------------------------------------- lista ustaw z CRM
+RE_ID = re.compile(r'^[a-z0-9_]{1,20}$')
+RE_ELI = re.compile(r'^(DU|MP)/\d{4}/\d{1,5}$')
+
+
+def clean_cfg(obs):
+    """Sprawdza listę z CRM; zwraca (akty, projekty) albo zgłasza ValueError z opisem."""
+    if not isinstance(obs, dict) or not isinstance(obs.get('akty'), list) or not obs['akty']:
+        raise ValueError('brak listy ustaw')
+    akty, ids, elis = [], set(), set()
+    for i, a in enumerate(obs['akty'], 1):
+        if not isinstance(a, dict):
+            raise ValueError(f'pozycja {i}: zły format')
+        aid, eli, nazwa = str(a.get('id', '')).strip(), str(a.get('eli', '')).strip(), str(a.get('nazwa', '')).strip()
+        if not RE_ID.match(aid):
+            raise ValueError(f'pozycja {i}: identyfikator „{aid}” (małe litery, cyfry, _)')
+        if not RE_ELI.match(eli):
+            raise ValueError(f'pozycja {i}: adres ELI „{eli}” (np. DU/1964/93)')
+        if not nazwa:
+            raise ValueError(f'pozycja {i}: brak nazwy')
+        if aid in ids or eli in elis:
+            raise ValueError(f'pozycja {i}: powtórzony identyfikator lub ELI')
+        ids.add(aid); elis.add(eli)
+        lst = lambda k: [str(x).strip() for x in (a.get(k) or []) if str(x).strip()][:40]
+        akty.append({'id': aid, 'eli': eli, 'nazwa': nazwa[:200], 'skrot': lst('skrot'), 'kategorie': lst('kategorie'), 'teksty': a.get('teksty') is not False})
+    proj = None
+    if isinstance(obs.get('projekty'), dict):
+        proj = {}
+        for k, v in obs['projekty'].items():
+            if k.startswith('_') or not isinstance(v, list):
+                continue
+            w = [str(x).strip() for x in v if str(x).strip()][:30]
+            if w:
+                proj[str(k)[:10]] = w
+    return akty, proj
+
+
+def crm_cfg(cfg):
+    """Lista ustaw opublikowana w CRM (site_content.data.obserwowane, odczyt kluczem publicznym)."""
+    try:
+        page = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+        m = re.search(r"SITE_DB='([^']+)',SITE_KEY='([^']+)'", page)
+        if not m:
+            return cfg, 'plik'
+        req = urllib.request.Request(f'{m[1]}/rest/v1/site_content?id=eq.1&select=obs:data->obserwowane',
+                                     headers={'User-Agent': UA, 'apikey': m[2], 'Authorization': f'Bearer {m[2]}', 'Accept': 'application/json'})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            rows = json.loads(r.read())
+        obs = rows[0].get('obs') if rows else None
+        if not obs:
+            return cfg, 'plik'
+        akty, proj = clean_cfg(obs)
+    except ValueError as e:
+        log(f'⚠ lista ustaw z CRM odrzucona ({e}) — używam prawo/obserwowane.json')
+        return cfg, 'plik (błąd w CRM)'
+    except Exception as e:
+        log(f'⚠ lista ustaw z CRM niedostępna ({e!r}) — używam prawo/obserwowane.json')
+        return cfg, 'plik'
+    new = dict(cfg)
+    new['akty'] = akty
+    if proj:
+        new['projekty'] = {'_info': (cfg.get('projekty') or {}).get('_info', '')} | proj
+    if new != cfg:
+        with open(os.path.join(OUT, 'obserwowane.json'), 'w', encoding='utf-8') as f:
+            json.dump(new, f, ensure_ascii=False, indent=2)
+            f.write('\n')
+        log(f'✓ lista ustaw z CRM: {len(akty)} ustaw (zapisano prawo/obserwowane.json)')
+    return new, 'crm'
+
+
 # ---------------------------------------------------------------- start
 def main():
     with open(os.path.join(OUT, 'obserwowane.json'), encoding='utf-8') as f:
         cfg = json.load(f)
+    cfg, zrodlo = crm_cfg(cfg)
     stan = load('stan.json', {})
+    stan['lista'] = zrodlo
     res = {}
     t0 = time.time()
     for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki)]:
