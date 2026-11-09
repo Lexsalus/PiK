@@ -1598,7 +1598,21 @@
       "Nazwa firmy (do wydruku planu, opcjonalnie)": "Назва компанії (для друку, необовʼязково)",
       "Ochrona — raty i egzekucje wstrzymane": "Захист — платежі та стягнення призупинено",
       "Karencja — bez spłat układowych": "Пільговий період — без платежів",
-      "Propozycja układu — plan spłaty": "Пропозиція мирової угоди — план погашення"
+      "Propozycja układu — plan spłaty": "Пропозиція мирової угоди — план погашення",
+      "📅 Nie znasz raty i salda? Policz z kursów NBP": "📅 Не знаєте платежу та залишку? Розрахуйте за курсами НБП",
+      "Data wypłaty kredytu": "Дата видачі кредиту",
+      "Waluta": "Валюта",
+      "Policz i wpisz": "Розрахувати й заповнити",
+      "Kwotę wypłaconą przez bank ustaw wyżej. Marżę znajdziesz w umowie (oprocentowanie = LIBOR 3M + marża).": "Суму, виплачену банком, вкажіть вище. Маржу знайдете в договорі (ставка = LIBOR 3M + маржа).",
+      "Wpisano": "Заповнено",
+      "rat": "платежів",
+      "średnia rata": "середній платіж",
+      "ostatnio": "останній",
+      "saldo": "залишок",
+      "Przybliżenie": "Наближення",
+      "Dokładne kwoty ustali kancelaria z zaświadczenia banku.": "Точні суми юристи встановлять за довідкою банку.",
+      "Kursy NBP nie są jeszcze dostępne": "Курси НБП ще недоступні",
+      "Uzupełnij kwotę, datę wypłaty, okres i marżę": "Заповніть суму, дату видачі, строк і маржу"
     },
     "en": {
       "Porównaj": "Compare",
@@ -1952,7 +1966,21 @@
       "Nazwa firmy (do wydruku planu, opcjonalnie)": "Company name (for the printout, optional)",
       "Ochrona — raty i egzekucje wstrzymane": "Protection — instalments and enforcement paused",
       "Karencja — bez spłat układowych": "Grace period — no arrangement payments",
-      "Propozycja układu — plan spłaty": "Arrangement proposal — repayment plan"
+      "Propozycja układu — plan spłaty": "Arrangement proposal — repayment plan",
+      "📅 Nie znasz raty i salda? Policz z kursów NBP": "📅 Don't know your instalment and balance? Calculate from NBP rates",
+      "Data wypłaty kredytu": "Loan disbursement date",
+      "Waluta": "Currency",
+      "Policz i wpisz": "Calculate and fill in",
+      "Kwotę wypłaconą przez bank ustaw wyżej. Marżę znajdziesz w umowie (oprocentowanie = LIBOR 3M + marża).": "Set the amount paid out by the bank above. The margin is in your contract (interest = LIBOR 3M + margin).",
+      "Wpisano": "Filled in",
+      "rat": "instalments",
+      "średnia rata": "average instalment",
+      "ostatnio": "latest",
+      "saldo": "balance",
+      "Przybliżenie": "Approximation",
+      "Dokładne kwoty ustali kancelaria z zaświadczenia banku.": "The firm will determine exact amounts from the bank's statement.",
+      "Kursy NBP nie są jeszcze dostępne": "NBP rates are not available yet",
+      "Uzupełnij kwotę, datę wypłaty, okres i marżę": "Fill in the amount, disbursement date, term and margin"
     }
   },
   "leads": {

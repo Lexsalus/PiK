@@ -101,6 +101,14 @@ Przycisk zgłoszenia pokazuje się tylko, gdy wybrany sposób jest kompletnie sk
 
 **Panel → Kalkulatory:** pole *Gdzie na stronie* (Co mi się należy / Kalkulatory prawne), *Kategoria sprawy w CRM* i *Uwaga pod polami* (zastrzeżenia — **teksty uwag zweryfikuje prawnik przed startem**).
 
+## 5b-1. Kredyt walutowy — symulacja z kursów NBP
+
+Klient nie musi znać raty ani salda. W kalkulatorze „Kredyt frankowy i walutowy” rozwija **📅 Nie znasz raty i salda? Policz z kursów NBP**: data wypłaty, okres, marża, waluta (CHF/EUR) → system wpisuje liczbę rat, średnią ratę i saldo. Ta sama symulacja działa przy **zwrocie z umowy**: gdy w umowie jest kwota, data i okres (marża z umowy albo przyjęta 1,2%).
+- Kursy: `prawo/kursy.json` — średnie miesięczne NBP od 2002 r. (tabela A — średni, tabela C — kupno/sprzedaż), pobierane przez codzienną synchronizację. Wypłata po kursie kupna, raty po kursie sprzedaży.
+- Oprocentowanie: LIBOR CHF 3M / SARON albo EURIBOR 3M (wartości przybliżone, kwartalne — w `kredyt-walutowy.js`) + marża, nie mniej niż 0%. Raty równe.
+- To szacunek — banki miały własne tabele kursów z większym spreadem. Do pozwu: zaświadczenie banku.
+- CRM → 📜 Prawo → **Kredyt walutowy**: ta sama symulacja dla prawnika (tabela lat, wpływ kursu, korzyść z unieważnienia). Symulacja klienta trafia ze zgłoszeniem do CRM.
+
 ## 5c. Restrukturyzacja firmy (sekcja „Dla firm”)
 
 Przedsiębiorca wpisuje długi: rodzaj (kredyt bankowy, leasing, pożyczka, dostawcy, podatki, ZUS, inne), kwotę do spłaty, ratę, oprocentowanie, zaległość, czy jest egzekucja i czy dług jest zabezpieczony (hipoteka, zastaw), a także przychód i koszty stałe miesięcznie. Suwaki ustawiają wariant układu: umorzenie części długu, liczbę rat, karencję.

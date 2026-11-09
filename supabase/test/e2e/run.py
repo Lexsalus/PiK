@@ -16,6 +16,7 @@ async def main():
         body=open(HERE+'../../../crm.html',encoding='utf-8').read()
         body=_re.sub(r' integrity="sha384-[^"]*"','',body); body=_re.sub(r"x\.integrity='sha384-[^']*';",'',body)
         return await r.fulfill(status=200,content_type='text/html; charset=utf-8',body=body)
+      if u.split('?')[0].endswith('/prawo/kursy.json'): return await r.fulfill(path=HERE+'kursy-test.json',content_type='application/json')  # dane testowe, nie NBP
       if 'xlsx.full.min.js' in u: return await r.fulfill(path=HERE+'node_modules/xlsx/dist/xlsx.full.min.js',content_type='application/javascript')
       if 'rest/v1/site_content' in u:
         SITEQ.append(u)
@@ -82,6 +83,9 @@ async def main():
     ok('Odsetki ustawowe za opóźnienie' in v and '%' in v,'Prawo: odsetki ustawowe z obwieszczeń')
     ok('Odsetki ustawowe' in v and ('stawki automatyczne' in v or 'stałe stawki' in v),'Prawo: kontrola stawek w kalkulatorach')
     await nav('#/prawo/projekty'); await pg.wait_for_timeout(800); ok('Projekty ustaw w Sejmie' in await T('#view'),'Prawo: projekty z Sejmu')
+    await nav('#/prawo/waluty'); await pg.wait_for_timeout(1200); v=await T('#view')
+    ok('Kredyt indeksowany' in v and 'Zapłacone raty' in v and 'Saldo wg kursu NBP' in v and '2008' in v and 'Śr. kurs sprzedaży' in v,'Prawo → Kredyt walutowy: symulacja z kursów NBP (raty, saldo, tabela lat)')
+    await pg.fill('#fxM',''); await pg.wait_for_timeout(300); ok('Uzupełnij kwotę' in await T('#fxOut'),'Kredyt walutowy: brak marży → komunikat')
     await nav('#/prawo/przepisy'); await pg.wait_for_timeout(500); await pg.fill('#ppQ','przedawnienie roszczeń'); await pg.click('#ppGo'); await pg.wait_for_timeout(2500)
     ok('Art.' in await T('#ppRes'),'Prawo: wyszukiwarka przepisów słowami')
     # --- nowe konto z CRM (funkcja serwera „konta”)
@@ -249,6 +253,12 @@ async def main():
     await nav('#/strona/settings'); await pg.wait_for_timeout(500); await pg.fill('#stView [data-p="site.tagline"]','Hasło szkicu XYZ'); await pg.wait_for_timeout(200)
     await sp.goto('http://localhost:8765/index.html?preview'); await sp.wait_for_timeout(1200); b2=await sp.inner_text('body')
     ok('Hasło szkicu XYZ' in b2 and 'PODGLĄD' in b2,'podgląd strony pokazuje szkic z CRM')
+    await sp.goto('http://localhost:8765/index.html'); await sp.wait_for_timeout(1200)
+    await sp.evaluate("openCalc('chf')"); await sp.wait_for_timeout(600)
+    ok(await sp.is_visible('.fxh summary'),'strona: kalkulator CHF — „Policz z kursów NBP” widoczne, gdy są kursy')
+    await sp.click('.fxh summary'); await sp.fill('.fxh [data-fx="data"]','2008-07'); await sp.click('.fxh [data-fxgo]'); await sp.wait_for_timeout(400)
+    rt_=await sp.input_value('#ncalc input[type=number][data-k="rata"]'); kk=await sp.input_value('#ncalc input[type=number][data-k="k"]')
+    ok(int(kk)>200 and 1000<int(rt_)<4000 and 'saldo' in await sp.inner_text('.fxh .fxr'),f'strona: rata ({rt_} zł), liczba rat ({kk}) i saldo wpisane z symulacji')
     await sp.goto('http://localhost:8765/admin.html'); ok('Treści strony' not in await sp.inner_text('body') and await sp.locator('#pw').count()==0,'admin.html usunięty'); await sp.close()
     # szkic starszy niż opublikowana wersja → ostrzeżenie i lista różnic
     await pg.evaluate("(()=>{const d=JSON.parse(localStorage.getItem('pk_draft'));d.site.name='Nazwa ze starego szkicu';localStorage.setItem('pk_draft',JSON.stringify(d));localStorage.setItem('pk_draft_base','stary')})()")

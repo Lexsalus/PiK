@@ -205,6 +205,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .refund .rsub{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px}.refund .rsub div{display:flex;flex-direction:column}.refund .rsub span{color:var(--mut);font-size:.8rem}
 .refund .rmiss{margin:10px 0;font-weight:600}.refund .rdata{margin:10px 0}.refund summary{cursor:pointer;color:var(--mut);font-weight:600;font-size:.9rem}
 .refund .rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px}.refund .rgrid label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut)}
+.fxh{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.fxh summary{cursor:pointer;font-weight:600;color:var(--accent)}.fxh .fxg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}.fxh label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mut)}.fxh label span{display:flex;align-items:center;gap:6px;color:var(--txt)}.fxh input,.fxh select{width:100%}.fxh .fxr{margin-top:10px;font-size:.86rem;color:var(--mut)}.fxh .fxr b{color:var(--txt)}
 .refund .rgrid span{display:flex;align-items:center;gap:6px;color:var(--txt)}.refund .rgrid input{width:100%}
 .refund .rcta{margin-top:6px;background:var(--bad);border-color:var(--bad)}.refund .rcta[disabled]{opacity:.5;cursor:not-allowed}.refund .rnote{color:var(--mut);font-size:.8rem;margin-top:8px}
 #firmaCalc{grid-template-columns:1fr}.fpanel{overflow:hidden}.ftw{overflow-x:auto;margin:6px 0 10px}.ftab{width:100%;border-collapse:collapse;min-width:720px}.ftab th{font-size:.75rem;color:var(--mut);text-align:left;font-weight:600;padding:4px 6px}
@@ -302,6 +303,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 <div id="gt"></div>
 
 <script src="prawo.js"></script>
+<script src="kredyt-walutowy.js"></script>
 <script src="umowa-zwrot.js"></script>
 <script src="restrukturyzacja.js"></script>
 <script>
@@ -408,7 +410,7 @@ function init(){
   applyLang(false);
   initConsent();
   initChatbot();
-  initPrawo().catch(e=>console.warn('prawo',e));
+  initPrawo().catch(e=>console.warn('prawo',e));if(window.KREDYTFX)KREDYTFX.load();
   const SV=D.serwis||{};let sb=document.getElementById('serwisBar');if(SV.enabled){if(!sb){sb=document.createElement('div');sb.id='serwisBar';document.body.prepend(sb)}sb.textContent='🚧 '+t(SV.tekst||'Trwają prace serwisowe.')}else if(sb)sb.remove();
   const F=D.firma||{};$('#firma').style.display=F.enabled===false?'none':'';document.querySelectorAll('a[href="#firma"]').forEach(e=>e.style.display=F.enabled===false?'none':'');
   if(window.FIRMA&&F.enabled!==false)FIRMA.render(F);
@@ -513,11 +515,36 @@ function openCalc(id,scroll,vals){
   P.innerHTML=`<div class="panel fade"><h3 style="margin-bottom:18px">${esc(c.icon||'')} ${esc(t(c.name))}</h3>
     ${c.inputs.map(i=>{const v=vals?.[i.key]??i.default;return `<div class="inp"><label>${esc(t(i.label))}<span><input class="field" type="number" data-k="${esc(i.key)}" value="${v}" step="${i.step||1}"> ${esc(t(i.unit||''))}</span></label>
     <input type="range" data-k="${esc(i.key)}" min="${i.min}" max="${i.max}" step="${i.step||1}" value="${v}"></div>`}).join('')}
-    ${c.note?`<div class="cnote">${esc(t(c.note))}</div>`:''}</div>
+    ${c.note?`<div class="cnote">${esc(t(c.note))}</div>`:''}${fxHelper(c)}</div>
     <div class="panel res fade"><div class="resv"></div>${k==='claim'&&D.leads?.enabled&&((D.leads.mode==='email'&&D.leads.email)||(D.leads.supabaseUrl&&D.leads.supabaseKey))?`<button class="btn pri lead-cta">${esc(t('Chcę bezpłatną analizę mojej sprawy →'))}</button>`:''}</div>`;
   P.oninput=e=>{const kk=e.target.dataset.k;if(!kk)return;P.querySelectorAll(`[data-k="${kk}"]`).forEach(x=>{if(x!==e.target)x.value=e.target.value});calcBox(k)};
-  const cta=P.querySelector('.lead-cta');if(cta)cta.onclick=()=>openLead(c,readVals(P));
+  const cta=P.querySelector('.lead-cta');if(cta)cta.onclick=()=>openLead(c,readVals(P),P._fx?{symulacja:P._fx}:undefined);
+  fxBind(P,k);
   calcBox(k);if(scroll)P.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+/* kredyt walutowy: rata, liczba rat i saldo z kursów NBP (kredyt-walutowy.js) — gdy klient ich nie zna */
+const fxOk=c=>window.KREDYTFX&&['CHF','FX'].includes(c.crmCategory)&&['kwota','rata','k','saldo'].every(k=>c.inputs.some(i=>i.key===k));
+function fxHelper(c){
+  if(!fxOk(c))return '';
+  return `<details class="fxh" style="display:none"><summary>${esc(t('📅 Nie znasz raty i salda? Policz z kursów NBP'))}</summary>
+    <div class="fxg"><label>${esc(t('Data wypłaty kredytu'))}<input class="field" type="month" data-fx="data" min="2002-01" max="${new Date().toISOString().slice(0,7)}"></label>
+    <label>${esc(t('Okres kredytu'))}<span><input class="field" type="number" data-fx="lata" value="30" min="5" max="50"> ${esc(t('lat'))}</span></label>
+    <label>${esc(t('Marża banku'))}<span><input class="field" type="number" step="0.01" data-fx="marza" value="1.2"> %</span></label>
+    <label>${esc(t('Waluta'))}<select class="field" data-fx="waluta"><option>CHF</option><option>EUR</option></select></label></div>
+    <button class="btn" type="button" data-fxgo>${esc(t('Policz i wpisz'))}</button><div class="fxr">${esc(t('Kwotę wypłaconą przez bank ustaw wyżej. Marżę znajdziesz w umowie (oprocentowanie = LIBOR 3M + marża).'))}</div></details>`;
+}
+function fxBind(P,k){
+  const D0=P.querySelector('.fxh');if(!D0)return;
+  KREDYTFX.load().then(ok=>{if(ok)D0.style.display=''});
+  D0.querySelector('[data-fxgo]').onclick=()=>{
+    const g=x=>D0.querySelector(`[data-fx="${x}"]`).value,v=readVals(P),out=D0.querySelector('.fxr');
+    const r=KREDYTFX.symuluj({kwota:v.kwota,data:g('data'),okres:Math.round(parseFloat(g('lata'))*12),marza:parseFloat(String(g('marza')).replace(',','.')),waluta:g('waluta')});
+    if(r.err){out.innerHTML=`<b>${esc(t(r.err))}</b>`;return}
+    const put=(key,val)=>P.querySelectorAll(`[data-k="${key}"]`).forEach(x=>x.value=Math.round(val));
+    put('rata',r.rataSrednia);put('k',r.k);put('saldo',r.saldo);P._fx={data:g('data'),okres_mies:r.n,marza:parseFloat(g('marza')),waluta:r.waluta,raty:r.k,wplaty:Math.round(r.wplaty),rata_srednia:r.rataSrednia,rata_teraz:r.rataTeraz,saldo:Math.round(r.saldo),saldo_waluta:r.saldoFx,zrodlo:r.zrodlo};
+    out.innerHTML=`${esc(t('Wpisano'))}: <b>${r.k}</b> ${esc(t('rat'))} · ${esc(t('średnia rata'))} <b>${fmt(r.rataSrednia,0)} zł</b> (${esc(t('ostatnio'))} ${fmt(r.rataTeraz,0)} zł) · ${esc(t('saldo'))} <b>${fmt(r.saldo,0)} zł</b> (${fmt(r.saldoFx,0)} ${r.waluta}).<br>${esc(t('Przybliżenie'))}: ${esc(r.zrodlo)}. ${esc(t('Dokładne kwoty ustali kancelaria z zaświadczenia banku.'))}`;
+    calcBox(k);
+  };
 }
 function readVals(P){const v={};P.querySelectorAll('input[type=range]').forEach(r=>{const n=P.querySelector(`input[type=number][data-k="${r.dataset.k}"]`);v[r.dataset.k]=parseFloat(n.value)||0});return v}
 function calcBox(k){

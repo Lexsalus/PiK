@@ -530,6 +530,7 @@ ROUTES.nowe=()=>{
       <div><div class="mut small">Wpisane dane</div><div class="small">${(l.calc?.inputs||[]).map(i=>`${esc(i.label)}: <b>${(+i.value).toLocaleString('pl-PL')} ${esc(i.unit||'')}</b>`).join('<br>')}</div></div></div>
     ${l.message?`<div class="note info" style="margin-top:10px">${esc(l.message)}</div>`:''}
     ${l.calc?.analiza&&window.leadAnaliza?leadAnaliza(l.calc.analiza):''}
+    ${l.calc?.symulacja&&window.fxSym?`<div class="card" style="margin-top:10px;background:var(--bg2)"><b>💱 Kredyt walutowy — symulacja z kursów NBP</b>${fxSym(l.calc.symulacja)}</div>`:''}
     <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'&&canChange('new_cases')?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`};
   return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia z formularza „Co mi się należy” na stronie · ${open.length} do obsłużenia</p></div></div>
     
@@ -1479,6 +1480,7 @@ addEventListener('DOMContentLoaded',pwaShow);addEventListener('load',()=>{pwaSho
 </script>
 <script src="crm-strona.js"></script>
 <script src="prawo.js"></script>
+<script src="kredyt-walutowy.js"></script>
 <script src="crm-prawo.js"></script>
 <script src="crm-podglad.js"></script>
 <script src="crm-pomoc.js"></script>

@@ -13,6 +13,7 @@ Wyjście:  prawo/akty.json        — stan obserwowanych i uchylonych aktów, te
           prawo/projekty.json    — projekty ustaw w Sejmie pasujące do kategorii spraw
           prawo/odsetki.json     — aktualne odsetki ustawowe z obwieszczeń w Monitorze Polskim
           prawo/teksty/<id>.json — artykuły z ostatniego tekstu jednolitego (wyszukiwarka, Adam, podgląd)
+          prawo/kursy.json       — miesięczne kursy NBP (CHF, EUR: średni z tabeli A, kupno/sprzedaż z tabeli C) do symulacji kredytów walutowych
           prawo/stan.json        — kiedy i z jakim skutkiem działała synchronizacja
           prawo/sync-log.txt     — dziennik ostatniego przebiegu
 
@@ -37,6 +38,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'prawo')
 ELI = 'https://api.sejm.gov.pl/eli'
 SEJM = 'https://api.sejm.gov.pl/sejm'
+NBP = 'https://api.nbp.pl/api/exchangerates/rates'
+WALUTY = ('CHF', 'EUR')
 UA = 'PiK-prawo-sync/1.0 (+https://lexsalus.github.io/PiK/)'
 PARSER = 5  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
 PAUSE = float(os.environ.get('PRAWO_PAUSE', '0.25'))  # odstęp między zapytaniami — nie obciążamy serwerów Sejmu
@@ -643,6 +646,56 @@ def sync_odsetki():
     save('odsetki.json', out)
 
 
+# ---------------------------------------------------------------- kursy NBP
+def monthly(rows, keys):
+    """[{effectiveDate, mid|bid|ask}] -> {'2008-07': [średnie dla kluczy]} (średnia z dni miesiąca)."""
+    acc = {}
+    for r in rows:
+        m = str(r.get('effectiveDate', ''))[:7]
+        v = [r.get(k) for k in keys]
+        if len(m) == 7 and all(isinstance(x, (int, float)) for x in v):
+            acc.setdefault(m, []).append(v)
+    return {m: [round(sum(x[i] for x in vs) / len(vs), 4) for i in range(len(keys))] for m, vs in acc.items()}
+
+
+def nbp_range(table, code, start, end):
+    rows, d = [], start
+    while d <= end:
+        e = min(end, d + dt.timedelta(days=90))   # API NBP: najwyżej 93 dni w jednym zapytaniu
+        try:
+            rows += jget(f'{NBP}/{table}/{code.lower()}/{d.isoformat()}/{e.isoformat()}/?format=json').get('rates', [])
+        except urllib.error.HTTPError as x:
+            if x.code != 404:          # 404 = brak notowań w tym okresie
+                raise
+        time.sleep(PAUSE)
+        d = e + dt.timedelta(days=1)
+    return rows
+
+
+def sync_kursy():
+    """Miesięczne kursy NBP od 2002 r. Przy kolejnych przebiegach pobiera tylko ostatnie dwa miesiące."""
+    old = load('kursy.json', {})
+    out = {'_info': 'Średnie miesięczne kursy NBP: [średni (tabela A), kupno, sprzedaż (tabela C)] w zł za 1 jednostkę waluty. Źródło: api.nbp.pl.',
+           'waluty': old.get('waluty', {})}
+    for code in WALUTY:
+        cur = out['waluty'].get(code, {})
+        start = dt.date(2002, 1, 2)
+        if cur:
+            y, m = map(int, max(cur).split('-'))
+            start = dt.date(y, m, 1) - dt.timedelta(days=31)
+            start = start.replace(day=1)
+        a = monthly(nbp_range('a', code, start, TODAY), ['mid'])
+        c = monthly(nbp_range('c', code, start, TODAY), ['bid', 'ask'])
+        for m in sorted(set(a) | set(c)):
+            mid = (a.get(m) or [None])[0]
+            bid, ask = c.get(m) or [None, None]
+            cur[m] = [mid, bid, ask]
+        out['waluty'][code] = dict(sorted(cur.items()))
+        log(f'✓ kursy {code}: {len(cur)} miesięcy (od {start})')
+    out['pobrano'] = TODAY.isoformat()
+    save('kursy.json', out)
+
+
 # ---------------------------------------------------------------- lista ustaw z CRM
 RE_ID = re.compile(r'^[a-z0-9_]{1,20}$')
 RE_ELI = re.compile(r'^(DU|MP)/\d{4}/\d{1,5}$')
@@ -722,7 +775,7 @@ def main():
     stan['lista'] = zrodlo
     res = {}
     t0 = time.time()
-    for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki)]:
+    for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki), ('kursy', sync_kursy)]:
         try:
             r = fn()
             res[name] = 'ok'

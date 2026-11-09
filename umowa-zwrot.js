@@ -6,7 +6,8 @@
    - skd — kredyt konsumencki (gotówkowy, ratalny, pożyczka, karta): sankcja kredytu darmowego, art. 45 ukk.
            Kwota: kalkulator „skd” (dane odczytane z umowy, klient może je poprawić).
    - chf — kredyt indeksowany / denominowany do waluty obcej: klauzule przeliczeniowe (tabele kursowe banku)
-           jako niedozwolone, art. 385¹ KC. Kwota: kalkulator „chf” (rata i saldo — podaje klient).
+           jako niedozwolone, art. 385¹ KC. Kwota: kalkulator „chf”; rata, liczba rat i saldo z symulacji na kursach NBP (kredyt-walutowy.js),
+           gdy w umowie jest kwota, data i okres (marża z umowy albo przyjęta 1,2%).
    - wibor — kredyt złotówkowy ze zmiennym oprocentowaniem: bez automatycznej kwalifikacji (wyrok TSUE C‑471/24).
    Reguły to wzorce językowe — wynik jest wstępny i wymaga oceny prawnika w CRM. */
 (function(){
@@ -105,7 +106,7 @@ function evaluate(text,D,compute){
   const kl=RULES[typ]?runRules(t,RULES[typ],full):[];
   const kwal=kl.some(k=>k.kwal);
   const calcId={skd:'skd',chf:'chf',wibor:'wibor'}[typ],calc=(D?.calculators||[]).find(c=>c.id===calcId);
-  const d=contractDate(t),n=rates(t),since=monthsSince(d),vals={},src={};
+  const d=contractDate(t),n=rates(t),since=monthsSince(d),vals={},src={};let extraSim=null;
   const set=(k,v,how)=>{if(v!=null&&Number.isFinite(v)){vals[k]=Math.round(v*100)/100;src[k]=how}};
   if(typ==='skd'){
     const kw=amountAfter(t,['całkowit\\w* kwot\\w* kredytu','kwot\\w* (kredytu |pożyczki )?do wypłaty','kwot\\w* wypłat\\w*','kwot\\w* pożyczki','kwot\\w* kredytu']);
@@ -121,12 +122,20 @@ function evaluate(text,D,compute){
     const kw=amountAfter(t,['kwot\\w* (kredytu )?(do )?wypłat\\w*','wypłat\\w* kredytu','kwot\\w* kredytu','kwot\\w* udzielonego kredytu'],220);
     set('kwota',kw?.v,kw?.txt);
     if(n!=null&&since!=null)set('k',Math.min(n,since),'miesiące od zawarcia umowy');
+    /* rata i saldo z historycznych kursów NBP (kredyt-walutowy.js), gdy znamy kwotę, datę i okres */
+    const FX=window.KREDYTFX;
+    if(FX?.ready&&vals.kwota&&d&&n){
+      const mz=pctAfter(t,['marż\\w*( banku)?']),wal=(t.match(/\bEUR\b|\beuro\b/giu)||[]).length>(t.match(/\bCHF\b|frank\w* szwajcar/giu)||[]).length?'EUR':'CHF';
+      const marza=mz!=null&&mz<8?mz:1.2,sim=FX.symuluj({kwota:vals.kwota,data:d.toISOString().slice(0,7),okres:n,marza,waluta:wal});
+      if(!sim.err){const how=`symulacja: ${sim.zrodlo}${mz==null?' (marża przyjęta — brak w umowie)':''}`;
+        set('rata',sim.rataSrednia,how);set('saldo',sim.saldo,how);set('k',sim.k,how);extraSim={waluta:sim.waluta,marza,raty:sim.k,wplaty:Math.round(sim.wplaty),saldo:Math.round(sim.saldo),saldo_waluta:sim.saldoFx,zrodlo:sim.zrodlo}}
+    }
   }
   const missing=calc?calc.inputs.filter(i=>!(i.key in vals)).map(i=>i.key):[];
   let out=null;
   if(calc&&!missing.length&&compute){const all={};calc.inputs.forEach(i=>all[i.key]=vals[i.key]);out=compute(calc,all)}
   const main=out?(out.find(o=>o.main)||out[0]):null;
-  return{typ,kwalifikuje:kwal&&typ!=='wibor',klauzule:kl,calc,calcId,vals,src,missing,out,main,data:d?d.toISOString().slice(0,10):null,liczbaRat:n};
+  return{typ,symulacja:extraSim,kwalifikuje:kwal&&typ!=='wibor',klauzule:kl,calc,calcId,vals,src,missing,out,main,data:d?d.toISOString().slice(0,10):null,liczbaRat:n};
 }
 /* dane dla CRM (mieszczą się w limicie leads.calc) */
 function forCrm(r,extra={}){
@@ -134,7 +143,7 @@ function forCrm(r,extra={}){
   const cut=(s,n)=>String(s||'').slice(0,n);
   return{zrodlo:'analiza umowy',typ:r.typ,kwalifikuje:r.kwalifikuje,data_umowy:r.data,
     klauzule:r.klauzule.slice(0,10).map(k=>({nazwa:cut(k.nazwa,160),podstawa:cut(k.podstawa,260),orzecznictwo:cut(k.orzecznictwo,260),fragment:cut(k.fragment,300),brak:k.mode==='missing',kwal:!!k.kwal})),
-    odczytane:Object.fromEntries(Object.entries(r.src).map(([k,v])=>[k,cut(v,120)])),...extra};
+    odczytane:Object.fromEntries(Object.entries(r.src).map(([k,v])=>[k,cut(v,160)])),...(r.symulacja?{symulacja:r.symulacja}:{}),...extra};
 }
 window.ZWROT={evaluate,forCrm,RULES,kind};
 })();

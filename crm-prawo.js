@@ -36,9 +36,9 @@ const origMenu=menuItems;
 window.menuItems=menuItems=function(){const m=origMenu();if(!seesCases())return m;
   const i=m.findIndex(x=>x[0]==='strona'||x[0]==='ustawienia');m.splice(i<0?m.length:i,0,['prawo','📜','Prawo',prawoNew(),'n']);return m};
 
-const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy']];
-const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy']}];
-Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.'});
+const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy'],['waluty','Kredyt walutowy']];
+const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy','waluty']}];
+Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.',waluty:'Symulacja kredytu CHF / EUR z kursów NBP: raty, wpłaty, saldo.'});
 const catChips=ks=>(ks||[]).map(k=>catBadge(k)).join(' ');
 const dl=(d)=>d?P.fmtD(d):'—';
 ROUTES.prawo=(sub)=>{
@@ -120,6 +120,36 @@ function bindSearch(pref,caseId){
     catch(e){R.innerHTML=`<div class="empty">Wyszukiwarka niedostępna: ${esc(e.message)}</div>`}};
   $('#'+pref+'Go').onclick=go;$('#'+pref+'Q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};
 }
+/* --- kredyt walutowy: symulacja z kursów NBP (kredyt-walutowy.js) --- */
+const FXV={kwota:300000,data:'2008-07',lata:30,marza:1.2,waluta:'CHF'};
+VIEW.waluty=async()=>{
+  const F=window.KREDYTFX;if(!F)return '<div class="empty">Brak modułu kredyt-walutowy.js.</div>';
+  const ok=await F.load();if(!ok)return `<div class="empty">Kursy NBP nie są jeszcze pobrane — pojawią się po najbliższej synchronizacji (plik prawo/kursy.json).</div>${stanLine()}`;
+  return `<div class="card"><h3>💱 Kredyt indeksowany / denominowany — symulacja z kursów NBP</h3>
+    <div class="grid g3" style="gap:12px"><label class="small">Kwota wypłacona (zł)<input class="f" id="fxKw" type="number" step="1000" value="${FXV.kwota}"></label>
+    <label class="small">Data wypłaty<input class="f" id="fxD" type="month" min="${F.months('CHF')[0]}" value="${FXV.data}"></label>
+    <label class="small">Okres (lata)<input class="f" id="fxL" type="number" min="5" max="50" value="${FXV.lata}"></label>
+    <label class="small">Marża (%)<input class="f" id="fxM" type="number" step="0.01" value="${FXV.marza}"></label>
+    <label class="small">Waluta<select class="f" id="fxW">${['CHF','EUR'].map(w=>`<option ${w===FXV.waluta?'selected':''}>${w}</option>`).join('')}</select></label>
+    <label class="small">Stan na miesiąc<input class="f" id="fxDo" type="month" value="${new Date().toISOString().slice(0,7)}"></label></div>
+    <div id="fxOut" style="margin-top:14px"></div>
+    <p class="hint">Wypłata po kursie kupna, raty po kursie sprzedaży z tabeli C NBP (średnie miesięczne; banki stosowały własne tabele z większym spreadem). Raty równe, oprocentowanie zmienne: stopa 3M (LIBOR CHF / SARON, EURIBOR — wartości przybliżone, kwartalne) + marża, nie mniej niż 0%. Szacunek do rozmowy z klientem — do pozwu: zaświadczenie banku. Kursy pobrano: ${esc(F.pobrano||'—')}.</p></div>${stanLine()}`;
+};
+VIEW.waluty.after=()=>{
+  const run=()=>{const v=id=>$('#'+id)?.value;Object.assign(FXV,{kwota:+v('fxKw'),data:v('fxD'),lata:+v('fxL'),marza:parseFloat(v('fxM')),waluta:v('fxW')});
+    const r=KREDYTFX.symuluj({kwota:FXV.kwota,data:FXV.data,okres:Math.round(FXV.lata*12),marza:FXV.marza,waluta:FXV.waluta,do:v('fxDo')});$('#fxOut').innerHTML=fxSym(r,true)};
+  ['fxKw','fxD','fxL','fxM','fxW','fxDo'].forEach(id=>$('#'+id)?.addEventListener('input',run));run();
+};
+/* wynik symulacji: z modułu (pełny) albo zapisany w zgłoszeniu ze strony (skrót) */
+window.fxSym=(r,full)=>{
+  if(!r)return '';if(r.err)return `<div class="empty">${esc(r.err)}</div>`;
+  const W=r.waluta||'CHF',m=x=>money(Math.round(x||0)),k=(l,v,h)=>`<div style="display:flex;flex-direction:column;gap:2px;background:var(--bg2);border-radius:10px;padding:10px 12px"><span class="mut small">${l}</span><b>${v}</b>${h?`<span class="mut small">${h}</span>`:''}</div>`;
+  if(!full)return `<div class="small" style="margin-top:8px"><span class="mut">Symulacja z kursów NBP (${esc(W)}${r.marza!=null?', marża '+String(r.marza).replace('.',',')+'%':''}${r.data?', wypłata '+esc(r.data):''}):</span> ${r.raty} rat, wpłaty ${m(r.wplaty)}, średnia rata ${m(r.rata_srednia||r.wplaty/r.raty)}, saldo ${m(r.saldo)}${r.saldo_waluta!=null?' ('+money(r.saldo_waluta).replace('zł',W)+')':''}<div class="mut">${esc(r.zrodlo||'')}</div></div>`;
+  const ben=r.wplaty+r.saldo-(+$('#fxKw')?.value||0);
+  return `<div class="grid g4" style="gap:10px">${k('Zapłacone raty',r.k+' z '+r.n)}${k('Wpłacone do banku',m(r.wplaty),'średnio '+m(r.rataSrednia)+' / mies.')}${k('Ostatnia rata',m(r.rataTeraz))}${k('Saldo wg kursu NBP',m(r.saldo),money(r.saldoFx).replace('zł',W)+' × '+r.kursTeraz.toFixed(4))}
+    ${k('Kapitał w walucie',money(r.kapitalFx).replace('zł',W),'kurs wypłaty '+r.kursWyplaty.toFixed(4)+' ('+r.miesiacWyplaty+')')}${k('Wpływ kursu na wpłaty',m(r.bezIndeksacji),'ponad raty liczone po kursie z wypłaty')}${k('Korzyść z unieważnienia',`<span style="color:var(--ok)">${m(ben)}</span>`,'wpłaty + saldo − kwota wypłacona')}</div>
+    <div class="tw" style="margin-top:12px"><table><tr><th>Rok</th><th>Raty</th><th>Wpłaty</th><th>Śr. kurs sprzedaży</th><th>Śr. oprocentowanie</th></tr>${r.lata.map(l=>`<tr><td>${l.rok}</td><td>${l.raty}</td><td>${m(l.wplaty)}</td><td>${l.kurs.toFixed(4)}</td><td>${l.stopa.toFixed(2).replace('.',',')}%</td></tr>`).join('')}</table></div>`;
+};
 VIEW.przepisy=async()=>`<div class="card"><h3>Wyszukiwarka przepisów</h3>${searchBox('pp')}</div>${stanLine()}`;
 VIEW.przepisy.after=()=>bindSearch('pp',null);
 
@@ -159,12 +189,13 @@ window.leadAnaliza=a=>{if(!a)return '';const L=x=>P.linkify(esc(x||''));
     <div class="small" style="margin-top:8px"><span class="mut">Ścieżki (prawo restrukturyzacyjne):</span><ul style="margin:4px 0 0 18px">${(a.warianty||[]).map(w=>`<li><b>${esc(w.nazwa)}</b> — ${esc(w.podstawa)}<div class="mut">${esc(w.kiedy)}</div></li>`).join('')}</ul></div>
     <div class="small" style="margin-top:6px"><span class="mut">Zasady do sprawdzenia:</span><ul style="margin:4px 0 0 18px">${(a.zasady||[]).map(z=>`<li>${esc(z)}</li>`).join('')}</ul></div>`:''}
   ${(a.zgodnosc||[]).length?`<div class="small" style="margin-top:8px"><span class="mut">Zgodność z prawem (reguły analizy umów):</span><ul style="margin:4px 0 0 18px">${a.zgodnosc.map(z=>`<li><b>${esc(z.nazwa)}</b>${z.brak?' — brak zapisu':''}${z.podstawa?` — ${L(z.podstawa)}`:''}</li>`).join('')}</ul></div>`:''}
+  ${a.symulacja?fxSym(a.symulacja):''}
   ${a.ryzyko?`<div class="mut small" style="margin-top:6px">Ocena ze strony: ryzyko zapisów ${a.ryzyko.zapisy??'—'}/100, ryzyko prawne ${a.ryzyko.prawne??'—'}/100</div>`:''}
   <p class="hint">Wynik automatycznej analizy wzorców w treści umowy — wymaga weryfikacji prawnika. Klientowi pokazano tylko komunikat i kwotę, bez podstaw prawnych.</p></details>`};
 
 /* --- karta „Przepisy” w zakładce Analiza sprawy --- */
 const origAnaliza=CTAB.analiza;
-CTAB.analiza=c=>origAnaliza(c)+(c.leadData?.analiza?leadAnaliza(c.leadData.analiza):'')+`<div class="card" style="margin-top:14px"><h3>📜 Przepisy <span class="mut small">wyszukaj i dołącz do sprawy ze stanem prawnym na wybrany dzień</span></h3><div id="caPrawo">${searchBox('cp',c.id)}</div></div>`;
+CTAB.analiza=c=>origAnaliza(c)+(c.leadData?.analiza?leadAnaliza(c.leadData.analiza):'')+(c.leadData?.symulacja?`<div class="card" style="margin-top:10px;background:var(--bg2)"><b>💱 Kredyt walutowy — symulacja klienta ze strony</b>${fxSym(c.leadData.symulacja)}</div>`:'')+`<div class="card" style="margin-top:14px"><h3>📜 Przepisy <span class="mut small">wyszukaj i dołącz do sprawy ze stanem prawnym na wybrany dzień</span></h3><div id="caPrawo">${searchBox('cp',c.id)}</div></div>`;
 const origAfter=ROUTES.sprawa.after;
 ROUTES.sprawa.after=(id,tab)=>{origAfter?.(id,tab);if((tab||'')==='analiza'&&$('#cpGo')){loadAll().then(()=>{const sel=$('#cpAct');if(sel&&sel.options.length<=1)sel.innerHTML=`<option value="">Wszystkie ustawy</option>`+(A?.akty||[]).filter(a=>a.tekst).map(a=>`<option value="${esc(a.id)}">${esc(a.nazwa)}</option>`).join('');
   const cat=CASE(id)?.category,pref=(A?.akty||[]).find(a=>a.tekst&&a.kategorie[0]===cat);if(pref&&sel)sel.value=pref.id}).catch(()=>{});bindSearch('cp',id)}};

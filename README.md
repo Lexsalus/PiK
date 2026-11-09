@@ -59,11 +59,12 @@ prawo.js        wspólny moduł danych prawnych (przepisy z podglądem, odsetki,
 prawo/          dane z API Sejmu (obserwowane.json — lista ustaw, edytowana w CRM i zapisywana przez synchronizację; reszta generowana codziennie)
 restrukturyzacja.js  kalkulator restrukturyzacji firmy (sekcja #firma)
 umowa-zwrot.js  ocena umowy kredytu i wyliczenie zwrotu (reguły z podstawami prawnymi i orzecznictwem)
+kredyt-walutowy.js  symulacja kredytu CHF/EUR z kursów NBP (prawo/kursy.json) — rata, wpłaty, saldo
 adam/           czat Adam (adam.js, wiedza.json)
 tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
 PLAN.md         plan prac (prowadzony na bieżąco)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–010), test/ — testy bazy 148/148, e2e CRM 125/125 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–010), test/ — testy bazy 148/148, e2e CRM 129/129 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

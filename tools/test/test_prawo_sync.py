@@ -59,4 +59,6 @@ ak,pr=P.clean_cfg({'akty':[A(teksty=False)],'projekty':{'_info':'x','SKD':['kred
 res += [
   ok(ak==[{'id':'kc','eli':'DU/1964/93','nazwa':'Kodeks cywilny','skrot':['KC'],'kategorie':['SKD'],'teksty':False}] and pr=={'SKD':['kredy*']},'lista z CRM: czyszczenie pozycji i słów do projektów'),
   ok(bad({'akty':[]}) and bad({'akty':[A(eli='1964/93')]}) and bad({'akty':[A(id='K C')]}) and bad({'akty':[A(),A(id='kc2')]}) and bad({'akty':[A(nazwa='')]}),'lista z CRM: błędne ELI, identyfikator, duplikat, brak nazwy odrzucone')]
+mm=P.monthly([{'effectiveDate':'2008-07-01','bid':2.0,'ask':2.04},{'effectiveDate':'2008-07-02','bid':2.02,'ask':2.06},{'effectiveDate':'2008-08-01','bid':2.1,'ask':None}],['bid','ask'])
+res.append(ok(mm=={'2008-07':[2.01,2.05]},f'kursy NBP: średnie miesięczne, niepełne notowania pominięte: {mm}'))
 print(f'WYNIK: {sum(res)}/{len(res)}'); sys.exit(0 if all(res) else 1)

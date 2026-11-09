@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.30.0] — 2026-11-09
+- Kredyt CHF/EUR z historycznymi kursami NBP: rata, liczba rat i saldo bez pytania klienta (kalkulator, zwrot z umowy), CRM → Prawo → Kredyt walutowy; synchronizacja pobiera kursy NBP
+
 ## [1.29.0] — 2026-11-09
 - Lista obserwowanych ustaw i słów do projektów w Sejmie edytowana w CRM (Treści strony → Nowe funkcje), sprawdzanie adresu ELI w API Sejmu; synchronizacja czyta listę z bazy
 
