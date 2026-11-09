@@ -18,5 +18,14 @@
 ✓ uchylony? DU/2000/1319 — Ustawa z dnia 15 grudnia 2000 r. o ochronie konkurencji i konsumentów. [uchylony]
 ✓ uchylony? DU/1934/502 — Rozporządzenie Prezydenta Rzeczypospolitej z dnia 27 czerwca 1934 r. Kodeks hand [uchylony]
 ✓ zmiany: +0, razem 27
+  ✓ tekst kc: 1296 artykułów z DU/2024/1061 [id] (np. art. 1: 'Kodeks niniejszy reguluje stosunki cywilnoprawne między osobami fizycznymi i oso')
+  ✓ tekst kpc: 1947 artykułów z DU/2024/1568 [id] (np. art. 1: ')Utracił moc z dniem 17 lipca 2000 r., rozumiany w ten sposób, iż w zakresie poj')
+  ✓ tekst ukk: 109 artykułów z DU/2024/1497 [id] (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt konsumencki;\n2) obowią')
   – frank: brak tekstu HTML
+  ✓ tekst pb: 461 artykułów z DU/2024/1646 [id] (np. art. 1: 'Ustawa określa:\n1) zasady prowadzenia działalności bankowej, tworzenia i organiz')
+  ✓ tekst ukh: 91 artykułów z DU/2022/2245 [id] (np. art. 1: 'Ustawa określa:\n1) zasady i tryb zawierania umów o kredyt hipoteczny;\n2) prawa i')
+  ✓ tekst upk: 74 artykułów z DU/2024/1796 [id] (np. art. 1: 'Ustawa określa prawa przysługujące konsumentowi, w szczególności:\n1) obowiązki p')
+  ✓ tekst kro: 245 artykułów z DU/2023/2809 [id] (np. art. 1: '§ 1. Małżeństwo zostaje zawarte, gdy mężczyzna i kobieta jednocześnie obecni zło')
+  ✓ tekst pu: 597 artykułów z DU/2024/794 [id] (np. art. 1: '1. Ustawa reguluje:\n1) zasady wspólnego dochodzenia roszczeń wierzycieli od niew')
+  ✓ tekst uksc: 171 artykułów z DU/2024/959 [id] (np. art. 1: 'Ustawa określa zasady i tryb pobierania kosztów sądowych w sprawach cywilnych, z')
 ✓ projekty: kadencja 10, przejrzano 487, pasuje 12
