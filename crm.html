@@ -537,7 +537,10 @@ ROUTES.nowe=()=>{
 };
 
 /* ===================== KARTA SPRAWY ===================== */
-const TABS=[['klient','Dane klienta'],['finanse','Finanse'],['terminy','Terminy'],['etapy','Etapy'],['dokumenty','Dokumenty'],['zespol','Zespół'],['analiza','Analiza'],['historia','Historia działań']];
+const TABS=[['klient','Dane klienta'],['etapy','Etapy'],['historia','Historia działań'],['terminy','Terminy'],['dokumenty','Dokumenty'],['zespol','Zespół'],['finanse','Finanse'],['analiza','Analiza']];
+/* zakładki karty sprawy w grupach: Sprawa / Praca nad sprawą / Pieniądze / Analiza i prawo */
+const CASE_GROUPS=[{l:'Sprawa',c:'#5aa9ff',k:['klient','etapy','historia']},{l:'Praca nad sprawą',c:'#2fd6a0',k:['terminy','dokumenty','zespol']},{l:'Pieniądze',c:'#f5b84a',k:['finanse']},{l:'Analiza i prawo',c:'#c08cff',k:['analiza']}];
+Object.assign(TAB_TIPS,{klient:'Dane klienta, PESEL (maskowany), kontakt.',etapy:'Etapy sprawy, wpisy i czynności, zatwierdzanie.',historia:'Historia zmian „przed → po”.',terminy:'Terminy procesowe i wewnętrzne.',dokumenty:'Akta: pliki z wersjami.',zespol:'Zespół sprawy i zakres dostępu.',finanse:'Wpływy, podział, wynagrodzenia.',analiza:'Kalkulatory na danych sprawy, przepisy, analiza umowy klienta, pisma.'});
 const shownPesel=new Set();
 function tabAllowed(c,t){
   const f=caseFlags(c);
@@ -555,7 +558,7 @@ ROUTES.sprawa=(id,tab)=>{
   <div class="chead" style="margin-top:8px"><div><h1>${esc(c.number)} ${catBadge(c.category)} ${stBadge(c.status)}${c.currency?` <span class="badge">${esc(c.currency)}</span>`:''}</h1>
     <p class="mut" style="margin-top:4px">Klient: ${esc(clientName(c))}${c.court?` · ${esc(c.court)}`:''}${c.signature?` · sygn. ${esc(c.signature)}`:''}</p></div>
     <div style="display:flex;gap:10px;align-items:center"><div class="avs">${team.map(m=>av(m.userId)).join('')}</div><a class="btn sm" href="#/sprawa/${c.id}/zespol">Zespół sprawy</a>${isAdmin()?`<button class="btn sm" onclick="caseAdminModal('${c.id}')">Status / kategoria</button>`:''}</div></div>
-  <div class="tabs">${tabs.map(([t,l])=>`<a class="tab ${t===tab?'on':''}" href="#/sprawa/${c.id}/${t}">${l}</a>`).join('')}</div>
+  ${groupTabs(tabs,CASE_GROUPS,tab,t=>`#/sprawa/${c.id}/${t}`)}
   <div id="ctab">${CTAB[tab](c)}</div>`;
 };
 ROUTES.sprawa.after=(id,tab)=>{if((tab||'')==='analiza')loadCalcs(CASE(id))};

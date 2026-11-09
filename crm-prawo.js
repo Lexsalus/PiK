@@ -37,13 +37,15 @@ window.menuItems=menuItems=function(){const m=origMenu();if(!seesCases())return 
   const i=m.findIndex(x=>x[0]==='strona'||x[0]==='ustawienia');m.splice(i<0?m.length:i,0,['prawo','📜','Prawo',prawoNew(),'n']);return m};
 
 const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy']];
+const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy']}];
+Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.'});
 const catChips=ks=>(ks||[]).map(k=>catBadge(k)).join(' ');
 const dl=(d)=>d?P.fmtD(d):'—';
 ROUTES.prawo=(sub)=>{
   need(seesCases(),'Zakładka dostępna dla zespołu kancelarii.');
   sub=TABS.some(t=>t[0]===sub)?sub:'zmiany';
   return `<div class="ph"><div><h1>📜 Prawo</h1><p>Zmiany w ustawach i projekty z Sejmu dla kategorii spraw kancelarii · źródło: API Sejmu (ELI), aktualizacja raz dziennie</p></div></div>
-  <div class="tabs">${TABS.map(([t,l])=>`<a class="tab ${t===sub?'on':''}" href="#/prawo/${t}">${l}</a>`).join('')}</div>
+  ${groupTabs(TABS,PRAWO_GROUPS,sub,t=>'#/prawo/'+t)}
   <div id="prawoView"><div class="empty">Wczytywanie danych prawnych…</div></div>`;
 };
 ROUTES.prawo.after=async(sub)=>{
@@ -153,6 +155,7 @@ window.leadAnaliza=a=>{if(!a)return '';const L=x=>P.linkify(esc(x||''));
   ${(a.podstawy_w_umowie||[]).length?`<div class="small" style="margin-top:8px"><span class="mut">Podstawy prawne powołane w umowie (stan z API Sejmu):</span><ul style="margin:4px 0 0 18px">${a.podstawy_w_umowie.map(r=>`<li>${r.poziom==='high'?'⛔':'ℹ️'} <b>${esc(r.akt)}</b> — ${esc(r.uwaga)}${r.fragment?` <span class="mut">(„${esc(r.fragment)}”)</span>`:''}</li>`).join('')}</ul></div>`:''}
   ${a.typ==='rst'?`<div class="tw" style="margin-top:8px"><table><tr><th>Dług</th><th>Kwota</th><th>Rata</th><th>Opr.</th><th>Zaległe</th><th></th></tr>${(a.dlugi||[]).map(d=>`<tr><td>${esc(d.rodzaj)}</td><td>${money(d.kwota)}</td><td>${money(d.rata)}</td><td>${d.opr}%</td><td>${money(d.zalegle)}</td><td class="small">${d.egzekucja?'⚠️ egzekucja ':''}${d.zabezpieczony?'🔒 zabezpieczony ':''}${d.w_ukladzie?'':'poza układem'}</td></tr>`).join('')}</table></div>
     ${a.wynik?`<div class="small" style="margin-top:8px">Wariant: umorzenie ${a.wariant?.umorzenie_proc}%, ${a.wariant?.raty_mies} rat, karencja ${a.wariant?.karencja_mies} mies. → raty ${money(a.wynik.raty_teraz)} → <b>${money(a.wynik.raty_po)}</b>/mies., mniej odsetek ${money(a.wynik.mniej_odsetek)}, umorzenie ${money(a.wynik.umorzenie)}, nadwyżka firmy ${money(a.wynik.nadwyzka)}/mies.</div>`:''}
+    ${(a.harmonogram||[]).length?`<div class="tw" style="margin-top:8px"><table><tr><th>Plan dla wierzycieli</th><th>Dług</th><th>Umorzenie</th><th>Do spłaty</th><th>Rata</th><th>Miesiące</th></tr>${a.harmonogram.map(h=>`<tr><td>${esc(h.wierzyciel)}${h.w_ukladzie?'':' <span class="badge">poza układem</span>'}</td><td>${money(h.dlug)}</td><td>${money(h.umorzenie)}</td><td>${money(h.do_splaty)}</td><td><b>${money(h.rata)}</b></td><td>${h.w_ukladzie?h.od_mies+'–'+h.do_mies:'jak dotąd'}</td></tr>`).join('')}</table><p class="hint">Miesiące liczone od zgłoszenia: 1–4 ochrona, potem karencja, potem raty.</p></div>`:''}
     <div class="small" style="margin-top:8px"><span class="mut">Ścieżki (prawo restrukturyzacyjne):</span><ul style="margin:4px 0 0 18px">${(a.warianty||[]).map(w=>`<li><b>${esc(w.nazwa)}</b> — ${esc(w.podstawa)}<div class="mut">${esc(w.kiedy)}</div></li>`).join('')}</ul></div>
     <div class="small" style="margin-top:6px"><span class="mut">Zasady do sprawdzenia:</span><ul style="margin:4px 0 0 18px">${(a.zasady||[]).map(z=>`<li>${esc(z)}</li>`).join('')}</ul></div>`:''}
   ${(a.zgodnosc||[]).length?`<div class="small" style="margin-top:8px"><span class="mut">Zgodność z prawem (reguły analizy umów):</span><ul style="margin:4px 0 0 18px">${a.zgodnosc.map(z=>`<li><b>${esc(z.nazwa)}</b>${z.brak?' — brak zapisu':''}${z.podstawa?` — ${L(z.podstawa)}`:''}</li>`).join('')}</ul></div>`:''}

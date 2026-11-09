@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.28.0] — 2026-11-09
+- Restrukturyzacja: harmonogram miesiąc po miesiącu, plan dla wierzycieli, wydruk/PDF, plan w CRM; zakładki karty sprawy i Prawa w grupach z kolorami i dymkami
+
 ## [1.27.0] — 2026-11-09
 - Migracja 010: powiadomienia o zmianach w prawie w bazie (pg_cron+pg_net, zapasowo z CRM), zakładanie kont z CRM (funkcja serwera konta, hasło tymczasowe, wymuszona zmiana), limity zgłoszeń po telefonie i ogólny; parser v5 (art. 1 KPC); testy bazy 148/148, e2e 122/122
 

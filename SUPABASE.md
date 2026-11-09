@@ -21,8 +21,8 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ✅ Migracja `009_uprawnienia_akcje.sql` (wdrożona 27.10.2026) — uprawnienia: podgląd i zmiana osobno dla danych klienta, dokumentów, czynności, terminów i zgłoszeń; dla obecnych kont bez zmian w dostępie.
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
-- ✅/⏳ Migracja `010_prawo_konta_limity.sql` — limity zgłoszeń (telefon, ogólny), powiadomienia o zmianach w prawie (pg_cron `prawo-pobierz` 5:40 UTC i `prawo-powiadom` 5:50 UTC przez pg_net), konta z CRM (`must_change_password`, `account_created`)
-- ✅/⏳ Funkcja serwera **`konta`** (`supabase/functions/konta`) — zakładanie kont z CRM; klucz serwisowy tylko w środowisku Supabase
+- ✅ Migracja `010_prawo_konta_limity.sql` — limity zgłoszeń (telefon, ogólny), powiadomienia o zmianach w prawie (pg_cron `prawo-pobierz` 5:40 UTC i `prawo-powiadom` 5:50 UTC przez pg_net), konta z CRM (`must_change_password`, `account_created`)
+- ✅ Funkcja serwera **`konta`** (`supabase/functions/konta`) — zakładanie kont z CRM; klucz serwisowy tylko w środowisku Supabase
 
 Kroki poniżej opisują świeżą instalację (np. nowy projekt albo odtworzenie).
 

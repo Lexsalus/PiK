@@ -70,10 +70,12 @@ function render(cfg){
       <h3>🏢 ${e(tt('Długi firmy'))}</h3>
       <div class="ftw"><table class="ftab"><thead><tr><th>${e(tt('Rodzaj'))}</th><th>${e(tt('Do spłaty'))} (zł)</th><th>${e(tt('Rata / mies.'))} (zł)</th><th>${e(tt('Oprocentowanie'))} (%)</th><th>${e(tt('Zaległe'))} (zł)</th><th title="${e(tt('Komornik lub egzekucja z urzędu'))}">${e(tt('Egzekucja'))}</th><th title="${e(tt('Hipoteka, zastaw, przewłaszczenie'))}">${e(tt('Zabezpieczony'))}</th><th></th></tr></thead><tbody id="fRows"></tbody></table></div>
       <button class="btn" id="fAdd">+ ${e(tt('Dodaj dług'))}</button>
+      <div class="frow2"><label>${e(tt('Nazwa firmy (do wydruku planu, opcjonalnie)'))}<input class="field" id="fFirma" maxlength="120"></label></div>
       <div class="frow2"><label>${e(tt('Przychód miesięcznie (netto)'))}<input class="field" type="number" id="fPrz" value="${S.przychod}"></label><label>${e(tt('Koszty stałe miesięcznie (bez rat)'))}<input class="field" type="number" id="fKos" value="${S.koszty}"></label></div>
       <h3 style="margin-top:18px">${e(tt('Wariant układu'))}</h3>
       <div class="frow3">${[['red','Umorzenie części długu',0,70,5,'%'],['mies','Rozłożenie na raty',12,120,6,'mies.'],['kar','Karencja (bez spłat)',0,24,1,'mies.']].map(([k,l,mi,ma,st,u])=>`<label>${e(tt(l))}: <b id="fv_${k}">${S[k]} ${e(tt(u))}</b><input type="range" data-fs="${k}" min="${mi}" max="${ma}" step="${st}" value="${S[k]}"></label>`).join('')}</div></div>
-      <div class="panel res fade" id="fRes"></div>`;
+      <div class="panel res fade" id="fRes"></div>
+      <div class="panel fade fpanel" id="fPlan" style="grid-column:1/-1"></div>`;
     $('#fAdd').onclick=()=>{S.rows.push({t:'dostawcy',kw:0,rata:0,opr:0,zal:0,egz:false,zab:false});drawRows();render()};
     $('#fPrz').oninput=x=>{S.przychod=+x.target.value||0;render()};$('#fKos').oninput=x=>{S.koszty=+x.target.value||0;render()};
     box.querySelectorAll('[data-fs]').forEach(x=>x.oninput=()=>{S[x.dataset.fs]=+x.value;$('#fv_'+x.dataset.fs).textContent=x.value+' '+tt(x.dataset.fs==='red'?'%':'mies.');render()});
@@ -91,11 +93,13 @@ function render(cfg){
     ${R.zabSuma?`<div class="cnote" style="margin-top:10px">${e(tt('Długi zabezpieczone (hipoteka, zastaw) liczymy jak dotąd — można je objąć układem za zgodą wierzyciela.'))}</div>`:''}
     <button class="btn pri lead-cta" id="fLead">${e(tt('Chcę zrestrukturyzować długi — bezpłatna analiza →'))}</button>
     <p class="cnote" style="margin-top:10px">${e(tt('Szacunek orientacyjny. Dokładny plan i najlepszą ścieżkę przygotuje kancelaria.'))}</p>`;
+  const P=plan(R);$('#fPlan').innerHTML=planHtml(P);$('#fPrint').onclick=()=>printPlan(R,P);
   $('#fLead').onclick=()=>{const c=pseudoCalc(R),vals={dlugi:R.rows.reduce((a,r)=>a+(+r.kw||0),0),raty:R.rNow,przychod:S.przychod,koszty:S.koszty,red:S.red,mies:S.mies,kar:S.kar};
     const T=k=>TYPES.find(x=>x.k===k)?.l||k;
     openLead(c,vals,{analiza:{zrodlo:'restrukturyzacja firmy',typ:'rst',kwalifikuje:true,
       dlugi:R.rows.map(r=>({rodzaj:T(r.t),kwota:+r.kw||0,rata:+r.rata||0,opr:+r.opr||0,zalegle:+r.zal||0,egzekucja:!!r.egz,zabezpieczony:!!r.zab,w_ukladzie:r.inPlan})).slice(0,20),
       wariant:{umorzenie_proc:S.red,raty_mies:S.mies,karencja_mies:S.kar},wynik:{raty_teraz:Math.round(R.rNow),raty_po:Math.round(R.rAfter),wstrzymane:Math.round(R.wstrz),mniej_odsetek:Math.round(R.odsetki),umorzenie:Math.round(R.umorz),nadwyzka:Math.round(R.zdol)},
+      harmonogram:plan(R).cred.map(c=>({wierzyciel:c.rodzaj,dlug:Math.round(c.kw),umorzenie:Math.round(c.um),do_splaty:Math.round(c.doSplaty),rata:Math.round(c.rata),od_mies:c.od,do_mies:c.do,w_ukladzie:c.w})),
       warianty:PRAWO_RST.warianty,zasady:PRAWO_RST.zasady,egzekucja:R.rows.some(r=>r.egz)}})};
 }
 function drawRows(){
@@ -107,5 +111,52 @@ function drawRows(){
   tb.querySelectorAll('[data-f]').forEach(x=>{const ev=x.type==='checkbox'||x.tagName==='SELECT'?'change':'input';x.addEventListener(ev,()=>{const r=S.rows[+x.dataset.i];r[x.dataset.f]=x.type==='checkbox'?x.checked:x.tagName==='SELECT'?x.value:(+x.value||0);render()})});
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{S.rows.splice(+b.dataset.del,1);drawRows();render()});
 }
-window.FIRMA={render,calc,PRAWO_RST};
+/* harmonogram miesiąc po miesiącu: ochrona (do 4 mies., raty objęte układem wstrzymane) → karencja → raty układowe;
+   długi zabezpieczone (poza układem) spłacane jak dotąd przez cały okres */
+const OCHRONA=4;
+function plan(R){
+  const T=k=>TYPES.find(x=>x.k===k)||TYPES[6],start=new Date();start.setDate(1);start.setMonth(start.getMonth()+1);
+  const cred=R.rows.map((r,i)=>{const kw=+r.kw||0,um=r.umorz||0,typ=T(r.t);return{nr:i+1,rodzaj:typ.l,kw,um,doSplaty:Math.max(0,kw-um),w:r.inPlan,
+    rata:r.inPlan?Math.max(0,kw-um)/Math.max(1,S.mies):(+r.rata||0),od:r.inPlan?OCHRONA+S.kar+1:1,do:r.inPlan?OCHRONA+S.kar+S.mies:null}});
+  const total=OCHRONA+S.kar+S.mies,months=[];
+  for(let m=1;m<=total;m++){const d=new Date(start);d.setMonth(start.getMonth()+m-1);
+    const faza=m<=OCHRONA?'ochrona':m<=OCHRONA+S.kar?'karencja':'raty';
+    const zab=cred.filter(c=>!c.w).reduce((a,c)=>a+c.rata,0),ukl=faza==='raty'?cred.filter(c=>c.w).reduce((a,c)=>a+c.rata,0):0;
+    months.push({m,data:d,faza,zab,ukl,razem:zab+ukl,nadw:R.zdol-(zab+ukl)})}
+  return{cred,months,total,start};
+}
+const FAZA={ochrona:'Ochrona — raty i egzekucje wstrzymane',karencja:'Karencja — bez spłat układowych',raty:'Raty układowe'};
+const mies=d=>d.toLocaleDateString('pl-PL',{month:'long',year:'numeric'});
+function planHtml(P,full){
+  return `<div class="fplan"><h3>📅 ${e(tt('Harmonogram spłat'))}</h3>
+    <div class="ftw"><table class="ftab"><thead><tr><th>${e(tt('Okres'))}</th><th>${e(tt('Etap'))}</th><th>${e(tt('Raty układowe'))}</th><th>${e(tt('Długi zabezpieczone'))}</th><th>${e(tt('Razem / mies.'))}</th><th>${e(tt('Zostaje firmie'))}</th></tr></thead><tbody>
+    ${[P.months].map(ms=>{const grp=[];ms.forEach(x=>{const l=grp[grp.length-1];if(l&&l.faza===x.faza&&Math.abs(l.razem-x.razem)<1)l.to=x;else grp.push({...x,from:x,to:x})});
+      return grp.map(g=>`<tr><td>${e(g.from===g.to?mies(g.from.data):mies(g.from.data)+' – '+mies(g.to.data))}</td><td>${e(tt(FAZA[g.faza]))}</td><td>${zl(g.ukl)}</td><td>${zl(g.zab)}</td><td><b>${zl(g.razem)}</b></td><td style="color:${g.nadw>=0?'var(--good)':'var(--bad)'}">${zl(g.nadw)}</td></tr>`).join('')}).join('')}
+    </tbody></table></div>
+    <h3 style="margin-top:14px">${e(tt('Plan dla wierzycieli'))}</h3>
+    <div class="ftw"><table class="ftab"><thead><tr><th>#</th><th>${e(tt('Wierzyciel'))}</th><th>${e(tt('Dług'))}</th><th>${e(tt('Umorzenie'))}</th><th>${e(tt('Do spłaty'))}</th><th>${e(tt('Rata / mies.'))}</th><th>${e(tt('Spłata'))}</th></tr></thead><tbody>
+    ${P.cred.map(c=>`<tr><td>${c.nr}</td><td>${e(tt(c.rodzaj))}${c.w?'':' <small style="color:var(--mut)">('+e(tt('poza układem'))+')</small>'}</td><td>${zl(c.kw)}</td><td>${zl(c.um)}</td><td>${zl(c.doSplaty)}</td><td><b>${zl(c.rata)}</b></td><td>${c.w?e(mies(P.months[c.od-1].data))+' – '+e(mies(P.months[c.do-1].data)):e(tt('jak dotąd'))}</td></tr>`).join('')}
+    </tbody></table></div>
+    <button class="btn" id="fPrint" type="button" style="margin-top:12px">🖨️ ${e(tt('Drukuj / zapisz PDF — plan dla wierzycieli'))}</button></div>`;
+}
+function printPlan(R,P){
+  const firma=(document.getElementById('fFirma')?.value||'').trim(),w=window.open('','_blank');if(!w)return alert(tt('Zezwól na otwarcie okna wydruku.'));
+  const row=(a)=>`<tr>${a.map(x=>`<td>${x}</td>`).join('')}</tr>`;
+  w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>${e(tt('Propozycja układu — plan spłaty'))}</title><style>
+    body{font:12px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#111;margin:28px}h1{font-size:20px;margin:0 0 4px}h2{font-size:14px;margin:22px 0 8px}
+    table{width:100%;border-collapse:collapse}th,td{border:1px solid #bbb;padding:5px 7px;text-align:left}th{background:#f1f1f4}td:nth-child(n+3){text-align:right}
+    .meta{color:#555;margin-bottom:14px}.box{border:1px solid #bbb;padding:10px 12px;margin:10px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.box b{display:block;font-size:15px}
+    .note{color:#555;font-size:11px;margin-top:18px}@media print{body{margin:12mm}button{display:none}}</style></head><body>
+    <button onclick="print()" style="float:right;padding:8px 14px">Drukuj / PDF</button>
+    <h1>${e(tt('Propozycja układu — plan spłaty'))}</h1><div class="meta">${firma?e(firma)+' · ':''}${e(tt('przygotowano'))} ${new Date().toLocaleDateString('pl-PL')}</div>
+    <div class="box"><div>${e(tt('Suma długów'))}<b>${zl(R.rows.reduce((a,r)=>a+(+r.kw||0),0))}</b></div><div>${e(tt('Umorzenie'))}<b>${zl(R.umorz)} (${S.red}%)</b></div><div>${e(tt('Raty po układzie'))}<b>${zl(R.rAfter)} / ${e(tt('mies.'))}</b></div>
+      <div>${e(tt('Okres ochrony'))}<b>${OCHRONA} ${e(tt('mies.'))}</b></div><div>${e(tt('Karencja'))}<b>${S.kar} ${e(tt('mies.'))}</b></div><div>${e(tt('Liczba rat'))}<b>${S.mies}</b></div></div>
+    <h2>${e(tt('Plan dla wierzycieli'))}</h2><table><tr><th>#</th><th>${e(tt('Wierzyciel'))}</th><th>${e(tt('Dług'))}</th><th>${e(tt('Umorzenie'))}</th><th>${e(tt('Do spłaty'))}</th><th>${e(tt('Rata / mies.'))}</th><th>${e(tt('Spłata'))}</th></tr>
+    ${P.cred.map(c=>row([c.nr,e(tt(c.rodzaj))+(c.w?'':' ('+e(tt('poza układem'))+')'),zl(c.kw),zl(c.um),zl(c.doSplaty),zl(c.rata),c.w?e(mies(P.months[c.od-1].data))+' – '+e(mies(P.months[c.do-1].data)):e(tt('jak dotąd'))])).join('')}</table>
+    <h2>${e(tt('Harmonogram miesięczny'))}</h2><table><tr><th>${e(tt('Miesiąc'))}</th><th>${e(tt('Etap'))}</th><th>${e(tt('Raty układowe'))}</th><th>${e(tt('Długi zabezpieczone'))}</th><th>${e(tt('Razem'))}</th></tr>
+    ${P.months.map(x=>row([e(mies(x.data)),e(tt(FAZA[x.faza])),zl(x.ukl),zl(x.zab),zl(x.razem)])).join('')}</table>
+    <p class="note">${e(tt('Plan orientacyjny przygotowany na podstawie danych przedsiębiorcy. Ostateczne warunki układu ustala się z wierzycielami i nadzorcą układu.'))}</p></body></html>`);
+  w.document.close();
+}
+window.FIRMA={render,calc,plan,PRAWO_RST};
 })();

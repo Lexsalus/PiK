@@ -88,6 +88,10 @@ Do decyzji właściciela:
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
 
+## Zakładki karty sprawy i Prawa w grupach (v1.28.0)
+
+Karta sprawy: **Sprawa** (Dane klienta, Etapy, Historia) · **Praca nad sprawą** (Terminy, Dokumenty, Zespół) · **Pieniądze** (Finanse) · **Analiza i prawo** (Analiza). Prawo: **Zmiany** (Zmiany w ustawach, Projekty) · **Narzędzia** (Odsetki, Przepisy, Orzecznictwo). Zgłoszenie z restrukturyzacji pokazuje plan dla wierzycieli (rata, miesiące spłaty).
+
 ## Zakładki w grupach i 🔧 Techniczne (v1.25.0)
 
 - **Treści strony** — zakładki w grupach z kolorami: **Strona** (Ustawienia, Kategorie), **Narzędzia dla klienta** (Kalkulatory, Analiza umów, Nowe funkcje), **Kontakt** (Czat Adam), **Zasięg** (Tłumaczenia, SEO), **Technika i publikacja** (Techniczne, Publikacja). **Kropka** przy zakładce = w tej części szkic różni się od opublikowanej wersji. Dymki opisują zakładki.
