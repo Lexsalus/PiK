@@ -284,6 +284,10 @@ Codziennie ok. 6:17 GitHub Actions uruchamia `tools/prawo_sync.py`: pobiera z of
 
 Dziennik ostatniego przebiegu: `prawo/sync-log.txt`, wynik: `prawo/stan.json` (widać też w CRM → Prawo). Teksty z ISAP są informacyjne — wiążący jest Dziennik Ustaw.
 
+## 12b. Orzecznictwo (SAOS)
+
+Synchronizacja pobiera codziennie najnowsze orzeczenia z bazy **SAOS** (System Analizy Orzeczeń Sądowych, saos.org.pl) dla każdej kategorii spraw → `prawo/orzeczenia.json`. W CRM: 📜 Prawo → **Orzecznictwo** (lista dla kategorii moich spraw / wszystkich, przycisk „📎 Dołącz do sprawy” — wpis w historii sprawy z sygnaturą, sądem, datą i linkiem) oraz wyszukiwarka: SAOS, portal orzeczeń sądów powszechnych, Sąd Najwyższy, TSUE. W karcie sprawy → Analiza: 5 najnowszych orzeczeń z kategorii sprawy. Zapytania dla kategorii: Treści strony → ✨ Nowe funkcje → Orzecznictwo (puste = domyślne). Uwaga: baza SAOS może nie mieć najnowszych orzeczeń — aktualne sprawdzaj w portalach sądów.
+
 ## 13. CRM kancelarii
 
 Zaplecze dla adwokatów i pracowników: `https://lexsalus.github.io/PiK/crm.html`. Pełny opis ról i modułów: `CRM.md`; baza: `SUPABASE.md`.

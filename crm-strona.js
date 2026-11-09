@@ -345,12 +345,15 @@ function vObs(){
     ${rows}
     <p class="hint">Zmiany działają po <b>opublikowaniu</b>, przy najbliższej codziennej synchronizacji (ok. 6:17). Adres ELI znajdziesz na isap.sejm.gov.pl (np. „WDU19640160093” → <code>DU/1964/93</code>). Nowa ustawa: pierwsze dane i teksty pojawią się po synchronizacji.</p></div>
   <div class="box"><h3>🏛️ Projekty w Sejmie — słowa w tytułach</h3><div class="form">${cats.map(c=>`<label>${esc(c.name)}<textarea class="f" rows="2" data-stch="obsProj('${esc(c.code)}',this.value)" placeholder="np. kredy* konsumen*">${esc((pr[c.code]||[]).join(', '))}</textarea></label>`).join('')}</div>
-    <p class="hint">Po przecinku; bez polskich znaków; <code>*</code> = początek słowa (kredy* → kredyt, kredytu…).</p></div>`;
+    <p class="hint">Po przecinku; bez polskich znaków; <code>*</code> = początek słowa (kredy* → kredyt, kredytu…).</p></div>
+  <div class="box"><h3>⚖️ Orzecznictwo — zapytania do bazy SAOS</h3><div class="form">${cats.map(c=>`<label>${esc(c.name)}<textarea class="f" rows="2" data-stch="obsOrz('${esc(c.code)}',this.value)" placeholder="domyślne zapytanie">${esc(((O.orzecznictwo||{})[c.code]||[]).join('\n'))}</textarea></label>`).join('')}</div>
+    <p class="hint">Każda linia to jedno zapytanie (najwyżej 3 na kategorię). Puste — zapytanie domyślne. Wyniki: CRM → 📜 Prawo → Orzecznictwo i karta sprawy → Analiza.</p></div>`;
 }
 async function obsStart(){
   try{const j=await (await fetch('prawo/obserwowane.json',{cache:'no-store'})).json();
     const pr={};Object.entries(j.projekty||{}).forEach(([k,v])=>{if(!k.startsWith('_')&&Array.isArray(v))pr[k]=v});
-    D.obserwowane={akty:structuredClone(j.akty||[]),projekty:pr};save();render();toast('Lista przejęta do szkicu — opublikuj, by działała')}
+    const oz={};Object.entries(j.orzecznictwo||{}).forEach(([k,v])=>{if(!k.startsWith('_')&&Array.isArray(v))oz[k]=v});
+    D.obserwowane={akty:structuredClone(j.akty||[]),projekty:pr,orzecznictwo:oz};save();render();toast('Lista przejęta do szkicu — opublikuj, by działała')}
   catch(e){toast('Nie udało się wczytać prawo/obserwowane.json',true)}
 }
 function obsReset(){if(!confirm('Usunąć listę ustaw z CRM? Synchronizacja wróci do pliku z repozytorium (po opublikowaniu).'))return;delete D.obserwowane;save();render()}
@@ -360,6 +363,7 @@ function obsMv(i,d){const a=D.obserwowane.akty,j=i+d;if(j<0||j>=a.length)return;
 const obsSplit=v=>String(v).split(/[,\n]/).map(x=>x.trim()).filter(Boolean);
 function obsList(i,k,v){D.obserwowane.akty[i][k]=obsSplit(v);save()}
 function obsCat(i,c,on){const a=D.obserwowane.akty[i],k=new Set(a.kategorie||[]);on?k.add(c):k.delete(c);a.kategorie=[...k];save()}
+function obsOrz(c,v){const p=D.obserwowane.orzecznictwo||(D.obserwowane.orzecznictwo={}),w=String(v).split('\n').map(x=>x.trim()).filter(Boolean).slice(0,3);if(w.length)p[c]=w;else delete p[c];save()}
 function obsProj(c,v){const p=D.obserwowane.projekty||(D.obserwowane.projekty={}),w=obsSplit(v);if(w.length)p[c]=w;else delete p[c];save()}
 async function obsCheck(i){
   const a=D.obserwowane.akty[i];if(!OBS_ELI.test(a.eli||''))return toast('Wpisz adres ELI, np. DU/1964/93',true);

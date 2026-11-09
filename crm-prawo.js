@@ -7,16 +7,16 @@ const P=window.PRAWO;if(!P){console.warn('prawo.js nie wczytany');return}
 const seenKey=()=>'crm_prawo_seen_'+(ME?.id||'');
 const getSeen=()=>{try{return localStorage.getItem(seenKey())||''}catch(e){return ''}};
 const setSeen=v=>{try{localStorage.setItem(seenKey(),v)}catch(e){}};
-let Z=null,A=null,PR=null,O=null,S=null,loadErr='';
+let Z=null,A=null,PR=null,O=null,S=null,OR=null,loadErr='';
 const openCases=cats=>myCases().filter(c=>c.status==='open'&&cats.includes(c.category));
 /* nowe zmiany dotyczące kategorii moich spraw (licznik w menu) */
 window.prawoNew=()=>{if(!Z||!ME)return 0;const s=getSeen(),mine=new Set(myCases().filter(c=>c.status==='open').map(c=>c.category));
   return Z.zmiany.filter(z=>(z.wykryto||'')>s&&(isAdmin()||z.kategorie.some(k=>mine.has(k)))).length};
 async function loadAll(force){
   if(Z&&!force)return;
-  const r=await Promise.allSettled([P.load('zmiany'),P.acts(),P.load('projekty'),P.loadOds().then(()=>P.load('odsetki')),P.load('stan')]);
-  [Z,A,PR,O,S]=r.map(x=>x.status==='fulfilled'?x.value:null);
-  loadErr=r.every(x=>x.status==='rejected')?'Dane prawne nie zostały jeszcze pobrane — synchronizacja z API Sejmu działa raz dziennie (GitHub Actions).':'';
+  const r=await Promise.allSettled([P.load('zmiany'),P.acts(),P.load('projekty'),P.loadOds().then(()=>P.load('odsetki')),P.load('stan'),P.load('orzeczenia')]);
+  [Z,A,PR,O,S,OR]=r.map(x=>x.status==='fulfilled'?x.value:null);
+  loadErr=r.slice(0,5).every(x=>x.status==='rejected')?'Dane prawne nie zostały jeszcze pobrane — synchronizacja z API Sejmu działa raz dziennie (GitHub Actions).':'';
   if(Z&&!Z.zmiany)Z.zmiany=[];
   lawNotify();
 }
@@ -36,9 +36,9 @@ const origMenu=menuItems;
 window.menuItems=menuItems=function(){const m=origMenu();if(!seesCases())return m;
   const i=m.findIndex(x=>x[0]==='strona'||x[0]==='ustawienia');m.splice(i<0?m.length:i,0,['prawo','📜','Prawo',prawoNew(),'n']);return m};
 
-const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy'],['waluty','Kredyt walutowy']];
-const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy','waluty']}];
-Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.',waluty:'Symulacja kredytu CHF / EUR z kursów NBP: raty, wpłaty, saldo.'});
+const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy'],['waluty','Kredyt walutowy'],['orzeczenia','Orzecznictwo']];
+const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy','orzeczenia','waluty']}];
+Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.',orzeczenia:'Najnowsze orzeczenia sądów w kategoriach spraw (SAOS) i wyszukiwarki orzeczeń.',waluty:'Symulacja kredytu CHF / EUR z kursów NBP: raty, wpłaty, saldo.'});
 const catChips=ks=>(ks||[]).map(k=>catBadge(k)).join(' ');
 const dl=(d)=>d?P.fmtD(d):'—';
 ROUTES.prawo=(sub)=>{
@@ -150,6 +150,42 @@ window.fxSym=(r,full)=>{
     ${k('Kapitał w walucie',money(r.kapitalFx).replace('zł',W),'kurs wypłaty '+r.kursWyplaty.toFixed(4)+' ('+r.miesiacWyplaty+')')}${k('Wpływ kursu na wpłaty',m(r.bezIndeksacji),'ponad raty liczone po kursie z wypłaty')}${k('Korzyść z unieważnienia',`<span style="color:var(--ok)">${m(ben)}</span>`,'wpłaty + saldo − kwota wypłacona')}</div>
     <div class="tw" style="margin-top:12px"><table><tr><th>Rok</th><th>Raty</th><th>Wpłaty</th><th>Śr. kurs sprzedaży</th><th>Śr. oprocentowanie</th></tr>${r.lata.map(l=>`<tr><td>${l.rok}</td><td>${l.raty}</td><td>${m(l.wplaty)}</td><td>${l.kurs.toFixed(4)}</td><td>${l.stopa.toFixed(2).replace('.',',')}%</td></tr>`).join('')}</table></div>`;
 };
+/* --- orzecznictwo: SAOS (prawo/orzeczenia.json, codzienna synchronizacja) + wyszukiwarki zewnętrzne --- */
+let oCat='mine',oQ='';
+const ORZ_SZUKAJ=[['SAOS',q=>'https://www.saos.org.pl/search?all='+encodeURIComponent(q)],['Portal orzeczeń sądów powszechnych',q=>'https://www.google.com/search?q='+encodeURIComponent('site:orzeczenia.ms.gov.pl '+q)],
+  ['Sąd Najwyższy',q=>'https://www.google.com/search?q='+encodeURIComponent('site:sn.pl orzeczenie '+q)],['TSUE',q=>'https://www.google.com/search?q='+encodeURIComponent('site:curia.europa.eu '+q)]];
+const orzItem=(o,caseId)=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span><a href="${esc(o.url)}" target="_blank" rel="noopener"><b>${esc(o.rodzaj||'orzeczenie')} ${esc(o.sygn||'')}</b></a> · ${esc(o.sad||'')} · ${P.fmtD(o.data)}</span>${caseId!==undefined?`<button class="btn sm" type="button" onclick="orzAttach(${o.id},${caseId?`'${caseId}'`:'null'})">📎 Dołącz do sprawy</button>`:''}</div>
+  ${(o.hasla||[]).length?`<div class="small mut">${o.hasla.map(esc).join(' · ')}</div>`:''}${o.fragment?`<div class="small" style="margin-top:4px">${esc(o.fragment)}…</div>`:''}</div>`;
+const orzAll=()=>Object.entries(OR?.kategorie||{}).flatMap(([k,v])=>(v.orzeczenia||[]).map(o=>({...o,kat:k})));
+VIEW.orzeczenia=async()=>{
+  const mine=new Set(myCases().filter(c=>c.status==='open').map(c=>c.category)),K=OR?.kategorie||{};
+  const kats=Object.keys(K).filter(k=>oCat==='all'||(oCat==='mine'?mine.has(k)||!mine.size:k===oCat));
+  const q=oQ||(kats.length===1?(K[kats[0]].zapytania||[])[0]||'':'');
+  return `<div class="card"><h3>🔎 Szukaj orzeczeń</h3><div class="toolbar"><input class="f" id="orQ" value="${esc(q)}" placeholder="np. sankcja kredytu darmowego prowizja" style="flex:1;min-width:220px">${ORZ_SZUKAJ.map(([n,u],i)=>`<a class="btn sm${i?'':' pri'}" target="_blank" rel="noopener" data-orz="${i}" href="${esc(u(q||'kredyt'))}">${esc(n)} ↗</a>`).join('')}</div>
+    <p class="hint">Wyszukiwanie otwiera się w bazie orzeczeń (SAOS) albo w wyszukiwarce ograniczonej do serwisu sądu.</p></div>
+  ${OR?`<div class="toolbar"><select class="f" id="orCat"><option value="mine" ${oCat==='mine'?'selected':''}>Kategorie moich spraw</option><option value="all" ${oCat==='all'?'selected':''}>Wszystkie</option>${Object.keys(K).map(k=>`<option value="${esc(k)}" ${oCat===k?'selected':''}>${esc(CAT(k).name)}</option>`).join('')}</select></div>
+  ${kats.map(k=>`<div class="card"><h3>${catBadge(k)} <span class="mut small">zapytanie: ${esc((K[k].zapytania||[]).join(' · '))}</span></h3>${(K[k].orzeczenia||[]).slice(0,12).map(o=>orzItem(o,null)).join('')||'<div class="empty">Brak orzeczeń.</div>'}</div>`).join('')||'<div class="empty">Brak orzeczeń w tych kategoriach.</div>'}
+  <p class="hint">Źródło: SAOS — System Analizy Orzeczeń Sądowych (saos.org.pl), pobrano ${P.fmtD(OR.pobrano)}. Najnowsze orzeczenia w bazie mogą być sprzed kilku lat — aktualne sprawdzaj w portalach sądów. Zapytania zmienisz w CRM → Treści strony → ✨ Nowe funkcje.</p>`
+  :'<div class="empty">Orzeczenia z SAOS nie są jeszcze pobrane — pojawią się po najbliższej synchronizacji.</div>'}${stanLine()}`;
+};
+VIEW.orzeczenia.after=()=>{
+  const s=$('#orCat');if(s)s.onchange=()=>{oCat=s.value;oQ='';ROUTES.prawo.after('orzeczenia')};
+  const q=$('#orQ');if(q)q.oninput=()=>{oQ=q.value;document.querySelectorAll('[data-orz]').forEach(a=>a.href=ORZ_SZUKAJ[+a.dataset.orz][1](q.value||'kredyt'))};
+};
+/* dołączenie orzeczenia do sprawy (notatka „analiza”) */
+window.orzAttach=(id,caseId)=>{
+  const o=orzAll().find(x=>x.id===id);if(!o)return;
+  const cs=myCases().filter(c=>c.status==='open'&&caseFlags(c).actionsChange&&DB.stages.some(s=>s.caseId===c.id&&s.status==='open'));
+  if(!cs.length)return toast('Brak otwartych spraw, w których możesz dodawać wpisy',true);
+  modal('Dołącz orzeczenie do sprawy',`<div class="form"><label class="full">Sprawa<select class="f" name="case">${cs.map(c=>`<option value="${c.id}" ${c.id===caseId?'selected':''}>${esc(c.number)} · ${esc(clientName(c))}</option>`).join('')}</select></label>
+    <label class="full">Uwagi<textarea class="f" name="note" placeholder="np. teza istotna dla sprawy"></textarea></label></div>
+    <div class="card" style="background:var(--bg2);margin-top:10px">${orzItem(o)}</div>`,{ok:'Dołącz',onOk:async v=>{
+    const c=CASE(v.case),st=DB.stages.find(s=>s.caseId===c.id&&s.status==='open');if(!st)throw new Error('Brak otwartego etapu w sprawie');
+    const lines=[`${o.rodzaj||'Orzeczenie'} ${o.sygn} — ${o.sad}, ${P.fmtD(o.data)}`,o.url,'',...(o.hasla?.length?['Hasła: '+o.hasla.join(', ')]:[]),...(o.fragment?[o.fragment+'…']:[]),'','Źródło: SAOS (saos.org.pl).'];
+    if(v.note?.trim())lines.push('','Uwagi: '+v.note.trim());
+    await act(async()=>chk(await sb.from('case_entries').insert({case_id:c.id,stage_id:st.id,type:'notatka',kind:'analiza',title:`Orzeczenie: ${o.sygn} (${o.sad})`.slice(0,300),description:lines.join('\n'),performed_on:iso(new Date())})),`Dołączono do sprawy ${c.number}`);
+  }});
+};
 VIEW.przepisy=async()=>`<div class="card"><h3>Wyszukiwarka przepisów</h3>${searchBox('pp')}</div>${stanLine()}`;
 VIEW.przepisy.after=()=>bindSearch('pp',null);
 
@@ -195,7 +231,8 @@ window.leadAnaliza=a=>{if(!a)return '';const L=x=>P.linkify(esc(x||''));
 
 /* --- karta „Przepisy” w zakładce Analiza sprawy --- */
 const origAnaliza=CTAB.analiza;
-CTAB.analiza=c=>origAnaliza(c)+(c.leadData?.analiza?leadAnaliza(c.leadData.analiza):'')+(c.leadData?.symulacja?`<div class="card" style="margin-top:10px;background:var(--bg2)"><b>💱 Kredyt walutowy — symulacja klienta ze strony</b>${fxSym(c.leadData.symulacja)}</div>`:'')+`<div class="card" style="margin-top:14px"><h3>📜 Przepisy <span class="mut small">wyszukaj i dołącz do sprawy ze stanem prawnym na wybrany dzień</span></h3><div id="caPrawo">${searchBox('cp',c.id)}</div></div>`;
+const orzCase=c=>{const L=(OR?.kategorie?.[c.category]?.orzeczenia||[]).slice(0,5);return L.length?`<div class="card" style="margin-top:14px"><h3>⚖️ Orzecznictwo — ${esc(CAT(c.category).name)} <a class="btn sm" href="#/prawo/orzeczenia">Więcej</a></h3>${L.map(o=>orzItem(o,c.id)).join('')}</div>`:''};
+CTAB.analiza=c=>origAnaliza(c)+orzCase(c)+(c.leadData?.analiza?leadAnaliza(c.leadData.analiza):'')+(c.leadData?.symulacja?`<div class="card" style="margin-top:10px;background:var(--bg2)"><b>💱 Kredyt walutowy — symulacja klienta ze strony</b>${fxSym(c.leadData.symulacja)}</div>`:'')+`<div class="card" style="margin-top:14px"><h3>📜 Przepisy <span class="mut small">wyszukaj i dołącz do sprawy ze stanem prawnym na wybrany dzień</span></h3><div id="caPrawo">${searchBox('cp',c.id)}</div></div>`;
 const origAfter=ROUTES.sprawa.after;
 ROUTES.sprawa.after=(id,tab)=>{origAfter?.(id,tab);if((tab||'')==='analiza'&&$('#cpGo')){loadAll().then(()=>{const sel=$('#cpAct');if(sel&&sel.options.length<=1)sel.innerHTML=`<option value="">Wszystkie ustawy</option>`+(A?.akty||[]).filter(a=>a.tekst).map(a=>`<option value="${esc(a.id)}">${esc(a.nazwa)}</option>`).join('');
   const cat=CASE(id)?.category,pref=(A?.akty||[]).find(a=>a.tekst&&a.kategorie[0]===cat);if(pref&&sel)sel.value=pref.id}).catch(()=>{});bindSearch('cp',id)}};

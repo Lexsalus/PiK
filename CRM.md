@@ -48,7 +48,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 - **Raporty:** filtr statusu, eksport CSV / XLSX / PDF (drukowanie do pliku), każdy w audycie; aplikant widzi własne czynności i terminy.
 - **Wylogowanie po 30 min bezczynności**; kolejność kategorii także przeciąganiem.
 
-**Testy:** reguły bazy 148/148 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 129/129 (`supabase/test/e2e/`).
+**Testy:** reguły bazy 148/148 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 132/132 (`supabase/test/e2e/`).
 
 ## Treści strony (migracja 005, 27.10.2026)
 
@@ -88,8 +88,9 @@ Do decyzji właściciela:
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
 
-## Kredyt walutowy i obserwowane ustawy (v1.29–1.30)
+## Kredyt walutowy, orzecznictwo i obserwowane ustawy (v1.29–1.31)
 
+- 📜 Prawo → **Orzecznictwo**: najnowsze orzeczenia z SAOS dla kategorii spraw, dołączanie do sprawy, wyszukiwarki (SAOS, sądy powszechne, SN, TSUE); karta sprawy → Analiza: orzeczenia z kategorii sprawy.
 - 📜 Prawo → **Kredyt walutowy**: symulacja kredytu CHF/EUR z kursów NBP (raty, wpłaty, saldo, tabela lat, wpływ kursu). Zgłoszenia ze strony pokazują symulację klienta.
 - Treści strony → ✨ Nowe funkcje → **Obserwowane ustawy**: lista ustaw i słów do projektów (zamiast pliku w repozytorium).
 

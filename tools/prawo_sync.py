@@ -13,6 +13,7 @@ Wyjście:  prawo/akty.json        — stan obserwowanych i uchylonych aktów, te
           prawo/projekty.json    — projekty ustaw w Sejmie pasujące do kategorii spraw
           prawo/odsetki.json     — aktualne odsetki ustawowe z obwieszczeń w Monitorze Polskim
           prawo/teksty/<id>.json — artykuły z ostatniego tekstu jednolitego (wyszukiwarka, Adam, podgląd)
+          prawo/orzeczenia.json  — najnowsze orzeczenia dla kategorii spraw (SAOS — System Analizy Orzeczeń Sądowych)
           prawo/kursy.json       — miesięczne kursy NBP (CHF, EUR: średni z tabeli A, kupno/sprzedaż z tabeli C) do symulacji kredytów walutowych
           prawo/stan.json        — kiedy i z jakim skutkiem działała synchronizacja
           prawo/sync-log.txt     — dziennik ostatniego przebiegu
@@ -40,6 +41,11 @@ ELI = 'https://api.sejm.gov.pl/eli'
 SEJM = 'https://api.sejm.gov.pl/sejm'
 NBP = 'https://api.nbp.pl/api/exchangerates/rates'
 WALUTY = ('CHF', 'EUR')
+SAOS = 'https://www.saos.org.pl'
+ORZ_DOMYSLNE = {   # zapytania do wyszukiwarki SAOS dla kategorii spraw (można zmienić w CRM)
+    'SKD': ['sankcja kredytu darmowego'], 'CHF': ['kredyt indeksowany frank szwajcarski'], 'FX': ['kredyt denominowany'],
+    'PLN': ['WIBOR kredyt'], 'RST': ['postępowanie restrukturyzacyjne układ'], 'ROD': ['alimenty'],
+    'CIV': ['przedawnienie roszczenia konsument'], 'INNE': ['niedozwolone postanowienie umowne']}
 UA = 'PiK-prawo-sync/1.0 (+https://lexsalus.github.io/PiK/)'
 PARSER = 5  # wersja parsera tekstów — zmiana wymusza ponowne pobranie artykułów
 PAUSE = float(os.environ.get('PRAWO_PAUSE', '0.25'))  # odstęp między zapytaniami — nie obciążamy serwerów Sejmu
@@ -696,6 +702,51 @@ def sync_kursy():
     save('kursy.json', out)
 
 
+# ---------------------------------------------------------------- orzecznictwo (SAOS)
+def judgment(it):
+    """Pozycja z wyszukiwarki SAOS -> skrócony opis orzeczenia."""
+    div = it.get('division') or {}
+    court = (div.get('court') or {}).get('name') or {'SUPREME': 'Sąd Najwyższy', 'CONSTITUTIONAL_TRIBUNAL': 'Trybunał Konstytucyjny',
+                                                      'ADMINISTRATIVE': 'Sąd administracyjny', 'NATIONAL_APPEAL_CHAMBER': 'Krajowa Izba Odwoławcza'}.get(it.get('courtType'), '')
+    if it.get('courtType') == 'SUPREME':
+        ch = [c.get('name') for c in (it.get('chambers') or []) if c.get('name')]
+        court = 'Sąd Najwyższy' + (' — ' + ch[0] if ch else '')
+    txt = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', str(it.get('textContent') or '')))).strip()
+    return {'id': it.get('id'), 'sygn': ', '.join(c.get('caseNumber', '') for c in (it.get('courtCases') or []) if c.get('caseNumber')),
+            'sad': court, 'wydzial': div.get('name', ''), 'data': it.get('judgmentDate', ''), 'rodzaj': {'SENTENCE': 'wyrok', 'DECISION': 'postanowienie', 'RESOLUTION': 'uchwała', 'REASONS': 'uzasadnienie', 'REGULATION': 'zarządzenie'}.get(it.get('judgmentType'), (it.get('judgmentType') or '').lower()),
+            'hasla': [k for k in (it.get('keywords') or []) if isinstance(k, str)][:6], 'fragment': txt[:400],
+            'url': f"{SAOS}/judgments/{it.get('id')}"}
+
+
+def sync_orzeczenia(cfg):
+    zap = ORZ_DOMYSLNE | {k: v for k, v in (cfg.get('orzecznictwo') or {}).items() if not k.startswith('_') and isinstance(v, list) and v}
+    old = load('orzeczenia.json', {}).get('kategorie', {})
+    out, bledy = {}, 0
+    for kat, qs in zap.items():
+        lst, seen = [], set()
+        try:
+            for q in qs[:3]:
+                for extra in ('', '&courtType=SUPREME'):
+                    url = f"{SAOS}/api/search/judgments?all={urllib.parse.quote(q)}&sortingField=JUDGMENT_DATE&sortingDirection=DESC&pageSize={8 if extra else 15}{extra}"
+                    for it in jget(url).get('items', []):
+                        j = judgment(it)
+                        if j['id'] and j['id'] not in seen:
+                            seen.add(j['id']); lst.append(j)
+                    time.sleep(PAUSE)
+            lst.sort(key=lambda j: j['data'], reverse=True)
+            out[kat] = {'zapytania': qs[:3], 'orzeczenia': lst[:20]}
+        except Exception as e:
+            bledy += 1
+            log(f'⚠ orzecznictwo {kat}: {e!r} — zostaje poprzednia lista')
+            if kat in old:
+                out[kat] = old[kat]
+    if bledy == len(zap):
+        raise RuntimeError('SAOS niedostępny')
+    save('orzeczenia.json', {'_info': 'Najnowsze orzeczenia z SAOS (saos.org.pl) dla kategorii spraw. Dane informacyjne — treść orzeczenia sprawdź w źródle.',
+                             'pobrano': TODAY.isoformat(), 'kategorie': out})
+    log(f"✓ orzecznictwo: {sum(len(v['orzeczenia']) for v in out.values())} orzeczeń w {len(out)} kategoriach")
+
+
 # ---------------------------------------------------------------- lista ustaw z CRM
 RE_ID = re.compile(r'^[a-z0-9_]{1,20}$')
 RE_ELI = re.compile(r'^(DU|MP)/\d{4}/\d{1,5}$')
@@ -721,16 +772,18 @@ def clean_cfg(obs):
         ids.add(aid); elis.add(eli)
         lst = lambda k: [str(x).strip() for x in (a.get(k) or []) if str(x).strip()][:40]
         akty.append({'id': aid, 'eli': eli, 'nazwa': nazwa[:200], 'skrot': lst('skrot'), 'kategorie': lst('kategorie'), 'teksty': a.get('teksty') is not False})
-    proj = None
-    if isinstance(obs.get('projekty'), dict):
-        proj = {}
-        for k, v in obs['projekty'].items():
+    def words(d, n):
+        if not isinstance(d, dict):
+            return None
+        r = {}
+        for k, v in d.items():
             if k.startswith('_') or not isinstance(v, list):
                 continue
-            w = [str(x).strip() for x in v if str(x).strip()][:30]
+            w = [str(x).strip()[:120] for x in v if str(x).strip()][:n]
             if w:
-                proj[str(k)[:10]] = w
-    return akty, proj
+                r[str(k)[:10]] = w
+        return r
+    return akty, words(obs.get('projekty'), 30), words(obs.get('orzecznictwo'), 3)
 
 
 def crm_cfg(cfg):
@@ -747,7 +800,7 @@ def crm_cfg(cfg):
         obs = rows[0].get('obs') if rows else None
         if not obs:
             return cfg, 'plik'
-        akty, proj = clean_cfg(obs)
+        akty, proj, orz = clean_cfg(obs)
     except ValueError as e:
         log(f'⚠ lista ustaw z CRM odrzucona ({e}) — używam prawo/obserwowane.json')
         return cfg, 'plik (błąd w CRM)'
@@ -758,6 +811,8 @@ def crm_cfg(cfg):
     new['akty'] = akty
     if proj:
         new['projekty'] = {'_info': (cfg.get('projekty') or {}).get('_info', '')} | proj
+    if orz is not None:
+        new['orzecznictwo'] = {'_info': 'Zapytania do wyszukiwarki SAOS dla kategorii spraw (najwyżej 3 na kategorię).'} | orz
     if new != cfg:
         with open(os.path.join(OUT, 'obserwowane.json'), 'w', encoding='utf-8') as f:
             json.dump(new, f, ensure_ascii=False, indent=2)
@@ -775,7 +830,7 @@ def main():
     stan['lista'] = zrodlo
     res = {}
     t0 = time.time()
-    for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki), ('kursy', sync_kursy)]:
+    for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki), ('kursy', sync_kursy), ('orzecznictwo', lambda: sync_orzeczenia(cfg))]:
         try:
             r = fn()
             res[name] = 'ok'

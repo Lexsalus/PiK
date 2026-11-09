@@ -55,10 +55,13 @@ def bad(o):
   try: P.clean_cfg(o); return False
   except ValueError: return True
 A=lambda **k:{'id':'kc','eli':'DU/1964/93','nazwa':'Kodeks cywilny','skrot':['KC',' '],'kategorie':['SKD'],**k}
-ak,pr=P.clean_cfg({'akty':[A(teksty=False)],'projekty':{'_info':'x','SKD':['kredy*',''],'X':'zle'}})
+ak,pr,oz=P.clean_cfg({'akty':[A(teksty=False)],'projekty':{'_info':'x','SKD':['kredy*',''],'X':'zle'},'orzecznictwo':{'CHF':['a','b','c','d']}})
 res += [
-  ok(ak==[{'id':'kc','eli':'DU/1964/93','nazwa':'Kodeks cywilny','skrot':['KC'],'kategorie':['SKD'],'teksty':False}] and pr=={'SKD':['kredy*']},'lista z CRM: czyszczenie pozycji i słów do projektów'),
+  ok(ak==[{'id':'kc','eli':'DU/1964/93','nazwa':'Kodeks cywilny','skrot':['KC'],'kategorie':['SKD'],'teksty':False}] and pr=={'SKD':['kredy*']} and oz=={'CHF':['a','b','c']},'lista z CRM: czyszczenie pozycji i słów do projektów'),
   ok(bad({'akty':[]}) and bad({'akty':[A(eli='1964/93')]}) and bad({'akty':[A(id='K C')]}) and bad({'akty':[A(),A(id='kc2')]}) and bad({'akty':[A(nazwa='')]}),'lista z CRM: błędne ELI, identyfikator, duplikat, brak nazwy odrzucone')]
 mm=P.monthly([{'effectiveDate':'2008-07-01','bid':2.0,'ask':2.04},{'effectiveDate':'2008-07-02','bid':2.02,'ask':2.06},{'effectiveDate':'2008-08-01','bid':2.1,'ask':None}],['bid','ask'])
 res.append(ok(mm=={'2008-07':[2.01,2.05]},f'kursy NBP: średnie miesięczne, niepełne notowania pominięte: {mm}'))
+jg=P.judgment({'id':123,'courtType':'COMMON','courtCases':[{'caseNumber':'I C 1/20'}],'judgmentType':'SENTENCE','textContent':'<p>Sąd&nbsp;uznał  klauzulę</p>','keywords':['kredyt'],'division':{'name':'I Wydział Cywilny','court':{'name':'Sąd Okręgowy w Warszawie'}},'judgmentDate':'2021-05-04'})
+sn=P.judgment({'id':5,'courtType':'SUPREME','courtCases':[{'caseNumber':'III CZP 25/22'}],'judgmentType':'RESOLUTION','chambers':[{'name':'Izba Cywilna'}],'judgmentDate':'2024-04-25'})
+res.append(ok(jg['sygn']=='I C 1/20' and jg['sad']=='Sąd Okręgowy w Warszawie' and jg['rodzaj']=='wyrok' and jg['fragment']=='Sąd uznał klauzulę' and jg['url'].endswith('/judgments/123') and sn['sad']=='Sąd Najwyższy — Izba Cywilna' and sn['rodzaj']=='uchwała','orzecznictwo: pozycja z SAOS (sygnatura, sąd, rodzaj, fragment, link)'))
 print(f'WYNIK: {sum(res)}/{len(res)}'); sys.exit(0 if all(res) else 1)

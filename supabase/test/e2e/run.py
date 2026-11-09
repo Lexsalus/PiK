@@ -16,6 +16,7 @@ async def main():
         body=open(HERE+'../../../crm.html',encoding='utf-8').read()
         body=_re.sub(r' integrity="sha384-[^"]*"','',body); body=_re.sub(r"x\.integrity='sha384-[^']*';",'',body)
         return await r.fulfill(status=200,content_type='text/html; charset=utf-8',body=body)
+      if u.split('?')[0].endswith('/prawo/orzeczenia.json'): return await r.fulfill(path=HERE+'orzeczenia-test.json',content_type='application/json')  # dane testowe, nie SAOS
       if u.split('?')[0].endswith('/prawo/kursy.json'): return await r.fulfill(path=HERE+'kursy-test.json',content_type='application/json')  # dane testowe, nie NBP
       if 'xlsx.full.min.js' in u: return await r.fulfill(path=HERE+'node_modules/xlsx/dist/xlsx.full.min.js',content_type='application/javascript')
       if 'rest/v1/site_content' in u:
@@ -26,6 +27,9 @@ async def main():
       if 'localhost' in u: return await r.continue_()
       await r.abort()
     await c.route('**/*',rt)
+    def sqlx(q):
+      import urllib.request
+      return json.loads(urllib.request.urlopen(urllib.request.Request('http://localhost:9900/sql',data=json.dumps({'sql':q,'params':[]}).encode(),method='POST')).read()).get('data') or []
     pg=await c.new_page(); pg.on('pageerror',lambda e:errs.append(str(e)+' @ '+str(getattr(e,'stack',''))[:500])); pg.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
     pg.on('console',lambda m: errs.append('console: '+m.text) if m.type=='error' else None)
     T=lambda s: pg.inner_text(s)
@@ -86,6 +90,12 @@ async def main():
     await nav('#/prawo/waluty'); await pg.wait_for_timeout(1200); v=await T('#view')
     ok('Kredyt indeksowany' in v and 'Zapłacone raty' in v and 'Saldo wg kursu NBP' in v and '2008' in v and 'Śr. kurs sprzedaży' in v,'Prawo → Kredyt walutowy: symulacja z kursów NBP (raty, saldo, tabela lat)')
     await pg.fill('#fxM',''); await pg.wait_for_timeout(300); ok('Uzupełnij kwotę' in await T('#fxOut'),'Kredyt walutowy: brak marży → komunikat')
+    await nav('#/prawo/orzeczenia'); await pg.wait_for_timeout(900); await pg.select_option('#orCat','all'); await pg.wait_for_timeout(700); v=await T('#view')
+    ok('Szukaj orzeczeń' in v and 'I C 2/21 TEST' in v and 'Fragment testowego orzeczenia CHF' in v and await pg.locator('a[data-orz]').count()==4,'Prawo → Orzecznictwo: lista z SAOS i wyszukiwarki')
+    await pg.fill('#orQ','prowizja'); ok('prowizja' in (await pg.get_attribute('a[data-orz="0"]','href')),'Orzecznictwo: zapytanie w linku do SAOS')
+    n0=len(sqlx("select 1 from public.case_entries where title like 'Orzeczenie:%'"))
+    await pg.click('button:has-text("Dołącz do sprawy") >> nth=1'); await pg.wait_for_timeout(500); await pg.click('#mform .mfoot button.pri'); await pg.wait_for_timeout(900)
+    ok(len(sqlx("select 1 from public.case_entries where title like 'Orzeczenie:%' and description like '%saos.org.pl%'"))==n0+1,'Orzecznictwo: dołączenie orzeczenia do sprawy (wpis w historii)')
     await nav('#/prawo/przepisy'); await pg.wait_for_timeout(500); await pg.fill('#ppQ','przedawnienie roszczeń'); await pg.click('#ppGo'); await pg.wait_for_timeout(2500)
     ok('Art.' in await T('#ppRes'),'Prawo: wyszukiwarka przepisów słowami')
     # --- nowe konto z CRM (funkcja serwera „konta”)

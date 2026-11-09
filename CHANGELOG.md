@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.31.0] — 2026-11-09
+- Orzecznictwo z SAOS: CRM → Prawo → Orzecznictwo (lista dla kategorii, dołączanie do sprawy, wyszukiwarki SAOS/sądy/SN/TSUE), orzeczenia w karcie sprawy, zapytania edytowane w CRM
+
 ## [1.30.0] — 2026-11-09
 - Kredyt CHF/EUR z historycznymi kursami NBP: rata, liczba rat i saldo bez pytania klienta (kalkulator, zwrot z umowy), CRM → Prawo → Kredyt walutowy; synchronizacja pobiera kursy NBP
 
