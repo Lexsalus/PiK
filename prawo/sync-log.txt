@@ -20,5 +20,6 @@
 ✓ zmiany: +0, razem 27
   – frank: brak tekstu HTML
 ✓ projekty: kadencja 10, przejrzano 487, pasuje 12
-✓ kursy CHF: 299 miesięcy (od 2002-01-02)
-✓ kursy EUR: 299 miesięcy (od 2002-01-02)
+✓ kursy CHF: 299 miesięcy (od 2026-10-01)
+✓ kursy EUR: 299 miesięcy (od 2026-10-01)
+✓ orzecznictwo: 151 orzeczeń w 8 kategoriach
