@@ -242,7 +242,7 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
 // --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
 {await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
  await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
- for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
+ for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
@@ -306,4 +306,13 @@ R(!!eNotAdmin,'010: konto może zakładać tylko aktywny Administrator');
 await as('piotr',`select public.password_changed()`);
 R((await db.query(`select must_change_password m from public.profiles where id=$1`,[U.piotr])).rows[0].m===false,'010: po zmianie hasła flaga zdjęta');
 }
-
+{ // --- 011: ustawienia kancelarii i szablony pism
+R(!!await fails('jan',`select public.office_setting_save('kancelaria','{"nazwa":"X"}'::jsonb)`),'011: dane kancelarii do pism zmienia tylko Administrator');
+await as('admin',`select public.office_setting_save('kancelaria','{"nazwa":"Kancelaria Test","miejscowosc":"Warszawa"}'::jsonb)`);
+await as('admin',`select public.office_setting_save('pisma','[{"id":"t1","nazwa":"Test","tresc":"# T"}]'::jsonb)`);
+R((await as('jan',`select value->>'nazwa' n from public.office_settings where key='kancelaria'`)).rows[0]?.n==='Kancelaria Test','011: zespół czyta dane kancelarii');
+R((await as('anon',`select count(*)::int n from public.office_settings`).catch(()=>({rows:[{n:0}]}))).rows[0].n===0,'011: niezalogowany nie widzi szablonów');
+R(!!await fails('admin',`select public.office_setting_save('pisma','{"a":1}'::jsonb)`)&&!!await fails('admin',`select public.office_setting_save('inne','{}'::jsonb)`),'011: zły format / nieznane ustawienie → odmowa');
+R(!!await fails('admin',`update public.office_settings set value='{}'::jsonb`)||(await db.query(`select value->>'nazwa' n from public.office_settings where key='kancelaria'`)).rows[0].n==='Kancelaria Test','011: bez bezpośredniej zmiany tabeli (tylko przez funkcję)');
+R((await db.query(`select count(*)::int n from public.audit_log where action in ('konfiguracja.kancelaria','konfiguracja.pisma')`)).rows[0].n===2,'011: zmiany w audycie');
+}

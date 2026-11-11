@@ -288,6 +288,10 @@ Dziennik ostatniego przebiegu: `prawo/sync-log.txt`, wynik: `prawo/stan.json` (w
 
 Synchronizacja pobiera codziennie najnowsze orzeczenia z bazy **SAOS** (System Analizy Orzeczeń Sądowych, saos.org.pl) dla każdej kategorii spraw → `prawo/orzeczenia.json`. W CRM: 📜 Prawo → **Orzecznictwo** (lista dla kategorii moich spraw / wszystkich, przycisk „📎 Dołącz do sprawy” — wpis w historii sprawy z sygnaturą, sądem, datą i linkiem) oraz wyszukiwarka: SAOS, portal orzeczeń sądów powszechnych, Sąd Najwyższy, TSUE. W karcie sprawy → Analiza: 5 najnowszych orzeczeń z kategorii sprawy. Zapytania dla kategorii: Treści strony → ✨ Nowe funkcje → Orzecznictwo (puste = domyślne). Uwaga: baza SAOS może nie mieć najnowszych orzeczeń — aktualne sprawdzaj w portalach sądów.
 
+## 12c. Pisma z szablonów
+
+Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: oświadczenie o sankcji kredytu darmowego, wezwanie do zapłaty (nieważność umowy CHF/EUR), wniosek o zaświadczenie o historii kredytu, przedsądowe wezwanie do zapłaty, pełnomocnictwo. Dane klienta, sprawy, kancelarii, pełnomocnika i data wypełniają się same; pozostałe pola wpisujesz w formularzu (podgląd na żywo). Wynik: **DOCX**, **wydruk / PDF** albo **zapis w dokumentach sprawy** (z historią wersji). Administrator: Ustawienia → **Pisma i szablony** (dane kancelarii, edycja / wyłączanie wbudowanych, własne szablony z dowolnymi polami `{{nazwa_pola}}`; znaczniki `# ` tytuł, `>> ` do prawej, `**pogrubienie**`). Dane w bazie: tabela `office_settings` (migracja 011), zmiany w audycie; szablony nie są publiczne.
+
 ## 13. CRM kancelarii
 
 Zaplecze dla adwokatów i pracowników: `https://lexsalus.github.io/PiK/crm.html`. Pełny opis ról i modułów: `CRM.md`; baza: `SUPABASE.md`.

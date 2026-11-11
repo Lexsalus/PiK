@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.32.0] — 2026-11-11
+- Pisma z szablonów: DOCX, wydruk/PDF, zapis w dokumentach sprawy; Ustawienia → Pisma i szablony (dane kancelarii, własne szablony); migracja 011
+
 ## [1.31.0] — 2026-11-09
 - Orzecznictwo z SAOS: CRM → Prawo → Orzecznictwo (lista dla kategorii, dołączanie do sprawy, wyszukiwarki SAOS/sądy/SN/TSUE), orzeczenia w karcie sprawy, zapytania edytowane w CRM
 
