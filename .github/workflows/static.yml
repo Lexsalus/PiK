@@ -53,7 +53,7 @@ jobs:
           git commit -m "Dane prawne z API Sejmu ($(date -u +%F)) [automat]"
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
       - name: Build SEO (meta tagi, robots.txt, sitemap.xml z data.json)
-        run: python3 build_seo.py
+        run: python3 tools/build_seo.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

@@ -68,7 +68,7 @@ Wszystkie 12 modułów jest zrobionych, a kryteria akceptacji sprawdzają testy 
 - „Zapisz wynik jako czynność” w zakładce Analiza zapisuje czynność w bazie (wcześniej tylko w oknie przeglądarki),
 - zasady haseł w Supabase: min. 12 znaków, małe i wielkie litery, cyfry, ponowne potwierdzenie przy zmianie hasła (§12).
 
-Podpowiedzi: każda pozycja menu, zakładka i ważniejszy przycisk ma dymek (najechanie lub Tab), a pola i kolumny, których znaczenie nie jest oczywiste, mają ikonkę [?]. Teksty są w `crm-pomoc.js`. Numer wersji CRM widać przy nazwie w lewym górnym rogu.
+Podpowiedzi: każda pozycja menu, zakładka i ważniejszy przycisk ma dymek (najechanie lub Tab), a pola i kolumny, których znaczenie nie jest oczywiste, mają ikonkę [?]. Teksty są w `crm/pomoc.js`. Numer wersji CRM widać przy nazwie w lewym górnym rogu.
 
 Do decyzji właściciela:
 - blokada konta po nieudanych logowaniach — w Supabase tylko w planie Team (hook „Password Verification Attempt”); teraz jest limit prób na adres IP (§12),

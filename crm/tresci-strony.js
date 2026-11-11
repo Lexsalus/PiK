@@ -256,7 +256,7 @@ function vTech(){
   return `<div class="box"><h3>🩺 Stan systemu <button class="btn sm" type="button" data-st="techCheck()">↻ Sprawdź</button></h3><div id="techStan" class="grid g2"><div class="mut">Sprawdzanie…</div></div></div>
   <div class="box"><h3>📜 Synchronizacja prawa (API Sejmu)</h3><div id="techSync" class="small mut">…</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn sm" href="${GH}/actions/workflows/static.yml" target="_blank" rel="noopener" data-tip="GitHub → Actions → „Run workflow” uruchamia synchronizację od razu (wymaga konta z dostępem do repozytorium)">▶ Uruchom teraz (GitHub)</a>
-      <a class="btn sm" href="prawo/sync-log.txt" target="_blank">📄 Dziennik ostatniego przebiegu</a><a class="btn sm" href="${GH}/blob/main/prawo/obserwowane.json" target="_blank" rel="noopener">✏️ Lista obserwowanych ustaw</a><a class="btn sm" href="#/prawo/zmiany">📜 CRM → Prawo</a></div>
+      <a class="btn sm" href="prawo/log/sync-log.txt" target="_blank">📄 Dziennik ostatniego przebiegu</a><a class="btn sm" href="${GH}/blob/main/prawo/obserwowane.json" target="_blank" rel="noopener">✏️ Lista obserwowanych ustaw</a><a class="btn sm" href="#/prawo/zmiany">📜 CRM → Prawo</a></div>
     <p class="hint">Automatycznie codziennie ok. 6:17. Zmiana listy ustaw = edycja pliku w repozytorium (synchronizacja uruchomi się sama po zapisie).</p></div>
   <div class="box"><h3>🚧 Tryb serwisowy strony</h3><div class="form">
     ${chkBox('serwis.enabled',S.enabled,'Włącz baner o pracach serwisowych na stronie')}${chkBox('serwis.blokujFormularz',S.blokujFormularz!==false,'Na czas prac wyłącz wysyłanie zgłoszeń')}
@@ -305,7 +305,7 @@ function vFunkcje(){
   <div class="box"><h3>💰 Zwrot z umowy kredytu (analiza umów)</h3><div class="form">
     ${chkBox('zwrot.enabled',W.enabled!==false,'Pokaż komunikat o zwrocie i kwotę po analizie umowy')}${chkBox('zwrot.skd',W.skd!==false,'Kredyt konsumencki (sankcja kredytu darmowego)')}${chkBox('zwrot.chf',W.chf!==false,'Kredyt frankowy / walutowy')}
     ${txt('zwrot.naglowek',W.naglowek,'Nagłówek komunikatu (czerwony)')}${txt('zwrot.podtytul',W.podtytul,'Drugi wiersz')}${txt('zwrot.cta',W.cta,'Przycisk')}${txt('zwrot.nota',W.nota,'Dopisek pod przyciskiem')}</div>
-    <p class="hint">Klient widzi tylko komunikat i kwoty. Podstawy prawne, orzecznictwo i wykryte zapisy trafiają ze zgłoszeniem do CRM → Nowe sprawy. Reguły: <code>umowa-zwrot.js</code>.</p></div>
+    <p class="hint">Klient widzi tylko komunikat i kwoty. Podstawy prawne, orzecznictwo i wykryte zapisy trafiają ze zgłoszeniem do CRM → Nowe sprawy. Reguły: <code>strona/umowa-zwrot.js</code>.</p></div>
   <div class="box"><h3>🏢 Restrukturyzacja firmy (sekcja „Dla firm”)</h3><div class="form">
     ${chkBox('firma.enabled',F.enabled!==false,'Pokaż sekcję i link „Dla firm”')}
     ${num('firma.red',F.red,'Domyślne umorzenie części długu (%)',5)}${num('firma.mies',F.mies,'Domyślna liczba rat (mies.)',6)}${num('firma.kar',F.kar,'Domyślna karencja (mies.)')}</div>
@@ -600,7 +600,7 @@ function vSeo(){
      <h3 style="margin-top:16px">Podgląd plików generowanych przy publikacji</h3>
      <div class="form"><label>robots.txt<textarea class="f code" id="pRobots" rows="6" readonly></textarea></label>
      <label>sitemap.xml<textarea class="f code" id="pSitemap" rows="6" readonly></textarea></label></div>
-     <p class="hint">Meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy automatycznie GitHub Actions (<code>build_seo.py</code>) z pliku <code>data.json</code> w repozytorium — po zmianach SEO pobierz go w zakładce „Publikacja” i podmień w repo.</p></div>`;
+     <p class="hint">Meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy automatycznie GitHub Actions (<code>tools/build_seo.py</code>) z pliku <code>data.json</code> w repozytorium — po zmianach SEO pobierz go w zakładce „Publikacja” i podmień w repo.</p></div>`;
 }
 const trS=(l,s)=>l==='pl'?s:(D.translations[l]?.[s]||s);
 function seoPreview(){

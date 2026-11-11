@@ -105,7 +105,7 @@ Przycisk zgłoszenia pokazuje się tylko, gdy wybrany sposób jest kompletnie sk
 
 Klient nie musi znać raty ani salda. W kalkulatorze „Kredyt frankowy i walutowy” rozwija **📅 Nie znasz raty i salda? Policz z kursów NBP**: data wypłaty, okres, marża, waluta (CHF/EUR) → system wpisuje liczbę rat, średnią ratę i saldo. Ta sama symulacja działa przy **zwrocie z umowy**: gdy w umowie jest kwota, data i okres (marża z umowy albo przyjęta 1,2%).
 - Kursy: `prawo/kursy.json` — średnie miesięczne NBP od 2002 r. (tabela A — średni, tabela C — kupno/sprzedaż), pobierane przez codzienną synchronizację. Wypłata po kursie kupna, raty po kursie sprzedaży.
-- Oprocentowanie: LIBOR CHF 3M / SARON albo EURIBOR 3M (wartości przybliżone, kwartalne — w `kredyt-walutowy.js`) + marża, nie mniej niż 0%. Raty równe.
+- Oprocentowanie: LIBOR CHF 3M / SARON albo EURIBOR 3M (wartości przybliżone, kwartalne — w `wspolne/kredyt-walutowy.js`) + marża, nie mniej niż 0%. Raty równe.
 - To szacunek — banki miały własne tabele kursów z większym spreadem. Do pozwu: zaświadczenie banku.
 - CRM → 📜 Prawo → **Kredyt walutowy**: ta sama symulacja dla prawnika (tabela lat, wpływ kursu, korzyść z unieważnienia). Symulacja klienta trafia ze zgłoszeniem do CRM.
 
@@ -113,7 +113,7 @@ Klient nie musi znać raty ani salda. W kalkulatorze „Kredyt frankowy i waluto
 
 Przedsiębiorca wpisuje długi: rodzaj (kredyt bankowy, leasing, pożyczka, dostawcy, podatki, ZUS, inne), kwotę do spłaty, ratę, oprocentowanie, zaległość, czy jest egzekucja i czy dług jest zabezpieczony (hipoteka, zastaw), a także przychód i koszty stałe miesięcznie. Suwaki ustawiają wariant układu: umorzenie części długu, liczbę rat, karencję.
 
-Wynik (tylko kwoty): łącznie mniej do zapłaty, raty teraz i po układzie, raty i egzekucje wstrzymane (do 4 miesięcy ochrony), mniej odsetek, umorzenie, czy firma udźwignie nowe raty. Model orientacyjny: długi zabezpieczone liczone jak dotąd, ZUS i podatki tylko rozłożone na raty (bez umorzenia), odsetki — z raty i oprocentowania do końca spłaty. Zgłoszenie trafia do CRM (kategoria RST) z listą długów, wariantem, ścieżkami postępowań (PZU, przyspieszone układowe, układowe, sanacja) z podstawami i zasadami do sprawdzenia. Pod wynikiem: **📅 Harmonogram spłat** (ochrona do 4 miesięcy → karencja → raty układowe; ile zostaje firmie co miesiąc) i **Plan dla wierzycieli** (dług, umorzenie, do spłaty, rata, miesiące spłaty dla każdego wierzyciela) oraz **🖨️ Drukuj / zapisz PDF** — gotowy wydruk propozycji układu (opcjonalnie z nazwą firmy). W CRM zgłoszenie pokazuje plan dla wierzycieli. Kod: `restrukturyzacja.js`.
+Wynik (tylko kwoty): łącznie mniej do zapłaty, raty teraz i po układzie, raty i egzekucje wstrzymane (do 4 miesięcy ochrony), mniej odsetek, umorzenie, czy firma udźwignie nowe raty. Model orientacyjny: długi zabezpieczone liczone jak dotąd, ZUS i podatki tylko rozłożone na raty (bez umorzenia), odsetki — z raty i oprocentowania do końca spłaty. Zgłoszenie trafia do CRM (kategoria RST) z listą długów, wariantem, ścieżkami postępowań (PZU, przyspieszone układowe, układowe, sanacja) z podstawami i zasadami do sprawdzenia. Pod wynikiem: **📅 Harmonogram spłat** (ochrona do 4 miesięcy → karencja → raty układowe; ile zostaje firmie co miesiąc) i **Plan dla wierzycieli** (dług, umorzenie, do spłaty, rata, miesiące spłaty dla każdego wierzyciela) oraz **🖨️ Drukuj / zapisz PDF** — gotowy wydruk propozycji układu (opcjonalnie z nazwą firmy). W CRM zgłoszenie pokazuje plan dla wierzycieli. Kod: `strona/restrukturyzacja.js`.
 
 ## 6. Analiza umów
 
@@ -121,7 +121,7 @@ Na stronie (sekcja **Umowy**) odwiedzający wgrywa plik albo wkleja tekst. **Pli
 
 **Formaty:** PDF, Word `.docx`, OpenDocument `.odt`, `.rtf`, `.txt` / `.md`, `.html` oraz **zdjęcia i skany** (`.jpg`, `.png`, `.webp`, PDF bez warstwy tekstu — do 15 stron). Tekst ze skanu rozpoznaje przeglądarka (Tesseract); przy pierwszym użyciu pobiera się słownik języka polskiego (kilka MB), plik dalej nie opuszcza urządzenia. Na telefonie można od razu zrobić zdjęcie umowy. **Kilka zdjęć naraz** (strona po stronie) składa się w jeden tekst — kolejność według nazw plików (np. IMG_001, IMG_002). Przed odczytem obraz jest przygotowywany: obrót wg danych z aparatu, powiększenie, odcienie szarości, wzmocnienie kontrastu, wyprostowanie przekosu do ±12°, a przy słabym odczycie sprawdzenie, czy strona nie jest **do góry nogami lub obrócona o 90°** (wybierany jest najlepszy wynik). Typowe pomyłki („$ 1.” zamiast „§ 1.”) są poprawiane. Nieobsługiwany: stary `.doc`.
 
-**Zwrot pieniędzy (umowy kredytu).** Jeśli umowa to kredyt konsumencki (SKD) albo kredyt indeksowany/denominowany (CHF, waluta) i system wykryje kwalifikujące zapisy, klient widzi **czerwony komunikat** „W Twojej umowie wykryliśmy klauzule abuzywne… Kwalifikujesz się do zwrotu pieniędzy” oraz **szacowaną kwotę** (kalkulator „Co mi się należy” na danych odczytanych z umowy; klient może je poprawić, przy CHF podaje ratę i saldo). **Klient nie widzi podstaw prawnych.** Po kliknięciu „Chcę odzyskać pieniądze” zgłoszenie trafia do CRM → Nowe sprawy razem z: wykrytymi zapisami, podstawą prawną, orzecznictwem, fragmentami umowy, danymi odczytanymi z umowy i ustawami powołanymi w umowie (czy obowiązują). Reguły: `umowa-zwrot.js`. Kredyt złotówkowy z WIBOR nie daje automatycznej kwalifikacji (wyrok TSUE C‑471/24).
+**Zwrot pieniędzy (umowy kredytu).** Jeśli umowa to kredyt konsumencki (SKD) albo kredyt indeksowany/denominowany (CHF, waluta) i system wykryje kwalifikujące zapisy, klient widzi **czerwony komunikat** „W Twojej umowie wykryliśmy klauzule abuzywne… Kwalifikujesz się do zwrotu pieniędzy” oraz **szacowaną kwotę** (kalkulator „Co mi się należy” na danych odczytanych z umowy; klient może je poprawić, przy CHF podaje ratę i saldo). **Klient nie widzi podstaw prawnych.** Po kliknięciu „Chcę odzyskać pieniądze” zgłoszenie trafia do CRM → Nowe sprawy razem z: wykrytymi zapisami, podstawą prawną, orzecznictwem, fragmentami umowy, danymi odczytanymi z umowy i ustawami powołanymi w umowie (czy obowiązują). Reguły: `strona/umowa-zwrot.js`. Kredyt złotówkowy z WIBOR nie daje automatycznej kwalifikacji (wyrok TSUE C‑471/24).
 
 **Wynik** to trzy paski od zielonego do czerwonego (0–29 dobrze, 30–59 uwaga, 60+ źle) i trzy działy:
 
@@ -182,7 +182,7 @@ W panelu: **🔎 SEO**. Na górze jest **podgląd wyniku w Google**, podgląd pr
 
 Tytuł i opis tłumaczysz w zakładce Tłumaczenia (grupa „SEO”).
 
-**Jak to trafia do Google:** przy każdej publikacji GitHub Actions uruchamia `build_seo.py`, który wpisuje meta tagi (w tym `hreflang` dla wersji językowych, Open Graph, schema.org) prosto do `index.html` oraz tworzy `robots.txt` i `sitemap.xml`. Nic nie trzeba robić ręcznie poza wrzuceniem `data.json`.
+**Jak to trafia do Google:** przy każdej publikacji GitHub Actions uruchamia `tools/build_seo.py`, który wpisuje meta tagi (w tym `hreflang` dla wersji językowych, Open Graph, schema.org) prosto do `index.html` oraz tworzy `robots.txt` i `sitemap.xml`. Nic nie trzeba robić ręcznie poza wrzuceniem `data.json`.
 
 **Pierwsze zgłoszenie do Google:**
 1. Wejdź na [Google Search Console](https://search.google.com/search-console) → *Dodaj usługę* → *Prefiks URL* → adres strony.
@@ -251,14 +251,14 @@ Zasada: **każdy push = nowa wersja**.
 
 | Rodzaj zmiany | Polecenie | Przykład |
 |---------------|-----------|----------|
-| dane, poprawki | `py bump.py patch "opis"` | 1.1.0 → 1.1.1 |
-| nowe funkcje | `py bump.py minor "opis"` | 1.1.0 → 1.2.0 |
-| duża przebudowa | `py bump.py major "opis"` | 1.1.0 → 2.0.0 |
+| dane, poprawki | `py tools/bump.py patch "opis"` | 1.1.0 → 1.1.1 |
+| nowe funkcje | `py tools/bump.py minor "opis"` | 1.1.0 → 1.2.0 |
+| duża przebudowa | `py tools/bump.py major "opis"` | 1.1.0 → 2.0.0 |
 
 Skrypt aktualizuje `version.json` i dopisuje wpis do `CHANGELOG.md`. Pełna sekwencja (PowerShell):
 
 ```
-py bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe oferty internetu"; git push
+py tools/bump.py patch "Nowe oferty internetu"; git add -A; git commit -m "v1.1.1 Nowe oferty internetu"; git push
 ```
 
 ## 12. Rozwiązywanie problemów
@@ -282,7 +282,7 @@ Codziennie ok. 6:17 GitHub Actions uruchamia `tools/prawo_sync.py`: pobiera z of
 
 **Lista ustaw:** edytujesz w CRM → Treści strony → ✨ Nowe funkcje → **⚖️ Obserwowane ustawy** (przycisk „Edytuj listę ustaw” przejmuje obecną listę; 🔎 sprawdza adres ELI w API Sejmu i podpowiada nazwę; niżej słowa do projektów w Sejmie dla każdej kategorii). Po **opublikowaniu** codzienna synchronizacja czyta listę z bazy i zapisuje ją do `prawo/obserwowane.json`; lista z błędami (zły adres ELI, powtórzenia) jest pomijana i zostaje poprzednia. „↺ Lista z pliku” wraca do pliku z repozytorium. Format pliku: `prawo/obserwowane.json` — `id`, adres ELI aktu pierwotnego (np. `DU/1964/93` = Kodeks cywilny), skróty rozpoznawane w tekście (`KC`, `ukk`…), kategorie spraw CRM, `teksty` (czy pobierać artykuły). Sekcja `uchylone` — ustawy uchylone, których powołanie w umowie oznaczamy w CRM. Sekcja `projekty` — słowa szukane w tytułach projektów. Po zmianie pliku synchronizacja uruchamia się sama przy wysyłce.
 
-Dziennik ostatniego przebiegu: `prawo/sync-log.txt`, wynik: `prawo/stan.json` (widać też w CRM → Prawo). Teksty z ISAP są informacyjne — wiążący jest Dziennik Ustaw.
+Dziennik ostatniego przebiegu: `prawo/log/sync-log.txt`, wynik: `prawo/stan.json` (widać też w CRM → Prawo). Teksty z ISAP są informacyjne — wiążący jest Dziennik Ustaw.
 
 ## 12b. Orzecznictwo (SAOS)
 

@@ -11,11 +11,12 @@ async def main():
     async def rt(r):
       u=r.request.url
       if 'supabase-js' in u: return await r.fulfill(path=SH,content_type='application/javascript')
-      if u.split('?')[0].endswith('/crm.html'):  # podpisy SRI nie pasują do podmienionych lokalnie bibliotek testowych
+      if u.split('?')[0].endswith(('/crm.html','/crm/rdzen.js')):  # podpisy SRI nie pasują do podmienionych lokalnie bibliotek testowych
         import re as _re
-        body=open(HERE+'../../../crm.html',encoding='utf-8').read()
+        fn='crm.html' if u.split('?')[0].endswith('.html') else 'crm/rdzen.js'
+        body=open(HERE+'../../../'+fn,encoding='utf-8').read()
         body=_re.sub(r' integrity="sha384-[^"]*"','',body); body=_re.sub(r"x\.integrity='sha384-[^']*';",'',body)
-        return await r.fulfill(status=200,content_type='text/html; charset=utf-8',body=body)
+        return await r.fulfill(status=200,content_type='text/html; charset=utf-8' if fn.endswith('.html') else 'application/javascript; charset=utf-8',body=body)
       if 'lexsalus.github.io/Grants/' in u:   # serwis dotacji: kopia silnika i danych do testów
         n=u.split('?')[0].rsplit('/',1)[1]; return await r.fulfill(path=HERE+'granty/'+n,content_type='application/javascript' if n.endswith('.js') else 'application/json',headers={'Access-Control-Allow-Origin':'*'})
       for nm in ('klauzule','uodo'):
@@ -277,7 +278,7 @@ async def main():
     await pg.click('text=⬇ PDF'); await pg.wait_for_timeout(900); ok('PDF' in await T('#toast'),'eksport PDF (drukowanie do pliku)')
     ok(len(sql("select 1 from public.audit_log where action='eksport.raport' and target in ('XLSX','PDF')"))==2,'eksporty XLSX i PDF w audycie')
     # --- zużycie: po zapisie pobierane tylko zmienione tabele; SRI w kodzie
-    raw=open(HERE+'../../../crm.html',encoding='utf-8').read(); ix=open(HERE+'../../../index.html',encoding='utf-8').read()
+    raw=open(HERE+'../../../crm.html',encoding='utf-8').read()+open(HERE+'../../../crm/rdzen.js',encoding='utf-8').read(); ix=open(HERE+'../../../strona/strona.js',encoding='utf-8').read()
     ok(raw.count('integrity=')>=1 and "x.integrity='sha384-" in raw and ix.count("'sha384-")==5,'SRI: supabase-js i xlsx w CRM, pdf.js/worker/mammoth/jszip/tesseract (OCR) na stronie')
     await pg.evaluate("window.__fa=[];{const o=fetchAll;fetchAll=t=>{__fa.push(t);return o(t)}};0")
     await nav('#/powiadomienia'); await pg.wait_for_timeout(500)

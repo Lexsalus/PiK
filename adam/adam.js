@@ -2,7 +2,7 @@
    Bot regułowy działający w całości w przeglądarce (bez AI i bez wysyłania pytań na zewnątrz).
    Z czatu Ilona (repo Lexsalus/Ilona) przejęte: normalizacja tekstu i dopasowanie fraz z tolerancją literówek,
    widżet w Shadow DOM (style strony nie mieszają się z czatem), pełny ekran na telefonie, pamięć rozmowy w sesji.
-   Wiedza: adam/wiedza.json; przepisy, odsetki, zmiany w prawie: prawo.js + prawo/*.json (API Sejmu).
+   Wiedza: adam/wiedza.json; przepisy, odsetki, zmiany w prawie: wspolne/prawo.js + prawo/*.json (API Sejmu).
    Osadzenie: <script src="adam/adam.js" defer></script> */
 (function(){
 'use strict';
@@ -46,7 +46,7 @@ const wiedza=()=>baseW().then(B=>{const C=window.ADAM_CFG||{},K={...B};
   if(Array.isArray(C.intencje)&&C.intencje.length)K.intencje=C.intencje;
   if(Array.isArray(C.dodatkowe))K.intencje=[...C.dodatkowe,...K.intencje];
   K.przepisy=C.przepisy!==false;K.szukaj=C.szukaj!==false;return K});
-const prawo=()=>window.PRAWO?Promise.resolve(window.PRAWO):new Promise((ok,no)=>{const s=document.createElement('script');s.src=ROOT+'prawo.js';s.onload=()=>ok(window.PRAWO);s.onerror=no;document.head.appendChild(s)});
+const prawo=()=>window.PRAWO?Promise.resolve(window.PRAWO):new Promise((ok,no)=>{const s=document.createElement('script');s.src=ROOT+'wspolne/prawo.js';s.onload=()=>ok(window.PRAWO);s.onerror=no;document.head.appendChild(s)});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtD=d=>{if(!d)return '';const [y,m,dd]=String(d).slice(0,10).split('-');return `${dd}.${m}.${y}`};
 const pct=v=>v==null?'—':String(v).replace('.',',')+'%';

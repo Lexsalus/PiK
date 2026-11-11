@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.35.0] — 2026-11-11
+- Porządek w plikach: style i skrypty wydzielone z crm.html i index.html; foldery crm/, strona/, wspolne/, docs/, tools/; dziennik synchronizacji w prawo/log/
+
 ## [1.34.0] — 2026-11-11
 - Prawo → Urzędy: rejestr klauzul niedozwolonych UOKiK (wyszukiwarka, porównanie zapisu umowy, podobne wpisy w analizie), decyzje UODO, wyszukiwarki KIS/ZUS/KNF/UOKiK; listy w porcjach, dziennik audytu na żądanie; migracje 011–012 wdrożone
 

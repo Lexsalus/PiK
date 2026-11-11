@@ -16,7 +16,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 5 | Kalkulatory: odsetki ustawowe aktualizowane same (zmienne `ODS_KAP`, `ODS_OPOZN`, `ODS_HANDL`, `ODS_MAX`, `ODS_MAX_OPOZN`, w etykietach `{ODS_…}`) | ✅ |
 | 6 | Strona: sekcja „Zmiany w prawie” (nowelizacje, projekty, odsetki) | ✅ |
 | 7 | Analiza umów: limit odsetek maksymalnych z aktualnego obwieszczenia; kontrola powołanych ustaw i artykułów (uchylone, nieistniejące) — **tylko w CRM** (w zgłoszeniu) | ✅ v1.21.0 |
-| 8 | Zwrot z umowy: z umowy (wpisanej / pliku / skanu) system liczy zwrot (SKD, CHF/FX) wg przepisów i orzecznictwa; klient widzi **czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” + kwotę, bez podstawy prawnej**; podstawy, zapisy i orzecznictwo trafiają ze zgłoszeniem do CRM | ✅ v1.21.0 (`umowa-zwrot.js`) |
+| 8 | Zwrot z umowy: z umowy (wpisanej / pliku / skanu) system liczy zwrot (SKD, CHF/FX) wg przepisów i orzecznictwa; klient widzi **czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” + kwotę, bez podstawy prawnej**; podstawy, zapisy i orzecznictwo trafiają ze zgłoszeniem do CRM | ✅ v1.21.0 (`strona/umowa-zwrot.js`) |
 | 9 | Skany umów: rozpoznawanie tekstu (OCR) w przeglądarce — zdjęcia JPG/PNG/WEBP i zeskanowane PDF | ✅ v1.21.0 |
 | 10 | Bot **Adam** (zamiast Ilony na stronie): regułowy, w przeglądarce, wiedza w `adam/wiedza.json`, przepisy, odsetki, zmiany, projekty, kierowanie do kalkulatorów | ✅ |
 | 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 23/23, e2e 153/153 |
@@ -34,7 +34,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 24 | Restrukturyzacja: harmonogram miesiąc po miesiącu, plan dla wierzycieli, wydruk/PDF; plan w zgłoszeniu w CRM | ✅ v1.28.0 |
 | 25 | Zakładki karty sprawy i Prawa w grupach z kolorami i dymkami | ✅ v1.28.0 |
 | 26 | Lista obserwowanych ustaw i słów do projektów edytowana w CRM (Treści strony → Nowe funkcje); synchronizacja czyta ją z bazy i zapisuje do `prawo/obserwowane.json` | ✅ v1.29.0 |
-| 27 | Kredyt CHF/EUR z historycznymi kursami NBP: synchronizacja `prawo/kursy.json`, symulacja rat i salda (`kredyt-walutowy.js`) w kalkulatorze, zwrocie z umowy i CRM → Prawo → Kredyt walutowy | ✅ v1.30.0 (kursy pobierze pierwsza synchronizacja) |
+| 27 | Kredyt CHF/EUR z historycznymi kursami NBP: synchronizacja `prawo/kursy.json`, symulacja rat i salda (`wspolne/kredyt-walutowy.js`) w kalkulatorze, zwrocie z umowy i CRM → Prawo → Kredyt walutowy | ✅ v1.30.0 (kursy pobierze pierwsza synchronizacja) |
 | 28 | Orzecznictwo z SAOS (API publiczne) w synchronizacji → `prawo/orzeczenia.json`; CRM → Prawo → Orzecznictwo, dołączanie do sprawy, wyszukiwarki; karta sprawy → Analiza; zapytania edytowane w CRM | ✅ v1.31.0 (dane pobierze synchronizacja) |
 | 29 | Pisma z szablonów (DOCX bez bibliotek, wydruk/PDF, zapis w aktach), Ustawienia → Pisma i szablony; migracja 011 `office_settings` | ✅ v1.32.0 (migracja 011 wdrożona 11.11.2026) |
 | 30 | Serwis dotacji Lexsalus/Grants zintegrowany z CRM: zgłoszenia (kategoria DOT), panel 💶 Dotacje (zgłoszenia, źródła finansowania, podgląd raportu, treści, publikacja), wspólny silnik `engine.js`; migracja 012; filtr kategorii w Nowych sprawach | ✅ v1.33.0 (migracja 012 wdrożona 11.11.2026) |
@@ -46,6 +46,6 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 
 ## Do decyzji / później
 
-- ❓ Reguły zwrotu (`umowa-zwrot.js`) — przegląd przez prawnika: wzorce zapisów, podstawy, orzecznictwo, próg „kwalifikuje się”.
+- ❓ Reguły zwrotu (`strona/umowa-zwrot.js`) — przegląd przez prawnika: wzorce zapisów, podstawy, orzecznictwo, próg „kwalifikuje się”.
 
 - ✅ Adam a przepisy: przełącznik w CRM → Treści strony → Czat Adam („Pokazuje treść przepisów i odnośniki”); domyślnie włączony — decyzja kancelarii.

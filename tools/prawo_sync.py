@@ -18,7 +18,7 @@ Wyjście:  prawo/akty.json        — stan obserwowanych i uchylonych aktów, te
           prawo/uodo.json        — najnowsze decyzje Prezesa UODO (orzeczenia.uodo.gov.pl, publiczne API)
           prawo/kursy.json       — miesięczne kursy NBP (CHF, EUR: średni z tabeli A, kupno/sprzedaż z tabeli C) do symulacji kredytów walutowych
           prawo/stan.json        — kiedy i z jakim skutkiem działała synchronizacja
-          prawo/sync-log.txt     — dziennik ostatniego przebiegu
+          prawo/log/sync-log.txt — dziennik ostatniego przebiegu
 
 Każda część działa osobno: błąd jednej (np. chwilowa awaria API) zostawia jej poprzedni plik bez zmian.
 Uruchomienie: python3 tools/prawo_sync.py  (w GitHub Actions raz dziennie, patrz .github/workflows/static.yml)
@@ -923,7 +923,7 @@ def main():
     if all(v == 'ok' for v in res.values()):
         stan['ostatnio_ok'] = stan['ostatnio']
     save('stan.json', stan)
-    with open(os.path.join(OUT, 'sync-log.txt'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUT, 'log', 'sync-log.txt'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(LOG) + '\n')
     return 0
 

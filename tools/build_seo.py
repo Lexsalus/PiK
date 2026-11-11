@@ -1,13 +1,13 @@
 """Wpisuje ustawienia SEO z data.json do index.html oraz tworzy robots.txt i sitemap.xml.
 
 Uruchamiany automatycznie przez GitHub Actions przed publikacją.
-Lokalnie (podgląd wyniku):  py build_seo.py
+Lokalnie (podgląd wyniku):  py tools/build_seo.py
 Zmienia tylko blok między <!--SEO--> a <!--/SEO--> w index.html.
 """
 import json, datetime, html, pathlib, re, sys
 from urllib.parse import urlparse
 
-ROOT = pathlib.Path(__file__).parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 D = json.loads((ROOT / "data.json").read_text(encoding="utf-8"))
 S, SITE = D.get("seo", {}), D.get("site", {})
 TR = D.get("translations", {})

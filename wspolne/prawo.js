@@ -9,7 +9,7 @@
 (function(){
 'use strict';
 if(window.PRAWO)return;
-const BASE=new URL('prawo/',(document.currentScript&&document.currentScript.src)||location.href).href;
+const BASE=new URL('../prawo/',(document.currentScript&&document.currentScript.src)||new URL('wspolne/',location.href).href).href;   // plik leży w wspolne/, dane w prawo/
 const ELI='https://api.sejm.gov.pl/eli/acts/';
 const cache={},texts={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

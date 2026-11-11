@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **11.11.2026**, wersja **1.34.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **11.11.2026**, wersja **1.35.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -34,10 +34,12 @@ Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to
 
 - **08.11.2026 historia gita została nadpisana** (usunięte notatki biznesowe z dawnych commitów). Istniejące klony: `git fetch origin && git reset --hard origin/main` (lokalne niewysłane zmiany najpierw zapisać).
 
+- **Układ plików (od 1.35.0):** `index.html` i `crm.html` to same szkielety; style i skrypty strony w `strona/`, CRM w `crm/`, moduły wspólne w `wspolne/`, dokumentacja w `docs/`, skrypty w `tools/`. Nowy moduł CRM = plik w `crm/` + wpis w `crm.html` i na liście `SHELL` w `crm-sw.js` (podbić `CACHE`).
+
 - **Plan:** `PLAN.md` — uzupełniać na bieżąco (status zadań, decyzje).
 
 - **Jedna wersja, bez demo:** pracujemy na oryginale; w razie problemu cofamy przez historię gita (`git revert` / poprzednia wersja z `CHANGELOG.md`). Cofnięcie to też nowa wersja.
-- **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
+- **Każda wysyłka (push) = podbicie wersji:** `py tools/bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
 - Testy: `supabase/test/schema.test.mjs` (161 testów reguł bazy), `supabase/test/e2e/` (153 kroki przez interfejs CRM i stronę, lokalna kopia bazy, dane testowe zamiast NBP/SAOS/UOKiK/UODO), `tools/test/test_prawo_sync.py` (23 testy synchronizacji).
@@ -65,7 +67,7 @@ Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to
 - 1.25.0 — zakładki Treści strony i Ustawień w grupach z kolorami (kropka = nieopublikowane zmiany), nowa zakładka **🔧 Techniczne** (stan systemu, synchronizacja prawa, tryb serwisowy z wstrzymaniem zgłoszeń, limity, połączenie z bazą, pamięć aplikacji). e2e 117/117.
 - 1.24.0 — CRM → Treści strony: **💬 Czat Adam** (imię, powitanie, przyciski, własne tematy, przełącznik pokazywania przepisów, tester) i **✨ Nowe funkcje** (zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, OCR). Ustawienia idą przez szkic → Opublikuj (bez wysyłki na GitHub).
 - 1.23.0 — menu CRM w grupach z kolorami (Codzienna praca, Kancelaria, Prawo, Administracja), tylko pozycje z uprawnień, dymki z powodem dostępu.
-- 1.22.0 — **Restrukturyzacja firmy** (sekcja „Dla firm”, `restrukturyzacja.js`): długi przedsiębiorcy → raty po układzie, wstrzymanie, odsetki, umorzenie; ścieżki postępowań z podstawami w CRM.
+- 1.22.0 — **Restrukturyzacja firmy** (sekcja „Dla firm”, `strona/restrukturyzacja.js`): długi przedsiębiorcy → raty po układzie, wstrzymanie, odsetki, umorzenie; ścieżki postępowań z podstawami w CRM.
 - 1.21.1–1.21.2 — parser tekstów ustaw po identyfikatorach ELI (pewny dla KPC i kodeksów).
 - 1.20.0–1.21.0 — **prawo z API Sejmu + Adam + zwrot z umowy** (szczegóły i status: `PLAN.md`): codzienna synchronizacja `tools/prawo_sync.py` → `prawo/*.json`; CRM → 📜 Prawo (zmiany, projekty, odsetki, przepisy, dołączanie przepisu do sprawy ze stanem na dzień); strona: „Zmiany w prawie”, odsetki automatyczne, OCR skanów umów, **zwrot z umowy kredytu: klient widzi czerwony komunikat + kwotę bez podstaw prawnych, podstawy/orzecznictwo idą ze zgłoszeniem do CRM**; czat **Adam** zamiast Ilony (Ilona to czat medyczny innego serwisu).
 - Na stronie wynik analizy umowy jest bez podstaw prawnych (komunikat i kwoty); pełne uzasadnienie w CRM.
@@ -75,13 +77,13 @@ Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to
 
 - 1.19.0 (05.11.2026) — CRM jako aplikacja na telefon/komputer (PWA, jak w panelu pielęgniarek): przycisk „📲 Zainstaluj aplikację” na ekranie logowania i w górnym pasku, `crm.webmanifest`, `crm-sw.js` (tylko pliki CRM, baza zawsze z sieci), ikony `icons/crm-*`. Test e2e blokuje service worker (inaczej podmiana bibliotek nie działa).
 - 1.18.0 — Treści strony: przycisk „🔍 Pokaż różnice” przy ostrzeżeniu o nieaktualnym szkicu; paski przewijania w stylu strony (CRM i strona publiczna).
-- 1.17.0 — **Podgląd panelu** jako rola lub osoba (Administrator, tylko do odczytu, `crm-podglad.js`).
+- 1.17.0 — **Podgląd panelu** jako rola lub osoba (Administrator, tylko do odczytu, `crm/podglad.js`).
 - 1.16.0 — uprawnienia: podgląd i zmiana osobno (wariant pośredni §9; migracja `009_uprawnienia_akcje.sql` — wdrożona 27.10.2026). Następny krok: pełna macierz akcji.
 - 1.15.0 — poprawki po audycie (SRI, limit zgłoszeń z e-maila, pobieranie tylko zmienionych tabel, porządki powiadomień, pamięć treści na stronie, uwagi doradców — migracja `008_audyt_bezpieczenstwa.sql`, wdrożona 27.10.2026); migracja 007 wdrożona. Doradcy Supabase po wdrożeniu: zostały tylko uwagi „z założenia” (funkcje SECURITY DEFINER dla zalogowanych, case_counters bez reguł — dostęp tylko przez wyzwalacz) i HIBP (plan płatny).
 - 1.14.1 — aktualizacja dokumentacji i podstawowy audyt bezpieczeństwa i zużycia (sekcja niżej).
-- 1.14.0 — podpowiedzi w CRM (dymki + [?], `crm-pomoc.js`), numer wersji przy nazwie CRM; zasady haseł w Supabase ustawione (min. 12, małe/wielkie/cyfry, potwierdzenie przy zmianie).
+- 1.14.0 — podpowiedzi w CRM (dymki + [?], `crm/pomoc.js`), numer wersji przy nazwie CRM; zasady haseł w Supabase ustawione (min. 12, małe/wielkie/cyfry, potwierdzenie przy zmianie).
 - 1.13.0–1.13.1 — przegląd zgodności ze specyfikacją v1.1 (opis w `CRM.md`): migracja 006 (czas polski, przypomnienie 8:00, typy plików, raport w bazie — wdrożona), raporty z bazy z pamięcią 5 min, naprawiony zapis kalkulacji z zakładki Analiza; migracja 007 (naprawa polskich znaków po wdrożeniu 004/005).
-- 1.12.0 — **Treści strony w CRM**: panel z `admin.html` przeniesiony do CRM (`crm-strona.js`, tylko Administrator), publikacja do bazy (migracja `005_tresci_strony.sql`, wdrożona 27.10.2026 razem z 004), strona czyta opublikowaną wersję (zapas: `data.json`), ⚙️ Panel → CRM, `admin.html` usunięty. SEO dalej z `data.json`.
+- 1.12.0 — **Treści strony w CRM**: panel z `admin.html` przeniesiony do CRM (`crm/tresci-strony.js`, tylko Administrator), publikacja do bazy (migracja `005_tresci_strony.sql`, wdrożona 27.10.2026 razem z 004), strona czyta opublikowaną wersję (zapas: `data.json`), ⚙️ Panel → CRM, `admin.html` usunięty. SEO dalej z `data.json`.
 
 ## Wcześniejsze zmiany (26.10.2026)
 

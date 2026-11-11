@@ -1,15 +1,15 @@
 """Podbija wersję w version.json i dopisuje wpis do CHANGELOG.md.
 
 Użycie (Windows):
-  py bump.py patch "Opis zmiany"     # 1.1.0 -> 1.1.1  (poprawki, dane)
-  py bump.py minor "Opis zmiany"     # 1.1.0 -> 1.2.0  (nowe funkcje)
-  py bump.py major "Opis zmiany"     # 1.1.0 -> 2.0.0  (duże przebudowy)
+  py tools/bump.py patch "Opis zmiany"     # 1.1.0 -> 1.1.1  (poprawki, dane)
+  py tools/bump.py minor "Opis zmiany"     # 1.1.0 -> 1.2.0  (nowe funkcje)
+  py tools/bump.py major "Opis zmiany"     # 1.1.0 -> 2.0.0  (duże przebudowy)
 """
 import json, sys, datetime, pathlib
 
-ROOT = pathlib.Path(__file__).parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 VER = ROOT / "version.json"
-LOG = ROOT / "CHANGELOG.md"
+LOG = ROOT / "docs" / "CHANGELOG.md"
 
 def main():
     if len(sys.argv) < 3 or sys.argv[1] not in ("patch", "minor", "major"):

@@ -3,11 +3,11 @@
 Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych (porady online, kancelarie, mediacje), kalkulatory prawne (odsetki ustawowe, opłata sądowa, koszty zastępstwa, kara umowna), analiza umów. Treści strony edytuje Administrator w CRM (🌐 Treści strony) i publikuje do bazy Supabase (zapasowo `data.json`); zgłoszenia i dane CRM też w bazie.
 
 🌐 **Strona:** https://lexsalus.github.io/PiK/
-🗄️ **Baza CRM (Supabase):** wdrożenie — **[SUPABASE.md](SUPABASE.md)**
-⚖️ **CRM kancelarii:** https://lexsalus.github.io/PiK/crm.html (logowanie + 2FA) — opis: **[CRM.md](CRM.md)**
-🧭 **Stan projektu i kontynuacja:** **[STAN.md](STAN.md)**
+🗄️ **Baza CRM (Supabase):** wdrożenie — **[docs/SUPABASE.md](docs/SUPABASE.md)**
+⚖️ **CRM kancelarii:** https://lexsalus.github.io/PiK/crm.html (logowanie + 2FA) — opis: **[docs/CRM.md](docs/CRM.md)**
+🧭 **Stan projektu i kontynuacja:** **[docs/STAN.md](docs/STAN.md)**
 
-📖 Obsługa krok po kroku: **[INSTRUKCJA.md](INSTRUKCJA.md)** · Historia zmian: **[CHANGELOG.md](CHANGELOG.md)**
+📖 Obsługa krok po kroku: **[docs/INSTRUKCJA.md](docs/INSTRUKCJA.md)** · Historia zmian: **[docs/CHANGELOG.md](docs/CHANGELOG.md)**
 
 ## Funkcje
 
@@ -49,33 +49,33 @@ Strona prawnicza na GitHub Pages z CRM w Supabase: porównywarka usług prawnych
 ## Struktura
 
 ```
-index.html      strona publiczna
-crm.html        CRM kancelarii na żywo (Supabase)
-crm-pomoc.js    podpowiedzi w CRM (dymki i ikonki [?]) — słowniki tekstów w jednym miejscu
-crm-podglad.js  CRM → Podgląd: panel oczami wybranej roli lub osoby (tylko Administrator, tylko do odczytu)
-crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawny admin.html)
-crm-prawo.js    CRM → 📜 Prawo + karta „Przepisy” w sprawie + analiza umowy klienta w zgłoszeniu
-crm-pisma.js    pisma z szablonów (DOCX, wydruk/PDF, zapis w aktach), Ustawienia → Pisma i szablony
-crm-granty.js   CRM → 💶 Dotacje: serwis Lexsalus/Grants (zgłoszenia DOT, źródła finansowania, podgląd raportu, treści, publikacja)
-prawo.js        wspólny moduł danych prawnych (przepisy z podglądem, odsetki, wyszukiwarka, stan prawny na dzień)
-prawo/          dane generowane codziennie (tools/prawo_sync.py): API Sejmu (akty, zmiany, projekty, teksty, odsetki), kursy NBP, orzeczenia SAOS, klauzule UOKiK, decyzje UODO; obserwowane.json — lista ustaw edytowana w CRM
-restrukturyzacja.js  kalkulator restrukturyzacji firmy (sekcja #firma)
-umowa-zwrot.js  ocena umowy kredytu i wyliczenie zwrotu (reguły z podstawami prawnymi i orzecznictwem)
-kredyt-walutowy.js  symulacja kredytu CHF/EUR z kursów NBP (prawo/kursy.json) — rata, wpłaty, saldo
-adam/           czat Adam (adam.js, wiedza.json)
-tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
-PLAN.md         plan prac (prowadzony na bieżąco)
-STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–012), test/ — testy bazy 161/161, e2e CRM 153/153 (SUPABASE.md)
-CRM.md          opis CRM: role, moduły, decyzje
-SUPABASE.md     wdrożenie i stan bazy
-data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)
-version.json    aktualna wersja
-CHANGELOG.md    historia wersji
-bump.py         podbijanie wersji
-build_seo.py    SEO z data.json -> index.html, robots.txt, sitemap.xml (uruchamia Actions)
-INSTRUKCJA.md   instrukcja obsługi
-.github/        workflow publikacji na GitHub Pages + codzienna synchronizacja prawa (ok. 6:17)
+index.html, crm.html      strona publiczna i CRM kancelarii (same szkielety HTML; muszą być w katalogu głównym)
+crm-sw.js, crm.webmanifest  aplikacja CRM (service worker w katalogu głównym — obejmuje cały CRM)
+data.json, version.json   dane strony (zapas i źródło SEO), aktualna wersja
+
+strona/                   strona publiczna
+  strona.css, strona.js   style i skrypt strony (kalkulatory, porównywarka, analiza umów, formularz zgłoszeń)
+  umowa-zwrot.js          ocena umowy kredytu i wyliczenie zwrotu (reguły z podstawami i orzecznictwem)
+  restrukturyzacja.js     kalkulator restrukturyzacji firmy, harmonogram, plan dla wierzycieli
+wspolne/                  moduły używane przez stronę i CRM
+  prawo.js                dane prawne: przepisy z podglądem, odsetki, wyszukiwarka, stan prawny na dzień
+  kredyt-walutowy.js      symulacja kredytu CHF/EUR z kursów NBP
+crm/                      CRM kancelarii
+  crm.css, rdzen.js       style i rdzeń (dane, logowanie, menu, sprawy, terminy, finanse, ustawienia…)
+  pwa.js                  instalacja aplikacji
+  tresci-strony.js        Treści strony (edycja i publikacja)
+  prawo.js                📜 Prawo, przepisy w sprawie, analiza umowy w zgłoszeniu, klauzule UOKiK, UODO
+  pisma.js                pisma z szablonów, Ustawienia → Pisma i szablony
+  granty.js               💶 Dotacje (serwis Lexsalus/Grants)
+  podglad.js, pomoc.js    podgląd panelu oczami roli, podpowiedzi
+adam/                     czat Adam (adam.js, wiedza.json)
+prawo/                    dane generowane codziennie (API Sejmu, kursy NBP, orzeczenia SAOS, klauzule UOKiK, decyzje UODO);
+                          obserwowane.json — lista ustaw (edytowana w CRM); log/ — dziennik ostatniej synchronizacji
+icons/                    ikony aplikacji CRM
+supabase/                 schema.sql, migrations/ (002–012), functions/ (konta), test/ — testy bazy 161/161, e2e 153/153
+tools/                    prawo_sync.py (synchronizacja), bump.py (wersja), build_seo.py (SEO), test/ (testy synchronizacji)
+docs/                     dokumentacja: STAN (stan i zasady — zacznij tutaj), PLAN, INSTRUKCJA, CRM, SUPABASE, CHANGELOG
+.github/                  publikacja na GitHub Pages + codzienna synchronizacja prawa (ok. 6:17)
 ```
 
 ## Jak to działa
@@ -95,9 +95,9 @@ INSTRUKCJA.md   instrukcja obsługi
 [SemVer](https://semver.org/lang/pl/). **Każdy push = podbicie wersji**:
 
 ```
-py bump.py patch "opis"   # poprawki, dane
-py bump.py minor "opis"   # nowe funkcje
-py bump.py major "opis"   # duże zmiany
+py tools/bump.py patch "opis"   # poprawki, dane
+py tools/bump.py minor "opis"   # nowe funkcje
+py tools/bump.py major "opis"   # duże zmiany
 ```
 
 Wersja widoczna jest w stopce strony i w panelu.
