@@ -24,4 +24,4 @@
 ✓ kursy EUR: 299 miesięcy (od 2026-10-01)
 ✓ orzecznictwo: 151 orzeczeń w 8 kategoriach
 ✓ decyzje UODO: 40
-✓ klauzule UOKiK: 5440 wpisów (część — dokończy następny przebieg od strony 545 z 746)
+✓ klauzule UOKiK: 7453 wpisów
