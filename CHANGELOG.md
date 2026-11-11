@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.34.0] — 2026-11-11
+- Prawo → Urzędy: rejestr klauzul niedozwolonych UOKiK (wyszukiwarka, porównanie zapisu umowy, podobne wpisy w analizie), decyzje UODO, wyszukiwarki KIS/ZUS/KNF/UOKiK; listy w porcjach, dziennik audytu na żądanie; migracje 011–012 wdrożone
+
 ## [1.33.0] — 2026-11-11
 - Serwis dotacji (Lexsalus/Grants) w CRM: menu Dotacje (zgłoszenia, źródła finansowania, podgląd raportu, treści, publikacja), zgłoszenia DOT, filtr kategorii w Nowych sprawach; migracja 012
 

@@ -18,6 +18,8 @@ async def main():
         return await r.fulfill(status=200,content_type='text/html; charset=utf-8',body=body)
       if 'lexsalus.github.io/Grants/' in u:   # serwis dotacji: kopia silnika i danych do testów
         n=u.split('?')[0].rsplit('/',1)[1]; return await r.fulfill(path=HERE+'granty/'+n,content_type='application/javascript' if n.endswith('.js') else 'application/json',headers={'Access-Control-Allow-Origin':'*'})
+      for nm in ('klauzule','uodo'):
+        if u.split('?')[0].endswith(f'/prawo/{nm}.json'): return await r.fulfill(path=HERE+f'{nm}-test.json',content_type='application/json')  # dane testowe
       if u.split('?')[0].endswith('/prawo/orzeczenia.json'): return await r.fulfill(path=HERE+'orzeczenia-test.json',content_type='application/json')  # dane testowe, nie SAOS
       if u.split('?')[0].endswith('/prawo/kursy.json'): return await r.fulfill(path=HERE+'kursy-test.json',content_type='application/json')  # dane testowe, nie NBP
       if 'xlsx.full.min.js' in u: return await r.fulfill(path=HERE+'node_modules/xlsx/dist/xlsx.full.min.js',content_type='application/javascript')
@@ -98,6 +100,13 @@ async def main():
     n0=len(sqlx("select 1 from public.case_entries where title like 'Orzeczenie:%'"))
     await pg.click('button:has-text("Dołącz do sprawy") >> nth=1'); await pg.wait_for_timeout(500); await pg.click('#mform .mfoot button.pri'); await pg.wait_for_timeout(900)
     ok(len(sqlx("select 1 from public.case_entries where title like 'Orzeczenie:%' and description like '%saos.org.pl%'"))==n0+1,'Orzecznictwo: dołączenie orzeczenia do sprawy (wpis w historii)')
+    await nav('#/prawo/klauzule'); await pg.wait_for_timeout(1200)
+    await pg.fill('#klZ','Bank może w każdym czasie jednostronnie zmienić wysokość opłat oraz prowizji przy zmianie warunków rynkowych'); await pg.wait_for_timeout(400)
+    ok('7766' in await T('#klZo') and 'zgodności' in await T('#klZo') and '7765' not in await T('#klZo'),'Prawo → Klauzule UOKiK: porównanie zapisu umowy z rejestrem')
+    await pg.fill('#klQ','marketingowych'); await pg.wait_for_timeout(300); ok('7765' in await T('#klO') and '7766' not in await T('#klO'),'Klauzule UOKiK: wyszukiwarka')
+    await nav('#/prawo/uodo'); await pg.wait_for_timeout(800); ok('DKE.561.5.2026 TEST' in await T('#view'),'Prawo → Decyzje UODO')
+    await nav('#/prawo/urzedy'); await pg.wait_for_timeout(500); await pg.fill('#urQ','ulga na złe długi')
+    ok('EUREKA' in await T('#view') and 'site%3Aeureka.mf.gov.pl' in (await pg.get_attribute('[data-ur="eureka.mf.gov.pl"]','href')),'Prawo → KNF · ZUS · KIS · UOKiK: wyszukiwarki')
     await nav('#/prawo/przepisy'); await pg.wait_for_timeout(500); await pg.fill('#ppQ','przedawnienie roszczeń'); await pg.click('#ppGo'); await pg.wait_for_timeout(2500)
     ok('Art.' in await T('#ppRes'),'Prawo: wyszukiwarka przepisów słowami')
     # --- nowe konto z CRM (funkcja serwera „konta”)
@@ -197,7 +206,12 @@ async def main():
     await pg.click('text=+ Pozycja'); await pg.wait_for_timeout(300); await pg.select_option('#alT','company'); await pg.fill('#mform [name=amount]','6000'); await submit()
     ok('Bilans 0 zł' in await T('#view'),'podział 3000+1000+6000 → Bilans 0 zł')
     # --- uprawnienia, audyt
-    await nav('#/ustawienia/audyt'); await pg.click('text=Sprawdź łańcuch skrótów'); await pg.wait_for_timeout(600); ok('poprawny' in await T('#toast'),'audyt: '+await T('#toast'))
+    await nav('#/ustawienia/audyt'); await pg.wait_for_timeout(1200)
+    ok(('Wczytaj starsze' in await T('#view') or 'To wszystkie wpisy' in await T('#view')) and 'Odśwież' in await T('#view'),'audyt: wczytywany z bazy na żądanie, porcjami')
+    await nav('#/nowe'); await pg.wait_for_timeout(500); await pg.evaluate("PG.nowe=1;rerender()"); await pg.wait_for_timeout(700)
+    vv=await T('#view'); ok('Pokaż więcej' in vv,'Nowe sprawy: długa lista w porcjach („Pokaż więcej”) '+('' if 'Pokaż więcej' in vv else vv[:400]))
+    await pg.click('text=Pokaż więcej'); await pg.wait_for_timeout(400); await pg.evaluate("delete PG.nowe")
+    await nav('#/ustawienia/audyt'); await pg.wait_for_timeout(600); await pg.click('text=Sprawdź łańcuch skrótów'); await pg.wait_for_timeout(600); ok('poprawny' in await T('#toast'),'audyt: '+await T('#toast'))
     await pg.click('text=Test: edytuj wpis'); await pg.wait_for_timeout(500); ok('odrzuciła' in await T('#toast'),'edycja audytu odrzucona przez bazę')
     a=await T('#view'); ok('pesel.odsloniecie' in a and 'odczyt.akt' in a and 'sprawa.utworzona' in a,'audyt: odsłonięcie PESEL, odczyt akt, utworzenie sprawy')
     await nav('#/ustawienia/kategorie'); await pg.fill('form [name=c]','CZK'); await pg.press('form [name=c]','Enter'); await pg.wait_for_timeout(700); ok('CZK' in await T('#view'),'waluta dodana w bazie')

@@ -58,7 +58,7 @@ crm-prawo.js    CRM → 📜 Prawo + karta „Przepisy” w sprawie + analiza um
 crm-pisma.js    pisma z szablonów (DOCX, wydruk/PDF, zapis w aktach), Ustawienia → Pisma i szablony
 crm-granty.js   CRM → 💶 Dotacje: serwis Lexsalus/Grants (zgłoszenia DOT, źródła finansowania, podgląd raportu, treści, publikacja)
 prawo.js        wspólny moduł danych prawnych (przepisy z podglądem, odsetki, wyszukiwarka, stan prawny na dzień)
-prawo/          dane z API Sejmu (obserwowane.json — lista ustaw, edytowana w CRM i zapisywana przez synchronizację; reszta generowana codziennie)
+prawo/          dane generowane codziennie (tools/prawo_sync.py): API Sejmu (akty, zmiany, projekty, teksty, odsetki), kursy NBP, orzeczenia SAOS, klauzule UOKiK, decyzje UODO; obserwowane.json — lista ustaw edytowana w CRM
 restrukturyzacja.js  kalkulator restrukturyzacji firmy (sekcja #firma)
 umowa-zwrot.js  ocena umowy kredytu i wyliczenie zwrotu (reguły z podstawami prawnymi i orzecznictwem)
 kredyt-walutowy.js  symulacja kredytu CHF/EUR z kursów NBP (prawo/kursy.json) — rata, wpłaty, saldo
@@ -66,7 +66,7 @@ adam/           czat Adam (adam.js, wiedza.json)
 tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
 PLAN.md         plan prac (prowadzony na bieżąco)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–012), test/ — testy bazy 148/148, e2e CRM 147/147 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–012), test/ — testy bazy 161/161, e2e CRM 153/153 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

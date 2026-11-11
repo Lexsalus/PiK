@@ -508,7 +508,7 @@ ROUTES.sprawy=()=>{
   <div class="toolbar"><div class="chips"><span class="chip ${!f.cat?'on':''}" onclick="caseFilter.cat='';rerender()">Wszystkie</span>${cats.map(c=>`<span class="chip ${f.cat===c.code?'on':''}" onclick="caseFilter.cat='${c.code}';rerender()"><span class="dotc" style="background:${c.color}"></span>${esc(c.code)}</span>`).join('')}</div></div>
   <div class="toolbar"><input class="f" id="cq" placeholder="Filtruj: numer, klient, sygnatura" value="${esc(f.q)}" style="min-width:260px">
     <select class="f" onchange="caseFilter.status=this.value;rerender()"><option value="">Każdy status</option>${Object.entries(CASE_STATUS).map(([k,v])=>`<option value="${k}" ${f.status===k?'selected':''}>${v}</option>`).join('')}</select></div>
-  <div class="card" style="padding:6px 8px">${caseTable(list)}</div>`;
+  ${(()=>{const P=pageOf('sprawy',list,50);return `<div class="card" style="padding:6px 8px">${caseTable(P.items)}</div>${P.more}`})()}`;
 };
 ROUTES.sprawy.after=()=>{const i=$('#cq');if(i)i.oninput=()=>{caseFilter.q=i.value;clearTimeout(i._t);i._t=setTimeout(()=>{rerender();const j=$('#cq');j.focus();j.setSelectionRange(j.value.length,j.value.length)},350)}};
 const canCreateCase=()=>isAdmin()||ME.role==='office';
@@ -525,7 +525,7 @@ ROUTES.nowe=(sub)=>{
   const cats=[...new Set(all.map(l=>l.category))],chip=(k,l,n)=>`<a class="btn sm${(sub||'')===k?' pri':''}" href="#/nowe${k?'/'+k:''}">${l}${n?` <span class="cnt n">${n}</span>`:''}</a>`;
   const bar=cats.length>1?`<div class="toolbar" style="flex-wrap:wrap">${chip('','Wszystkie',all.filter(l=>l.status==='nowe').length)}${cats.map(k=>chip(k,esc(CAT(k).name||k),all.filter(l=>l.category===k&&l.status==='nowe').length)).join('')}</div>`:'';
   return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia ze strony (formularz „Co mi się należy”, serwis dotacji) · ${open.length} do obsłużenia</p></div></div>
-    ${bar}${L.length?L.map(leadCard).join(''):'<div class="empty">Brak zgłoszeń</div>'}`;
+    ${bar}${(()=>{const P=pageOf('nowe'+(sub||''),L,30);return L.length?P.items.map(leadCard).join('')+P.more:'<div class="empty">Brak zgłoszeń</div>'})()}`;
 };
 function leadCard(l){const m=l.calc?.outputs?.find(o=>o.main)||l.calc?.outputs?.[0];return `<div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="display:flex;gap:10px;align-items:center">${catBadge(l.category)}<b>${esc(l.client.name)}</b><span class="mut">${fDT(l.created)}</span>${l.fromSite?'<span class="badge b-acc">z formularza</span>':l.demo?'<span class="badge">przykład</span>':''}</div>
@@ -904,12 +904,28 @@ SET.swieta=()=>{
 /* --- System (obsługa techniczna) --- */
 /* --- Dziennik audytu --- */
 let audQ='';
+/* --- porcje: długie listy pokazują po N pozycji z przyciskiem „Pokaż więcej” --- */
+const PG={};
+function pageOf(key,list,size=50){const n=PG[key]||size;return{items:list.slice(0,n),more:list.length>n?`<div style="text-align:center;margin:12px 0"><button class="btn" onclick="PG['${key}']=${n+size};rerender()">Pokaż więcej — ${Math.min(size,list.length-n)} z ${list.length-n} pozostałych</button></div>`:''}}
+/* dziennik audytu z bazy: na żądanie, od najnowszych, po 200 wpisów */
+const AUD={rows:[],loaded:false,all:false,busy:false};
+async function auditLoad(more){
+  if(AUD.busy)return;AUD.busy=true;
+  try{let q=sb.from('audit_log').select('*').order('id',{ascending:false}).limit(200);if(more&&AUD.rows.length)q=q.lt('id',AUD.rows[0].i);
+    const a=chk(await q),R=(a||[]).reverse().map(x=>({i:x.id,ts:x.at,user:x.user_id,action:x.action,target:x.target,details:x.details,hash:x.hash,prev:x.prev_hash}));
+    AUD.rows=more?[...R,...AUD.rows]:R;AUD.all=(a||[]).length<200;AUD.loaded=true;DB.audit=AUD.rows}
+  catch(e){toast('Nie udało się wczytać dziennika: '+errMsg(e),true)}
+  AUD.busy=false;if(location.hash.startsWith('#/ustawienia/audyt'))rerender();
+}
+const auditRefresh=()=>{AUD.loaded=false;AUD.rows=[];auditLoad()};
 SET.audyt=()=>{
-  const list=DB.audit.filter(e=>!audQ||[e.action,e.target,e.details,U(e.user).name].join(' ').toLowerCase().includes(audQ.toLowerCase())).slice().reverse().slice(0,300);
+  if(!AUD.loaded){auditLoad();return '<div class="empty">Wczytywanie dziennika audytu…</div>'}
+  const P=pageOf('audyt',DB.audit.filter(e=>!audQ||[e.action,e.target,e.details,U(e.user).name].join(' ').toLowerCase().includes(audQ.toLowerCase())).slice().reverse(),100),list=P.items;
   return `<div class="card"><h3>Dziennik audytu (${DB.audit.length}) <span style="display:flex;gap:8px"><button class="btn sm" onclick="const r=verifyAudit();toast(r.ok?'Łańcuch skrótów poprawny ('+r.n+' wpisów)':'Wykryto manipulację przy wpisie #'+r.at,!r.ok)">Sprawdź łańcuch skrótów</button><button class="btn sm" onclick="toast('UPDATE/DELETE odrzucone: tabela audytu przyjmuje tylko INSERT (dla każdej roli, także Administratora).',true);audit('odmowa.dostepu','audit_log','próba edycji dziennika');save()">Test: edytuj wpis</button></span></h3>
   <input class="f" placeholder="Filtruj: akcja, osoba, sprawa" value="${esc(audQ)}" oninput="audQ=this.value;clearTimeout(this._t);this._t=setTimeout(()=>{rerender();const i=$('.content input.f');i.focus();i.setSelectionRange(i.value.length,i.value.length)},300)" style="margin-bottom:10px">
   <div class="tw"><table><tr><th>#</th><th>Czas</th><th>Kto</th><th>Akcja</th><th>Obiekt</th><th>Szczegóły</th><th>Skrót</th></tr>${list.map(e=>`<tr><td class="mut">${e.i}</td><td class="small" style="white-space:nowrap">${fDT(e.ts)}</td><td class="small">${esc(U(e.user).name||e.user)}</td><td><span class="badge ${/odmowa|usuniety|odsloniecie/.test(e.action)?'b-warn':''}">${esc(e.action)}</span></td><td class="small">${esc(e.target)}</td><td class="small mut">${esc(e.details)}</td><td class="small mut" style="font-family:monospace">${e.hash.slice(0,10)}</td></tr>`).join('')}</table></div>
-  <p class="hint">Tylko dopisywanie — bez edycji i usuwania dla nikogo. Rejestrowane: logowania, odczyt akt, zmiany, usunięcia, uprawnienia, eksporty. Każdy wpis zawiera skrót poprzedniego (łańcuch wykrywa manipulację).</p></div>`;
+  ${P.more}<div style="display:flex;gap:8px;justify-content:center;margin:10px 0">${AUD.all?'<span class="mut small">To wszystkie wpisy w dzienniku.</span>':'<button class="btn sm" onclick="auditLoad(true)">Wczytaj starsze wpisy z bazy (200)</button>'}<button class="btn sm" onclick="auditRefresh()">↻ Odśwież</button></div>
+  <p class="hint">Dziennik wczytuje się z bazy na żądanie, od najnowszych wpisów. Tylko dopisywanie — bez edycji i usuwania dla nikogo. Rejestrowane: logowania, odczyt akt, zmiany, usunięcia, uprawnienia, eksporty. Każdy wpis zawiera skrót poprzedniego (łańcuch wykrywa manipulację).</p></div>`;
 };
 SET.konto=()=>`<div class="card" style="max-width:560px"><h3>Moje konto</h3><dl class="kv"><dt>Imię i nazwisko</dt><dd>${esc(ME.name)}</dd><dt>Rola</dt><dd>${esc(ROLES[ME.role])}</dd><dt>E-mail</dt><dd>${esc(ME.email)}</dd><dt>2FA</dt><dd>${['admin','att','tech'].includes(ME.role)?'obowiązkowe':'zalecane'} <span class="mut">(w produkcji)</span></dd></dl>
   <h3 style="margin-top:16px">Moje uprawnienia</h3>${PERMS.filter(([k])=>can(k)).map(([k,l])=>`<span class="badge ${permLevel(k)===2?'b-good':'b-warn'}" style="margin:0 6px 6px 0">${l}</span>`).join('')||'<span class="mut">—</span>'}</div>`;
@@ -1005,7 +1021,7 @@ async function reload(only){  // only = lista tabel do pobrania; bez listy (albo
   d.audit=[];
   DB=d;
   ME=d.users.find(u=>u.id===SESSION_UID)||ME;
-  if(can('audit')){const a=await sb.from('audit_log').select('*').order('id',{ascending:false}).limit(1000);d.audit=(a.data||[]).reverse().map(x=>({i:x.id,ts:x.at,user:x.user_id,action:x.action,target:x.target,details:x.details,hash:x.hash,prev:x.prev_hash}))}
+  d.audit=AUD.rows;   // dziennik audytu wczytywany na żądanie (Ustawienia → Dziennik audytu), porcjami po 200
 }
 const leadOfRaw=cid=>RAW.case_members?.find(m=>m.case_id===cid&&m.role==='lead'&&!m.revoked_at)?.user_id;
 

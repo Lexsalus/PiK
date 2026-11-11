@@ -288,6 +288,13 @@ Dziennik ostatniego przebiegu: `prawo/sync-log.txt`, wynik: `prawo/stan.json` (w
 
 Synchronizacja pobiera codziennie najnowsze orzeczenia z bazy **SAOS** (System Analizy Orzeczeń Sądowych, saos.org.pl) dla każdej kategorii spraw → `prawo/orzeczenia.json`. W CRM: 📜 Prawo → **Orzecznictwo** (lista dla kategorii moich spraw / wszystkich, przycisk „📎 Dołącz do sprawy” — wpis w historii sprawy z sygnaturą, sądem, datą i linkiem) oraz wyszukiwarka: SAOS, portal orzeczeń sądów powszechnych, Sąd Najwyższy, TSUE. W karcie sprawy → Analiza: 5 najnowszych orzeczeń z kategorii sprawy. Zapytania dla kategorii: Treści strony → ✨ Nowe funkcje → Orzecznictwo (puste = domyślne). Uwaga: baza SAOS może nie mieć najnowszych orzeczeń — aktualne sprawdzaj w portalach sądów.
 
+## 12b-1. Urzędy: klauzule UOKiK, decyzje UODO, KNF, ZUS, KIS
+
+CRM → 📜 Prawo → grupa **Urzędy**:
+- **Klauzule UOKiK** — rejestr klauzul niedozwolonych (ok. 7,8 tys. wpisów z wyroków SOKiK, wersja zanonimizowana, rejestr zamknięty 17.04.2026), pobierany przez synchronizację do `prawo/klauzule.json` (raz na 30 dni, z wznawianiem). Wyszukiwarka (słowa, sygnatura, branża) i **porównanie zapisu umowy** z rejestrem (procent zgodności). W zgłoszeniu z analizą umowy pod wykrytymi zapisami pokazują się podobne wpisy rejestru. Wpis jest argumentem, nie przesądza o abuzywności w innej umowie.
+- **Decyzje UODO** — najnowsze decyzje Prezesa UODO z publicznego API (`prawo/uodo.json`).
+- **KNF · ZUS · KIS · UOKiK** — serwisy bez publicznego API: wyszukiwarki (interpretacje KIS w EUREKA, ZUS, KNF, decyzje UOKiK) z Twoim zapytaniem.
+
 ## 12c. Pisma z szablonów
 
 Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: oświadczenie o sankcji kredytu darmowego, wezwanie do zapłaty (nieważność umowy CHF/EUR), wniosek o zaświadczenie o historii kredytu, przedsądowe wezwanie do zapłaty, pełnomocnictwo. Dane klienta, sprawy, kancelarii, pełnomocnika i data wypełniają się same; pozostałe pola wpisujesz w formularzu (podgląd na żywo). Wynik: **DOCX**, **wydruk / PDF** albo **zapis w dokumentach sprawy** (z historią wersji). Administrator: Ustawienia → **Pisma i szablony** (dane kancelarii, edycja / wyłączanie wbudowanych, własne szablony z dowolnymi polami `{{nazwa_pola}}`; znaczniki `# ` tytuł, `>> ` do prawej, `**pogrubienie**`). Dane w bazie: tabela `office_settings` (migracja 011), zmiany w audycie; szablony nie są publiczne.

@@ -19,7 +19,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 8 | Zwrot z umowy: z umowy (wpisanej / pliku / skanu) system liczy zwrot (SKD, CHF/FX) wg przepisów i orzecznictwa; klient widzi **czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” + kwotę, bez podstawy prawnej**; podstawy, zapisy i orzecznictwo trafiają ze zgłoszeniem do CRM | ✅ v1.21.0 (`umowa-zwrot.js`) |
 | 9 | Skany umów: rozpoznawanie tekstu (OCR) w przeglądarce — zdjęcia JPG/PNG/WEBP i zeskanowane PDF | ✅ v1.21.0 |
 | 10 | Bot **Adam** (zamiast Ilony na stronie): regułowy, w przeglądarce, wiedza w `adam/wiedza.json`, przepisy, odsetki, zmiany, projekty, kierowanie do kalkulatorów | ✅ |
-| 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 22/22, e2e 147/147 |
+| 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 23/23, e2e 153/153 |
 | 12 | Dokumentacja: README, INSTRUKCJA, CRM, STAN, CHANGELOG, PLAN | ✅ v1.21.0 |
 | 13 | Sprawdzenie po wysyłce: parser v4 (identyfikatory ELI) na danych z API, wygląd na telefonie | ✅ v1.21.2 |
 | 14 | Restrukturyzacja firmy: kalkulator długów przedsiębiorcy (raty po układzie, wstrzymanie, odsetki, umorzenie) + ścieżki postępowań z podstawami w CRM | ✅ v1.22.0 |
@@ -29,17 +29,19 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 19 | Treści strony: zakładki w grupach z kolorami + kropka zmian; 🔧 Techniczne (stan systemu, synchronizacja, tryb serwisowy, limity, połączenie, pamięć aplikacji) | ✅ v1.25.0 |
 | 20 | OCR: kilka zdjęć stron naraz, przygotowanie obrazu (EXIF, kontrast, prostowanie przekosu), wykrywanie stron do góry nogami / obróconych, poprawki typowych pomyłek | ✅ v1.26.0 |
 | 21 | Usterki: art. 1 KPC bez treści (parser v5), limit zgłoszeń bez e-maila (telefon 3/h, ogólny 40/10 min) | ✅ v1.27.0 |
-| 22 | Powiadomienia o zmianach w prawie w bazie (migracja 010: pg_cron + pg_net, zapasowo z CRM Administratora) | ✅ v1.27.0 — wdrożenie w Supabase |
-| 23 | Zakładanie kont pracowników z CRM (funkcja serwera `konta`, hasło tymczasowe, wymuszona zmiana) | ✅ v1.27.0 — wdrożenie w Supabase |
+| 22 | Powiadomienia o zmianach w prawie w bazie (migracja 010: pg_cron + pg_net, zapasowo z CRM Administratora) | ✅ v1.27.0 (wdrożone 09.11.2026) |
+| 23 | Zakładanie kont pracowników z CRM (funkcja serwera `konta`, hasło tymczasowe, wymuszona zmiana) | ✅ v1.27.0 (wdrożone 09.11.2026) |
 | 24 | Restrukturyzacja: harmonogram miesiąc po miesiącu, plan dla wierzycieli, wydruk/PDF; plan w zgłoszeniu w CRM | ✅ v1.28.0 |
 | 25 | Zakładki karty sprawy i Prawa w grupach z kolorami i dymkami | ✅ v1.28.0 |
 | 26 | Lista obserwowanych ustaw i słów do projektów edytowana w CRM (Treści strony → Nowe funkcje); synchronizacja czyta ją z bazy i zapisuje do `prawo/obserwowane.json` | ✅ v1.29.0 |
 | 27 | Kredyt CHF/EUR z historycznymi kursami NBP: synchronizacja `prawo/kursy.json`, symulacja rat i salda (`kredyt-walutowy.js`) w kalkulatorze, zwrocie z umowy i CRM → Prawo → Kredyt walutowy | ✅ v1.30.0 (kursy pobierze pierwsza synchronizacja) |
 | 28 | Orzecznictwo z SAOS (API publiczne) w synchronizacji → `prawo/orzeczenia.json`; CRM → Prawo → Orzecznictwo, dołączanie do sprawy, wyszukiwarki; karta sprawy → Analiza; zapytania edytowane w CRM | ✅ v1.31.0 (dane pobierze synchronizacja) |
-| 29 | Pisma z szablonów (DOCX bez bibliotek, wydruk/PDF, zapis w aktach), Ustawienia → Pisma i szablony; migracja 011 `office_settings` | ✅ v1.32.0 — migracja 011 do wdrożenia w Supabase |
-| 30 | Serwis dotacji Lexsalus/Grants zintegrowany z CRM: zgłoszenia (kategoria DOT), panel 💶 Dotacje (zgłoszenia, źródła finansowania, podgląd raportu, treści, publikacja), wspólny silnik `engine.js`; migracja 012; filtr kategorii w Nowych sprawach | ✅ v1.33.0 — migracje 011 i 012 do wdrożenia |
-| 31 | Nowe źródła w Prawie: rejestr klauzul niedozwolonych UOKiK (porównanie z umową), decyzje UOKiK, UODO, KNF, ZUS, interpretacje KIS (EUREKA) — najpierw sprawdzenie, czy da się pobierać automatycznie | 🔄 |
-| 32 | Ładowanie spraw porcjami (duże listy), audyt na żądanie | ⏳ |
+| 29 | Pisma z szablonów (DOCX bez bibliotek, wydruk/PDF, zapis w aktach), Ustawienia → Pisma i szablony; migracja 011 `office_settings` | ✅ v1.32.0 (migracja 011 wdrożona 11.11.2026) |
+| 30 | Serwis dotacji Lexsalus/Grants zintegrowany z CRM: zgłoszenia (kategoria DOT), panel 💶 Dotacje (zgłoszenia, źródła finansowania, podgląd raportu, treści, publikacja), wspólny silnik `engine.js`; migracja 012; filtr kategorii w Nowych sprawach | ✅ v1.33.0 (migracja 012 wdrożona 11.11.2026) |
+| 31 | Prawo → Urzędy: rejestr klauzul niedozwolonych UOKiK (pobierany, wyszukiwarka, porównanie zapisu umowy, podobne wpisy w analizie zgłoszenia), decyzje UODO (publiczne API) | ✅ v1.34.0 (dane pobierze synchronizacja) |
+| 31a | KNF, ZUS, interpretacje KIS (EUREKA), decyzje UOKiK — brak publicznego API / stałego pliku: na razie wyszukiwarki w CRM; dane — gdy będzie źródło | ⏳ |
+| 32 | Długie listy w porcjach (sprawy, nowe sprawy, zgłoszenia dotacji, audyt), dziennik audytu z bazy na żądanie (zamiast 1000 wpisów przy każdym odświeżeniu) | ✅ v1.34.0 |
+| 32a | Pobieranie danych spraw z bazy porcjami (przy tysiącach spraw) | ⏳ |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później

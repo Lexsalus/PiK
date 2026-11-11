@@ -60,7 +60,7 @@ const VIEW={};let curSub='';
 ROUTES.dotacje.after=()=>{if(G.loaded||curSub==='zgloszenia')VIEW[curSub]?.after?.()};
 VIEW.zgloszenia=()=>{
   const L=DB.leads.filter(l=>l.category==='DOT').sort((a,b)=>b.created.localeCompare(a.created)),open=L.filter(l=>l.status==='nowe');
-  return `<p class="mut" style="margin-bottom:12px">${open.length} do obsłużenia · ${L.length} wszystkich. „Załóż sprawę” tworzy sprawę w kategorii „Dotacje i granty”.</p>${L.length?L.map(leadCard).join(''):'<div class="empty">Brak zgłoszeń z serwisu dotacji.</div>'}`;
+  return `<p class="mut" style="margin-bottom:12px">${open.length} do obsłużenia · ${L.length} wszystkich. „Załóż sprawę” tworzy sprawę w kategorii „Dotacje i granty”.</p>${(()=>{const Pg=pageOf('dotacje',L,30);return L.length?Pg.items.map(leadCard).join('')+Pg.more:'<div class="empty">Brak zgłoszeń z serwisu dotacji.</div>'})()}`;
 };
 VIEW.zrodla=()=>{
   const P=[...D().programy].sort((a,b)=>'ABC'.indexOf(a.tier||'A')-'ABC'.indexOf(b.tier||'A')||(b.waga||0)-(a.waga||0));

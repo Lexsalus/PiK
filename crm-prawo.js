@@ -36,9 +36,9 @@ const origMenu=menuItems;
 window.menuItems=menuItems=function(){const m=origMenu();if(!seesCases())return m;
   const i=m.findIndex(x=>x[0]==='strona'||x[0]==='ustawienia');m.splice(i<0?m.length:i,0,['prawo','📜','Prawo',prawoNew(),'n']);return m};
 
-const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy'],['waluty','Kredyt walutowy'],['orzeczenia','Orzecznictwo']];
-const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy','orzeczenia','waluty']}];
-Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.',orzeczenia:'Najnowsze orzeczenia sądów w kategoriach spraw (SAOS) i wyszukiwarki orzeczeń.',waluty:'Symulacja kredytu CHF / EUR z kursów NBP: raty, wpłaty, saldo.'});
+const TABS=[['zmiany','Zmiany w ustawach'],['projekty','Projekty w Sejmie'],['odsetki','Odsetki'],['przepisy','Przepisy'],['waluty','Kredyt walutowy'],['orzeczenia','Orzecznictwo'],['klauzule','Klauzule UOKiK'],['uodo','Decyzje UODO'],['urzedy','KNF · ZUS · KIS · UOKiK']];
+const PRAWO_GROUPS=[{l:'Zmiany',c:'#c08cff',k:['zmiany','projekty']},{l:'Narzędzia',c:'#2fd6a0',k:['odsetki','przepisy','orzeczenia','waluty']},{l:'Urzędy',c:'#ff8a5c',k:['klauzule','uodo','urzedy']}];
+Object.assign(TAB_TIPS,{zmiany:'Nowelizacje obserwowanych ustaw i ile spraw dotyczą.',projekty:'Projekty ustaw w Sejmie w kategoriach spraw.',odsetki:'Odsetki z obwieszczeń i kontrola kalkulatorów.',przepisy:'Wyszukiwarka przepisów i dołączanie do spraw.',klauzule:'Rejestr klauzul niedozwolonych UOKiK: wyszukiwarka i porównanie zapisu umowy z wpisami.',uodo:'Najnowsze decyzje Prezesa UODO.',urzedy:'Wyszukiwarki: interpretacje KIS (EUREKA), ZUS, KNF, decyzje UOKiK.',orzeczenia:'Najnowsze orzeczenia sądów w kategoriach spraw (SAOS) i wyszukiwarki orzeczeń.',waluty:'Symulacja kredytu CHF / EUR z kursów NBP: raty, wpłaty, saldo.'});
 const catChips=ks=>(ks||[]).map(k=>catBadge(k)).join(' ');
 const dl=(d)=>d?P.fmtD(d):'—';
 ROUTES.prawo=(sub)=>{
@@ -186,6 +186,50 @@ window.orzAttach=(id,caseId)=>{
     await act(async()=>chk(await sb.from('case_entries').insert({case_id:c.id,stage_id:st.id,type:'notatka',kind:'analiza',title:`Orzeczenie: ${o.sygn} (${o.sad})`.slice(0,300),description:lines.join('\n'),performed_on:iso(new Date())})),`Dołączono do sprawy ${c.number}`);
   }});
 };
+/* --- rejestr klauzul niedozwolonych UOKiK (prawo/klauzule.json — duży plik, wczytywany na żądanie) --- */
+let KL=null,KLp=null;
+const klTok=t=>[...new Set(String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ł/g,'l').match(/[a-z0-9]{4,}/g)||[])].map(w=>w.slice(0,6));
+function klLoad(){if(KLp)return KLp;KLp=P.load('klauzule').then(j=>{KL=j;(j?.klauzule||[]).forEach(k=>k.t=new Set(klTok(k[4])));return KL}).catch(()=>{KLp=null;return null});return KLp}
+/* podobieństwo: część słów zapisu umowy obecna we wpisie (z karą za bardzo krótkie wpisy) */
+function klMatch(text,n=5,min=0.3){const q=klTok(text);if(q.length<4||!KL?.klauzule)return [];
+  return KL.klauzule.map(k=>{let h=0;q.forEach(w=>k.t.has(w)&&h++);const sc=h/Math.max(q.length,Math.min(k.t.size,q.length*1.5));return{k,sc}}).filter(x=>x.sc>=min).sort((a,b)=>b.sc-a.sc).slice(0,n)}
+const klRow=(k,sc)=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="small">${sc!=null?`<span class="badge" style="background:#ff8a5c22;color:#ff8a5c">${Math.round(sc*100)}% zgodności</span> `:''}<b>poz. ${k[0]}</b> · ${esc(k[2])} · ${P.fmtD(k[1])} · <span class="mut">${esc(k[6])}</span> · <a href="https://rejestr.uokik.gov.pl/wyszukiwanie.php?details=${k[7]}#details" target="_blank" rel="noopener">rejestr ↗</a></div><div style="margin-top:3px">„${esc(k[4])}”</div></div>`;
+let klQ='',klB='',klZ='';
+VIEW.klauzule=async()=>{
+  const J=await klLoad();
+  if(!J?.klauzule?.length)return `<div class="empty">Rejestr klauzul nie jest jeszcze pobrany — pojawi się po najbliższej synchronizacji (prawo/klauzule.json).</div>${stanLine()}`;
+  const br=[...new Set(J.klauzule.map(k=>k[6]))].filter(Boolean).sort();
+  return `<div class="card"><h3>⚖️ Porównaj zapis umowy z rejestrem</h3><textarea class="f" id="klZ" rows="3" placeholder="Wklej zapis z umowy klienta, np. „Bank może zmienić wysokość opłat i prowizji w przypadku…”">${esc(klZ)}</textarea><div id="klZo" style="margin-top:8px"></div></div>
+  <div class="card"><h3>🔎 Szukaj w rejestrze (${J.klauzule.length.toLocaleString('pl-PL')} wpisów)</h3><div class="toolbar"><input class="f" id="klQ" value="${esc(klQ)}" placeholder="słowa z treści albo sygnatura, np. prowizja, XVII AmC" style="flex:1;min-width:220px"><select class="f" id="klB"><option value="">Wszystkie branże</option>${br.map(b=>`<option ${b===klB?'selected':''}>${esc(b)}</option>`).join('')}</select></div><div id="klO"></div></div>
+  <p class="hint">Źródło: rejestr klauzul niedozwolonych UOKiK (rejestr.uokik.gov.pl), wersja zanonimizowana — wpisy z prawomocnych wyroków SOKiK; rejestr prowadzono do 17.04.2026. Pobrano ${P.fmtD(J.pobrano)}${J.komplet?'':' (pobieranie w toku — reszta przy kolejnych synchronizacjach)'}. Wpis jest argumentem, nie przesądza o abuzywności zapisu w innej umowie — oceń w kontekście (art. 385¹ i 479⁴³ KPC w brzmieniu sprzed 17.04.2016).</p>`;
+};
+VIEW.klauzule.after=()=>{
+  const find=()=>{klQ=$('#klQ').value.trim();klB=$('#klB').value;const ws=klQ.toLowerCase().split(/\s+/).filter(Boolean);
+    const L=KL.klauzule.filter(k=>(!klB||k[6]===klB)&&ws.every(w=>(k[4]+' '+k[2]).toLowerCase().includes(w)));
+    $('#klO').innerHTML=ws.length||klB?`<div class="mut small" style="margin:6px 0">${L.length} wyników${L.length>50?' — pierwsze 50':''}</div>${L.slice(0,50).map(k=>klRow(k)).join('')}`:'<div class="mut small">Wpisz słowa albo wybierz branżę.</div>'};
+  const cmp=()=>{klZ=$('#klZ').value;const M=klMatch(klZ,8,0.25);$('#klZo').innerHTML=klZ.trim().length<20?'<div class="mut small">Wklej co najmniej jedno zdanie.</div>':M.length?M.map(x=>klRow(x.k,x.sc)).join(''):'<div class="mut small">Brak podobnych wpisów w rejestrze.</div>'};
+  $('#klQ')?.addEventListener('input',find);$('#klB')?.addEventListener('change',find);$('#klZ')?.addEventListener('input',cmp);if($('#klQ')){find();if(klZ)cmp()}
+};
+/* analiza umowy w zgłoszeniu: podobne wpisy rejestru dla wykrytych zapisów (wypełniane po wczytaniu rejestru) */
+const klFill=()=>document.querySelectorAll('.klm:not([data-done])').forEach(el=>{el.dataset.done=1;klLoad().then(J=>{if(!J)return;
+  const fr=JSON.parse(el.dataset.q||'[]'),out=fr.map(f=>({f,m:klMatch(f,2,0.35)})).filter(x=>x.m.length);
+  el.innerHTML=out.length?`<div class="small" style="margin-top:8px"><b>⚖️ Podobne wpisy w rejestrze klauzul niedozwolonych UOKiK</b>${out.map(x=>x.m.map(y=>klRow(y.k,y.sc)).join('')).join('')}</div>`:''})});
+new MutationObserver(klFill).observe(document.body,{childList:true,subtree:true});
+/* --- decyzje UODO (prawo/uodo.json) --- */
+VIEW.uodo=async()=>{let J=null;try{J=await P.load('uodo')}catch(e){}
+  if(!J?.decyzje?.length)return `<div class="empty">Decyzje UODO pojawią się po najbliższej synchronizacji.</div>${stanLine()}`;
+  return `<div class="card"><h3>🛡️ Najnowsze decyzje Prezesa UODO <a class="btn sm" href="https://orzeczenia.uodo.gov.pl/" target="_blank" rel="noopener">Wyszukiwarka UODO ↗</a></h3>${J.decyzje.map(d=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><a href="${esc(d.url)}" target="_blank" rel="noopener"><b>${esc(d.sygn)}</b></a> · ${P.fmtD(d.data)}<div class="small">${esc(d.tytul)}</div></div>`).join('')}
+  <p class="hint">Źródło: orzeczenia.uodo.gov.pl (publiczne API), pobrano ${P.fmtD(J.pobrano)}.</p></div>${stanLine()}`};
+/* --- pozostałe urzędy: bez publicznego API — wyszukiwarki --- */
+let urQ='';
+const URZ=[['Interpretacje podatkowe — KIS (EUREKA)','https://eureka.mf.gov.pl/','Interpretacje indywidualne i ogólne, objaśnienia; wyszukiwarka Ministerstwa Finansów.','eureka.mf.gov.pl'],
+  ['ZUS — interpretacje i wyjaśnienia','https://www.zus.pl/','Decyzje w sprawie interpretacji przepisów i wyjaśnienia ZUS.','zus.pl'],
+  ['KNF — stanowiska, rekomendacje, ostrzeżenia','https://www.knf.gov.pl/','Stanowiska i rekomendacje dla banków, lista ostrzeżeń publicznych.','knf.gov.pl'],
+  ['UOKiK — decyzje Prezesa','https://decyzje.uokik.gov.pl/bp/dec_prez.nsf','Decyzje w sprawach praktyk naruszających zbiorowe interesy konsumentów i postanowień niedozwolonych (po 17.04.2016).','uokik.gov.pl']];
+VIEW.urzedy=async()=>`<div class="card"><h3>🔎 Szukaj w serwisach urzędów</h3><input class="f" id="urQ" value="${esc(urQ)}" placeholder="np. ulga na złe długi, zmiana oprocentowania kredytu" style="width:100%">
+  <div style="display:grid;gap:10px;margin-top:12px">${URZ.map(([n,u,o,d],i)=>`<div style="background:var(--bg2);border-radius:10px;padding:10px 12px"><b>${esc(n)}</b><div class="small mut">${esc(o)}</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">Otwórz ↗</a><a class="btn sm" data-ur="${esc(d)}" target="_blank" rel="noopener" href="#">Szukaj w serwisie ↗</a></div></div>`).join('')}</div>
+  <p class="hint">Te serwisy nie udostępniają publicznego API ani stałego pliku z danymi — dlatego tu są wyszukiwarki, a nie codzienna synchronizacja. Rejestr klauzul UOKiK i decyzje UODO są pobierane automatycznie (osobne zakładki).</p></div>`;
+VIEW.urzedy.after=()=>{const q=$('#urQ'),upd=()=>{urQ=q.value;document.querySelectorAll('[data-ur]').forEach(a=>a.href='https://www.google.com/search?q='+encodeURIComponent('site:'+a.dataset.ur+' '+(urQ||'interpretacja')))};q?.addEventListener('input',upd);upd()};
 VIEW.przepisy=async()=>`<div class="card"><h3>Wyszukiwarka przepisów</h3>${searchBox('pp')}</div>${stanLine()}`;
 VIEW.przepisy.after=()=>bindSearch('pp',null);
 
@@ -226,6 +270,7 @@ window.leadAnaliza=a=>{if(!a)return '';const L=x=>P.linkify(esc(x||''));
     <div class="small" style="margin-top:6px"><span class="mut">Zasady do sprawdzenia:</span><ul style="margin:4px 0 0 18px">${(a.zasady||[]).map(z=>`<li>${esc(z)}</li>`).join('')}</ul></div>`:''}
   ${(a.zgodnosc||[]).length?`<div class="small" style="margin-top:8px"><span class="mut">Zgodność z prawem (reguły analizy umów):</span><ul style="margin:4px 0 0 18px">${a.zgodnosc.map(z=>`<li><b>${esc(z.nazwa)}</b>${z.brak?' — brak zapisu':''}${z.podstawa?` — ${L(z.podstawa)}`:''}</li>`).join('')}</ul></div>`:''}
   ${a.symulacja?fxSym(a.symulacja):''}
+  ${(a.klauzule||[]).some(k=>k.fragment)?`<div class="klm" data-q="${esc(JSON.stringify(a.klauzule.filter(k=>k.fragment).map(k=>k.fragment)))}"></div>`:''}
   ${a.ryzyko?`<div class="mut small" style="margin-top:6px">Ocena ze strony: ryzyko zapisów ${a.ryzyko.zapisy??'—'}/100, ryzyko prawne ${a.ryzyko.prawne??'—'}/100</div>`:''}
   <p class="hint">Wynik automatycznej analizy wzorców w treści umowy — wymaga weryfikacji prawnika. Klientowi pokazano tylko komunikat i kwotę, bez podstaw prawnych.</p></details>`};
 

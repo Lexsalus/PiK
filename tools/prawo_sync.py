@@ -14,6 +14,8 @@ Wyjście:  prawo/akty.json        — stan obserwowanych i uchylonych aktów, te
           prawo/odsetki.json     — aktualne odsetki ustawowe z obwieszczeń w Monitorze Polskim
           prawo/teksty/<id>.json — artykuły z ostatniego tekstu jednolitego (wyszukiwarka, Adam, podgląd)
           prawo/orzeczenia.json  — najnowsze orzeczenia dla kategorii spraw (SAOS — System Analizy Orzeczeń Sądowych)
+          prawo/klauzule.json    — rejestr klauzul niedozwolonych UOKiK (zanonimizowany, zamknięty — pobierany raz na 30 dni, z wznawianiem)
+          prawo/uodo.json        — najnowsze decyzje Prezesa UODO (orzeczenia.uodo.gov.pl, publiczne API)
           prawo/kursy.json       — miesięczne kursy NBP (CHF, EUR: średni z tabeli A, kupno/sprzedaż z tabeli C) do symulacji kredytów walutowych
           prawo/stan.json        — kiedy i z jakim skutkiem działała synchronizacja
           prawo/sync-log.txt     — dziennik ostatniego przebiegu
@@ -42,6 +44,9 @@ SEJM = 'https://api.sejm.gov.pl/sejm'
 NBP = 'https://api.nbp.pl/api/exchangerates/rates'
 WALUTY = ('CHF', 'EUR')
 SAOS = 'https://www.saos.org.pl'
+UOKIK = 'https://rejestr.uokik.gov.pl'
+UODO = 'https://orzeczenia.uodo.gov.pl'
+KLAUZULE_LIMIT_S = int(os.environ.get('KLAUZULE_LIMIT_S', '600'))  # najdłużej tyle sekund na rejestr w jednym przebiegu
 ORZ_DOMYSLNE = {   # zapytania do wyszukiwarki SAOS dla kategorii spraw (można zmienić w CRM)
     'SKD': ['sankcja kredytu darmowego'], 'CHF': ['kredyt indeksowany frank szwajcarski'], 'FX': ['kredyt denominowany'],
     'PLN': ['WIBOR kredyt'], 'RST': ['postępowanie restrukturyzacyjne układ'], 'ROD': ['alimenty'],
@@ -747,6 +752,69 @@ def sync_orzeczenia(cfg):
     log(f"✓ orzecznictwo: {sum(len(v['orzeczenia']) for v in out.values())} orzeczeń w {len(out)} kategoriach")
 
 
+# ---------------------------------------------------------------- rejestr klauzul niedozwolonych UOKiK
+RE_KL_ROW = re.compile(r'<tr data-click="wyszukiwanie\.php\?details=(\d+)#details"[^>]*>(.*?)</tr>', re.S)
+RE_TD = re.compile(r'<td[^>]*>(.*?)</td>', re.S)
+
+
+def kl_cell(x):
+    return re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', x))).strip()
+
+
+def parse_klauzule(page):
+    """Strona wyników rejestru -> [[lp, data wyroku, sygnatura, sąd, treść, data wpisu, branża, id szczegółów]]."""
+    out = []
+    for det, row in RE_KL_ROW.findall(page):
+        td = [kl_cell(x) for x in RE_TD.findall(row)]
+        if len(td) >= 9 and td[0].isdigit():
+            tresc = td[6].strip().strip('"„”').strip()
+            out.append([int(td[0]), td[1], td[2], td[3], tresc, td[7], td[8], int(det)])
+    return out
+
+
+def sync_klauzule():
+    """Rejestr jest zamknięty (wpisy do 17.04.2026, wersja zanonimizowana) — pobieramy raz na 30 dni, z wznawianiem."""
+    old = load('klauzule.json', {})
+    if old.get('komplet') and old.get('pobrano', '') >= (TODAY - dt.timedelta(days=30)).isoformat():
+        log(f"✓ klauzule UOKiK: aktualne ({len(old.get('klauzule', []))} wpisów, pobrano {old['pobrano']})")
+        return
+    acc = {} if old.get('komplet') else {k[0]: k for k in old.get('klauzule', [])}
+    strona, stron, t0 = (old.get('strona_nastepna') or 1) if not old.get('komplet') else 1, old.get('stron') or 0, time.time()
+    while True:
+        page = http(f'{UOKIK}/index.php?page={strona}&view=')
+        if not stron:
+            stron = max([int(x) for x in re.findall(r'index\.php\?page=(\d+)&', page)] or [1])
+        for k in parse_klauzule(page):
+            acc[k[0]] = k
+        strona += 1
+        if strona > stron:
+            break
+        if time.time() - t0 > KLAUZULE_LIMIT_S:
+            break
+    komplet = strona > stron
+    save('klauzule.json', {'_info': 'Rejestr klauzul niedozwolonych UOKiK (rejestr.uokik.gov.pl, wersja zanonimizowana; wpisy z wyroków SOKiK, rejestr zamknięty 17.04.2026). '
+                           'Kolumny: lp, data wyroku, sygnatura, sąd, treść postanowienia, data wpisu, branża, id szczegółów.',
+                           'pobrano': TODAY.isoformat(), 'komplet': komplet, 'strona_nastepna': None if komplet else strona, 'stron': stron,
+                           'klauzule': sorted(acc.values(), key=lambda k: -k[0])})
+    log(f"✓ klauzule UOKiK: {len(acc)} wpisów{'' if komplet else f' (część — dokończy następny przebieg od strony {strona} z {stron})'}")
+
+
+# ---------------------------------------------------------------- decyzje UODO
+def sync_uodo():
+    url = f"{UODO}/api/documents/search/PublicDocument/,/publicator_subtype:eq:uodo?order=-id&count=40&from=0&fields=id,refid,refname,dates,title"
+    rows = jget(url)
+    out = []
+    for d in rows if isinstance(rows, list) else []:
+        dates = {x.get('use'): x.get('date') for x in d.get('dates') or []}
+        t = d.get('title') or {}
+        out.append({'sygn': d.get('refname', ''), 'data': dates.get('announcement') or dates.get('publication') or '',
+                    'tytul': (t.get('pl') if isinstance(t, dict) else str(t))[:600], 'url': f"{UODO}/document/{d.get('refid')}/content"})
+    if not out:
+        raise RuntimeError('UODO: pusta odpowiedź')
+    save('uodo.json', {'_info': 'Najnowsze decyzje Prezesa UODO (orzeczenia.uodo.gov.pl). Dane informacyjne — treść w źródle.', 'pobrano': TODAY.isoformat(), 'decyzje': out})
+    log(f'✓ decyzje UODO: {len(out)}')
+
+
 # ---------------------------------------------------------------- lista ustaw z CRM
 RE_ID = re.compile(r'^[a-z0-9_]{1,20}$')
 RE_ELI = re.compile(r'^(DU|MP)/\d{4}/\d{1,5}$')
@@ -830,7 +898,7 @@ def main():
     stan['lista'] = zrodlo
     res = {}
     t0 = time.time()
-    for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki), ('kursy', sync_kursy), ('orzecznictwo', lambda: sync_orzeczenia(cfg))]:
+    for name, fn in [('akty', lambda: sync_akty(cfg)), ('projekty', lambda: sync_projekty(cfg)), ('odsetki', sync_odsetki), ('kursy', sync_kursy), ('orzecznictwo', lambda: sync_orzeczenia(cfg)), ('uodo', sync_uodo), ('klauzule', sync_klauzule)]:
         try:
             r = fn()
             res[name] = 'ok'

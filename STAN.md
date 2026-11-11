@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **08.11.2026**, wersja **1.33.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **11.11.2026**, wersja **1.34.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -11,15 +11,16 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Treści strony | CRM → **🌐 Treści strony** (tylko Administrator; przycisk ⚙️ Panel na stronie i link w stopce prowadzą do CRM) | szkic + „Opublikuj” do bazy (`site_content`, migracja 005 — wdrożona); dopóki nic nie opublikowano, strona czyta `data.json`. `admin.html` usunięty |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–009 wdrożone 27.10.2026; Administrator aktywny |
+| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–009 27.10.2026, 010 + funkcja `konta` 09.11.2026, 011–012 11.11.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
+| Serwis dotacji | https://lexsalus.github.io/Grants/ (repo `Lexsalus/Grants`) | zgłoszenia do CRM (kategoria DOT), treści z bazy; panel w CRM → 💶 Dotacje |
 
-Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie — **nie zmieniać** (osobny projekt, repo `Lexsalus/Ilona`).
+Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to osobny projekt (repo `Lexsalus/Ilona`) — nie zmieniać.
 
 ## Konta i dostęp
 
 - Administrator CRM: `biuro@lekarzeiterapeuci.pl` (nazwa „Admin”), 2FA konfiguruje się przy pierwszym logowaniu.
-- Nowych pracowników zakłada się w Supabase → Authentication → Users (samodzielna rejestracja wyłączona), rolę i aktywację nadaje się w CRM → Ustawienia → Użytkownicy.
+- Nowych pracowników zakłada Administrator w CRM → Ustawienia → Użytkownicy → „+ Nowe konto” (funkcja serwera `konta`, hasło tymczasowe, zmiana przy pierwszym logowaniu). Samodzielna rejestracja wyłączona.
 - Klucz publiczny (`sb_publishable_…`) jest w `crm.html`, `index.html` i `data.json` — może być jawny. **Nigdy** nie umieszczać klucza `sb_secret_…`.
 - Zmiany w bazie (SQL) wykonuje się w Supabase SQL Editor albo przez API zarządzania z tokenem osobistym ograniczonym do projektu (Database read-write, krótka ważność, usunąć po użyciu). Treść SQL wysyłać jako UTF-8 (inaczej giną polskie znaki — zob. migracja 007).
 
@@ -39,7 +40,7 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - **Każda wysyłka (push) = podbicie wersji:** `py bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (137 testów reguł bazy) i `supabase/test/e2e/` (96 kroków przez interfejs CRM i stronę, lokalna kopia bazy).
+- Testy: `supabase/test/schema.test.mjs` (161 testów reguł bazy), `supabase/test/e2e/` (153 kroki przez interfejs CRM i stronę, lokalna kopia bazy, dane testowe zamiast NBP/SAOS/UOKiK/UODO), `tools/test/test_prawo_sync.py` (23 testy synchronizacji).
 
 ## Zrobione
 
@@ -47,7 +48,18 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 - Baza: 29 tabel z RLS, 60+ reguł, numeracja spraw, blokada etapów, wersje, soft delete, bilans podziału, PESEL szyfrowany, audyt tylko INSERT z łańcuchem SHA-256, przypomnienia o terminach co 15 min (pg_cron), 2FA egzekwowane w bazie (aal2 dla Administratora, pełnomocnika, obsługi technicznej), prywatny magazyn akt `akta`.
 - CRM na żywo: wszystkie moduły specyfikacji podłączone do bazy (sprawy, zgłoszenia, karta, etapy, wpisy, korekty, dokumenty w Storage, zespół, terminy, powiadomienia, finanse, raporty, uprawnienia, kategorie, święta, audyt, dostęp awaryjny).
 
-## Ostatnie zmiany (08–09.11.2026)
+## Ostatnie zmiany (09–11.11.2026)
+
+- 1.34.0 — Prawo → grupa **Urzędy**: rejestr klauzul niedozwolonych UOKiK (wyszukiwarka, porównanie zapisu umowy z rejestrem, podobne wpisy w analizie umowy klienta), decyzje UODO (publiczne API), wyszukiwarki KIS/ZUS/KNF/decyzje UOKiK; długie listy w porcjach („Pokaż więcej”), dziennik audytu z bazy na żądanie.
+- 1.33.0 — serwis dotacji **Lexsalus/Grants** w CRM (💶 Dotacje: zgłoszenia, źródła finansowania, podgląd raportu, treści, publikacja; migracja 012); filtr kategorii w Nowych sprawach.
+- 1.32.0 — **pisma z szablonów** (DOCX, wydruk/PDF, zapis w aktach; Ustawienia → Pisma i szablony; migracja 011).
+- 1.31.0 — **orzecznictwo** z SAOS (Prawo → Orzecznictwo, dołączanie do sprawy, karta sprawy → Analiza).
+- 1.30.0 — **kredyt CHF/EUR z kursów NBP** (rata, saldo bez pytania klienta; Prawo → Kredyt walutowy).
+- 1.29.0 — **lista obserwowanych ustaw w CRM** (Treści strony → Nowe funkcje).
+- 1.28.0 — restrukturyzacja: harmonogram i wydruk planu dla wierzycieli; zakładki karty sprawy i Prawa w grupach.
+- 1.27.0 — powiadomienia o zmianach w prawie w bazie, konta pracowników z CRM, limit zgłoszeń po telefonie (migracja 010, funkcja `konta`).
+
+## Zmiany 08–09.11.2026
 
 - 1.26.0 — OCR: kilka zdjęć stron umowy naraz, przygotowanie obrazu (obrót z aparatu, kontrast, prostowanie przekosu), wykrywanie stron do góry nogami i obróconych o 90°.
 - 1.25.0 — zakładki Treści strony i Ustawień w grupach z kolorami (kropka = nieopublikowane zmiany), nowa zakładka **🔧 Techniczne** (stan systemu, synchronizacja prawa, tryb serwisowy z wstrzymaniem zgłoszeń, limity, połączenie z bazą, pamięć aplikacji). e2e 117/117.
@@ -91,7 +103,8 @@ Chatbot **Ilona** (`lexsalus.github.io/Ilona/embed.js`) jest osadzony na stronie
 
 - Po wdrożeniu 008: w CRM → Treści strony kliknąć „Opublikuj”, aby strona dostała tłumaczenie nowego komunikatu o limicie zgłoszeń.
 - Pierwsze logowanie Administratora do `crm.html` i konfiguracja 2FA (jeszcze nie sprawdzone na żywo).
-- Usunąć tokeny API w Supabase (Account → Access Tokens) oraz pliki z pulpitu: `PiK.txt`, `tok.txt`, `crmkp.txt`, `crm_schema.sql`, `crm_migracja_002.sql`, `crm_migracja_003.sql`.
+- Po wdrożeniu migracji usunąć token API w Supabase (Account → Access Tokens) i plik `tok.txt` z pulpitu (oraz stare: `PiK.txt`, `crmkp.txt`, `crm_*.sql`).
+- CRM → Ustawienia → Pisma i szablony: uzupełnić dane kancelarii (nazwa, adres, miejscowość). CRM → 💶 Dotacje → Publikacja: pierwsza publikacja przenosi katalog z plików repozytorium Grants do bazy.
 - Podmienić przykładowe (fikcyjne) oferty w porównywarce na prawdziwe.
 
 ## Bezpieczeństwo i zużycie — audyt 27.10.2026 (podstawowy)
@@ -110,12 +123,11 @@ Zostaje: sprawdzanie haseł z wycieków (HIBP) — plan płatny; kto publikuje t
 
 ## Następne kroki (propozycja)
 
-1. Założenie kont pracowników i test ról na żywo.
+1. Założenie kont pracowników (z CRM) i test ról na żywo.
 2. Powiadomienia e-mail/SMS (Edge Function + dostawca — decyzja kancelarii).
-3. Zakładanie kont pracowników z poziomu CRM (Edge Function z kluczem secret po stronie serwera).
-4. Generowanie pism z szablonów (PDF/DOCX).
-5. Paginacja / ładowanie przyrostowe przy dużej liczbie spraw (obecnie CRM pobiera do 5000 wierszy z tabeli).
-6. Test odtwarzania kopii zapasowej (co kwartał) — wymaga planu Supabase z kopiami.
+3. Pobieranie danych spraw z bazy porcjami (dziś listy w interfejsie są w porcjach, ale CRM wczytuje dane spraw w całości przy logowaniu).
+4. KNF, ZUS, interpretacje KIS i decyzje UOKiK jako dane (dziś wyszukiwarki) — gdy pojawi się API lub stały plik danych.
+5. Test odtwarzania kopii zapasowej (co kwartał) — wymaga planu Supabase z kopiami.
 
 ## Decyzje do podjęcia (ze specyfikacji)
 
