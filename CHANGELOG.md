@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.33.0] — 2026-11-11
+- Serwis dotacji (Lexsalus/Grants) w CRM: menu Dotacje (zgłoszenia, źródła finansowania, podgląd raportu, treści, publikacja), zgłoszenia DOT, filtr kategorii w Nowych sprawach; migracja 012
+
 ## [1.32.0] — 2026-11-11
 - Pisma z szablonów: DOCX, wydruk/PDF, zapis w dokumentach sprawy; Ustawienia → Pisma i szablony (dane kancelarii, własne szablony); migracja 011
 

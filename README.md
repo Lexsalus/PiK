@@ -55,6 +55,8 @@ crm-pomoc.js    podpowiedzi w CRM (dymki i ikonki [?]) — słowniki tekstów w 
 crm-podglad.js  CRM → Podgląd: panel oczami wybranej roli lub osoby (tylko Administrator, tylko do odczytu)
 crm-strona.js   CRM → Treści strony (edycja i publikacja treści strony; dawny admin.html)
 crm-prawo.js    CRM → 📜 Prawo + karta „Przepisy” w sprawie + analiza umowy klienta w zgłoszeniu
+crm-pisma.js    pisma z szablonów (DOCX, wydruk/PDF, zapis w aktach), Ustawienia → Pisma i szablony
+crm-granty.js   CRM → 💶 Dotacje: serwis Lexsalus/Grants (zgłoszenia DOT, źródła finansowania, podgląd raportu, treści, publikacja)
 prawo.js        wspólny moduł danych prawnych (przepisy z podglądem, odsetki, wyszukiwarka, stan prawny na dzień)
 prawo/          dane z API Sejmu (obserwowane.json — lista ustaw, edytowana w CRM i zapisywana przez synchronizację; reszta generowana codziennie)
 restrukturyzacja.js  kalkulator restrukturyzacji firmy (sekcja #firma)
@@ -64,7 +66,7 @@ adam/           czat Adam (adam.js, wiedza.json)
 tools/          prawo_sync.py — synchronizacja z API Sejmu; test/ — testy parsera
 PLAN.md         plan prac (prowadzony na bieżąco)
 STAN.md         stan projektu, zasady, następne kroki
-supabase/       schema.sql, migrations/ (002–011), test/ — testy bazy 148/148, e2e CRM 139/139 (SUPABASE.md)
+supabase/       schema.sql, migrations/ (002–012), test/ — testy bazy 148/148, e2e CRM 147/147 (SUPABASE.md)
 CRM.md          opis CRM: role, moduły, decyzje
 SUPABASE.md     wdrożenie i stan bazy
 data.json       dane strony — wersja zapasowa i źródło SEO (opublikowana wersja jest w bazie)

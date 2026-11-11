@@ -48,7 +48,7 @@ Zaplecze dla adwokatów i pracowników kancelarii według **specyfikacji v1.1 (2
 - **Raporty:** filtr statusu, eksport CSV / XLSX / PDF (drukowanie do pliku), każdy w audycie; aplikant widzi własne czynności i terminy.
 - **Wylogowanie po 30 min bezczynności**; kolejność kategorii także przeciąganiem.
 
-**Testy:** reguły bazy 148/148 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 139/139 (`supabase/test/e2e/`).
+**Testy:** reguły bazy 148/148 (`supabase/test/schema.test.mjs`), scenariusz przez interfejs dla wszystkich ról i strony 147/147 (`supabase/test/e2e/`).
 
 ## Treści strony (migracja 005, 27.10.2026)
 
@@ -87,6 +87,12 @@ Do decyzji właściciela:
 - **👁 Podgląd** w lewym menu: CRM oczami wybranej **roli** (domyślne uprawnienia, bez przypisań do spraw) albo **osoby** (rola, nadania indywidualne, sprawy z jej zespołów) — menu, sprawy, zakładki i przyciski.
 - Tylko do odczytu: zapisy, przesyłanie plików i funkcje bazy są zablokowane; pasek u góry z przyciskiem „Zakończ podgląd”.
 - Podgląd stosuje te same reguły co CRM na danych wczytanych przez Administratora. Nie pokazuje cudzych powiadomień ani raportów (liczy je baza dla zalogowanej osoby). Dostępu do danych i tak pilnuje baza.
+
+## Dotacje, pisma, filtr zgłoszeń (v1.32–1.33)
+
+- Menu → grupa **Dotacje** (pomarańczowa) → 💶 Dotacje; zakładki w grupach: **Klienci** (Zgłoszenia) · **Katalog** (Źródła finansowania, Podgląd raportu) · **Serwis** (Treści i ustawienia, Publikacja).
+- Nowe sprawy: filtr kategorii (`#/nowe/DOT`), karta zgłoszenia z serwisu dotacji pokazuje wstępny raport.
+- Karta sprawy → Dokumenty → 📝 Pismo z szablonu; Ustawienia → Pisma i szablony.
 
 ## Kredyt walutowy, orzecznictwo i obserwowane ustawy (v1.29–1.31)
 

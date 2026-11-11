@@ -242,7 +242,7 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
 // --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
 {await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
  await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
- for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
+ for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql','012_dotacje.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
@@ -315,4 +315,14 @@ R((await as('anon',`select count(*)::int n from public.office_settings`).catch((
 R(!!await fails('admin',`select public.office_setting_save('pisma','{"a":1}'::jsonb)`)&&!!await fails('admin',`select public.office_setting_save('inne','{}'::jsonb)`),'011: zły format / nieznane ustawienie → odmowa');
 R(!!await fails('admin',`update public.office_settings set value='{}'::jsonb`)||(await db.query(`select value->>'nazwa' n from public.office_settings where key='kancelaria'`)).rows[0].n==='Kancelaria Test','011: bez bezpośredniej zmiany tabeli (tylko przez funkcję)');
 R((await db.query(`select count(*)::int n from public.audit_log where action in ('konfiguracja.kancelaria','konfiguracja.pisma')`)).rows[0].n===2,'011: zmiany w audycie');
+}
+{ // --- 012: serwis dotacji
+const G={programy:[{id:'p1',tier:'A',nazwa:{pl:'Test'},kwotaMax:100000}],settings:{siteName:'Granty'}};
+R(!!await fails('jan',`select public.grants_publish($1::jsonb)`,[JSON.stringify(G)]),'012: serwis dotacji publikuje tylko Administrator');
+R(!!await fails('admin',`select public.grants_publish('{"programy":{}}'::jsonb)`)&&!!await fails('admin',`select public.grants_publish($1::jsonb)`,[JSON.stringify({...G,settings:{x:'ghp_abc'}})]),'012: zły format / token w danych → odmowa');
+await as('admin',`select public.grants_publish($1::jsonb)`,[JSON.stringify(G)]);
+R((await as('anon',`select data->'settings'->>'siteName' n from public.grants_content`)).rows[0]?.n==='Granty','012: strona (niezalogowany) czyta opublikowane treści');
+R(!!await fails('anon',`update public.grants_content set data='{}'::jsonb`)||(await db.query(`select data->'settings'->>'siteName' n from public.grants_content`)).rows[0].n==='Granty','012: niezalogowany nie zmieni treści');
+await db.exec(`delete from public.leads where client_name='Dot Test'`);
+R(!await fails('anon',`insert into public.leads(category,calc,client_name,phone,consent) values('DOT','{"dotacje":{"laczne":300000}}','Dot Test','603 100 200',true)`)&&(await db.query(`select 1 from public.case_categories where code='DOT'`)).rows.length===1,'012: zgłoszenie z serwisu dotacji (kategoria DOT) przyjęte');
 }

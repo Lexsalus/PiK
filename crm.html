@@ -518,11 +518,16 @@ function nextNumber(code){
 }
 
 /* ===================== NOWE SPRAWY (zgłoszenia z frontu) ===================== */
-ROUTES.nowe=()=>{
+ROUTES.nowe=(sub)=>{
   need(can('new_cases'),'Zgłoszenia ze strony widzą Administrator i Biuro.');
   importLeads();
-  const L=[...DB.leads].sort((a,b)=>b.created.localeCompare(a.created)),open=L.filter(l=>l.status==='nowe');
-  const card=l=>{const m=l.calc?.outputs?.find(o=>o.main)||l.calc?.outputs?.[0];return `<div class="card" style="margin-bottom:12px">
+  const all=[...DB.leads].sort((a,b)=>b.created.localeCompare(a.created)),L=sub?all.filter(l=>l.category===sub):all,open=L.filter(l=>l.status==='nowe');
+  const cats=[...new Set(all.map(l=>l.category))],chip=(k,l,n)=>`<a class="btn sm${(sub||'')===k?' pri':''}" href="#/nowe${k?'/'+k:''}">${l}${n?` <span class="cnt n">${n}</span>`:''}</a>`;
+  const bar=cats.length>1?`<div class="toolbar" style="flex-wrap:wrap">${chip('','Wszystkie',all.filter(l=>l.status==='nowe').length)}${cats.map(k=>chip(k,esc(CAT(k).name||k),all.filter(l=>l.category===k&&l.status==='nowe').length)).join('')}</div>`:'';
+  return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia ze strony (formularz „Co mi się należy”, serwis dotacji) · ${open.length} do obsłużenia</p></div></div>
+    ${bar}${L.length?L.map(leadCard).join(''):'<div class="empty">Brak zgłoszeń</div>'}`;
+};
+function leadCard(l){const m=l.calc?.outputs?.find(o=>o.main)||l.calc?.outputs?.[0];return `<div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="display:flex;gap:10px;align-items:center">${catBadge(l.category)}<b>${esc(l.client.name)}</b><span class="mut">${fDT(l.created)}</span>${l.fromSite?'<span class="badge b-acc">z formularza</span>':l.demo?'<span class="badge">przykład</span>':''}</div>
       <span class="badge ${l.status==='nowe'?'b-warn':l.status==='przyjęte'?'b-good':''}">${esc(l.status)}</span></div>
     <div class="grid g3" style="margin-top:12px"><div><div class="mut small">Kontakt</div>📞 ${esc(l.client.phone)}<br>✉️ ${esc(l.client.email||'—')}</div>
@@ -530,12 +535,9 @@ ROUTES.nowe=()=>{
       <div><div class="mut small">Wpisane dane</div><div class="small">${(l.calc?.inputs||[]).map(i=>`${esc(i.label)}: <b>${(+i.value).toLocaleString('pl-PL')} ${esc(i.unit||'')}</b>`).join('<br>')}</div></div></div>
     ${l.message?`<div class="note info" style="margin-top:10px">${esc(l.message)}</div>`:''}
     ${l.calc?.analiza&&window.leadAnaliza?leadAnaliza(l.calc.analiza):''}
+    ${l.calc?.dotacje&&window.grantLead?grantLead(l.calc.dotacje):''}
     ${l.calc?.symulacja&&window.fxSym?`<div class="card" style="margin-top:10px;background:var(--bg2)"><b>💱 Kredyt walutowy — symulacja z kursów NBP</b>${fxSym(l.calc.symulacja)}</div>`:''}
-    <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'&&canChange('new_cases')?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`};
-  return `<div class="ph"><div><h1>Nowe sprawy</h1><p>Zgłoszenia z formularza „Co mi się należy” na stronie · ${open.length} do obsłużenia</p></div></div>
-    
-    ${L.length?L.map(card).join(''):'<div class="empty">Brak zgłoszeń</div>'}`;
-};
+    <div style="display:flex;gap:8px;margin-top:12px">${l.status==='nowe'&&canChange('new_cases')?`<button class="btn pri sm" onclick="leadToCase('${l.id}')">Załóż sprawę</button><button class="btn sm del" onclick="rejectLead('${l.id}')">Odrzuć</button>`:l.caseId&&CASE(l.caseId)?`<a class="btn sm" href="#/sprawa/${l.caseId}">Otwórz ${esc(CASE(l.caseId).number)} →</a>`:`<span class="mut small">${esc(l.reason||'')}</span>`}</div></div>`}
 
 /* ===================== KARTA SPRAWY ===================== */
 const TABS=[['klient','Dane klienta'],['etapy','Etapy'],['historia','Historia działań'],['terminy','Terminy'],['dokumenty','Dokumenty'],['zespol','Zespół'],['finanse','Finanse'],['analiza','Analiza']];
@@ -1483,6 +1485,7 @@ addEventListener('DOMContentLoaded',pwaShow);addEventListener('load',()=>{pwaSho
 <script src="kredyt-walutowy.js"></script>
 <script src="crm-prawo.js"></script>
 <script src="crm-pisma.js"></script>
+<script src="crm-granty.js"></script>
 <script src="crm-podglad.js"></script>
 <script src="crm-pomoc.js"></script>
 </body>

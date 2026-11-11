@@ -292,6 +292,15 @@ Synchronizacja pobiera codziennie najnowsze orzeczenia z bazy **SAOS** (System A
 
 Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: oświadczenie o sankcji kredytu darmowego, wezwanie do zapłaty (nieważność umowy CHF/EUR), wniosek o zaświadczenie o historii kredytu, przedsądowe wezwanie do zapłaty, pełnomocnictwo. Dane klienta, sprawy, kancelarii, pełnomocnika i data wypełniają się same; pozostałe pola wpisujesz w formularzu (podgląd na żywo). Wynik: **DOCX**, **wydruk / PDF** albo **zapis w dokumentach sprawy** (z historią wersji). Administrator: Ustawienia → **Pisma i szablony** (dane kancelarii, edycja / wyłączanie wbudowanych, własne szablony z dowolnymi polami `{{nazwa_pola}}`; znaczniki `# ` tytuł, `>> ` do prawej, `**pogrubienie**`). Dane w bazie: tabela `office_settings` (migracja 011), zmiany w audycie; szablony nie są publiczne.
 
+## 12d. Serwis dotacji (Lexsalus/Grants) w CRM
+
+Serwis [Granty](https://lexsalus.github.io/Grants/) pokazuje klientowi wstępny raport finansowania (Plan A / B / C). Jest zintegrowany z CRM:
+- **Zgłoszenia**: formularz po raporcie zapisuje zgłoszenie w bazie kancelarii (kategoria **DOT** „Dotacje i granty”) → CRM → **💶 Dotacje → Zgłoszenia** oraz **Nowe sprawy** (filtr kategorii). Karta pokazuje opis działalności, rozpoznaną formę i cele, województwo, dopasowane plany z kwotami i łączny potencjał; „Załóż sprawę” tworzy sprawę DOT (raport widać też w karcie sprawy → Analiza).
+- **Katalog** (Administrator): Dotacje → **Źródła finansowania** (plan, nazwa PL/UK/EN, kwoty, dla kogo, cele, słowa-klucze, województwa, waga) i **Podgląd raportu** (punktacja i powód dopasowania).
+- **Serwis** (Administrator): **Treści i ustawienia** (nazwa, teksty PL/UK/EN, kontakt, licznik, Plan C) i **Publikacja** — zmiany są w szkicu w przeglądarce, „Opublikuj” zapisuje je w bazie (`grants_content`, audyt) i strona pokazuje je od razu.
+- Silnik raportu jest jeden: `assets/engine.js` w repozytorium Grants (CRM ładuje go ze strony serwisu).
+- Dostęp: zakładka dla Administratora i osób z uprawnieniem „Nowe sprawy” (one widzą Zgłoszenia i Podgląd). Wymaga migracji `012_dotacje.sql`.
+
 ## 13. CRM kancelarii
 
 Zaplecze dla adwokatów i pracowników: `https://lexsalus.github.io/PiK/crm.html`. Pełny opis ról i modułów: `CRM.md`; baza: `SUPABASE.md`.

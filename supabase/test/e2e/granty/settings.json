@@ -1,0 +1,10 @@
+{
+  "siteName": "Granty",
+  "defaultLang": "pl",
+  "defaultTheme": "light",
+  "timerSec": 270,
+  "planC": false,
+  "texts": {},
+  "contact": {},
+  "form": {}
+}

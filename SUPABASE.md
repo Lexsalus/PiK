@@ -22,6 +22,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 - ✅ Migracja `010_prawo_konta_limity.sql` — limity zgłoszeń (telefon, ogólny), powiadomienia o zmianach w prawie (pg_cron `prawo-pobierz` 5:40 UTC i `prawo-powiadom` 5:50 UTC przez pg_net), konta z CRM (`must_change_password`, `account_created`)
+- ⏳ Migracja `012_dotacje.sql` — kategoria DOT, treści serwisu dotacji (`grants_content`, odczyt publiczny, publikacja `grants_publish` — Administrator). Do wdrożenia razem z 011.
 - ⏳ Migracja `011_pisma.sql` — dane kancelarii i szablony pism (`office_settings`, zapis tylko przez `office_setting_save`, Administrator). Do wdrożenia.
 - ✅ Funkcja serwera **`konta`** (`supabase/functions/konta`) — zakładanie kont z CRM; klucz serwisowy tylko w środowisku Supabase
 

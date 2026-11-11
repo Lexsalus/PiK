@@ -1,0 +1,300 @@
+[
+  {
+    "id": "p01",
+    "tier": "A",
+    "nazwa": {
+      "pl": "Dotacje na rozwój małych firm (fundusze regionalne i LGD)"
+    },
+    "opis": {
+      "pl": "Bezzwrotne wsparcie na rozwój działalności lokalnych firm: zakup wyposażenia, modernizację, nowe usługi. Nabory ogłaszają urzędy marszałkowskie oraz lokalne grupy działania."
+    },
+    "kwotaMin": 50000,
+    "kwotaMax": 300000,
+    "formy": [
+      "firma",
+      "rolnik"
+    ],
+    "cele": [
+      "rozwoj",
+      "maszyny",
+      "budynek",
+      "zatrudnienie"
+    ],
+    "regiony": [],
+    "slowa": "usług, zakład, salon, fryzj, kosmet, warsztat, sklep, gastronom, restaurac, kawiar, piekar, turyst, noclegi, rzemio",
+    "waga": 7,
+    "aktywny": true
+  },
+  {
+    "id": "p02",
+    "tier": "A",
+    "nazwa": {
+      "pl": "Dofinansowanie z urzędu pracy (doposażenie stanowisk, start działalności)"
+    },
+    "opis": {
+      "pl": "Środki z powiatowego urzędu pracy na utworzenie lub doposażenie stanowiska pracy oraz na rozpoczęcie działalności gospodarczej."
+    },
+    "kwotaMin": 30000,
+    "kwotaMax": 150000,
+    "formy": [
+      "firma",
+      "start"
+    ],
+    "cele": [
+      "zatrudnienie",
+      "rozwoj",
+      "maszyny"
+    ],
+    "regiony": [],
+    "slowa": "zatrudn, pracownik, stanowisk, założ, otworz, fryzj, kosmet, usług",
+    "waga": 6,
+    "aktywny": true
+  },
+  {
+    "id": "p03",
+    "tier": "A",
+    "nazwa": {
+      "pl": "Granty na cyfryzację i e-sprzedaż"
+    },
+    "opis": {
+      "pl": "Wsparcie na wdrożenie sklepu internetowego, systemów do zarządzania firmą i automatyzacji oraz na doradztwo cyfrowe."
+    },
+    "kwotaMin": 20000,
+    "kwotaMax": 300000,
+    "formy": [
+      "firma"
+    ],
+    "cele": [
+      "cyfra"
+    ],
+    "regiony": [],
+    "slowa": "sklep internet, online, e-commerce, aplikac, oprogramow, rezerwac",
+    "waga": 5,
+    "aktywny": true
+  },
+  {
+    "id": "p04",
+    "tier": "A",
+    "nazwa": {
+      "pl": "Premie i dotacje dla rolników i przetwórstwa (ARiMR)"
+    },
+    "opis": {
+      "pl": "Wsparcie dla gospodarstw i małego przetwórstwa: modernizacja, rozwój, rozpoczęcie działalności pozarolniczej na wsi."
+    },
+    "kwotaMin": 50000,
+    "kwotaMax": 500000,
+    "formy": [
+      "rolnik"
+    ],
+    "cele": [
+      "rozwoj",
+      "maszyny",
+      "budynek"
+    ],
+    "regiony": [],
+    "slowa": "rolni, gospodarstw, sad, hodowl, przetwórst, mleczar, pszczel",
+    "waga": 7,
+    "aktywny": true
+  },
+  {
+    "id": "p05",
+    "tier": "A",
+    "nazwa": {
+      "pl": "Granty dla organizacji pozarządowych"
+    },
+    "opis": {
+      "pl": "Dotacje z programów rządowych, samorządowych i fundacji korporacyjnych na działania społeczne, kulturalne, edukacyjne i sportowe."
+    },
+    "kwotaMin": 10000,
+    "kwotaMax": 200000,
+    "formy": [
+      "ngo"
+    ],
+    "cele": [
+      "spoleczne",
+      "szkolenia",
+      "rozwoj"
+    ],
+    "regiony": [],
+    "slowa": "fundacj, stowarzysz, kultur, sport, senior, dzieci, młodzież, edukac",
+    "waga": 7,
+    "aktywny": true
+  },
+  {
+    "id": "p06",
+    "tier": "B",
+    "nazwa": {
+      "pl": "Fundusze Europejskie na inwestycje w nowe technologie"
+    },
+    "opis": {
+      "pl": "Duże dotacje regionalne i krajowe na inwestycje w maszyny, linie produkcyjne i nowe technologie, które podnoszą konkurencyjność firmy."
+    },
+    "kwotaMin": 300000,
+    "kwotaMax": 5000000,
+    "formy": [
+      "firma"
+    ],
+    "cele": [
+      "maszyny",
+      "rozwoj",
+      "budynek",
+      "innowacje",
+      "eksport"
+    ],
+    "regiony": [],
+    "slowa": "produk, wytwarz, fabryk, drewn, meb, stolar, metal, tworzyw, spożyw, przetwór, drukar",
+    "waga": 8,
+    "aktywny": true
+  },
+  {
+    "id": "p07",
+    "tier": "B",
+    "nazwa": {
+      "pl": "Ścieżka SMART (FENG) — innowacje i B+R"
+    },
+    "opis": {
+      "pl": "Program krajowy dla firm wdrażających innowacje: prace badawczo-rozwojowe, wdrożenia, cyfryzacja, zazielenienie i internacjonalizacja."
+    },
+    "kwotaMin": 1000000,
+    "kwotaMax": 20000000,
+    "formy": [
+      "firma"
+    ],
+    "cele": [
+      "innowacje",
+      "cyfra",
+      "eksport"
+    ],
+    "regiony": [],
+    "slowa": "innowac, technolog, badaw, prototyp, patent, produk",
+    "waga": 6,
+    "aktywny": true
+  },
+  {
+    "id": "p08",
+    "tier": "B",
+    "nazwa": {
+      "pl": "Dotacje i pożyczki na OZE i efektywność energetyczną"
+    },
+    "opis": {
+      "pl": "Wsparcie na fotowoltaikę, pompy ciepła, magazyny energii i termomodernizację budynków firmy lub organizacji."
+    },
+    "kwotaMin": 100000,
+    "kwotaMax": 5000000,
+    "formy": [
+      "firma",
+      "rolnik",
+      "ngo",
+      "jst"
+    ],
+    "cele": [
+      "oze",
+      "budynek"
+    ],
+    "regiony": [],
+    "slowa": "fotowolt, energi, pomp, ciepł, termomoder, hala",
+    "waga": 5,
+    "aktywny": true
+  },
+  {
+    "id": "p09",
+    "tier": "B",
+    "nazwa": {
+      "pl": "Duże projekty społeczne i edukacyjne (EFS+)"
+    },
+    "opis": {
+      "pl": "Fundusze Europejskie na większe projekty społeczne, szkoleniowe i aktywizacji zawodowej, realizowane przez organizacje i samorządy."
+    },
+    "kwotaMin": 300000,
+    "kwotaMax": 5000000,
+    "formy": [
+      "ngo",
+      "jst"
+    ],
+    "cele": [
+      "spoleczne",
+      "szkolenia",
+      "zatrudnienie"
+    ],
+    "regiony": [],
+    "slowa": "społeczn, integrac, aktywiz, szkole, senior, niepełnospr",
+    "waga": 6,
+    "aktywny": true
+  },
+  {
+    "id": "p10",
+    "tier": "B",
+    "nazwa": {
+      "pl": "Rozwój usług i turystyki — fundusze regionalne"
+    },
+    "opis": {
+      "pl": "Dotacje regionalne na rozbudowę bazy usługowej i turystycznej, nowe usługi oraz inwestycje w lokale i wyposażenie."
+    },
+    "kwotaMin": 200000,
+    "kwotaMax": 3000000,
+    "formy": [
+      "firma"
+    ],
+    "cele": [
+      "rozwoj",
+      "budynek",
+      "maszyny"
+    ],
+    "regiony": [],
+    "slowa": "usług, salon, fryzj, kosmet, gastronom, restaurac, hotel, nocleg, turyst, spa, zakład usług, barber, warsztat",
+    "waga": 6,
+    "aktywny": true
+  },
+  {
+    "id": "p11",
+    "tier": "C",
+    "nazwa": {
+      "pl": "Preferencyjne pożyczki i gwarancje (BGK, fundusze pożyczkowe)"
+    },
+    "opis": {
+      "pl": "Pożyczki z niskim oprocentowaniem i gwarancje kredytowe na rozwój i inwestycje, często z częściowym umorzeniem."
+    },
+    "kwotaMin": 50000,
+    "kwotaMax": 5000000,
+    "formy": [
+      "firma",
+      "start",
+      "rolnik"
+    ],
+    "cele": [
+      "rozwoj",
+      "maszyny",
+      "budynek",
+      "oze",
+      "cyfra"
+    ],
+    "regiony": [],
+    "slowa": "",
+    "waga": 4,
+    "aktywny": true
+  },
+  {
+    "id": "p12",
+    "tier": "C",
+    "nazwa": {
+      "pl": "Ulgi podatkowe: B+R, IP Box, robotyzacja"
+    },
+    "opis": {
+      "pl": "Ulgi pozwalające odliczyć część kosztów innowacji, automatyzacji i rozwoju od podatku."
+    },
+    "kwotaMin": 0,
+    "kwotaMax": 1000000,
+    "formy": [
+      "firma"
+    ],
+    "cele": [
+      "innowacje",
+      "maszyny",
+      "cyfra"
+    ],
+    "regiony": [],
+    "slowa": "robot, automatyz, innowac, oprogramow",
+    "waga": 3,
+    "aktywny": true
+  }
+]
