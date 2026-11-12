@@ -28,10 +28,10 @@ async function load(force){
   try{const r=await sb.from('grants_content').select('data,published_at').eq('id',1).maybeSingle();if(r.error)throw r.error;G.pub=r.data?.data||null;G.pubAt=r.data?.published_at||null;G.brak=false}
   catch(e){G.brak=true;G.pub=null}
   if(!G.pub){try{const [p,s]=await Promise.all(['programy','settings'].map(n=>fetch(GR_BASE+'data/'+n+'.json',{cache:'no-store'}).then(r=>r.ok?r.json():null)));if(Array.isArray(p))G.pub={programy:p,settings:s||{},zPliku:true}}catch(e){}}
-  G.draft=ls.get();G.loaded=true;setPub('dotacje',dirty()||!!G.pub?.zPliku);
+  G.draft=ls.get();G.loaded=true;setPub('dotacje',!G.brak&&(dirty()||!!G.pub?.zPliku));
 }
 const D=()=>G.draft||G.pub||{programy:[],settings:{}};
-window.grPubCheck=async()=>{await load();if(dirty())pubNotice('dotacje',true);else if(G.pub?.zPliku)pubNotice('dotacje',true,'Katalog dotacji nie był jeszcze publikowany do bazy (serwis używa plików dotacje/data) — otwórz Dotacje → Publikacja i kliknij „Opublikuj”.')};
+window.grPubCheck=async()=>{await load();if(G.brak)return;if(dirty())pubNotice('dotacje',true);else if(G.pub?.zPliku)pubNotice('dotacje',true,'Katalog dotacji nie był jeszcze publikowany do bazy (serwis używa plików dotacje/data) — otwórz Dotacje → Publikacja i kliknij „Opublikuj”.')};
 const edit=()=>{if(!G.draft)G.draft=structuredClone({programy:D().programy,settings:D().settings});return G.draft};
 const saveD=()=>{ls.set(G.draft);setPub('dotacje',dirty()||!!G.pub?.zPliku);if(dirty())pubNotice('dotacje',true);rerender()};
 const dirty=()=>!!G.draft&&!sameJ({programy:G.draft.programy,settings:G.draft.settings},{programy:G.pub?.programy||[],settings:G.pub?.settings||{}});

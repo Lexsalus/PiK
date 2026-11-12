@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **11.11.2026**, wersja **1.41.5**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **11.11.2026**, wersja **1.41.6**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -42,7 +42,7 @@ Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to
 - **Każda wysyłka (push) = podbicie wersji:** `py tools/bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (184 testy reguł bazy), `supabase/test/e2e/` (171 kroków przez interfejs CRM i stronę, lokalna kopia bazy, dane testowe zamiast NBP/SAOS/UOKiK/UODO), `tools/test/test_prawo_sync.py` (23 testy synchronizacji).
+- Testy: `supabase/test/schema.test.mjs` (184 testy reguł bazy), `supabase/test/e2e/` (172 kroki przez interfejs CRM i stronę, lokalna kopia bazy, dane testowe zamiast NBP/SAOS/UOKiK/UODO), `tools/test/test_prawo_sync.py` (23 testy synchronizacji).
 
 ## Zrobione
 

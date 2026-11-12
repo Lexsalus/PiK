@@ -10,10 +10,10 @@ const SITE={pub:null,at:null,src:'',loaded:false};
 /* opublikowane treści strony (z bazy, w zapasie data.json) — używa też analiza w karcie sprawy */
 async function siteContent(force){
   if(SITE.loaded&&!force)return SITE.pub;
-  let pub=null,at=null,src='';
-  try{const r=await sb.from('site_content').select('data,published_at').eq('id',1).maybeSingle();if(!r.error&&r.data?.data){pub=r.data.data;at=r.data.published_at;src='db'}}catch(e){}
+  let pub=null,at=null,src='',err=false;
+  try{const r=await sb.from('site_content').select('data,published_at').eq('id',1).maybeSingle();if(r.error)err=true;else if(r.data?.data){pub=r.data.data;at=r.data.published_at;src='db'}}catch(e){err=true}
   if(!pub){try{pub=await (await fetch('data.json',{cache:'no-store'})).json();src='file'}catch(e){}}
-  Object.assign(SITE,{pub,at,src,loaded:true});return pub;
+  Object.assign(SITE,{pub,at,src,err,loaded:true});return pub;   // err: baza nie odpowiedziała — nie pokazujemy wtedy „do opublikowania”
 }
 (()=>{
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -48,7 +48,9 @@ const slug=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/�
 const uid=p=>p+Math.random().toString(36).slice(2,7);
 const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂️ Kategorie','Kategorie porównywarki'],['calcs','🧮 Kalkulatory','Kalkulatory'],['contracts','📄 Analiza umów','Analiza umów'],['funkcje','✨ Nowe funkcje','Nowe funkcje strony'],['adam','💬 Czat Adam','Czat Adam — asystent na stronie'],['i18n','🌐 Tłumaczenia','Tłumaczenia'],['seo','🔎 SEO','Optymalizacja pod Google (SEO)'],['tech','🔧 Techniczne','Ustawienia techniczne'],['export','🚀 Publikacja','Publikacja']];
 
-async function load(){
+let LOADING=null;
+function load(){return LOADING||(LOADING=load0().finally(()=>{LOADING=null}))}   // jedno wczytanie naraz (logowanie + wejście w zakładkę)
+async function load0(){
   const p=await siteContent(true);ORIG=p?structuredClone(p):null;if(ORIG?.site)delete ORIG.site.adminHash;
   let draft=null;try{draft=JSON.parse(localStorage.getItem(KEY))}catch(e){}
   BASE=ORIG?hash(canon(ORIG)):'';
@@ -57,7 +59,7 @@ async function load(){
   STALE=!!(draft&&ORIG&&dBase!==BASE&&!sameJ(draft,ORIG));
   D=draft||(ORIG&&structuredClone(ORIG));
   if(D){norm();READY=true}
-  setPub('strona',(D&&dirty())||SITE.src==='file');
+  setPub('strona',!SITE.err&&((D&&dirty())||SITE.src==='file'));
 }
 /* lista różnic: szkic (ta przeglądarka) ↔ opublikowana wersja */
 const DIFF_TOP={serwis:'Tryb serwisowy',adam:'Czat Adam',zmianyPrawa:'Zmiany w prawie (sekcja)',zwrot:'Zwrot z umowy',firma:'Restrukturyzacja firmy',site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
@@ -103,7 +105,7 @@ const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators
 function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty()||SITE.src==='file';return (ST_KEYS[k]||[]).some(x=>!sameJ(D[x],ORIG[x]))}
 const stTabs=()=>groupTabs(TABS,ST_GROUPS,view,k=>'#/strona/'+k,k=>stDirtyTab(k)?'<span class="tdot" data-tip="Zmiany nieopublikowane"></span>':'');
 function save(){
-  if(!D)return;setPub('strona',dirty()||SITE.src==='file');if(dirty())pubNotice('strona',true);
+  if(!D)return;setPub('strona',!SITE.err&&(dirty()||SITE.src==='file'));if(dirty())pubNotice('strona',true);
   const T=$('#stTabs');if(T)T.innerHTML=stTabs();
   try{localStorage.setItem(KEY,JSON.stringify(D));if(!STALE)localStorage.setItem(KEY+'_base',BASE)}catch(e){}
   const st=$('#stStatus');if(st){const d=dirty();st.textContent=d?'Szkic — nieopublikowany':(SITE.src==='db'?'Zgodne z opublikowaną':'Zgodne z data.json');st.classList.toggle('dirty',d)}
@@ -131,7 +133,7 @@ ROUTES.strona=sub=>{
     <h2 id="stTitle" style="font-size:1.15rem;margin-bottom:14px"></h2><div id="stView"><div class="empty">Wczytywanie…</div></div></div>`;
 };
 ROUTES.strona.after=async()=>{if(!READY)await load();render()};
-window.stPubCheck=async()=>{if(!READY)await load();const d=D&&dirty();setPub('strona',d||SITE.src==='file');if(d)pubNotice('strona',true);else if(SITE.src==='file')pubNotice('strona',true,'Treści strony nie były jeszcze publikowane do bazy (strona używa pliku data.json) — otwórz Publikację i kliknij „Opublikuj”.')};
+window.stPubCheck=async()=>{if(!READY)await load();if(SITE.err)return;const d=D&&dirty();setPub('strona',d||SITE.src==='file');if(d)pubNotice('strona',true);else if(SITE.src==='file')pubNotice('strona',true,'Treści strony nie były jeszcze publikowane do bazy (strona używa pliku data.json) — otwórz Publikację i kliknij „Opublikuj”.')};
 
 /* ---------- Publikacja ---------- */
 function vExport(){

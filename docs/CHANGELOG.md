@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.6] — 2026-11-12
+- Co nowego: dymki z opisem po najechaniu na znaczki; poprawka: chwilowy błąd połączenia z bazą nie pokazuje fałszywego „do opublikowania”
+
 ## [1.41.5] — 2026-11-12
 - CRM: logo wyrównane do lewej krawędzi pozycji menu
 
