@@ -183,6 +183,9 @@ const PUB={};
 function pubDots(){Object.entries(PUB).forEach(([k,on])=>{const a=document.querySelector(`#side a.nav[href="#/${k}"]`);if(!a)return;let d=a.querySelector('.pubdot');
   if(on&&!d){a.insertAdjacentHTML('beforeend','<span class="pubdot" title="Są zmiany do opublikowania" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#2fd6a0;box-shadow:0 0 0 3px #2fd6a033;margin-left:8px;vertical-align:middle"></span>')}else if(!on&&d)d.remove()})}
 const setPub=(k,on)=>{PUB[k]=!!on;pubDots()};
+/* porównanie treści niezależne od kolejności pól (baza jsonb zapisuje pola w innej kolejności niż szkic) */
+const canon=v=>JSON.stringify(v,(k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,kk)=>(o[kk]=x[kk],o),{}):x);
+const sameJ=(a,b)=>canon(a)===canon(b);
 /* powiadomienie w bazie (z nazwą osoby, która wprowadziła zmiany): raz na sesję przy pierwszej zmianie, po publikacji — przeczytane */
 const PUBN={};
 function pubNotice(k,on,note){const key=k+(note?':p':'');if(!ME||ME.role!=='admin'||!!PUBN[key]===!!on)return;PUBN[key]=on;if(!on)PUBN[k+':p']=false;sb.rpc('publish_notice',{p_what:k,p_pending:!!on,p_note:note||null}).then(()=>reload(['notifications'])).then(()=>{renderShell();if(location.hash.startsWith('#/powiadomienia'))rerender()},()=>{})}

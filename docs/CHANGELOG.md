@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.39.1] — 2026-11-12
+- Poprawka: Treści strony i Dotacje nie pokazują „do opublikowania” po ponownym wejściu, gdy treści są takie same (baza zmienia kolejność pól)
+
 ## [1.39.0] — 2026-11-12
 - 📜 Logi w menu (publikacje z opisem zmian, logowania i bezpieczeństwo, konfiguracja, sprawy, pełny dziennik); kropki publikacji w podzakładkach, powiadomienia o nieopublikowanych treściach, przycisk Różnice; kółko w serwisie dotacji; migracje 015–016
 

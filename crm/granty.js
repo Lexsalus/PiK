@@ -34,7 +34,7 @@ const D=()=>G.draft||G.pub||{programy:[],settings:{}};
 window.grPubCheck=async()=>{await load();if(dirty())pubNotice('dotacje',true);else if(G.pub?.zPliku)pubNotice('dotacje',true,'Katalog dotacji nie był jeszcze publikowany do bazy (serwis używa plików dotacje/data) — otwórz Dotacje → Publikacja i kliknij „Opublikuj”.')};
 const edit=()=>{if(!G.draft)G.draft=structuredClone({programy:D().programy,settings:D().settings});return G.draft};
 const saveD=()=>{ls.set(G.draft);setPub('dotacje',dirty()||!!G.pub?.zPliku);if(dirty())pubNotice('dotacje',true);rerender()};
-const dirty=()=>!!G.draft&&JSON.stringify({programy:G.draft.programy,settings:G.draft.settings})!==JSON.stringify({programy:G.pub?.programy||[],settings:G.pub?.settings||{}});
+const dirty=()=>!!G.draft&&!sameJ({programy:G.draft.programy,settings:G.draft.settings},{programy:G.pub?.programy||[],settings:G.pub?.settings||{}});
 const PL=k=>window.GRANTY?.LABELS.pl[k]||k,regionPL=k=>window.GRANTY?.REGIONS[k]?.[0]||k;
 const ml=o=>!o?'':typeof o==='string'?o:(o.pl||o.en||o.uk||'');
 const zl=n=>(+n||0).toLocaleString('pl-PL')+' zł',amount=p=>p.kwotaMin?`${zl(p.kwotaMin)} – ${zl(p.kwotaMax)}`:`do ${zl(p.kwotaMax)}`;
@@ -53,7 +53,7 @@ ROUTES.dotacje=sub=>{
   sub=tabs.some(t=>t[0]===sub)?sub:tabs[0][0];curSub=sub;
   if(!G.loaded){load().then(()=>location.hash.startsWith('#/dotacje')&&rerender());}
   const head=`<div class="ph"><div><h1>💶 Dotacje</h1><p>Serwis <a href="${GR_BASE}" target="_blank" rel="noopener">${esc(D().settings?.siteName||'Granty')} ↗</a> — wstępny raport finansowania dla klienta${dirty()?' · <span class="badge b-warn">nieopublikowane zmiany</span>':''}</p></div></div>`;
-  const P0=G.pub||{},Dd=G.draft,dd={zrodla:!!Dd&&JSON.stringify(Dd.programy)!==JSON.stringify(P0.programy||[]),strona:!!Dd&&JSON.stringify(Dd.settings)!==JSON.stringify(P0.settings||{}),publikacja:dirty()||!!P0.zPliku};
+  const P0=G.pub||{},Dd=G.draft,dd={zrodla:!!Dd&&!sameJ(Dd.programy,P0.programy||[]),strona:!!Dd&&!sameJ(Dd.settings,P0.settings||{}),publikacja:dirty()||!!P0.zPliku};
   const tb=groupTabs(tabs,GR_GROUPS,sub,k=>'#/dotacje/'+k,k=>dd[k]?'<span class="tdot" data-tip="Do opublikowania"></span>':'');
   if(!G.loaded&&sub!=='zgloszenia')return head+tb+'<div class="empty">Wczytywanie…</div>';
   return head+tb+(G.err&&sub!=='zgloszenia'?`<div class="note" style="margin-bottom:12px">⚠️ ${esc(G.err)}</div>`:'')+VIEW[sub]();
@@ -152,8 +152,8 @@ VIEW.publikacja=()=>{
 };
 window.grPublish=()=>{const d=D();if(!confirm(`Opublikować serwis dotacji (${d.programy.length} źródeł finansowania)?`))return;
   const P0=G.pub||{programy:[],settings:{}},nm=p=>ml(p.nazwa)||p.id,old=new Map((P0.programy||[]).map(p=>[p.id,p])),nw=new Map(d.programy.map(p=>[p.id,p]));
-  const add=d.programy.filter(p=>!old.has(p.id)).map(nm),del=(P0.programy||[]).filter(p=>!nw.has(p.id)).map(nm),chg=d.programy.filter(p=>old.has(p.id)&&JSON.stringify(old.get(p.id))!==JSON.stringify(p)).map(nm);
-  const st=Object.keys({...(P0.settings||{}),...(d.settings||{})}).filter(k=>JSON.stringify((P0.settings||{})[k])!==JSON.stringify((d.settings||{})[k]));
+  const add=d.programy.filter(p=>!old.has(p.id)).map(nm),del=(P0.programy||[]).filter(p=>!nw.has(p.id)).map(nm),chg=d.programy.filter(p=>old.has(p.id)&&!sameJ(old.get(p.id),p)).map(nm);
+  const st=Object.keys({...(P0.settings||{}),...(d.settings||{})}).filter(k=>!sameJ((P0.settings||{})[k],(d.settings||{})[k]));
   const zm=G.pub?.zPliku?'pierwsza publikacja do bazy (z plików dotacje/data)':[add.length?'Dodano: '+add.join(', '):'',del.length?'Usunięto: '+del.join(', '):'',chg.length?'Zmieniono: '+chg.join(', '):'',st.length?'Ustawienia serwisu: '+st.join(', '):''].filter(Boolean).join('\n')||'bez zmian';
   act(async()=>{chk(await sb.rpc('grants_publish',{p_data:{programy:d.programy,settings:d.settings}}));sb.rpc('log_event',{p_action:'publikacja.zmiany',p_target:'serwis dotacji',p_details:zm}).then(()=>{},()=>{});ls.del();G.draft=null;pubNotice('dotacje',false);await load(true)},'Opublikowano serwis dotacji')};
 window.grDiscard=()=>{if(!confirm('Odrzucić nieopublikowane zmiany?'))return;ls.del();G.draft=null;setPub('dotacje',!!G.pub?.zPliku);rerender()};

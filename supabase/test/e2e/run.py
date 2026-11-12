@@ -333,6 +333,8 @@ async def main():
     pub=sql("select data->'site'->>'name' n from public.site_content where id=1")
     ok(pub and pub[0]['n']=='Porównaj.to TEST' and 'Zgodne z opublikowaną' in await T('#stStatus'),'Opublikuj: treści zapisane w bazie')
     ok(len(sql("select 1 from public.audit_log where action='strona.publikacja'"))==1,'publikacja w audycie')
+    await pg.reload(); await pg.wait_for_timeout(2500); await nav('#/strona/settings'); await pg.wait_for_timeout(1500)
+    ok(await pg.locator('#side a.nav[href="#/strona"] .pubdot').count()==0 and 'Zgodne z opublikowaną' in await T('#stStatus'),'po ponownym wejściu brak „do opublikowania” (kolejność pól w bazie nie ma znaczenia)')
     sp=await c.new_page(); sp.on('pageerror',lambda e:errs.append(str(e)))
     await sp.goto('http://localhost:8765/index.html'); await sp.wait_for_timeout(1200)
     ok('Porównaj.to TEST' in await sp.inner_text('body'),'strona publiczna pokazuje opublikowaną wersję z bazy')

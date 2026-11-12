@@ -51,10 +51,10 @@ const TABS=[['settings','⚙️ Ustawienia','Ustawienia strony'],['cats','🗂�
 async function load(){
   const p=await siteContent(true);ORIG=p?structuredClone(p):null;if(ORIG?.site)delete ORIG.site.adminHash;
   let draft=null;try{draft=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-  BASE=ORIG?hash(JSON.stringify(ORIG)):'';
+  BASE=ORIG?hash(canon(ORIG)):'';
   let dBase=null;try{dBase=localStorage.getItem(KEY+'_base')}catch(e){}
   if(draft?.site)delete draft.site.adminHash;
-  STALE=!!(draft&&ORIG&&dBase!==BASE&&JSON.stringify(draft)!==JSON.stringify(ORIG));
+  STALE=!!(draft&&ORIG&&dBase!==BASE&&!sameJ(draft,ORIG));
   D=draft||(ORIG&&structuredClone(ORIG));
   if(D){norm();READY=true}
   setPub('strona',(D&&dirty())||SITE.src==='file');
@@ -90,7 +90,7 @@ function showDiff(){
 }
 function useNew(){if(!confirm('Odrzucić szkic i wczytać opublikowaną wersję strony?'))return;D=structuredClone(ORIG);norm();STALE=false;render();toast('Wczytano opublikowaną wersję')}
 function keepDraft(){STALE=false;save();render();toast('Zostawiono szkic')}
-const dirty=()=>!!D&&JSON.stringify(D)!==JSON.stringify(ORIG);
+const dirty=()=>!!D&&!sameJ(D,ORIG);
 /* zakładki Treści strony w grupach; kropka = szkic różni się od opublikowanej wersji w tej części */
 const ST_GROUPS=[{l:'Strona',c:'#5aa9ff',tip:'Nazwa, kolor, formularz zgłoszeń, porównywarka.',k:['settings','cats']},
   {l:'Narzędzia dla klienta',c:'#2fd6a0',tip:'Kalkulatory, analiza umów, zwrot z umowy, restrukturyzacja, zmiany w prawie.',k:['calcs','contracts','funkcje']},
@@ -100,7 +100,7 @@ const ST_GROUPS=[{l:'Strona',c:'#5aa9ff',tip:'Nazwa, kolor, formularz zgłoszeń
 Object.assign(TAB_TIPS,{settings:'Nazwa strony, kolor, formularz zgłoszeń.',cats:'Kategorie i oferty porównywarki.',calcs:'Kalkulatory i ich wzory.',contracts:'Reguły analizy umów i limity odsetek.',funkcje:'Zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, skany.',
   adam:'Ustawienia czatu Adam, tematy, tester.',i18n:'Tłumaczenia UA / EN.',seo:'Tytuł, opis, Google, analityka.',tech:'Stan systemu, synchronizacja prawa, tryb serwisowy, limity, połączenie z bazą, aplikacja.',export:'Opublikuj szkic, eksport i import data.json.'});
 const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators'],contracts:['contracts'],funkcje:['zmianyPrawa','zwrot','firma','obserwowane'],adam:['adam'],i18n:['i18n','translations'],seo:['seo'],tech:['serwis']};
-function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty()||SITE.src==='file';return (ST_KEYS[k]||[]).some(x=>JSON.stringify(D[x])!==JSON.stringify(ORIG[x]))}
+function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty()||SITE.src==='file';return (ST_KEYS[k]||[]).some(x=>!sameJ(D[x],ORIG[x]))}
 const stTabs=()=>groupTabs(TABS,ST_GROUPS,view,k=>'#/strona/'+k,k=>stDirtyTab(k)?'<span class="tdot" data-tip="Zmiany nieopublikowane"></span>':'');
 function save(){
   if(!D)return;setPub('strona',dirty()||SITE.src==='file');if(dirty())pubNotice('strona',true);
@@ -161,7 +161,7 @@ function publish(){
     const zm=L.length?`${L.length>=1000?'1000+':L.length} zmian · ${Object.entries(sec).map(([k,n])=>k+': '+n).join(', ')}\n`+L.slice(0,12).map(x=>'• '+x.path.join(' › ')).join('\n')+(L.length>12?`\n… i ${L.length-12} więcej`:''):(SITE.src==='file'?'pierwsza publikacja do bazy (z pliku data.json)':'bez zmian');
     const r=await sb.rpc('site_publish',{p_data:D});if(r.error)throw r.error;
     sb.rpc('log_event',{p_action:'publikacja.zmiany',p_target:'treści strony',p_details:zm}).then(()=>{},()=>{});
-    ORIG=structuredClone(D);SITE.pub=structuredClone(D);SITE.at=r.data;SITE.src='db';BASE=hash(JSON.stringify(ORIG));STALE=false;
+    ORIG=structuredClone(D);SITE.pub=structuredClone(D);SITE.at=r.data;SITE.src='db';BASE=hash(canon(ORIG));STALE=false;
     setPub('strona',false);pubNotice('strona',false);render();toast('Opublikowano — strona pokazuje nową wersję')}});
 }
 function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));a.download='data.json';a.click();URL.revokeObjectURL(a.href);toast('Pobrano data.json')}
