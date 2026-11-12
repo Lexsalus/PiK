@@ -311,7 +311,7 @@ Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo
 
 ## 12h. Co nowego
 
-Na dole lewego menu: **🆕 Co nowego · v…** (zielona kropka, gdy jest wersja, której jeszcze nie oglądałeś). Kliknięcie pokazuje listę wersji z datą i opisem zmian (z `docs/CHANGELOG.md`); numer wersji przy nazwie CRM też otwiera tę listę.
+Na dole lewego menu: **🆕 Co nowego · v…** (zielona kropka, gdy jest wersja, której jeszcze nie oglądałeś). Kliknięcie pokazuje listę wersji z datą i opisem zmian (z `docs/CHANGELOG.md`); numer wersji przy nazwie CRM też otwiera tę listę. Znaczki: ✨ nowości (x.Y.0), 🔧 poprawka (x.y.Z — coś naprawione lub drobna zmiana), 🚀 duża zmiana (X.0.0), ⛔ krytyczna (dotyczy bezpieczeństwa, np. wyłączenie 2FA), ⏸ wyłączone (coś wyłączono). Krytyczną i wyłączoną można wymusić w opisie wersji: `[krytyczna]`, `[wyłączone]`.
 
 ## 12g. Logi
 

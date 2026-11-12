@@ -4,6 +4,7 @@ Użycie (Windows):
   py tools/bump.py patch "Opis zmiany"     # 1.1.0 -> 1.1.1  (poprawki, dane)
   py tools/bump.py minor "Opis zmiany"     # 1.1.0 -> 1.2.0  (nowe funkcje)
   py tools/bump.py major "Opis zmiany"     # 1.1.0 -> 2.0.0  (duże przebudowy)
+  Znaczniki w opisie (CRM → Co nowego): [krytyczna] — dotyczy bezpieczeństwa, [wyłączone] — coś wyłączono.
 """
 import json, sys, datetime, pathlib
 

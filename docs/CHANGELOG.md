@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.3] — 2026-11-12
+- Lewe menu bez poziomego paska, logo i nazwa poza obszarem przewijania; Co nowego: znaczki 🔧 poprawka, ✨ nowości, 🚀 duża zmiana, ⛔ krytyczna, ⏸ wyłączone
+
 ## [1.41.2] — 2026-11-12
 - Wyższe poziome paski przewijania (tabele, zakładki) w CRM i na stronie
 

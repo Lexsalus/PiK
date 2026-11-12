@@ -182,7 +182,7 @@ async def main():
     await nav('#/logi/publikacje'); await pg.wait_for_timeout(1200); lg=await T('#view'); ok('Logi' in await T('#side') and 'Dotacje' in lg and ('pierwsza publikacja do bazy' in lg or 'Dodano: Test — grant na stolarnie' in lg),'Logi → Publikacje: kto, kiedy, co się zmieniło')
     await nav('#/logi/logowania'); await pg.wait_for_timeout(1000); ok('Logowanie' in await T('#view'),'Logi → Logowania i bezpieczeństwo')
     await pg.click('#side a.nav:has-text("Co nowego")'); await pg.wait_for_timeout(800); wn=await T('#mbox')
-    ok('Co nowego' in wn and 'aktualna' in wn and 'v1.' in wn,'Menu → Co nowego: wersje i opisy zmian'); await pg.click('#mform .mfoot button'); await pg.wait_for_timeout(300)
+    ok('Co nowego' in wn and 'aktualna' in wn and 'v1.' in wn and '🔧 poprawka' in wn and '✨ nowości' in wn and '⛔ krytyczna' in wn and '⏸ wyłączone' in wn,'Menu → Co nowego: wersje i opisy zmian, znaczki poprawka / nowości / krytyczna / wyłączone'); await pg.click('#mform .mfoot button'); await pg.wait_for_timeout(300)
     await nav('#/logi/wszystko'); await pg.wait_for_timeout(1200); ok('Dziennik audytu' in await T('#view'),'Logi → Pełny dziennik')
     await nav('#/nowe'); await pg.wait_for_timeout(500); await pg.click('text=Dorota Dotacyjna >> xpath=ancestor::div[contains(@class,"card")] >> text=Załóż sprawę'); await pg.wait_for_timeout(500)
     ok(await pg.locator('#mform [name=category]').input_value()=='DOT','Zgłoszenie DOT → nowa sprawa w kategorii „Dotacje i granty”')
