@@ -181,12 +181,12 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 @media(max-width:760px){nav .wrap{gap:6px;padding:0 10px}.logo{font-size:1rem;gap:6px}.logo i{display:none}.ver-badge{margin-left:0}.lang button{padding:7px 7px}.icon-btn{width:34px;height:34px}.admin-btn{padding:7px 9px}.calc{grid-template-columns:1fr}.links,.admin-btn span{display:none}.hero{padding-top:50px}.lang{margin-left:auto}}
 .fade{animation:fade .4s both}@keyframes fade{from{opacity:0;transform:translateY(8px)}}
 /* paski przewijania w stylu strony */
-::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar{width:10px;height:13px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 38%,transparent);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
 ::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--accent) 70%,transparent);border:2px solid transparent;background-clip:padding-box}
 ::-webkit-scrollbar-corner{background:transparent}
-.tabs::-webkit-scrollbar,.tw::-webkit-scrollbar,.sres::-webkit-scrollbar{height:6px;width:6px}
-@supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}}
+.tabs::-webkit-scrollbar,.tw::-webkit-scrollbar,.sres::-webkit-scrollbar{height:11px;width:8px}
+@supports (-moz-appearance:none){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}.tabs,.tw,.sres{scrollbar-width:auto}}
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pgrid .panel{padding:20px}.pgrid h3{margin-bottom:10px}
 .pitem{padding:10px 0;border-bottom:1px solid var(--line)}.pitem:last-child{border:0}.pitem a{color:var(--txt);font-weight:600}.pitem a:hover{color:var(--accent)}
 .pitem small{display:block;color:var(--mut);margin-top:3px}.ptag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:20px;background:var(--card2);color:var(--mut);margin:4px 4px 0 0}

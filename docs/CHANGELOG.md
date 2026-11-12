@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.2] — 2026-11-12
+- Wyższe poziome paski przewijania (tabele, zakładki) w CRM i na stronie
+
 ## [1.41.1] — 2026-11-12
 - CRM: logo, nazwa i wersja na górze lewego menu zostają na miejscu — przewija się tylko menu
 
