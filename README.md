@@ -67,13 +67,14 @@ crm/                      CRM kancelarii
   prawo.js                📜 Prawo, przepisy w sprawie, analiza umowy w zgłoszeniu, klauzule UOKiK, UODO
   pisma.js                pisma z szablonów, Ustawienia → Pisma i szablony
   granty.js               💶 Dotacje (panel serwisu dotacji/)
+  logi.js                 📜 Logi (publikacje, logowania, konfiguracja, sprawy, pełny dziennik)
   podglad.js, pomoc.js    podgląd panelu oczami roli, podpowiedzi
 dotacje/                  serwis dotacji (raport dla firm, zgłoszenia DOT do CRM; dawniej repo Lexsalus/Grants) — opis w dotacje/README.md
 adam/                     czat Adam (adam.js, wiedza.json)
 prawo/                    dane generowane codziennie (API Sejmu, kursy NBP, orzeczenia SAOS, klauzule UOKiK, decyzje UODO);
                           obserwowane.json — lista ustaw (edytowana w CRM); log/ — dziennik ostatniej synchronizacji
 icons/                    ikony aplikacji CRM
-supabase/                 schema.sql, migrations/ (002–014), functions/ (konta), test/ — testy bazy 176/176, e2e 162/162
+supabase/                 schema.sql, migrations/ (002–016), functions/ (konta), test/ — testy bazy 181/181, e2e 168/168
 tools/                    prawo_sync.py (synchronizacja), bump.py (wersja), build_seo.py (SEO), test/ (testy synchronizacji)
 docs/                     dokumentacja: STAN (stan i zasady — zacznij tutaj), PLAN, INSTRUKCJA, CRM, SUPABASE, CHANGELOG
 .github/                  publikacja na GitHub Pages + codzienna synchronizacja prawa (ok. 6:17)

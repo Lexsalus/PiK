@@ -56,7 +56,8 @@ function updateRun(){
   const prog = 1 - left/(RUN.total*1000);
   $('#runBar').style.width = (prog*100).toFixed(1)+'%';
   const cur = Math.min(STEPS.length-1, Math.floor(prog*STEPS.length));
-  $('#steps').innerHTML = STEPS.map((k,i)=>`<li class="${i<cur?'done':i===cur?'cur':''}">${i<cur?'✓':i===cur?'<span class="spin"></span>':'•'} ${t(k)}</li>`).join('');
+  if(RUN.cur !== cur){ RUN.cur = cur;   // przerysowanie tylko przy zmianie kroku — inaczej kółeczko zaczynało obrót od nowa co 250 ms
+  $('#steps').innerHTML = STEPS.map((k,i)=>`<li class="${i<cur?'done':i===cur?'cur':''}">${i<cur?'✓':i===cur?'<span class="spin"></span>':'•'} ${t(k)}</li>`).join(''); }
   document.title = $('#clock').textContent+' · '+(SITE.siteName||'Granty');
   if(left<=0){ clearInterval(tick); finishRun(); }
 }

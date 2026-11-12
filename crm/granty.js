@@ -31,7 +31,7 @@ async function load(force){
   G.draft=ls.get();G.loaded=true;setPub('dotacje',dirty()||!!G.pub?.zPliku);
 }
 const D=()=>G.draft||G.pub||{programy:[],settings:{}};
-window.grPubCheck=()=>load();
+window.grPubCheck=async()=>{await load();if(dirty())pubNotice('dotacje',true);else if(G.pub?.zPliku)pubNotice('dotacje',true,'Katalog dotacji nie był jeszcze publikowany do bazy (serwis używa plików dotacje/data) — otwórz Dotacje → Publikacja i kliknij „Opublikuj”.')};
 const edit=()=>{if(!G.draft)G.draft=structuredClone({programy:D().programy,settings:D().settings});return G.draft};
 const saveD=()=>{ls.set(G.draft);setPub('dotacje',dirty()||!!G.pub?.zPliku);if(dirty())pubNotice('dotacje',true);rerender()};
 const dirty=()=>!!G.draft&&JSON.stringify({programy:G.draft.programy,settings:G.draft.settings})!==JSON.stringify({programy:G.pub?.programy||[],settings:G.pub?.settings||{}});
@@ -53,7 +53,8 @@ ROUTES.dotacje=sub=>{
   sub=tabs.some(t=>t[0]===sub)?sub:tabs[0][0];curSub=sub;
   if(!G.loaded){load().then(()=>location.hash.startsWith('#/dotacje')&&rerender());}
   const head=`<div class="ph"><div><h1>💶 Dotacje</h1><p>Serwis <a href="${GR_BASE}" target="_blank" rel="noopener">${esc(D().settings?.siteName||'Granty')} ↗</a> — wstępny raport finansowania dla klienta${dirty()?' · <span class="badge b-warn">nieopublikowane zmiany</span>':''}</p></div></div>`;
-  const tb=groupTabs(tabs,GR_GROUPS,sub,k=>'#/dotacje/'+k);
+  const P0=G.pub||{},Dd=G.draft,dd={zrodla:!!Dd&&JSON.stringify(Dd.programy)!==JSON.stringify(P0.programy||[]),strona:!!Dd&&JSON.stringify(Dd.settings)!==JSON.stringify(P0.settings||{}),publikacja:dirty()||!!P0.zPliku};
+  const tb=groupTabs(tabs,GR_GROUPS,sub,k=>'#/dotacje/'+k,k=>dd[k]?'<span class="tdot" data-tip="Do opublikowania"></span>':'');
   if(!G.loaded&&sub!=='zgloszenia')return head+tb+'<div class="empty">Wczytywanie…</div>';
   return head+tb+(G.err&&sub!=='zgloszenia'?`<div class="note" style="margin-bottom:12px">⚠️ ${esc(G.err)}</div>`:'')+VIEW[sub]();
 };
@@ -146,10 +147,15 @@ VIEW.publikacja=()=>{
     <div class="grid g3" style="gap:10px">${[['Na stronie',G.pub?(G.pub.zPliku?'pliki dotacje/data/*.json':'opublikowano '+fDT(G.pubAt)):'—'],['Szkic',d?'zmiany do opublikowania':'bez zmian'],['Źródła finansowania',`${P.filter(p=>p.aktywny!==false).length} aktywnych z ${P.length}`]].map(([l,v])=>`<div style="background:var(--bg2);border-radius:10px;padding:10px 12px"><div class="mut small">${l}</div><b>${esc(v)}</b></div>`).join('')}</div>
     ${G.brak?'<div class="note" style="margin-top:12px">⚠️ Brak tabeli treści serwisu w bazie (migracja 012) — publikacja niedostępna, strona używa plików dotacje/data/*.json.</div>':''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn pri" ${G.brak||(!d&&!G.pub?.zPliku)?'disabled':''} onclick="grPublish()">🚀 Opublikuj na stronie</button><button class="btn" ${d?'':'disabled'} onclick="grDiscard()">↺ Odrzuć szkic</button><a class="btn" href="${GR_BASE}" target="_blank" rel="noopener">Otwórz serwis ↗</a></div>
-    <p class="hint">Szkic jest zapisany w tej przeglądarce. Publikacja (Administrator, w audycie) zmienia stronę od razu — bez wysyłki na GitHub. Strona czyta treści z bazy; gdy ich nie ma, używa plików <code>dotacje/data/*.json</code>.</p></div>`;
+    <p class="hint">Szkic jest zapisany w tej przeglądarce. Publikacja (Administrator, w audycie) zmienia stronę od razu — bez wysyłki na GitHub. Strona czyta treści z bazy; gdy ich nie ma, używa plików <code>dotacje/data/*.json</code>.</p></div>
+  <p class="hint">📜 Historia publikacji — kto, kiedy i co zmienił: <a href="#/logi/publikacje">menu → Logi → Publikacje</a>.</p>`;
 };
 window.grPublish=()=>{const d=D();if(!confirm(`Opublikować serwis dotacji (${d.programy.length} źródeł finansowania)?`))return;
-  act(async()=>{chk(await sb.rpc('grants_publish',{p_data:{programy:d.programy,settings:d.settings}}));ls.del();G.draft=null;pubNotice('dotacje',false);await load(true)},'Opublikowano serwis dotacji')};
+  const P0=G.pub||{programy:[],settings:{}},nm=p=>ml(p.nazwa)||p.id,old=new Map((P0.programy||[]).map(p=>[p.id,p])),nw=new Map(d.programy.map(p=>[p.id,p]));
+  const add=d.programy.filter(p=>!old.has(p.id)).map(nm),del=(P0.programy||[]).filter(p=>!nw.has(p.id)).map(nm),chg=d.programy.filter(p=>old.has(p.id)&&JSON.stringify(old.get(p.id))!==JSON.stringify(p)).map(nm);
+  const st=Object.keys({...(P0.settings||{}),...(d.settings||{})}).filter(k=>JSON.stringify((P0.settings||{})[k])!==JSON.stringify((d.settings||{})[k]));
+  const zm=G.pub?.zPliku?'pierwsza publikacja do bazy (z plików dotacje/data)':[add.length?'Dodano: '+add.join(', '):'',del.length?'Usunięto: '+del.join(', '):'',chg.length?'Zmieniono: '+chg.join(', '):'',st.length?'Ustawienia serwisu: '+st.join(', '):''].filter(Boolean).join('\n')||'bez zmian';
+  act(async()=>{chk(await sb.rpc('grants_publish',{p_data:{programy:d.programy,settings:d.settings}}));sb.rpc('log_event',{p_action:'publikacja.zmiany',p_target:'serwis dotacji',p_details:zm}).then(()=>{},()=>{});ls.del();G.draft=null;pubNotice('dotacje',false);await load(true)},'Opublikowano serwis dotacji')};
 window.grDiscard=()=>{if(!confirm('Odrzucić nieopublikowane zmiany?'))return;ls.del();G.draft=null;setPub('dotacje',!!G.pub?.zPliku);rerender()};
 
 /* --- zgłoszenie z serwisu: opis, plany, potencjał (karta zgłoszenia i Analiza sprawy) --- */

@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.39.0] — 2026-11-12
+- 📜 Logi w menu (publikacje z opisem zmian, logowania i bezpieczeństwo, konfiguracja, sprawy, pełny dziennik); kropki publikacji w podzakładkach, powiadomienia o nieopublikowanych treściach, przycisk Różnice; kółko w serwisie dotacji; migracje 015–016
+
 ## [1.38.0] — 2026-11-12
 - Procesy spraw edytowane w CRM (proces Dotacje i granty), listy kontrolne etapów z punktami automatycznymi, edycja i dodawanie etapów w sprawie; zielona kropka w menu przy publikacji i powiadomienie z nazwą osoby; migracja 014
 

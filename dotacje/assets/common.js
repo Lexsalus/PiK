@@ -1,5 +1,5 @@
 /* Granty — wspólne: i18n, motyw, słowniki, silnik raportu */
-const APP_VERSION = '3.0.0';
+const APP_VERSION = '3.0.1';
 /* CRM kancelarii (Lexsalus/PiK, Supabase): treści serwisu (grants_content) i zgłoszenia (leads, kategoria DOT).
    Klucz publiczny (publishable) — bezpieczny w kodzie strony; dostęp ogranicza RLS w bazie. */
 const KANCELARIA = { url:'https://eamobnucjsavahpxilrt.supabase.co', key:'sb_publishable_jwyxht3egYyB_dAPrWHkRw_68bmBctB', crm:'../crm.html#/dotacje' };

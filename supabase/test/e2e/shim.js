@@ -9,6 +9,7 @@ const q=b=>post('/q',{...b,sub:st.user?.id||null,aal:st.aal,amr:st.amr||[]});
 class B{constructor(t){this.b={table:t,filters:[],op:'select'}}
   select(){if(this.b.op==='select')this.b.op='select';else this.b.returning=true;return this}
   eq(c,v){this.b.filters.push(['eq',c,v]);return this} is(c,v){this.b.filters.push(['is',c,v]);return this}
+  in(c,v){this.b.filters.push(['in',c,v]);return this} lt(c,v){this.b.filters.push(['lt',c,v]);return this} like(c,v){this.b.filters.push(['like',c,v]);return this} or(s){this.b.filters.push(['or',null,s]);return this}
   order(c,o){(this.b.orders=this.b.orders||[]).push([c,o?.ascending!==false]);this.b.order=this.b.orders[0];return this} limit(n){this.b.limit=n;return this} range(a,b){this.b.offset=a;this.b.limit=b-a+1;return this}
   single(){this.b.single=true;return this} maybeSingle(){this.b.single=true;return this}
   insert(v){this.b.op='insert';this.b.values=v;return this} update(v){this.b.op='update';this.b.values=v;return this}

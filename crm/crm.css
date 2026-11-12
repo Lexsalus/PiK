@@ -38,7 +38,7 @@ aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px
 .tabs.gtabs .tab:hover{border-bottom-color:color-mix(in srgb,var(--gc) 70%,transparent);color:var(--txt)}
 .tabs.gtabs .tab.on{border-bottom-color:var(--gc);color:var(--txt);background:color-mix(in srgb,var(--gc) 10%,transparent)}
 .tabs.gtabs .tab.gs{margin-left:14px}.tabs.gtabs .tab.gs::before{content:"";position:absolute;left:-8px;top:22%;bottom:22%;width:1px;background:var(--line)}
-.tabs.gtabs .tab .tdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn,#f5b84a);margin-left:6px;vertical-align:middle}
+.tabs.gtabs .tab .tdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2fd6a0;box-shadow:0 0 0 3px #2fd6a033;margin-left:6px;vertical-align:middle}
 .nav .cnt{margin-left:auto;background:var(--bad);color:#fff;border-radius:20px;font-size:.72rem;padding:1px 7px;font-weight:700}
 .nav .cnt.n{background:var(--accent)}
 aside .sp{flex:1}

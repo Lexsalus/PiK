@@ -22,6 +22,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 - ✅ Migracja `010_prawo_konta_limity.sql` — limity zgłoszeń (telefon, ogólny), powiadomienia o zmianach w prawie (pg_cron `prawo-pobierz` 5:40 UTC i `prawo-powiadom` 5:50 UTC przez pg_net), konta z CRM (`must_change_password`, `account_created`)
+- ✅ Migracje `015_powiadomienie_publikacja.sql` (powiadomienie z opisem) i `016_log_publikacji.sql` (log zmian przy publikacji, `log_event('publikacja.zmiany')`). Wdrożone 12.11.2026.
 - ✅ Migracja `014_procesy_spraw.sql` — procesy spraw (`process_templates`), proces „dot”, listy kontrolne etapów (`stage_check`, `stage_edit`, `stage_add`), powiadomienie o publikacji (`publish_notice`). Wdrożona 12.11.2026.
 - ✅ Migracja `013_przelacznik_2fa.sql` — awaryjny przełącznik 2FA (`private.flags`, `mfa_required`, `mfa_set` — Administrator, audyt). Wdrożona 12.11.2026; **2FA tymczasowo wyłączone 12.11.2026** — włączyć ponownie w CRM → Ustawienia → System.
 - ✅ Migracja `012_dotacje.sql` — kategoria DOT, treści serwisu dotacji (`grants_content`, odczyt publiczny, publikacja `grants_publish` — Administrator). Wdrożona 11.11.2026.

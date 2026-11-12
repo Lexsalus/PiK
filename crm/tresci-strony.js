@@ -100,7 +100,7 @@ const ST_GROUPS=[{l:'Strona',c:'#5aa9ff',tip:'Nazwa, kolor, formularz zgłoszeń
 Object.assign(TAB_TIPS,{settings:'Nazwa strony, kolor, formularz zgłoszeń.',cats:'Kategorie i oferty porównywarki.',calcs:'Kalkulatory i ich wzory.',contracts:'Reguły analizy umów i limity odsetek.',funkcje:'Zmiany w prawie, zwrot z umowy, restrukturyzacja firmy, skany.',
   adam:'Ustawienia czatu Adam, tematy, tester.',i18n:'Tłumaczenia UA / EN.',seo:'Tytuł, opis, Google, analityka.',tech:'Stan systemu, synchronizacja prawa, tryb serwisowy, limity, połączenie z bazą, aplikacja.',export:'Opublikuj szkic, eksport i import data.json.'});
 const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators'],contracts:['contracts'],funkcje:['zmianyPrawa','zwrot','firma','obserwowane'],adam:['adam'],i18n:['i18n','translations'],seo:['seo'],tech:['serwis']};
-function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty();return (ST_KEYS[k]||[]).some(x=>JSON.stringify(D[x])!==JSON.stringify(ORIG[x]))}
+function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty()||SITE.src==='file';return (ST_KEYS[k]||[]).some(x=>JSON.stringify(D[x])!==JSON.stringify(ORIG[x]))}
 const stTabs=()=>groupTabs(TABS,ST_GROUPS,view,k=>'#/strona/'+k,k=>stDirtyTab(k)?'<span class="tdot" data-tip="Zmiany nieopublikowane"></span>':'');
 function save(){
   if(!D)return;setPub('strona',dirty()||SITE.src==='file');if(dirty())pubNotice('strona',true);
@@ -125,13 +125,13 @@ ROUTES.strona=sub=>{
   need(isAdmin(),'Treści strony edytuje tylko Administrator.');
   view=TABS.some(t=>t[0]===sub)?sub:'settings';
   return `<div id="stWrap"><div class="ph"><div><h1>Treści strony</h1><p>Porównywarka, kalkulatory, analiza umów, tłumaczenia i SEO. Zmiany zapisują się jako szkic w tej przeglądarce — na stronie pojawią się po „Opublikuj”.</p></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="stst" id="stStatus">…</span><a class="btn" href="index.html?preview" target="_blank" data-tip="Strona ze szkicem z tej przeglądarki (nieopublikowanym)">👁 Podgląd</a><a class="btn" href="index.html" target="_blank">🌐 Strona</a><button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj</button></div></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="stst" id="stStatus">…</span><a class="btn" href="index.html?preview" target="_blank" data-tip="Strona ze szkicem z tej przeglądarki (nieopublikowanym)">👁 Podgląd</a><a class="btn" href="index.html" target="_blank">🌐 Strona</a><button class="btn" type="button" data-st="showDiff()" data-tip="Co zmieniłeś w szkicu w porównaniu z wersją na stronie">🔍 Różnice</button><button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj</button></div></div>
     <div id="stTabs">${stTabs()}</div>
     <div id="stStale"><span style="flex:1;min-width:240px">⚠️ <b>Opublikowana wersja strony zmieniła się</b> od czasu utworzenia Twojego szkicu (np. publikacja z innego komputera). Szkic nie zawiera tych zmian.</span><button class="btn" type="button" data-st="showDiff()" data-tip="Co jest inne w szkicu z tej przeglądarki, a co w opublikowanej wersji">🔍 Pokaż różnice</button><button class="btn pri" type="button" data-st="useNew()">Użyj opublikowanej wersji</button><button class="btn" type="button" data-st="keepDraft()">Zostaw mój szkic</button></div>
     <h2 id="stTitle" style="font-size:1.15rem;margin-bottom:14px"></h2><div id="stView"><div class="empty">Wczytywanie…</div></div></div>`;
 };
 ROUTES.strona.after=async()=>{if(!READY)await load();render()};
-window.stPubCheck=async()=>{if(!READY)await load();else setPub('strona',dirty()||SITE.src==='file')};
+window.stPubCheck=async()=>{if(!READY)await load();const d=D&&dirty();setPub('strona',d||SITE.src==='file');if(d)pubNotice('strona',true);else if(SITE.src==='file')pubNotice('strona',true,'Treści strony nie były jeszcze publikowane do bazy (strona używa pliku data.json) — otwórz Publikację i kliknij „Opublikuj”.')};
 
 /* ---------- Publikacja ---------- */
 function vExport(){
@@ -147,15 +147,20 @@ function vExport(){
     <p class="hint"><b>SEO:</b> meta tagi, <code>robots.txt</code> i <code>sitemap.xml</code> tworzy GitHub Actions z pliku <code>data.json</code> w repozytorium. Po zmianach w zakładce SEO pobierz <code>data.json</code> i podmień go w repo.</p></div>
    <div class="box"><h3>Akcje</h3><div style="display:flex;gap:10px;flex-wrap:wrap">
      <button class="btn pri" type="button" data-st="publish()">🚀 Opublikuj na stronie</button>
+     <button class="btn" type="button" data-st="showDiff()">🔍 Pokaż różnice</button>
      <button class="btn" type="button" data-st="dl()">⬇ Pobierz data.json</button>
      <button class="btn" type="button" data-st="navigator.clipboard.writeText(JSON.stringify(D,null,2)).then(()=>toast('Skopiowano JSON'))">📋 Kopiuj JSON</button>
      <label class="btn">📂 Importuj plik<input type="file" accept=".json" hidden data-stch="imp(this.files[0])"></label>
-     <button class="btn del" type="button" data-st="reset()">↺ Odrzuć szkic</button></div></div>`;
+     <button class="btn del" type="button" data-st="reset()">↺ Odrzuć szkic</button></div></div>
+   <p class="hint">📜 Historia publikacji — kto, kiedy i co zmienił: <a href="#/logi/publikacje">menu → Logi → Publikacje</a>.</p>`;
 }
 function publish(){
   if(!D)return;if(!dirty()&&SITE.src==='db')return toast('Brak zmian do opublikowania');
   modal('Opublikować treści strony?',`<p>Szkic z tej przeglądarki zastąpi treści na stronie publicznej. Odwiedzający zobaczą zmiany od razu.</p><p class="hint">Publikacja trafia do dziennika audytu.</p>`,{ok:'🚀 Opublikuj',onOk:async()=>{
+    const L=ORIG?diffList(D,ORIG):[],sec={};L.forEach(x=>{const k=x.path[0]||'—';sec[k]=(sec[k]||0)+1});
+    const zm=L.length?`${L.length>=1000?'1000+':L.length} zmian · ${Object.entries(sec).map(([k,n])=>k+': '+n).join(', ')}\n`+L.slice(0,12).map(x=>'• '+x.path.join(' › ')).join('\n')+(L.length>12?`\n… i ${L.length-12} więcej`:''):(SITE.src==='file'?'pierwsza publikacja do bazy (z pliku data.json)':'bez zmian');
     const r=await sb.rpc('site_publish',{p_data:D});if(r.error)throw r.error;
+    sb.rpc('log_event',{p_action:'publikacja.zmiany',p_target:'treści strony',p_details:zm}).then(()=>{},()=>{});
     ORIG=structuredClone(D);SITE.pub=structuredClone(D);SITE.at=r.data;SITE.src='db';BASE=hash(JSON.stringify(ORIG));STALE=false;
     setPub('strona',false);pubNotice('strona',false);render();toast('Opublikowano — strona pokazuje nową wersję')}});
 }

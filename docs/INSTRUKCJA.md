@@ -307,7 +307,11 @@ Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: o�
 
 ## 12f. Publikacja — zielona kropka i powiadomienie
 
-Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo treści nie były jeszcze nigdy publikowane do bazy), w menu przy tej pozycji świeci **zielona kropka**. Administratorzy dostają też powiadomienie „Do opublikowania: …” z nazwą osoby, która wprowadziła zmiany (szkic jest w jej przeglądarce); po publikacji powiadomienie oznacza się jako przeczytane.
+Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo treści nie były jeszcze nigdy publikowane do bazy), w menu przy tej pozycji świeci **zielona kropka**, a w środku — zielone kropki przy podzakładkach ze zmianami i przy „Publikacji”. Przycisk **🔍 Różnice** (Treści strony, górny pasek i Publikacja) pokazuje, co dokładnie się zmieniło. Administratorzy dostają też powiadomienie „Do opublikowania: …” z nazwą osoby, która wprowadziła zmiany (szkic jest w jej przeglądarce); po publikacji powiadomienie oznacza się jako przeczytane.
+
+## 12g. Logi
+
+Menu → Administracja → **📜 Logi** (osoby z uprawnieniem „Dziennik audytu”). Zakładki: **Publikacje** (Treści strony i Dotacje: kto, kiedy i co się zmieniło — liczba zmian w sekcjach i lista miejsc; w Dotacjach dodane / usunięte / zmienione źródła i ustawienia), **Logowania i bezpieczeństwo** (logowania, 2FA, przełącznik 2FA), **Konfiguracja i konta**, **Sprawy** (zakładanie, etapy, korekty, dokumenty, eksporty, pisma), **Pełny dziennik** (cały dziennik audytu z weryfikacją łańcucha skrótów). Wpisów nie może zmienić ani usunąć nikt.
 
 ## 12d. Serwis dotacji w CRM
 

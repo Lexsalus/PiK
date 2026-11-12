@@ -185,7 +185,7 @@ function pubDots(){Object.entries(PUB).forEach(([k,on])=>{const a=document.query
 const setPub=(k,on)=>{PUB[k]=!!on;pubDots()};
 /* powiadomienie w bazie (z nazwą osoby, która wprowadziła zmiany): raz na sesję przy pierwszej zmianie, po publikacji — przeczytane */
 const PUBN={};
-function pubNotice(k,on){if(!ME||ME.role!=='admin'||!!PUBN[k]===!!on)return;PUBN[k]=on;sb.rpc('publish_notice',{p_what:k,p_pending:!!on}).then(()=>{},()=>{})}
+function pubNotice(k,on,note){const key=k+(note?':p':'');if(!ME||ME.role!=='admin'||!!PUBN[key]===!!on)return;PUBN[key]=on;if(!on)PUBN[k+':p']=false;sb.rpc('publish_notice',{p_what:k,p_pending:!!on,p_note:note||null}).then(()=>reload(['notifications'])).then(()=>{renderShell();if(location.hash.startsWith('#/powiadomienia'))rerender()},()=>{})}
 function navGroups(items,cur){
   const seen=new Set(),out=[];
   const one=([k,ic,l,cnt,cl],g)=>`<a class="nav ${cur===k?'on':''}" href="#/${k}" style="--gc:${g.c}" data-why="${esc(NAV_WHY[k]||'')}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`;
@@ -724,7 +724,7 @@ async function auditLoad(more){
     const a=chk(await q),R=(a||[]).reverse().map(x=>({i:x.id,ts:x.at,user:x.user_id,action:x.action,target:x.target,details:x.details,hash:x.hash,prev:x.prev_hash}));
     AUD.rows=more?[...R,...AUD.rows]:R;AUD.all=(a||[]).length<200;AUD.loaded=true;DB.audit=AUD.rows}
   catch(e){toast('Nie udało się wczytać dziennika: '+errMsg(e),true)}
-  AUD.busy=false;if(location.hash.startsWith('#/ustawienia/audyt'))rerender();
+  AUD.busy=false;if(location.hash.startsWith('#/ustawienia/audyt')||location.hash.startsWith('#/logi/wszystko'))rerender();
 }
 const auditRefresh=()=>{AUD.loaded=false;AUD.rows=[];auditLoad()};
 SET.audyt=()=>{

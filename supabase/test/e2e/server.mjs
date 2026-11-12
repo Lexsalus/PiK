@@ -35,7 +35,8 @@ async function handle(q){
       if(r.fields.length===1&&r.fields[0].name===q.name)return r.rows[0]?.[q.name]??null;return r.rows}
     if(q.kind==='storage'){await db.query(`insert into storage.objects(bucket_id,name) values($1,$2)`,[q.bucket,q.path]);return {path:q.path}}
     const T='public.'+ident(q.table),params=[],ph=v=>{params.push(Array.isArray(v)&&v.every(x=>x===null||typeof x!=='object')?'{'+v.map(x=>JSON.stringify(String(x))).join(',')+'}':v!==null&&typeof v==='object'?JSON.stringify(v):v);return '$'+params.length};
-    const where=(q.filters||[]).map(([op,c,v])=>op==='eq'?`${ident(c)} = ${ph(v)}`:op==='is'?`${ident(c)} is ${v===null?'null':v}`:'true').join(' and ')||'true';
+    const orPart=s=>'('+String(s).split(',').map(x=>{const [c,op,...r]=x.split('.');const v=r.join('.');return op==='eq'?`${ident(c)} = ${ph(v)}`:op==='like'?`${ident(c)} like ${ph(v.replace(/\*/g,'%'))}`:'false'}).join(' or ')+')';
+    const where=(q.filters||[]).map(([op,c,v])=>op==='eq'?`${ident(c)} = ${ph(v)}`:op==='is'?`${ident(c)} is ${v===null?'null':v}`:op==='in'?`${ident(c)} = any(${ph(v)})`:op==='lt'?`${ident(c)} < ${ph(v)}`:op==='like'?`${ident(c)} like ${ph(v)}`:op==='or'?orPart(v):'true').join(' and ')||'true';
     if(q.op==='select'){let sql=`select * from ${T} where ${where}`;const ords=q.orders||(q.order?[q.order]:[]);if(ords.length)sql+=' order by '+ords.map(o=>`${ident(o[0])} ${o[1]?'asc':'desc'}`).join(',');if(q.limit)sql+=` limit ${+q.limit}`;if(q.offset)sql+=` offset ${+q.offset}`;const r=await db.query(sql,params);return r.rows}
     const rows=Array.isArray(q.values)?q.values:[q.values];
     if(q.op==='insert'||q.op==='upsert'){const out=[];for(const row of rows){params.length=0;const cols=Object.keys(row);let sql=`insert into ${T}(${cols.map(ident).join(',')}) values (${cols.map(c=>ph(row[c])).join(',')})`;
