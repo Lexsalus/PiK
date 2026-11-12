@@ -199,11 +199,24 @@ function navGroups(items,cur){
 }
 /* numer wersji przy nazwie (version.json, podbijany przy każdej wysyłce) */
 let APP_VER='';fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v=>{APP_VER=v.version||'';if(ME)renderShell()}).catch(()=>{});
+/* Co nowego: wersje i opisy z docs/CHANGELOG.md (podbijany przy każdej wysyłce) */
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+async function whatsNew(){
+  let md='';try{md=await (await fetch('docs/CHANGELOG.md',{cache:'no-store'})).text()}catch(e){}
+  const V=[];md.split(/\n(?=## \[)/).forEach(b=>{const m=b.match(/^## \[([\d.]+)\]\s*[—-]\s*(\S+)/);if(!m)return;
+    const items=b.split('\n').slice(1).map(l=>l.trim()).filter(l=>l.startsWith('- ')).map(l=>l.slice(2));if(items.length)V.push({v:m[1],d:m[2],items})});
+  const seen=lsGet('crm_seen_ver');
+  modal('🆕 Co nowego',V.length?`<p class="mut small" style="margin-bottom:10px">Aktualna wersja: <b>v${esc(APP_VER)}</b>. Każda wysyłka zmian to nowa wersja.</p><div style="max-height:62vh;overflow:auto">${V.slice(0,60).map((x,i)=>{const isNew=seen&&cmpVer(x.v,seen)>0;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="display:flex;gap:8px;align-items:center"><b>v${esc(x.v)}</b><span class="mut small">${esc(fD(x.d))}</span>${i===0?'<span class="badge b-good">aktualna</span>':''}${isNew?'<span class="badge b-acc">nowe dla Ciebie</span>':''}</div>${x.items.map(t=>`<div class="small" style="margin-top:4px">${esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>')}</div>`).join('')}</div>`}).join('')}</div>`
+    :'<div class="empty">Nie udało się wczytać listy zmian.</div>',{ok:'',cancel:'Zamknij',wide:true});
+  if(APP_VER){lsSet('crm_seen_ver',APP_VER);renderShell()}
+}
+const cmpVer=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if((x[i]||0)!==(y[i]||0))return (x[i]||0)-(y[i]||0)}return 0};
 function renderShell(){
   const cur=(location.hash.split('/')[1]||'pulpit').replace('sprawa','sprawy');
-  $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM${APP_VER?`<span class="ver" data-tip="Wersja CRM — lista zmian w CHANGELOG.md">v${esc(APP_VER)}</span>`:''}</div>`+navGroups(menuItems(),cur)+
+  $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM${APP_VER?`<span class="ver" data-tip="Wersja CRM — kliknij: co nowego" style="cursor:pointer" onclick="whatsNew()">v${esc(APP_VER)}</span>`:''}</div>`+navGroups(menuItems(),cur)+
     (!MFA_ON?`<a class="nav" href="#/ustawienia/system" style="background:#ff5b5b22;color:#ff7b7b;font-weight:700" data-tip="Logowanie bez kodu z aplikacji — włącz ponownie w Ustawienia → System">⚠️ 2FA wyłączone</a>`:'')+
-    `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>`;
+    `<div class="sp"></div><a class="nav" href="#" onclick="whatsNew();return false" data-tip="Wersje CRM i strony — co nowego w każdej">🆕 Co nowego${APP_VER?` <span class="mut small">v${esc(APP_VER)}</span>`:''}${APP_VER&&lsGet('crm_seen_ver')!==APP_VER?'<span class="pubdot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#2fd6a0;box-shadow:0 0 0 3px #2fd6a033;margin-left:8px;vertical-align:middle"></span>':''}</a><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>`;
   $('#meBox').innerHTML=`${av(ME.id)}<div><b>${esc(ME.name)}</b><small>${esc(ROLES[ME.role])}</small></div>`;
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;
   $('#bell').innerHTML='🔔'+(unread?`<span class="dot">${unread}</span>`:'');$('#bell').style.display=ME.role==='tech'?'none':'';

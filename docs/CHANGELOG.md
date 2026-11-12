@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.40.0] — 2026-11-12
+- „Co nowego” w lewym menu: lista wersji z datą i opisem zmian, zielona kropka przy nowej wersji
+
 ## [1.39.1] — 2026-11-12
 - Poprawka: Treści strony i Dotacje nie pokazują „do opublikowania” po ponownym wejściu, gdy treści są takie same (baza zmienia kolejność pól)
 

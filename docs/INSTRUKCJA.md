@@ -309,6 +309,10 @@ Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: o�
 
 Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo treści nie były jeszcze nigdy publikowane do bazy), w menu przy tej pozycji świeci **zielona kropka**, a w środku — zielone kropki przy podzakładkach ze zmianami i przy „Publikacji”. Przycisk **🔍 Różnice** (Treści strony, górny pasek i Publikacja) pokazuje, co dokładnie się zmieniło. Administratorzy dostają też powiadomienie „Do opublikowania: …” z nazwą osoby, która wprowadziła zmiany (szkic jest w jej przeglądarce); po publikacji powiadomienie oznacza się jako przeczytane.
 
+## 12h. Co nowego
+
+Na dole lewego menu: **🆕 Co nowego · v…** (zielona kropka, gdy jest wersja, której jeszcze nie oglądałeś). Kliknięcie pokazuje listę wersji z datą i opisem zmian (z `docs/CHANGELOG.md`); numer wersji przy nazwie CRM też otwiera tę listę.
+
 ## 12g. Logi
 
 Menu → Administracja → **📜 Logi** (osoby z uprawnieniem „Dziennik audytu”). Zakładki: **Publikacje** (Treści strony i Dotacje: kto, kiedy i co się zmieniło — liczba zmian w sekcjach i lista miejsc; w Dotacjach dodane / usunięte / zmienione źródła i ustawienia), **Logowania i bezpieczeństwo** (logowania, 2FA, przełącznik 2FA), **Konfiguracja i konta**, **Sprawy** (zakładanie, etapy, korekty, dokumenty, eksporty, pisma), **Pełny dziennik** (cały dziennik audytu z weryfikacją łańcucha skrótów). Wpisów nie może zmienić ani usunąć nikt.

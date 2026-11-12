@@ -74,7 +74,7 @@ adam/                     czat Adam (adam.js, wiedza.json)
 prawo/                    dane generowane codziennie (API Sejmu, kursy NBP, orzeczenia SAOS, klauzule UOKiK, decyzje UODO);
                           obserwowane.json — lista ustaw (edytowana w CRM); log/ — dziennik ostatniej synchronizacji
 icons/                    ikony aplikacji CRM
-supabase/                 schema.sql, migrations/ (002–016), functions/ (konta), test/ — testy bazy 181/181, e2e 169/169
+supabase/                 schema.sql, migrations/ (002–016), functions/ (konta), test/ — testy bazy 181/181, e2e 170/170
 tools/                    prawo_sync.py (synchronizacja), bump.py (wersja), build_seo.py (SEO), test/ (testy synchronizacji)
 docs/                     dokumentacja: STAN (stan i zasady — zacznij tutaj), PLAN, INSTRUKCJA, CRM, SUPABASE, CHANGELOG
 .github/                  publikacja na GitHub Pages + codzienna synchronizacja prawa (ok. 6:17)
