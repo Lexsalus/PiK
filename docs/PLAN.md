@@ -19,7 +19,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 8 | Zwrot z umowy: z umowy (wpisanej / pliku / skanu) system liczy zwrot (SKD, CHF/FX) wg przepisów i orzecznictwa; klient widzi **czerwony komunikat „klauzule abuzywne — kwalifikujesz się do zwrotu” + kwotę, bez podstawy prawnej**; podstawy, zapisy i orzecznictwo trafiają ze zgłoszeniem do CRM | ✅ v1.21.0 (`strona/umowa-zwrot.js`) |
 | 9 | Skany umów: rozpoznawanie tekstu (OCR) w przeglądarce — zdjęcia JPG/PNG/WEBP i zeskanowane PDF | ✅ v1.21.0 |
 | 10 | Bot **Adam** (zamiast Ilony na stronie): regułowy, w przeglądarce, wiedza w `adam/wiedza.json`, przepisy, odsetki, zmiany, projekty, kierowanie do kalkulatorów | ✅ |
-| 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 23/23, e2e 170/170 |
+| 11 | Testy: parser (`tools/test/test_prawo_sync.py`), e2e CRM (`supabase/test/e2e/`) | ✅ parser 23/23, e2e 171/171 |
 | 12 | Dokumentacja: README, INSTRUKCJA, CRM, STAN, CHANGELOG, PLAN | ✅ v1.21.0 |
 | 13 | Sprawdzenie po wysyłce: parser v4 (identyfikatory ELI) na danych z API, wygląd na telefonie | ✅ v1.21.2 |
 | 14 | Restrukturyzacja firmy: kalkulator długów przedsiębiorcy (raty po układzie, wstrzymanie, odsetki, umorzenie) + ścieżki postępowań z podstawami w CRM | ✅ v1.22.0 |

@@ -181,6 +181,8 @@ async def main():
     ok(pub and pub[0]['n']=='Granty Test' and pub[0]['k']>=2 and 'bez zmian' in await T('#view'),'Dotacje: publikacja do bazy (grants_content), szkic wyczyszczony')
     await nav('#/logi/publikacje'); await pg.wait_for_timeout(1200); lg=await T('#view'); ok('Logi' in await T('#side') and 'Dotacje' in lg and ('pierwsza publikacja do bazy' in lg or 'Dodano: Test — grant na stolarnie' in lg),'Logi → Publikacje: kto, kiedy, co się zmieniło')
     await nav('#/logi/logowania'); await pg.wait_for_timeout(1000); ok('Logowanie' in await T('#view'),'Logi → Logowania i bezpieczeństwo')
+    hb=await pg.evaluate("(()=>{const b=document.querySelector('#side .brand').getBoundingClientRect(),t=document.querySelector('.top').getBoundingClientRect();return Math.abs(b.bottom-t.bottom)})()")
+    ok(hb<1,f'linia pod logo i pod górnym paskiem na tej samej wysokości (różnica {hb:.1f}px)')
     await pg.click('#side a.nav:has-text("Co nowego")'); await pg.wait_for_timeout(800); wn=await T('#mbox')
     ok('Co nowego' in wn and 'aktualna' in wn and 'v1.' in wn and '🔧 poprawka' in wn and '✨ nowości' in wn and '⛔ krytyczna' in wn and '⏸ wyłączone' in wn,'Menu → Co nowego: wersje i opisy zmian, znaczki poprawka / nowości / krytyczna / wyłączone'); await pg.click('#mform .mfoot button'); await pg.wait_for_timeout(300)
     await nav('#/logi/wszystko'); await pg.wait_for_timeout(1200); ok('Dziennik audytu' in await T('#view'),'Logi → Pełny dziennik')
