@@ -42,6 +42,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 31a | KNF, ZUS, interpretacje KIS (EUREKA), decyzje UOKiK — brak publicznego API / stałego pliku: na razie wyszukiwarki w CRM; dane — gdy będzie źródło | ⏳ |
 | 32 | Długie listy w porcjach (sprawy, nowe sprawy, zgłoszenia dotacji, audyt), dziennik audytu z bazy na żądanie (zamiast 1000 wpisów przy każdym odświeżeniu) | ✅ v1.34.0 |
 | 32a | Pobieranie danych spraw z bazy porcjami (przy tysiącach spraw) | ⏳ |
+| 33 | Awaryjny przełącznik 2FA (Ustawienia → System, czerwony znacznik w menu, audyt); migracja 013 | ✅ v1.36.0 — ⚠️ 2FA wyłączone 12.11.2026, do ponownego włączenia |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później

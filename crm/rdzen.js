@@ -191,6 +191,7 @@ let APP_VER='';fetch('version.json',{cache:'no-store'}).then(r=>r.json()).then(v
 function renderShell(){
   const cur=(location.hash.split('/')[1]||'pulpit').replace('sprawa','sprawy');
   $('#side').innerHTML=`<div class="brand"><i>⚖</i>Kancelaria CRM${APP_VER?`<span class="ver" data-tip="Wersja CRM — lista zmian w CHANGELOG.md">v${esc(APP_VER)}</span>`:''}</div>`+navGroups(menuItems(),cur)+
+    (!MFA_ON?`<a class="nav" href="#/ustawienia/system" style="background:#ff5b5b22;color:#ff7b7b;font-weight:700" data-tip="Logowanie bez kodu z aplikacji — włącz ponownie w Ustawienia → System">⚠️ 2FA wyłączone</a>`:'')+
     `<div class="sp"></div><a class="nav" href="index.html" target="_blank">🌐 Strona klienta</a>`;
   $('#meBox').innerHTML=`${av(ME.id)}<div><b>${esc(ME.name)}</b><small>${esc(ROLES[ME.role])}</small></div>`;
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;
@@ -658,7 +659,7 @@ ROUTES.ustawienia.after=sub=>{
     if(!ch.length)return toast('Brak zmian');
     if((v.reason||'').trim().length<5)return toast('Podaj uzasadnienie zmiany',true);
     const fin=()=>{ch.forEach(x=>audit('uprawnienia.zmiana',u.name,`${x} · ${v.reason.trim()}`));notify('perm.change',null,'Zmieniono Twoje uprawnienia',ch.join('; '),[u.id]);save();rerender();toast(`Zapisano ${ch.length} zmian — działa od razu`)};
-    if(u.role==='admin')modal('Potwierdź hasłem i 2FA',`<div class="form"><label>Hasło<input class="f" type="password" name="pw" required></label><label>Kod 2FA<input class="f" name="code" required pattern="\\d{6}" placeholder="6 cyfr"></label></div><p class="hint">Prototyp: dowolne hasło i 6 cyfr.</p>`,{ok:'Potwierdź',onOk:fin});else fin();
+    if(u.role==='admin')modal('Potwierdź hasłem i 2FA',`<div class="form"><label>Hasło<input class="f" type="password" name="pw" required></label><label>Kod 2FA<input class="f" name="code" ${MFA_ON?'required':'disabled placeholder="2FA wyłączone"'} pattern="\\d{6}" placeholder="6 cyfr"></label></div><p class="hint">Prototyp: dowolne hasło i 6 cyfr.</p>`,{ok:'Potwierdź',onOk:fin});else fin();
   };
 };
 
@@ -708,7 +709,7 @@ SET.konto=()=>`<div class="card" style="max-width:560px"><h3>Moje konto</h3><dl 
 const SB_URL='https://eamobnucjsavahpxilrt.supabase.co';
 const SB_KEY='sb_publishable_jwyxht3egYyB_dAPrWHkRw_68bmBctB';               // klucz publiczny (publishable) — może być jawny
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const NEED_2FA=['admin','att','tech'];
+const NEED_2FA=['admin','att','tech'];let MFA_ON=true;
 const errMsg=e=>{const m=e?.message||String(e||'Błąd');return m.replace(/^.*?ERROR:\s*/,'').replace(/\s*\(SQLSTATE.*$/,'')};
 // operacje serwera robią same: historia, audyt, powiadomienia, przypomnienia
 function audit(){} function hist(){} function notify(){} function runJobs(){} function importLeads(){}
@@ -833,7 +834,8 @@ async function afterSignIn(){
   const p=(await sb.from('profiles').select('*').eq('id',user.id).single()).data;
   if(!p||!p.active)return loginView('inactive',{email:user.email});
   const aal=(await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data;
-  if(NEED_2FA.includes(p.role)&&aal?.currentLevel!=='aal2'){
+  MFA_ON=await sb.rpc('mfa_required').then(r=>r.error?true:r.data!==false,()=>true);   // przełącznik w bazie (migracja 013); błąd = wymagaj
+  if(MFA_ON&&NEED_2FA.includes(p.role)&&aal?.currentLevel!=='aal2'){
     const f=(await sb.auth.mfa.listFactors()).data;const tot=(f?.totp||[]).find(x=>x.status==='verified');
     if(tot)return loginView('verify',{factorId:tot.id});
     (f?.all||[]).filter(x=>x.factor_type==='totp'&&x.status!=='verified').forEach(x=>sb.auth.mfa.unenroll({factorId:x.id}));
@@ -1149,9 +1151,12 @@ function userModal(id){
     actSafe(async()=>{if(ups.length)chk(await sb.from('permission_overrides').upsert(ups));for(const k of dels)chk(await sb.from('permission_overrides').delete().eq('user_id',u.id).eq('perm',k.split(':')[0]).eq('action',k.includes(':')?'change':'view'))},`Zapisano ${ups.length+dels.length} zmian — działa od razu`)}}}
 
 /* --- system i audyt (wersja na żywo) --- */
+window.mfaSet=on=>{if(!confirm(on?'Włączyć ponownie 2FA? Przy następnym logowaniu wszyscy z rolą Administrator, Pełnomocnik i IT podadzą kod z aplikacji (kto nie ma — skonfiguruje).':'Wyłączyć 2FA? Do CRM wystarczy wtedy samo hasło — to osłabia ochronę danych klientów. Używaj tylko tymczasowo.'))return;
+  act(async()=>{chk(await sb.rpc('mfa_set',{p_on:on}));MFA_ON=on;renderShell()},on?'2FA włączone':'2FA wyłączone')};
 SET.system=()=>{
   const em=DB.emergency;
-  return `<div class="grid g3" style="margin-bottom:14px"><div class="tile"><span>Baza</span><b style="color:var(--good);font-size:1.3rem">Supabase · UE</b><small class="mut">PostgreSQL 17 · RLS · 2FA</small></div>
+  return `${isAdmin()?`<div class="card" style="margin-bottom:14px;${MFA_ON?'':'border:1px solid #ff5b5b'}"><h3>🔐 Logowanie dwuetapowe (2FA)</h3><p>${MFA_ON?'<b style="color:var(--good)">Włączone</b> — Administrator, Pełnomocnik i IT logują się hasłem i kodem z aplikacji.':'<b style="color:#ff7b7b">Wyłączone</b> — do CRM wystarczy hasło. Włącz ponownie, gdy tylko problem z logowaniem zostanie rozwiązany.'}</p>
+    <button class="btn ${MFA_ON?'del':'pri'}" style="margin-top:8px" onclick="mfaSet(${!MFA_ON})">${MFA_ON?'Wyłącz tymczasowo':'Włącz 2FA'}</button><p class="hint">Zmiana trafia do dziennika audytu. Gdy ktoś stracił telefon z aplikacją, lepiej usunąć tylko jego klucz 2FA (skonfiguruje nowy przy logowaniu) niż wyłączać 2FA wszystkim.</p></div>`:''}<div class="grid g3" style="margin-bottom:14px"><div class="tile"><span>Baza</span><b style="color:var(--good);font-size:1.3rem">Supabase · UE</b><small class="mut">PostgreSQL 17 · RLS · 2FA</small></div>
     <div class="tile"><span>Kopie zapasowe</span><b style="font-size:1.1rem">wg planu Supabase</b><small><a href="https://supabase.com/dashboard/project/eamobnucjsavahpxilrt/database/backups/scheduled" target="_blank" style="color:var(--accent)">Database → Backups</a></small></div>
     <div class="tile"><span>Przypomnienia o terminach</span><b style="font-size:1.1rem">co 15 min</b><small class="mut">pg_cron · run_deadline_reminders()</small></div></div>
   <div class="grid g2" style="align-items:start"><div class="card"><h3>Dostęp awaryjny</h3>${ME.role==='tech'?(em&&em.status==='granted'&&em.until>Date.now()?`<div class="note info">Aktywny do ${fDT(new Date(em.until).toISOString())}</div>`:em&&em.status==='pending'?'<div class="note">Wniosek czeka na zgodę Administratora</div>':`<button class="btn" onclick="askReason('Wniosek o dostęp awaryjny','Powód (np. awaria, której nie da się zdiagnozować bez wglądu)',r=>act(async()=>chk(await sb.from('emergency_access').insert({reason:r})),'Wniosek wysłany'),{ok:'Wyślij',danger:false})">Złóż wniosek</button>`):
@@ -1205,6 +1210,7 @@ const subDel=id=>{if(confirm('Usunąć zastępstwo?'))actSafe(async()=>chk(await
 function reauth(){return new Promise(res=>{modal('Potwierdź hasłem i 2FA',`<p class="small mut" style="margin-bottom:10px">Zmiana uprawnień Administratora wymaga ponownego potwierdzenia hasłem i kodem z aplikacji (ważne 5 minut).</p>
   <div class="form"><label>Hasło<input class="f" type="password" name="pw" required autocomplete="current-password"></label><label>Kod 2FA<input class="f" name="code" required pattern="\\d{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label></div>`,
   {ok:'Potwierdź',onOk:async v=>{const r=await sb.auth.signInWithPassword({email:ME.email,password:v.pw});if(r.error)throw new Error('Nieprawidłowe hasło');
+    if(!MFA_ON){setTimeout(()=>res(true),30);return}
     const f=(await sb.auth.mfa.listFactors()).data,t=(f?.totp||[]).find(x=>x.status==='verified');if(!t)throw new Error('Brak skonfigurowanego 2FA');
     const m=await sb.auth.mfa.challengeAndVerify({factorId:t.id,code:v.code});if(m.error)throw new Error('Nieprawidłowy kod 2FA');setTimeout(()=>res(true),30)}})})}
 /* raporty: wiersze, XLSX, PDF, widok aplikanta */

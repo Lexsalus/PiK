@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.36.0] — 2026-11-12
+- Awaryjny przełącznik 2FA (Ustawienia → System, znacznik w menu, audyt); migracja 013 — 2FA tymczasowo wyłączone
+
 ## [1.35.0] — 2026-11-11
 - Porządek w plikach: style i skrypty wydzielone z crm.html i index.html; foldery crm/, strona/, wspolne/, docs/, tools/; dziennik synchronizacji w prawo/log/
 
