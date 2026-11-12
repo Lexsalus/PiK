@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.8] — 2026-11-12
+- Treści strony: dopisane w bazie 4 tłumaczenia UK/EN kafelka i menu „Dotacje” (brakowały w opublikowanej wersji); dokumentacja: liczniki testów i migracji
+
 ## [1.41.7] — 2026-11-12
 - Poprawki po przeglądzie: automat zmian w prawie odporny na odpowiedź spoza JSON, cykl powiadomień o publikacji dokładniejszy; migracja 019
 
