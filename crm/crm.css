@@ -32,7 +32,7 @@ aside{background:var(--bg2);border-right:1px solid var(--line);padding:16px 12px
 .ngrp::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--gc) 35%,transparent)}
 .brand+.ngrp{margin-top:2px}
 /* logo, nazwa i wersja zostają na górze — przewija się tylko menu (.navs), bez paska poziomego */
-#side{overflow:hidden}#side .brand{white-space:nowrap;flex:none;border-bottom:1px solid var(--line);box-sizing:border-box;height:var(--toph);margin:-16px -12px 8px;padding:0 22px}
+#side{overflow:hidden}#side .brand{white-space:nowrap;flex:none;border-bottom:1px solid var(--line);box-sizing:border-box;height:var(--toph);margin:-16px -12px 8px;padding:0 22px 0 12px}
 /* linia pod logo i pod górnym paskiem na tej samej wysokości */
 :root{--toph:66px}@media(min-width:761px){.top{box-sizing:border-box;height:var(--toph)}}
 #side .navs{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:2px;margin-right:-8px;padding-right:8px}

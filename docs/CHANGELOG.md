@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.5] — 2026-11-12
+- CRM: logo wyrównane do lewej krawędzi pozycji menu
+
 ## [1.41.4] — 2026-11-12
 - CRM: linia pod logo i pod górnym paskiem na tej samej wysokości
 
