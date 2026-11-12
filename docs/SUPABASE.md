@@ -22,6 +22,7 @@ Schemat `supabase/schema.sql` zawiera wszystkie tabele ze specyfikacji v1.1, reg
 - ⏳ Po wdrożeniu: usunąć tokeny API (Supabase → Account → Access Tokens) i pliki z tokenami z pulpitu
 
 - ✅ Migracja `010_prawo_konta_limity.sql` — limity zgłoszeń (telefon, ogólny), powiadomienia o zmianach w prawie (pg_cron `prawo-pobierz` 5:40 UTC i `prawo-powiadom` 5:50 UTC przez pg_net), konta z CRM (`must_change_password`, `account_created`)
+- ✅ Migracja `019_prawo_odpornosc.sql` — automat zmian w prawie pomija odpowiedź spoza JSON (błąd z 10.11.2026), cykl powiadomień o publikacji z mikrosekundami. Wdrożona 12.11.2026.
 - ✅ Migracja `018_powiadomienie_opublikowano.sql` — „Opublikowano: …” dla pozostałych Administratorów (z `log_event('publikacja.zmiany')`). Wdrożona 12.11.2026.
 - ✅ Migracja `017_powiadomienie_cykl.sql` — powiadomienie „Do opublikowania” raz na cykl publikacji. Wdrożona 12.11.2026.
 - ✅ Migracje `015_powiadomienie_publikacja.sql` (powiadomienie z opisem) i `016_log_publikacji.sql` (log zmian przy publikacji, `log_event('publikacja.zmiany')`). Wdrożone 12.11.2026.

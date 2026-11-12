@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.7] — 2026-11-12
+- Poprawki po przeglądzie: automat zmian w prawie odporny na odpowiedź spoza JSON, cykl powiadomień o publikacji dokładniejszy; migracja 019
+
 ## [1.41.6] — 2026-11-12
 - Co nowego: dymki z opisem po najechaniu na znaczki; poprawka: chwilowy błąd połączenia z bazą nie pokazuje fałszywego „do opublikowania”
 
