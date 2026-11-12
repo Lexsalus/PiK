@@ -49,6 +49,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 37 | Kropki publikacji w podzakładkach, powiadomienie także o nieopublikowanych treściach, przycisk „Różnice”, kółko w serwisie dotacji naprawione; migracja 015 | ✅ v1.39.0 |
 | 38 | 📜 Logi w menu (publikacje z opisem zmian, logowania i bezpieczeństwo, konfiguracja, sprawy, pełny dziennik); migracja 016 | ✅ v1.39.0 |
 | 39 | „Co nowego” w menu: lista wersji z opisami, kropka przy nowej wersji | ✅ v1.40.0 |
+| 40 | Powiadomienia o publikacji: „Do opublikowania” raz na cykl, „Opublikowano” dla pozostałych Administratorów; migracje 017–018 | ✅ v1.41.0 |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później

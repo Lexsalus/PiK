@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **11.11.2026**, wersja **1.40.1**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **11.11.2026**, wersja **1.41.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -11,7 +11,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | Strona dla klientów | https://lexsalus.github.io/PiK/ | działa; formularz „Co mi się należy” zapisuje zgłoszenia w bazie |
 | Treści strony | CRM → **🌐 Treści strony** (tylko Administrator; przycisk ⚙️ Panel na stronie i link w stopce prowadzą do CRM) | szkic + „Opublikuj” do bazy (`site_content`, migracja 005 — wdrożona); dopóki nic nie opublikowano, strona czyta `data.json`. `admin.html` usunięty |
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
-| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–009 27.10.2026, 010 + funkcja `konta` 09.11.2026, 011–012 11.11.2026, 013–017 12.11.2026; Administrator aktywny |
+| Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–009 27.10.2026, 010 + funkcja `konta` 09.11.2026, 011–012 11.11.2026, 013–018 12.11.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
 | Serwis dotacji | https://lexsalus.github.io/PiK/dotacje/ (folder `dotacje/`; stare repo `Lexsalus/Grants` tylko przekierowuje) | zgłoszenia do CRM (kategoria DOT), treści z bazy; panel w CRM → 💶 Dotacje |
 
@@ -42,7 +42,7 @@ Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to
 - **Każda wysyłka (push) = podbicie wersji:** `py tools/bump.py patch|minor|major "opis"` → `version.json` + `CHANGELOG.md`. Commit z wersją w treści („v1.8.5 …”).
 - Język: komunikacja i dokumentacja po polsku, zwięźle.
 - Zmiany bazy: nowy plik `supabase/migrations/00N_*.sql` + dopisanie testów w `supabase/test/schema.test.mjs`; uruchomić testy przed wdrożeniem.
-- Testy: `supabase/test/schema.test.mjs` (182 testy reguł bazy), `supabase/test/e2e/` (170 kroków przez interfejs CRM i stronę, lokalna kopia bazy, dane testowe zamiast NBP/SAOS/UOKiK/UODO), `tools/test/test_prawo_sync.py` (23 testy synchronizacji).
+- Testy: `supabase/test/schema.test.mjs` (184 testy reguł bazy), `supabase/test/e2e/` (170 kroków przez interfejs CRM i stronę, lokalna kopia bazy, dane testowe zamiast NBP/SAOS/UOKiK/UODO), `tools/test/test_prawo_sync.py` (23 testy synchronizacji).
 
 ## Zrobione
 

@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.41.0] — 2026-11-12
+- Powiadomienie „Opublikowano: …” dla pozostałych Administratorów (kto i co zmienił, link do Logów); migracja 018
+
 ## [1.40.1] — 2026-11-12
 - Powiadomienie „Do opublikowania” raz na cykl publikacji (po każdej publikacji kolejna zmiana daje nowe); migracja 017
 
