@@ -19,9 +19,9 @@
 ✓ uchylony? DU/1934/502 — Rozporządzenie Prezydenta Rzeczypospolitej z dnia 27 czerwca 1934 r. Kodeks hand [uchylony]
 ✓ zmiany: +0, razem 27
   – frank: brak tekstu HTML
-✗ projekty: <HTTPError 503: 'Service Unavailable'>
+✗ projekty: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
 ✓ kursy CHF: 299 miesięcy (od 2026-10-01)
 ✓ kursy EUR: 299 miesięcy (od 2026-10-01)
 ✓ orzecznictwo: 151 orzeczeń w 8 kategoriach
 ✓ decyzje UODO: 40
-✓ klauzule UOKiK: 7453 wpisów
+✓ klauzule UOKiK: aktualne (7453 wpisów, pobrano 2026-11-11)
