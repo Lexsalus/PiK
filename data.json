@@ -1612,7 +1612,11 @@
       "Przybliżenie": "Наближення",
       "Dokładne kwoty ustali kancelaria z zaświadczenia banku.": "Точні суми юристи встановлять за довідкою банку.",
       "Kursy NBP nie są jeszcze dostępne": "Курси НБП ще недоступні",
-      "Uzupełnij kwotę, datę wypłaty, okres i marżę": "Заповніть суму, дату видачі, строк і маржу"
+      "Uzupełnij kwotę, datę wypłaty, okres i marżę": "Заповніть суму, дату видачі, строк і маржу",
+      "Dotacje": "Дотації",
+      "Dotacje i granty dla firm": "Дотації та гранти для бізнесу",
+      "Opisz działalność — w kilka minut pokażemy wstępnie, ile finansowania może dostać Twoja firma (Plan A i B).": "Опишіть діяльність — за кілька хвилин попередньо покажемо, скільки фінансування може отримати ваша компанія (План A і B).",
+      "Sprawdź dotacje →": "Перевірити дотації →"
     },
     "en": {
       "Porównaj": "Compare",
@@ -1980,7 +1984,11 @@
       "Przybliżenie": "Approximation",
       "Dokładne kwoty ustali kancelaria z zaświadczenia banku.": "The firm will determine exact amounts from the bank's statement.",
       "Kursy NBP nie są jeszcze dostępne": "NBP rates are not available yet",
-      "Uzupełnij kwotę, datę wypłaty, okres i marżę": "Fill in the amount, disbursement date, term and margin"
+      "Uzupełnij kwotę, datę wypłaty, okres i marżę": "Fill in the amount, disbursement date, term and margin",
+      "Dotacje": "Grants",
+      "Dotacje i granty dla firm": "Grants and subsidies for businesses",
+      "Opisz działalność — w kilka minut pokażemy wstępnie, ile finansowania może dostać Twoja firma (Plan A i B).": "Describe your business — in a few minutes we will show how much funding your company may get (Plan A and B).",
+      "Sprawdź dotacje →": "Check grants →"
     }
   },
   "leads": {

@@ -1,6 +1,6 @@
 # Stan projektu — do kontynuacji w nowej sesji
 
-Ostatnia aktualizacja: **11.11.2026**, wersja **1.36.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
+Ostatnia aktualizacja: **11.11.2026**, wersja **1.37.0**. Ten plik pozwala kontynuować pracę z innego konta lub w nowej sesji bez historii rozmowy.
 
 ## Co to jest
 
@@ -13,7 +13,7 @@ Strona prawnicza **Porównaj.to** (front dla klientów) + **CRM kancelarii** (za
 | CRM na żywo | https://lexsalus.github.io/PiK/crm.html | logowanie + 2FA, wszystkie dane i operacje przez Supabase |
 | Baza | Supabase, projekt **Porównywarka** (dawniej „Piel”) `eamobnucjsavahpxilrt`, region UE (Irlandia), PostgreSQL 17 | schemat + migracje 002–003 wdrożone 26.10.2026, 004–009 27.10.2026, 010 + funkcja `konta` 09.11.2026, 011–012 11.11.2026, 013 12.11.2026; Administrator aktywny |
 | Repo | `Lexsalus/PiK` (GitHub Pages z gałęzi `main`) | |
-| Serwis dotacji | https://lexsalus.github.io/Grants/ (repo `Lexsalus/Grants`) | zgłoszenia do CRM (kategoria DOT), treści z bazy; panel w CRM → 💶 Dotacje |
+| Serwis dotacji | https://lexsalus.github.io/PiK/dotacje/ (folder `dotacje/`; stare repo `Lexsalus/Grants` tylko przekierowuje) | zgłoszenia do CRM (kategoria DOT), treści z bazy; panel w CRM → 💶 Dotacje |
 
 Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to osobny projekt (repo `Lexsalus/Ilona`) — nie zmieniać.
 
@@ -106,7 +106,7 @@ Na stronie działa czat **Adam** (`adam/`, regułowy, w przeglądarce). Ilona to
 - Po wdrożeniu 008: w CRM → Treści strony kliknąć „Opublikuj”, aby strona dostała tłumaczenie nowego komunikatu o limicie zgłoszeń.
 - Pierwsze logowanie Administratora do `crm.html` i konfiguracja 2FA (jeszcze nie sprawdzone na żywo).
 - Po wdrożeniu migracji usunąć token API w Supabase (Account → Access Tokens) i plik `tok.txt` z pulpitu (oraz stare: `PiK.txt`, `crmkp.txt`, `crm_*.sql`).
-- CRM → Ustawienia → Pisma i szablony: uzupełnić dane kancelarii (nazwa, adres, miejscowość). CRM → 💶 Dotacje → Publikacja: pierwsza publikacja przenosi katalog z plików repozytorium Grants do bazy.
+- CRM → Ustawienia → Pisma i szablony: uzupełnić dane kancelarii (nazwa, adres, miejscowość). CRM → 💶 Dotacje → Publikacja: pierwsza publikacja przenosi katalog z plików folderze `dotacje/` do bazy.
 - Podmienić przykładowe (fikcyjne) oferty w porównywarce na prawdziwe.
 
 ## Bezpieczeństwo i zużycie — audyt 27.10.2026 (podstawowy)

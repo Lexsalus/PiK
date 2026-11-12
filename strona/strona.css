@@ -1,4 +1,7 @@
 /* Porównaj.to — style strony (wydzielone z index.html) */
+.dot-banner{display:flex;align-items:center;gap:16px;margin:0 0 18px;padding:16px 20px;border-radius:16px;border:1px solid #ff8a5c66;background:linear-gradient(135deg,#ff8a5c1f,transparent);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}
+.dot-banner:hover{transform:translateY(-1px);border-color:#ff8a5c}.dot-banner .dot-ico{font-size:1.8rem}.dot-banner b{display:block;font-size:1.05rem}.dot-banner small{display:block;opacity:.75;margin-top:2px}
+.dot-banner .dot-go{margin-left:auto;white-space:nowrap;font-weight:700;color:#ff8a5c}@media(max-width:640px){.dot-banner{flex-wrap:wrap}.dot-banner .dot-go{margin-left:0}}
 :root{
   --accent:#7c5cff;
   --bg:#0b0d14;--bg2:#11141e;--card:#151927;--card2:#1b2032;--line:#262c42;

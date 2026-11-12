@@ -1,7 +1,7 @@
 /* =====================================================================
    Granty — silnik wstępnego raportu (regułowy) i słowniki.
-   Wspólny dla strony (index.html) i panelu w CRM kancelarii (Lexsalus/PiK → Dotacje),
-   który ładuje ten plik z https://lexsalus.github.io/Grants/assets/engine.js.
+   Wspólny dla serwisu dotacji (dotacje/index.html) i panelu w CRM (crm/granty.js → 💶 Dotacje),
+   który ładuje ten plik z dotacje/assets/engine.js.
    Bez zależności od strony: nie używa DOM ani zmiennych globalnych poza window.GRANTY.
    ===================================================================== */
 (function(){

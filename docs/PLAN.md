@@ -43,6 +43,7 @@ Szczegóły wersji: `CHANGELOG.md`, stan projektu: `STAN.md`.
 | 32 | Długie listy w porcjach (sprawy, nowe sprawy, zgłoszenia dotacji, audyt), dziennik audytu z bazy na żądanie (zamiast 1000 wpisów przy każdym odświeżeniu) | ✅ v1.34.0 |
 | 32a | Pobieranie danych spraw z bazy porcjami (przy tysiącach spraw) | ⏳ |
 | 33 | Awaryjny przełącznik 2FA (Ustawienia → System, czerwony znacznik w menu, audyt); migracja 013 | ✅ v1.36.0 — ⚠️ 2FA wyłączone 12.11.2026, do ponownego włączenia |
+| 34 | Serwis dotacji przeniesiony do PiK (`dotacje/`), menu „Dotacje” i kafelek w „Dla firm”; stare repo Grants przekierowuje | ✅ v1.37.0 |
 | 15 | Paski w analizie umów (ryzyko prawne, podejrzana treść) — sposób prezentacji klientowi | ❓ czeka na decyzję |
 
 ## Do decyzji / później

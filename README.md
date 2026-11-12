@@ -66,8 +66,9 @@ crm/                      CRM kancelarii
   tresci-strony.js        Treści strony (edycja i publikacja)
   prawo.js                📜 Prawo, przepisy w sprawie, analiza umowy w zgłoszeniu, klauzule UOKiK, UODO
   pisma.js                pisma z szablonów, Ustawienia → Pisma i szablony
-  granty.js               💶 Dotacje (serwis Lexsalus/Grants)
+  granty.js               💶 Dotacje (panel serwisu dotacji/)
   podglad.js, pomoc.js    podgląd panelu oczami roli, podpowiedzi
+dotacje/                  serwis dotacji (raport dla firm, zgłoszenia DOT do CRM; dawniej repo Lexsalus/Grants) — opis w dotacje/README.md
 adam/                     czat Adam (adam.js, wiedza.json)
 prawo/                    dane generowane codziennie (API Sejmu, kursy NBP, orzeczenia SAOS, klauzule UOKiK, decyzje UODO);
                           obserwowane.json — lista ustaw (edytowana w CRM); log/ — dziennik ostatniej synchronizacji

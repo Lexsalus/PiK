@@ -2,12 +2,12 @@
    DOTACJE — panel serwisu dotacji (Lexsalus/Grants) w CRM.
    Zakładki w grupach: Klienci (zgłoszenia DOT) · Katalog (źródła finansowania, podgląd raportu)
    · Serwis (treści i ustawienia, publikacja).
-   Silnik raportu: https://lexsalus.github.io/Grants/assets/engine.js (ten sam co na stronie serwisu).
+   Silnik raportu: dotacje/assets/engine.js (ten sam co w serwisie dotacji).
    Szkic zmian: w tej przeglądarce; publikacja: tabela grants_content (migracja 012, Administrator).
-   Brak opublikowanej wersji → start od plików data/*.json z repozytorium Grants.
+   Brak opublikowanej wersji → start od plików dotacje/data/*.json.
    ===================================================================== */
 (()=>{
-const GR_BASE='https://lexsalus.github.io/Grants/';
+const GR_BASE='dotacje/';   // serwis dotacji w tym samym repozytorium (dawniej Lexsalus/Grants)
 const GR_TABS=[['zgloszenia','Zgłoszenia'],['zrodla','Źródła finansowania'],['podglad','Podgląd raportu'],['strona','Treści i ustawienia'],['publikacja','Publikacja']];
 const GR_GROUPS=[{l:'Klienci',c:'#ff8a5c',k:['zgloszenia']},{l:'Katalog',c:'#f5b84a',k:['zrodla','podglad']},{l:'Serwis',c:'#5aa9ff',k:['strona','publikacja']}];
 Object.assign(TAB_TIPS,{zgloszenia:'Klienci, którzy zostawili kontakt po wstępnym raporcie dotacji.',zrodla:'Katalog źródeł finansowania: plany A/B/C, kwoty, dla kogo, słowa-klucze.',
@@ -142,10 +142,10 @@ VIEW.strona.after=()=>document.querySelectorAll('[data-gs]').forEach(el=>el.addE
 VIEW.publikacja=()=>{
   const d=dirty(),P=D().programy;
   return `<div class="card"><h3>Publikacja</h3>
-    <div class="grid g3" style="gap:10px">${[['Na stronie',G.pub?(G.pub.zPliku?'pliki z repozytorium Grants':'opublikowano '+fDT(G.pubAt)):'—'],['Szkic',d?'zmiany do opublikowania':'bez zmian'],['Źródła finansowania',`${P.filter(p=>p.aktywny!==false).length} aktywnych z ${P.length}`]].map(([l,v])=>`<div style="background:var(--bg2);border-radius:10px;padding:10px 12px"><div class="mut small">${l}</div><b>${esc(v)}</b></div>`).join('')}</div>
-    ${G.brak?'<div class="note" style="margin-top:12px">⚠️ Brak tabeli treści serwisu w bazie (migracja 012) — publikacja niedostępna, strona używa plików z repozytorium.</div>':''}
+    <div class="grid g3" style="gap:10px">${[['Na stronie',G.pub?(G.pub.zPliku?'pliki dotacje/data/*.json':'opublikowano '+fDT(G.pubAt)):'—'],['Szkic',d?'zmiany do opublikowania':'bez zmian'],['Źródła finansowania',`${P.filter(p=>p.aktywny!==false).length} aktywnych z ${P.length}`]].map(([l,v])=>`<div style="background:var(--bg2);border-radius:10px;padding:10px 12px"><div class="mut small">${l}</div><b>${esc(v)}</b></div>`).join('')}</div>
+    ${G.brak?'<div class="note" style="margin-top:12px">⚠️ Brak tabeli treści serwisu w bazie (migracja 012) — publikacja niedostępna, strona używa plików dotacje/data/*.json.</div>':''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn pri" ${G.brak||(!d&&!G.pub?.zPliku)?'disabled':''} onclick="grPublish()">🚀 Opublikuj na stronie</button><button class="btn" ${d?'':'disabled'} onclick="grDiscard()">↺ Odrzuć szkic</button><a class="btn" href="${GR_BASE}" target="_blank" rel="noopener">Otwórz serwis ↗</a></div>
-    <p class="hint">Szkic jest zapisany w tej przeglądarce. Publikacja (Administrator, w audycie) zmienia stronę od razu — bez wysyłki na GitHub. Strona czyta treści z bazy; gdy ich nie ma, używa plików <code>data/*.json</code> z repozytorium Grants.</p></div>`;
+    <p class="hint">Szkic jest zapisany w tej przeglądarce. Publikacja (Administrator, w audycie) zmienia stronę od razu — bez wysyłki na GitHub. Strona czyta treści z bazy; gdy ich nie ma, używa plików <code>dotacje/data/*.json</code>.</p></div>`;
 };
 window.grPublish=()=>{const d=D();if(!confirm(`Opublikować serwis dotacji (${d.programy.length} źródeł finansowania)?`))return;
   act(async()=>{chk(await sb.rpc('grants_publish',{p_data:{programy:d.programy,settings:d.settings}}));ls.del();G.draft=null;await load(true)},'Opublikowano serwis dotacji')};

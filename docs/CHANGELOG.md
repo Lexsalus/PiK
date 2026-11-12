@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.37.0] — 2026-11-12
+- Serwis dotacji przeniesiony do PiK (dotacje/); na stronie menu „Dotacje” i kafelek w „Dla firm”
+
 ## [1.36.0] — 2026-11-12
 - Awaryjny przełącznik 2FA (Ustawienia → System, znacznik w menu, audyt); migracja 013 — 2FA tymczasowo wyłączone
 

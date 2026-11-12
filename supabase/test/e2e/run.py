@@ -17,8 +17,6 @@ async def main():
         body=open(HERE+'../../../'+fn,encoding='utf-8').read()
         body=_re.sub(r' integrity="sha384-[^"]*"','',body); body=_re.sub(r"x\.integrity='sha384-[^']*';",'',body)
         return await r.fulfill(status=200,content_type='text/html; charset=utf-8' if fn.endswith('.html') else 'application/javascript; charset=utf-8',body=body)
-      if 'lexsalus.github.io/Grants/' in u:   # serwis dotacji: kopia silnika i danych do testów
-        n=u.split('?')[0].rsplit('/',1)[1]; return await r.fulfill(path=HERE+'granty/'+n,content_type='application/javascript' if n.endswith('.js') else 'application/json',headers={'Access-Control-Allow-Origin':'*'})
       for nm in ('klauzule','uodo'):
         if u.split('?')[0].endswith(f'/prawo/{nm}.json'): return await r.fulfill(path=HERE+f'{nm}-test.json',content_type='application/json')  # dane testowe
       if u.split('?')[0].endswith('/prawo/orzeczenia.json'): return await r.fulfill(path=HERE+'orzeczenia-test.json',content_type='application/json')  # dane testowe, nie SAOS

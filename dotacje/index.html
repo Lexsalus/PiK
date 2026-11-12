@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Granty</title>
+<meta name="description" content="Sprawdź możliwości dotacji i grantów dla swojej firmy lub organizacji.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var th=JSON.parse(localStorage.getItem('granty.theme'));if(th)document.documentElement.dataset.theme=th;}catch(e){}</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><span class="dot"></span><span id="siteName">Granty</span></a>
+    <nav>
+      <a href="#sprawdz" data-i="nav.check"></a>
+      <a href="#o-nas" data-i="nav.about"></a>
+      <a href="#kontakt" data-i="nav.contact"></a>
+    </nav>
+    <div class="spacer"></div>
+    <div class="tools" id="tools"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="sprawdz">
+    <!-- krok 1: opis -->
+    <div id="vInput">
+      <div class="hero"><h1 id="heroTitle"></h1><p id="heroLead"></p></div>
+      <form class="card grid" id="fInput" onsubmit="event.preventDefault();startCheck()">
+        <label class="f big"><span data-i="in.desc"></span>
+          <textarea id="opis" rows="4" data-ph="in.desc.ph" maxlength="1000"></textarea></label>
+        <details>
+          <summary data-i="in.more"></summary>
+          <div class="grid mt">
+            <div><div class="muted small mb" data-i="in.form"></div><div class="chips" id="cForm"></div></div>
+            <div><div class="muted small mb" data-i="in.goals"></div><div class="chips" id="cGoals"></div></div>
+            <label class="f" style="max-width:320px"><span data-i="in.region"></span><select id="region"></select></label>
+          </div>
+        </details>
+        <div><button class="btn pri lg" data-i="in.start"></button></div>
+      </form>
+    </div>
+
+    <!-- krok 2: licznik -->
+    <div id="vRun" class="hidden">
+      <div class="card run">
+        <h2 data-i="run.title"></h2>
+        <p class="muted" data-i="run.lead"></p>
+        <div class="clock" id="clock">4:30</div>
+        <div class="bar big"><i id="runBar" style="width:0"></i></div>
+        <ul class="steps" id="steps"></ul>
+      </div>
+    </div>
+
+    <!-- krok 3: raport -->
+    <div id="vReport" class="hidden"></div>
+  </section>
+
+  <section id="o-nas" class="mt" style="padding-top:30px">
+    <div class="card"><h2 data-i="about.title"></h2><div id="aboutText"></div></div>
+  </section>
+  <section id="kontakt" class="mt">
+    <div class="card"><h2 data-i="contact.title"></h2><div id="contactBox"></div></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap row between">
+    <span data-i="foot.note"></span>
+    <a href="../" class="muted">← Porównaj.to</a> · <span>© <span id="year"></span> <span id="siteName2">Granty</span> · v<span id="ver"></span> · <a href="../crm.html#/dotacje" class="muted" rel="nofollow">Panel</a></span>
+  </div>
+</footer>
+
+<script src="assets/engine.js"></script>
+<script src="assets/common.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>
