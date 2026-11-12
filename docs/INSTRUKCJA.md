@@ -307,7 +307,7 @@ Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: o�
 
 ## 12f. Publikacja — zielona kropka i powiadomienie
 
-Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo treści nie były jeszcze nigdy publikowane do bazy), w menu przy tej pozycji świeci **zielona kropka**, a w środku — zielone kropki przy podzakładkach ze zmianami i przy „Publikacji”. Przycisk **🔍 Różnice** (Treści strony, górny pasek i Publikacja) pokazuje, co dokładnie się zmieniło. Administratorzy dostają też powiadomienie „Do opublikowania: …” z nazwą osoby, która wprowadziła zmiany (szkic jest w jej przeglądarce); po publikacji powiadomienie oznacza się jako przeczytane.
+Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo treści nie były jeszcze nigdy publikowane do bazy), w menu przy tej pozycji świeci **zielona kropka**, a w środku — zielone kropki przy podzakładkach ze zmianami i przy „Publikacji”. Przycisk **🔍 Różnice** (Treści strony, górny pasek i Publikacja) pokazuje, co dokładnie się zmieniło. Administratorzy dostają też powiadomienie „Do opublikowania: …” z nazwą osoby, która wprowadziła zmiany (szkic jest w jej przeglądarce) — **jedno na cykl**: po każdej publikacji kolejna zmiana daje nowe powiadomienie; po publikacji powiadomienie oznacza się jako przeczytane. Wyłączenie: Ustawienia → Powiadomienia → „Zmiany czekają na publikację”.
 
 ## 12h. Co nowego
 

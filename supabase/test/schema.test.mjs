@@ -242,7 +242,7 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
 // --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
 {await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
  await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
- for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql','012_dotacje.sql','013_przelacznik_2fa.sql','014_procesy_spraw.sql','015_powiadomienie_publikacja.sql','016_log_publikacji.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
+ for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql','012_dotacje.sql','013_przelacznik_2fa.sql','014_procesy_spraw.sql','015_powiadomienie_publikacja.sql','016_log_publikacji.sql','017_powiadomienie_cykl.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
@@ -365,4 +365,13 @@ R((await db.query(`select count(*)::int c from public.notifications where event_
 }
 { // --- 016: logi publikacji
 R(!!await fails('jan',`select public.log_event('publikacja.zmiany','treści strony','x')`)&&!(await fails('admin',`select public.log_event('publikacja.zmiany','treści strony','Dodano: X')`)),'016: log zmian przy publikacji — tylko Administrator');
+}
+{ // --- 017: powiadomienie raz na cykl publikacji
+await db.exec(`delete from public.notifications where event_type='publish.pending'`);
+await as('admin',`select public.publish_notice('dotacje',true)`); await as('admin',`select public.publish_notice('dotacje',true)`);
+const c1=(await db.query(`select count(*)::int c from public.notifications where event_type='publish.pending' and title like '%Dotacje'`)).rows[0].c;
+await as('admin',`select public.grants_publish($1::jsonb)`,[JSON.stringify({programy:[],settings:{x:1}})]); await as('admin',`select public.publish_notice('dotacje',false)`);
+await as('admin',`select public.publish_notice('dotacje',true)`);
+const c2=(await db.query(`select count(*)::int c from public.notifications where event_type='publish.pending' and title like '%Dotacje'`)).rows[0].c;
+R(c2===c1*2&&c1>0,'017: jedno powiadomienie na cykl — po publikacji kolejna zmiana daje nowe');
 }
