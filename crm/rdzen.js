@@ -167,9 +167,9 @@ function groupTabs(list,groups,cur,href,extra){
   return `<div class="tabs gtabs">${list.map(([k,l])=>{const g=groups.find(x=>x.k.includes(k))||{c:'var(--line)',l:'',tip:''},gs=prev&&prev!==g;prev=g;
     return `<a class="tab ${k===cur?'on':''} ${gs?'gs':''}" href="${href(k)}" style="--gc:${g.c}" data-tip="${esc((g.l?g.l+' — ':'')+(TAB_TIPS[k]||g.tip||''))}">${l}${extra?extra(k):''}</a>`}).join('')}</div>`;
 }
-const TAB_TIPS={konto:'Twoje dane, hasło i 2FA.',kategorie:'Kategorie spraw, kolory, kolejność, waluty.',swieta:'Dni wolne do liczenia terminów.',przypomnienia:'Harmonogram przypomnień o terminach.',powiadomienia:'Reguły powiadomień — kto dostaje i kiedy.',
+const TAB_TIPS={konto:'Twoje dane, hasło i 2FA.',procesy:'Etapy załatwiania spraw i listy kontrolne dla każdego procesu (std, restrukturyzacja, dotacje…).',kategorie:'Kategorie spraw, kolory, kolejność, waluty.',swieta:'Dni wolne do liczenia terminów.',przypomnienia:'Harmonogram przypomnień o terminach.',powiadomienia:'Reguły powiadomień — kto dostaje i kiedy.',
   uzytkownicy:'Konta, role i uprawnienia indywidualne.',audyt:'Dziennik zdarzeń z łańcuchem skrótów — tylko do odczytu.',system:'Stan systemu, dostęp awaryjny, kopie.'};
-const SET_GROUPS=[{l:'Moje',c:'#5aa9ff',k:['konto']},{l:'Sprawy i terminy',c:'#2fd6a0',k:['kategorie','swieta','przypomnienia','powiadomienia']},{l:'Dostęp i bezpieczeństwo',c:'#f5b84a',k:['uzytkownicy','audyt','system']}];
+const SET_GROUPS=[{l:'Moje',c:'#5aa9ff',k:['konto']},{l:'Sprawy i terminy',c:'#2fd6a0',k:['kategorie','procesy','swieta','przypomnienia','powiadomienia']},{l:'Dostęp i bezpieczeństwo',c:'#f5b84a',k:['uzytkownicy','audyt','system']}];
 /* --- menu w grupach tematycznych z kolorem; w grupie tylko pozycje, do których masz uprawnienia --- */
 const NAV_GROUPS=[
   {id:'praca',l:'Codzienna praca',c:'#5aa9ff',tip:'Sprawy, zgłoszenia ze strony, terminy i powiadomienia — to, czym zajmujesz się na co dzień.',k:['pulpit','sprawy','nowe','terminy','powiadomienia']},
@@ -178,6 +178,14 @@ const NAV_GROUPS=[
   {id:'admin',l:'Administracja',c:'#f5b84a',tip:'Strona publiczna, podgląd uprawnień i ustawienia systemu.',k:['strona','podglad','ustawienia']}];
 const NAV_WHY={pulpit:'masz dostęp do spraw',sprawy:'masz dostęp do spraw',nowe:'uprawnienie „Nowe sprawy”',terminy:'uprawnienie „Terminy”',powiadomienia:'każdy członek zespołu',zespol:'każdy członek zespołu',
   finanse:'uprawnienia finansowe Twojej roli',raporty:'uprawnienie „Raporty”',prawo:'masz dostęp do spraw',strona:'tylko Administrator',podglad:'tylko Administrator',ustawienia:'każdy (zakres zależy od roli)'};
+/* zielona kropka w menu: w tej pozycji czeka publikacja (Treści strony, Dotacje) — ustawiają moduły */
+const PUB={};
+function pubDots(){Object.entries(PUB).forEach(([k,on])=>{const a=document.querySelector(`#side a.nav[href="#/${k}"]`);if(!a)return;let d=a.querySelector('.pubdot');
+  if(on&&!d){a.insertAdjacentHTML('beforeend','<span class="pubdot" title="Są zmiany do opublikowania" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#2fd6a0;box-shadow:0 0 0 3px #2fd6a033;margin-left:8px;vertical-align:middle"></span>')}else if(!on&&d)d.remove()})}
+const setPub=(k,on)=>{PUB[k]=!!on;pubDots()};
+/* powiadomienie w bazie (z nazwą osoby, która wprowadziła zmiany): raz na sesję przy pierwszej zmianie, po publikacji — przeczytane */
+const PUBN={};
+function pubNotice(k,on){if(!ME||ME.role!=='admin'||!!PUBN[k]===!!on)return;PUBN[k]=on;sb.rpc('publish_notice',{p_what:k,p_pending:!!on}).then(()=>{},()=>{})}
 function navGroups(items,cur){
   const seen=new Set(),out=[];
   const one=([k,ic,l,cnt,cl],g)=>`<a class="nav ${cur===k?'on':''}" href="#/${k}" style="--gc:${g.c}" data-why="${esc(NAV_WHY[k]||'')}">${ic} ${l}${cnt?`<span class="cnt ${cl||''}">${cnt}</span>`:''}</a>`;
@@ -197,6 +205,7 @@ function renderShell(){
   const unread=DB.notifications.filter(n=>n.recipient===ME.id&&!n.read).length;
   $('#bell').innerHTML='🔔'+(unread?`<span class="dot">${unread}</span>`:'');$('#bell').style.display=ME.role==='tech'?'none':'';
   $('.search').style.visibility=seesCases()?'':'hidden';
+  pubDots();
 }
 $('#bell').onclick=()=>location.hash='#/powiadomienia';
 
@@ -363,6 +372,35 @@ function timeline(list){
 }
 CTAB.historia=c=>`<div class="card"><h3>Historia działań <span class="mut small">tylko do odczytu</span></h3>${timeline(DB.history.filter(h=>h.caseId===c.id).slice().reverse())}</div>`;
 
+/* --- Lista kontrolna etapu: punkty odklikiwane ręcznie, punkty „auto” zaznacza system (pół-automatycznie).
+   Proces idzie dalej jak dotąd: zatwierdzenie etapu otwiera następny; lista kontrolna nie blokuje zatwierdzenia. --- */
+const AUTO_CHK={dokument:'dodany dokument w etapie',wpis:'wpis w etapie',wplata:'wpłata w sprawie',termin:'termin w sprawie'};
+function autoMet(c,st,a){
+  if(a==='dokument')return DB.documents.some(d=>d.stage===st.id&&!d.deleted);
+  if(a==='wpis')return DB.entries.some(e=>e.stage===st.id&&!e.deleted);
+  if(a==='wplata')return DB.payments.some(p=>p.caseId===c.id);
+  if(a==='termin')return DB.deadlines.some(d=>d.caseId===c.id);
+  return false;
+}
+function stageChecklist(c,st,f,canApprove){
+  const L=st.checklist||[];if(!L.length)return '';
+  const can=(f.actionsChange||isAdmin())&&(st.status==='open'||isAdmin()),done=L.filter(x=>x.done||autoMet(c,st,x.auto)).length;
+  return `<div style="margin-top:12px;background:var(--bg2);border-radius:12px;padding:10px 14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b class="small">Lista kontrolna</b><span class="badge ${done===L.length?'b-good':''}">${done}/${L.length}</span></div>
+    ${L.map((x,i)=>{const au=!x.done&&autoMet(c,st,x.auto);return `<label class="chk" style="display:flex;gap:8px;align-items:flex-start;margin:4px 0;${x.done||au?'opacity:.75':''}"><input type="checkbox" ${x.done||au?'checked':''} ${can&&!au?`onchange="stageCheck('${st.id}',${i},this.checked)"`:'disabled'}><span>${esc(x.t)}${x.auto?` <span class="mut small" title="Zaznacza się samo: ${esc(AUTO_CHK[x.auto]||x.auto)}">⚙️ ${au?'zaznaczone automatycznie':'auto: '+esc(AUTO_CHK[x.auto]||x.auto)}</span>`:''}${x.done&&x.by?` <span class="mut small">· ${esc(U(x.by).name)}, ${fDT(x.at)}</span>`:''}</span></label>`}).join('')}
+    ${done===L.length&&canApprove?'<div class="small" style="margin-top:6px;color:var(--good)">✓ Wszystkie punkty wykonane — możesz zatwierdzić etap (otworzy się następny).</div>':''}</div>`;
+}
+function stageCheck(id,i,on){actSafe(async()=>chk(await sb.rpc('stage_check',{p_stage:id,p_idx:i,p_done:on})))}
+/* lista kontrolna jako tekst: jeden punkt w linii, „[dokument] …” = punkt automatyczny */
+const chkToText=L=>(L||[]).map(x=>(x.auto?`[${x.auto}] `:'')+x.t).join('\n');
+const chkFromText=(t,old)=>String(t).split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.match(/^\[(dokument|wpis|wplata|termin)\]\s*(.+)$/);const it=m?{t:m[2].slice(0,300),auto:m[1]}:{t:l.slice(0,300)};const o=(old||[]).find(x=>x.t===it.t);return o?{...o,...it}:it});
+const CHK_HINT='Jeden punkt w linii. Na początku linii możesz dodać <code>[dokument]</code>, <code>[wpis]</code>, <code>[wplata]</code> albo <code>[termin]</code> — wtedy punkt zaznaczy się sam, gdy w etapie pojawi się dokument / wpis albo w sprawie wpłata / termin.';
+function stageEditModal(id){const st=DB.stages.find(x=>x.id===id);
+  modal(`Etap ${st.order} w sprawie ${CASE(st.caseId).number}`,`<div class="form"><label class="full">Nazwa etapu<input class="f" name="n" value="${esc(st.name)}" required></label>
+    <label class="full">Lista kontrolna<textarea class="f" name="l" rows="7">${esc(chkToText(st.checklist))}</textarea></label></div><p class="hint">${CHK_HINT} Zmiana dotyczy tylko tej sprawy; wzór procesu zmieniasz w Ustawienia → Procesy spraw.</p>`,
+  {onOk:v=>act(async()=>chk(await sb.rpc('stage_edit',{p_stage:id,p_name:v.n,p_checklist:chkFromText(v.l,st.checklist)})),'Zapisano etap')})}
+function stageAddModal(caseId,after){modal('Nowy etap w sprawie',`<div class="form"><label class="full">Nazwa etapu<input class="f" name="n" required placeholder="np. Uzupełnienie wniosku"></label></div><p class="hint">Etap pojawi się po etapie ${after}. Listę kontrolną dodasz przez ✏️.</p>`,
+  {onOk:v=>act(async()=>chk(await sb.rpc('stage_add',{p_case:caseId,p_after:after,p_name:v.n})),'Dodano etap')})}
+
 /* --- Etapy, wpisy, korekty (§4, §7) --- */
 let selStage={};
 CTAB.etapy=c=>{
@@ -377,8 +415,9 @@ CTAB.etapy=c=>{
   <div>
     ${isAdmin()&&corr.length?`<div class="note" style="margin-bottom:12px"><b>Wnioski o korektę do decyzji (${corr.length})</b>${corr.map(k=>{const e=DB.entries.find(x=>x.id===k.entryId);return `<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:8px"><span>${esc(U(k.by).name)}: „${esc(e?.title)}” — ${esc(k.reason)}</span><span><button class="btn sm pri" onclick="decideCorrection('${k.id}',true)">Zatwierdź</button> <button class="btn sm del" onclick="decideCorrection('${k.id}',false)">Odrzuć</button></span></div>`}).join('')}</div>`:''}
     <div class="card"><h3><span>${cur.order}. ${esc(cur.name)} ${cur.status==='approved'?'<span class="badge b-good">🔒 zatwierdzony</span>':cur.status==='open'?'<span class="badge b-acc">otwarty</span>':'<span class="badge">oczekuje</span>'}</span>
-      <span style="display:flex;gap:6px">${canAdd?`<button class="btn sm" onclick="entryModal('${c.id}','${cur.id}')">+ Wpis</button>`:''}${canApproveStage?`<button class="btn sm pri" onclick="approveStage('${cur.id}')">Zatwierdź etap</button>`:''}</span></h3>
+      <span style="display:flex;gap:6px">${canAdd?`<button class="btn sm" onclick="entryModal('${c.id}','${cur.id}')">+ Wpis</button>`:''}${(isAdmin()||f.approve)&&(cur.status!=='approved'||isAdmin())?`<button class="btn sm" onclick="stageEditModal('${cur.id}')" data-tip="Zmień nazwę etapu i listę kontrolną w tej sprawie">✏️</button><button class="btn sm" onclick="stageAddModal('${c.id}',${cur.order})" data-tip="Dodaj etap po tym">+ Etap</button>`:''}${canApproveStage?`<button class="btn sm pri" onclick="approveStage('${cur.id}')">Zatwierdź etap</button>`:''}</span></h3>
       <p class="mut small">Odpowiedzialny: ${esc(U(cur.responsible).name)}${cur.approvedAt?` · zatwierdził: ${esc(U(cur.approvedBy).name)}, ${fDT(cur.approvedAt)}`:''}${cur.conflict?` · wynik kontroli konfliktu: <b>${esc(cur.conflict)}</b>`:''}</p>
+      ${stageChecklist(c,cur,f,canApproveStage)}
       ${cur.status==='approved'?'<div class="note info" style="margin-top:10px">Etap zatwierdzony — wpisy i załączniki są zablokowane. Zmiana tylko przez wniosek o korektę (decyduje Administrator).</div>':''}
       <div style="margin-top:14px">${entries.length?entries.map(e=>entryCard(e,c,cur)).join(''):'<div class="empty">Brak wpisów w tym etapie</div>'}</div>
       ${docs.length?`<h3 style="margin:14px 0 8px">Dokumenty etapu</h3>${docs.map(d=>`<span class="file">📎 ${esc(d.name)} · v${d.versions.length}</span>`).join('')}`:''}</div>
@@ -609,7 +648,7 @@ async function loadCalcs(c){
 }
 
 /* ===================== USTAWIENIA ===================== */
-const SET_TABS=[['kategorie','Kategorie',()=>isAdmin()],['uzytkownicy','Użytkownicy i uprawnienia',()=>can('users')],['swieta','Święta',()=>isAdmin()],['system','System',()=>can('config')],['audyt','Dziennik audytu',()=>can('audit')],['konto','Moje konto',()=>true]];
+const SET_TABS=[['kategorie','Kategorie',()=>isAdmin()],['procesy','Procesy spraw',()=>isAdmin()],['uzytkownicy','Użytkownicy i uprawnienia',()=>can('users')],['swieta','Święta',()=>isAdmin()],['system','System',()=>can('config')],['audyt','Dziennik audytu',()=>can('audit')],['konto','Moje konto',()=>true]];
 ROUTES.ustawienia=sub=>{
   const ord=SET_GROUPS.flatMap(g=>g.k),tabs=SET_TABS.filter(t=>t[2]()).sort((a,b)=>(ord.indexOf(a[0])+99*(ord.indexOf(a[0])<0))-(ord.indexOf(b[0])+99*(ord.indexOf(b[0])<0)));sub=sub||tabs[0][0];
   const t=SET_TABS.find(x=>x[0]===sub);need(t&&t[2](),'Ta część ustawień wymaga uprawnień Administratora.');
@@ -626,8 +665,7 @@ SET.kategorie=()=>{
   <div class="grid g2" style="margin-top:14px;align-items:start"><div class="card"><h3>Waluty (kategoria FX)</h3><div class="chips">${DB.currencies.map(x=>`<span class="chip">${esc(x)} <a onclick="DB.currencies=DB.currencies.filter(y=>y!=='${esc(x)}');save();rerender()" style="cursor:pointer;color:var(--bad)">✕</a></span>`).join('')}</div>
     <form onsubmit="event.preventDefault();const v=this.c.value.trim().toUpperCase();if(v&&!DB.currencies.includes(v)){DB.currencies.push(v);audit('konfiguracja.waluta',v,'dodano');save();rerender()}" style="display:flex;gap:8px;margin-top:12px"><input class="f" name="c" placeholder="np. CZK" maxlength="8"><button class="btn">Dodaj</button></form>
     <p class="hint">Jedna kategoria + pole „waluta” — bez osobnego procesu dla każdej waluty.</p></div>
-  <div class="card"><h3>Szablon procesu: Restrukturyzacja</h3>${DB.templates.rst.map((s,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px"><span class="mut" style="width:22px;padding-top:8px">${i+1}.</span><input class="f" value="${esc(s.name)}" onchange="DB.templates.rst[${i}].name=this.value;audit('konfiguracja.szablon','RST','etap ${i+1}: '+this.value);save()"><button class="btn sm del" onclick="if(confirm('Usunąć etap z szablonu? Dotyczy tylko nowych spraw.')){DB.templates.rst.splice(${i},1);audit('konfiguracja.szablon','RST','usunięto etap');save();rerender()}">✕</button></div>`).join('')}
-    <button class="btn sm" onclick="DB.templates.rst.push({id:uid('r'),name:'Nowy etap',approval:true});save();rerender()">+ Etap</button><p class="hint">Zmiany dotyczą nowych spraw RST. Etapy definiuje Administrator.</p></div></div>`;
+</div>`;
 };
 
 /* --- Użytkownicy i uprawnienia (§9) --- */
@@ -728,11 +766,11 @@ async function act(fn,okMsg){const tr=TRACK=new Set();try{const d=await fn();TRA
 const actSafe=(fn,m)=>act(fn,m).catch(()=>{});
 
 /* --- pobranie danych (RLS zwraca tylko to, co wolno) --- */
-const TABLES=['profiles','role_permissions','permission_overrides','case_categories','currencies','process_template_stages','holidays','clients','cases','case_finance','case_members','case_stages','case_entries','entry_versions','correction_requests','documents','document_versions','deadlines','deadline_versions','payments','allocations','allocation_versions','attorney_fees','case_history','notifications','leads','emergency_access'];
+const TABLES=['profiles','role_permissions','permission_overrides','case_categories','currencies','process_templates','process_template_stages','holidays','clients','cases','case_finance','case_members','case_stages','case_entries','entry_versions','correction_requests','documents','document_versions','deadlines','deadline_versions','payments','allocations','allocation_versions','attorney_fees','case_history','notifications','leads','emergency_access'];
 let RAW={};
 /* pobieranie tabeli stronami po 1000 wierszy (serwer i tak zwraca najwyżej 1000 naraz) — bez cichego ucinania */
 const EXTRA_TABLES=['notification_rules','user_substitutes','deadline_reminder_rules'];  // wczytywane dodatkowo (migracja 004)
-const TABLE_KEY={notification_rules:['event_type'],deadline_reminder_rules:['type'],role_permissions:['role','perm','action'],permission_overrides:['user_id','perm','action'],case_categories:['code'],currencies:['code'],case_finance:['case_id']};
+const TABLE_KEY={notification_rules:['event_type'],deadline_reminder_rules:['type'],role_permissions:['role','perm','action'],permission_overrides:['user_id','perm','action'],case_categories:['code'],currencies:['code'],case_finance:['case_id'],process_templates:['code']};
 async function fetchAll(t){const keys=TABLE_KEY[t]||['id'],out=[],N=1000;
   for(let i=0;i<200000;i+=N){let q=sb.from(t).select('*');keys.forEach(k=>q=q.order(k,{ascending:true}));const r=await q.range(i,i+N-1);
     if(r.error){console.warn('reload',t,r.error.message);return RAW[t]||[]}out.push(...r.data);if(r.data.length<N)break}
@@ -742,7 +780,7 @@ const TABLE_DEPS={cases:['case_history','case_stages','case_finance','case_membe
   case_entries:['entry_versions','case_history','deadlines'],correction_requests:['case_entries','entry_versions','case_history'],documents:['document_versions','case_history'],document_versions:['documents','case_history'],
   deadlines:['deadline_versions','case_history'],payments:['allocations','case_history'],allocations:['allocation_versions','attorney_fees','case_history'],attorney_fees:['case_history'],leads:['cases'],
   emergency_access:[],permission_overrides:['profiles'],profiles:['permission_overrides']};
-const RPC_TABLES={approve_stage:['case_stages','case_entries','case_history'],decide_correction:['correction_requests','case_entries','entry_versions','case_history'],reveal_pesel:[],log_event:[],report_summary:[],site_publish:[]};
+const RPC_TABLES={stage_check:['case_stages','case_history'],stage_edit:['case_stages','case_history'],stage_add:['case_stages','case_history'],approve_stage:['case_stages','case_entries','case_history'],decide_correction:['correction_requests','case_entries','entry_versions','case_history'],reveal_pesel:[],log_event:[],report_summary:[],site_publish:[]};
 let TRACK=null;
 {const f=sb.from.bind(sb),r=sb.rpc.bind(sb);sb.from=t=>{TRACK?.add(t);return f(t)};sb.rpc=(n,a)=>{if(TRACK)RPC_TABLES[n]?RPC_TABLES[n].forEach(t=>TRACK.add(t)):TRACK.add('*');return r(n,a)}}
 function touchedTables(set){if(!set||!set.size||set.has('*'))return null;const out=new Set(['notifications']);
@@ -758,14 +796,15 @@ async function reload(only){  // only = lista tabel do pobrania; bez listy (albo
   d.overrides={};RAW.permission_overrides.forEach(o=>{(d.overrides[o.user_id]=d.overrides[o.user_id]||{})[o.perm+(o.action==='change'?':change':'')]={value:o.level,until:o.valid_until,reason:o.reason}});
   d.categories=RAW.case_categories.map(c=>({code:c.code,name:c.name,color:c.color_hex,order:c.sort_order,active:c.is_active,template:c.process_template,currency:c.has_currency}));
   d.currencies=RAW.currencies.map(c=>c.code);
-  d.templates={std:[],rst:[]};RAW.process_template_stages.sort((a,b)=>a.sort_order-b.sort_order).forEach(s=>d.templates[s.template].push({id:s.id,name:s.name,conflict:s.is_conflict_check,order:s.sort_order}));
+  d.procs=(RAW.process_templates||[]).map(p=>({code:p.code,name:p.name}));if(!d.procs.length)d.procs=[{code:'std',name:'Standardowy (sądowy)'},{code:'rst',name:'Restrukturyzacja'}];
+  d.templates={};d.procs.forEach(p=>d.templates[p.code]=[]);RAW.process_template_stages.sort((a,b)=>a.sort_order-b.sort_order).forEach(s=>(d.templates[s.template]||(d.templates[s.template]=[])).push({id:s.id,name:s.name,conflict:s.is_conflict_check,order:s.sort_order,checklist:Array.isArray(s.checklist)?s.checklist:[]}));
   d.holidays=RAW.holidays.map(h=>({id:h.id,date:h.month_day||h.day,name:h.name,fixed:!!h.month_day}));
   d.clients=RAW.clients.map(c=>({id:c.id,first:c.first_name,last:c.last_name,pesel:null,peselMasked:c.pesel_masked,address:c.address,phone:c.phone,email:c.email}));
   const fin=Object.fromEntries(RAW.case_finance.map(f=>[f.case_id,f]));
   d.cases=RAW.cases.map(c=>({id:c.id,number:c.case_number,category:c.category_code,status:c.status,clientId:c.client_id,court:c.court||'',signature:c.court_signature||'',value:+c.subject_value||0,
     initialFee:fin[c.id]?+fin[c.id].initial_fee:null,successFee:fin[c.id]?+fin[c.id].success_fee_pct:null,currency:c.currency||'',openedAt:c.opened_at,closedAt:c.closed_at,source:c.source,leadId:c.lead_id,leadData:c.lead_data}));
   d.members=RAW.case_members.map(m=>({id:m.id,caseId:m.case_id,userId:m.user_id,role:m.role,startDate:m.start_date,endDate:m.end_date,accessDocuments:m.access_documents,accessActions:m.access_actions,accessFinance:m.access_finance,scope:m.responsibility_scope||'',canApprove:m.can_approve,grantedBy:m.granted_by,grantedAt:m.granted_at,revokedAt:m.revoked_at,revokedBy:m.revoked_by}));
-  d.stages=RAW.case_stages.map(s=>({id:s.id,caseId:s.case_id,stageId:s.template_stage_id,order:s.sort_order,name:s.name,status:s.status,responsible:s.responsible_user_id||leadOfRaw(s.case_id),approvedBy:s.approved_by,approvedAt:s.approved_at,conflict:s.is_conflict_check?(s.conflict_result||null):undefined}));
+  d.stages=RAW.case_stages.map(s=>({id:s.id,caseId:s.case_id,stageId:s.template_stage_id,order:s.sort_order,name:s.name,status:s.status,checklist:Array.isArray(s.checklist)?s.checklist:[],responsible:s.responsible_user_id||leadOfRaw(s.case_id),approvedBy:s.approved_by,approvedAt:s.approved_at,conflict:s.is_conflict_check?(s.conflict_result||null):undefined}));
   const dv=by(RAW.document_versions,'document_id');
   d.documents=RAW.documents.map(x=>({id:x.id,caseId:x.case_id,stage:x.stage_id,entryId:x.entry_id,name:x.name,deleted:x.deleted_at?{at:x.deleted_at,by:x.deleted_by,reason:x.delete_reason}:false,
     versions:(dv[x.id]||[]).sort((a,b)=>a.version-b.version).map(v=>({v:v.version,at:v.uploaded_at,by:v.uploaded_by,size:v.size_bytes>1048576?(v.size_bytes/1048576).toFixed(1)+' MB':Math.max(1,Math.round((v.size_bytes||0)/1024))+' KB',sha:v.sha256,path:v.storage_path}))}));
@@ -850,6 +889,7 @@ async function afterSignIn(){
   if(!sessionStorage.getItem('crm_logged_'+p.id)){sessionStorage.setItem('crm_logged_'+p.id,1);sb.rpc('log_login',{p_action:'logowanie'})}
   $('#login').style.display='none';$('#app').style.display='grid';
   if(!location.hash||location.hash==='#'||/access_token|type=/.test(location.hash))location.hash=ME.role==='tech'?'#/ustawienia/system':'#/pulpit';else route();
+  if(ME.role==='admin')setTimeout(()=>{window.stPubCheck?.().catch(()=>{});window.grPubCheck?.().catch(()=>{})},1200);   // zielone kropki publikacji w menu
 }
 function renderLogin(){loginView('password')}
 $('#logout').onclick=async()=>{try{await sb.rpc('log_login',{p_action:'wylogowanie'})}catch(e){}await sb.auth.signOut();sessionStorage.clear();ME=null;DB=null;RAW={};REPC&&Object.keys(REPC).forEach(k=>delete REPC[k]);$('#app').style.display='none';$('#login').style.display='grid';loginView('password');history.replaceState(null,'',location.pathname)};
@@ -1087,11 +1127,35 @@ function allocModal(pid,aid){
 }
 function allocStatus(aid,st){actSafe(async()=>chk(await sb.from('allocations').update({status:st,paid_on:st==='paid'?iso(today()):null,change_reason:'zmiana statusu'}).eq('id',aid)),'Zmieniono status').catch(()=>rerender())}
 
-/* --- ustawienia: kategorie, waluty, szablon RST, święta --- */
+/* --- ustawienia → Procesy spraw: etapy i listy kontrolne dla nowych spraw (Administrator) --- */
+let procSel='std';
+SET.procesy=()=>{
+  if(!DB.templates[procSel])procSel=DB.procs[0]?.code||'std';
+  const T=DB.templates[procSel]||[],cats=DB.categories.filter(c=>c.template===procSel);
+  return `<div class="toolbar" style="flex-wrap:wrap">${DB.procs.map(p=>`<button class="btn sm${p.code===procSel?' pri':''}" onclick="procSel='${p.code}';rerender()">${esc(p.name)} <span class="mut small">${(DB.templates[p.code]||[]).length}</span></button>`).join('')}<button class="btn sm" onclick="procNew()">+ Nowy proces</button></div>
+  <div class="card"><h3>${esc(DB.procs.find(p=>p.code===procSel)?.name||procSel)} <button class="btn sm pri" onclick="procStageAdd()">+ Etap</button></h3>
+    <p class="mut small" style="margin-bottom:10px">Kategorie spraw z tym procesem: ${cats.length?cats.map(c=>catBadge(c.code)).join(' '):'<i>żadna — przypisz w zakładce Kategorie</i>'}</p>
+    ${T.map((st,i)=>`<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <b style="width:24px">${i+1}.</b><input class="f" style="flex:1;min-width:200px" value="${esc(st.name)}" onchange="procStageSave('${st.id}',{name:this.value})">
+      <label class="chk small"><input type="checkbox" ${st.conflict?'checked':''} onchange="procStageSave('${st.id}',{is_conflict_check:this.checked})">kontrola konfliktu</label>
+      <button class="btn sm" ${i?'':'disabled'} onclick="procStageMove(${i},-1)">↑</button><button class="btn sm" ${i<T.length-1?'':'disabled'} onclick="procStageMove(${i},1)">↓</button><button class="btn sm del" onclick="procStageDel('${st.id}')">Usuń</button></div>
+      <details style="margin-top:6px"><summary class="small mut" style="cursor:pointer">Lista kontrolna (${(st.checklist||[]).length})</summary><textarea class="f" rows="4" style="margin-top:6px" onchange="procStageSave('${st.id}',{checklist:chkFromText(this.value)})">${esc(chkToText(st.checklist))}</textarea></details></div>`).join('')||'<div class="empty">Brak etapów.</div>'}
+    <p class="hint">${CHK_HINT} Zmiany dotyczą <b>nowych spraw</b>; w istniejącej sprawie etap zmienisz w jej karcie (Etapy → ✏️). Proces idzie jak dotąd: zatwierdzenie etapu otwiera następny, lista kontrolna podpowiada, co zrobić, ale nie blokuje.</p></div>`;
+};
+const procStageSave=(id,row)=>actSafe(async()=>chk(await sb.from('process_template_stages').update(row).eq('id',id)),'Zapisano');
+function procStageAdd(){const T=DB.templates[procSel]||[],n=Math.max(0,...T.map(s=>s.order))+1;actSafe(async()=>chk(await sb.from('process_template_stages').insert({template:procSel,sort_order:n,name:'Nowy etap'})),'Dodano etap')}
+function procStageDel(id){if(!confirm('Usunąć etap z procesu? Dotyczy tylko nowych spraw (istniejące sprawy zachowują swoje etapy).'))return;
+  actSafe(async()=>{const r=await sb.from('process_template_stages').delete().eq('id',id);if(r.error&&/foreign key|violates/i.test(r.error.message))throw new Error('Etap jest użyty w istniejących sprawach — zamiast usuwać, zmień jego nazwę albo przenieś na koniec');chk(r)},'Usunięto etap')}
+function procStageMove(i,d){const T=DB.templates[procSel],a=T[i],b=T[i+d];if(!a||!b)return;
+  actSafe(async()=>{chk(await sb.from('process_template_stages').update({sort_order:-1}).eq('id',a.id));chk(await sb.from('process_template_stages').update({sort_order:a.order}).eq('id',b.id));chk(await sb.from('process_template_stages').update({sort_order:b.order}).eq('id',a.id))},'Zmieniono kolejność')}
+function procNew(){modal('Nowy proces spraw',`<div class="form"><label>Kod (małe litery, 2–10)<input class="f" name="code" required pattern="[a-z]{2,10}" placeholder="np. rodo"></label><label>Nazwa<input class="f" name="name" required placeholder="np. Ochrona danych"></label></div><p class="hint">Potem dodaj etapy i przypisz proces kategorii spraw (zakładka Kategorie).</p>`,
+  {onOk:v=>act(async()=>{chk(await sb.from('process_templates').insert({code:v.code.toLowerCase(),name:v.name}));procSel=v.code.toLowerCase()},'Dodano proces')})}
+
+/* --- ustawienia: kategorie, waluty, święta --- */
 function catModal(code){
   const c=code&&CAT(code);
   modal(c?`Kategoria ${c.code}`:'Nowa kategoria',`<div class="form"><label>Kod<input class="f" name="code" required maxlength="6" pattern="[A-Za-z]{2,6}" value="${esc(c?.code||'')}"></label><label>Kolor<input class="f" type="color" name="color" value="${c?.color||'#7c5cff'}" style="height:38px;padding:3px"></label>
-    <label class="full">Nazwa<input class="f" name="name" required value="${esc(c?.name||'')}"></label><label>Szablon procesu<select class="f" name="template"><option value="std" ${c?.template!=='rst'?'selected':''}>Standardowy</option><option value="rst" ${c?.template==='rst'?'selected':''}>Restrukturyzacja</option></select></label>
+    <label class="full">Nazwa<input class="f" name="name" required value="${esc(c?.name||'')}"></label><label>Proces<select class="f" name="template">${DB.procs.map(p=>`<option value="${p.code}" ${(c?.template||'std')===p.code?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>
     <label class="chk" style="align-self:end"><input type="checkbox" name="currency" ${c?.currency?'checked':''}>Pole „waluta”</label></div>`,{onOk:v=>act(async()=>{
     const row={code:v.code.toUpperCase(),name:v.name,color_hex:v.color,process_template:v.template,has_currency:!!v.currency};
     if(c)chk(await sb.from('case_categories').update(row).eq('code',c.code));else chk(await sb.from('case_categories').insert({...row,sort_order:DB.categories.length+1}));

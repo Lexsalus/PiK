@@ -57,6 +57,7 @@ async function load(){
   STALE=!!(draft&&ORIG&&dBase!==BASE&&JSON.stringify(draft)!==JSON.stringify(ORIG));
   D=draft||(ORIG&&structuredClone(ORIG));
   if(D){norm();READY=true}
+  setPub('strona',(D&&dirty())||SITE.src==='file');
 }
 /* lista różnic: szkic (ta przeglądarka) ↔ opublikowana wersja */
 const DIFF_TOP={serwis:'Tryb serwisowy',adam:'Czat Adam',zmianyPrawa:'Zmiany w prawie (sekcja)',zwrot:'Zwrot z umowy',firma:'Restrukturyzacja firmy',site:'Ustawienia strony',leads:'Formularz zgłoszenia',seo:'SEO',i18n:'Tłumaczenia — ustawienia',translations:'Tłumaczenia',categories:'Kategorie',calculators:'Kalkulatory',contracts:'Analiza umów'};
@@ -102,7 +103,7 @@ const ST_KEYS={settings:['site','leads'],cats:['categories'],calcs:['calculators
 function stDirtyTab(k){if(!D||!ORIG)return false;if(k==='export')return dirty();return (ST_KEYS[k]||[]).some(x=>JSON.stringify(D[x])!==JSON.stringify(ORIG[x]))}
 const stTabs=()=>groupTabs(TABS,ST_GROUPS,view,k=>'#/strona/'+k,k=>stDirtyTab(k)?'<span class="tdot" data-tip="Zmiany nieopublikowane"></span>':'');
 function save(){
-  if(!D)return;
+  if(!D)return;setPub('strona',dirty()||SITE.src==='file');if(dirty())pubNotice('strona',true);
   const T=$('#stTabs');if(T)T.innerHTML=stTabs();
   try{localStorage.setItem(KEY,JSON.stringify(D));if(!STALE)localStorage.setItem(KEY+'_base',BASE)}catch(e){}
   const st=$('#stStatus');if(st){const d=dirty();st.textContent=d?'Szkic — nieopublikowany':(SITE.src==='db'?'Zgodne z opublikowaną':'Zgodne z data.json');st.classList.toggle('dirty',d)}
@@ -130,6 +131,7 @@ ROUTES.strona=sub=>{
     <h2 id="stTitle" style="font-size:1.15rem;margin-bottom:14px"></h2><div id="stView"><div class="empty">Wczytywanie…</div></div></div>`;
 };
 ROUTES.strona.after=async()=>{if(!READY)await load();render()};
+window.stPubCheck=async()=>{if(!READY)await load();else setPub('strona',dirty()||SITE.src==='file')};
 
 /* ---------- Publikacja ---------- */
 function vExport(){
@@ -155,11 +157,11 @@ function publish(){
   modal('Opublikować treści strony?',`<p>Szkic z tej przeglądarki zastąpi treści na stronie publicznej. Odwiedzający zobaczą zmiany od razu.</p><p class="hint">Publikacja trafia do dziennika audytu.</p>`,{ok:'🚀 Opublikuj',onOk:async()=>{
     const r=await sb.rpc('site_publish',{p_data:D});if(r.error)throw r.error;
     ORIG=structuredClone(D);SITE.pub=structuredClone(D);SITE.at=r.data;SITE.src='db';BASE=hash(JSON.stringify(ORIG));STALE=false;
-    render();toast('Opublikowano — strona pokazuje nową wersję')}});
+    setPub('strona',false);pubNotice('strona',false);render();toast('Opublikowano — strona pokazuje nową wersję')}});
 }
 function dl(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,2)],{type:'application/json'}));a.download='data.json';a.click();URL.revokeObjectURL(a.href);toast('Pobrano data.json')}
 function imp(f){if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(!j.site||!j.categories||!j.calculators)throw 0;delete j.site.adminHash;D=j;norm();render();toast('Zaimportowano do szkicu')}catch(e){toast('Nieprawidłowy plik',true)}})}
-function reset(){if(!ORIG||!confirm('Odrzucić wszystkie nieopublikowane zmiany?'))return;D=structuredClone(ORIG);norm();STALE=false;try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono opublikowaną wersję')}
+function reset(){if(!ORIG||!confirm('Odrzucić wszystkie nieopublikowane zmiany?'))return;D=structuredClone(ORIG);norm();STALE=false;setPub('strona',SITE.src==='file');try{localStorage.removeItem(KEY)}catch(e){}render();toast('Przywrócono opublikowaną wersję')}
 
 /* ścieżkowe wiązanie pól: data-p="categories.0.name" */
 const getP=p=>p.split('.').reduce((o,k)=>o?.[k],D);

@@ -2,6 +2,9 @@
 
 Format: [SemVer](https://semver.org/lang/pl/) — `MAJOR.MINOR.PATCH`. Każda wysyłka (push) = podbicie wersji.
 
+## [1.38.0] — 2026-11-12
+- Procesy spraw edytowane w CRM (proces Dotacje i granty), listy kontrolne etapów z punktami automatycznymi, edycja i dodawanie etapów w sprawie; zielona kropka w menu przy publikacji i powiadomienie z nazwą osoby; migracja 014
+
 ## [1.37.0] — 2026-11-12
 - Serwis dotacji przeniesiony do PiK (dotacje/); na stronie menu „Dotacje” i kafelek w „Dla firm”
 

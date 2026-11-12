@@ -28,11 +28,12 @@ async function load(force){
   try{const r=await sb.from('grants_content').select('data,published_at').eq('id',1).maybeSingle();if(r.error)throw r.error;G.pub=r.data?.data||null;G.pubAt=r.data?.published_at||null;G.brak=false}
   catch(e){G.brak=true;G.pub=null}
   if(!G.pub){try{const [p,s]=await Promise.all(['programy','settings'].map(n=>fetch(GR_BASE+'data/'+n+'.json',{cache:'no-store'}).then(r=>r.ok?r.json():null)));if(Array.isArray(p))G.pub={programy:p,settings:s||{},zPliku:true}}catch(e){}}
-  G.draft=ls.get();G.loaded=true;
+  G.draft=ls.get();G.loaded=true;setPub('dotacje',dirty()||!!G.pub?.zPliku);
 }
 const D=()=>G.draft||G.pub||{programy:[],settings:{}};
+window.grPubCheck=()=>load();
 const edit=()=>{if(!G.draft)G.draft=structuredClone({programy:D().programy,settings:D().settings});return G.draft};
-const saveD=()=>{ls.set(G.draft);rerender()};
+const saveD=()=>{ls.set(G.draft);setPub('dotacje',dirty()||!!G.pub?.zPliku);if(dirty())pubNotice('dotacje',true);rerender()};
 const dirty=()=>!!G.draft&&JSON.stringify({programy:G.draft.programy,settings:G.draft.settings})!==JSON.stringify({programy:G.pub?.programy||[],settings:G.pub?.settings||{}});
 const PL=k=>window.GRANTY?.LABELS.pl[k]||k,regionPL=k=>window.GRANTY?.REGIONS[k]?.[0]||k;
 const ml=o=>!o?'':typeof o==='string'?o:(o.pl||o.en||o.uk||'');
@@ -148,8 +149,8 @@ VIEW.publikacja=()=>{
     <p class="hint">Szkic jest zapisany w tej przeglądarce. Publikacja (Administrator, w audycie) zmienia stronę od razu — bez wysyłki na GitHub. Strona czyta treści z bazy; gdy ich nie ma, używa plików <code>dotacje/data/*.json</code>.</p></div>`;
 };
 window.grPublish=()=>{const d=D();if(!confirm(`Opublikować serwis dotacji (${d.programy.length} źródeł finansowania)?`))return;
-  act(async()=>{chk(await sb.rpc('grants_publish',{p_data:{programy:d.programy,settings:d.settings}}));ls.del();G.draft=null;await load(true)},'Opublikowano serwis dotacji')};
-window.grDiscard=()=>{if(!confirm('Odrzucić nieopublikowane zmiany?'))return;ls.del();G.draft=null;rerender()};
+  act(async()=>{chk(await sb.rpc('grants_publish',{p_data:{programy:d.programy,settings:d.settings}}));ls.del();G.draft=null;pubNotice('dotacje',false);await load(true)},'Opublikowano serwis dotacji')};
+window.grDiscard=()=>{if(!confirm('Odrzucić nieopublikowane zmiany?'))return;ls.del();G.draft=null;setPub('dotacje',!!G.pub?.zPliku);rerender()};
 
 /* --- zgłoszenie z serwisu: opis, plany, potencjał (karta zgłoszenia i Analiza sprawy) --- */
 window.grantLead=d=>{

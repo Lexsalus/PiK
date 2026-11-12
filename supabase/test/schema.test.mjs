@@ -242,7 +242,7 @@ R(Number.isInteger((await db.query('select public.run_deadline_reminders() n')).
 // --- 007: naprawa kodowania (symulacja zepsutych etykiet i funkcji)
 {await db.exec(`update public.notification_rules set label='Zakonczenie sprawy' where event_type='case.closed'`);
  await db.exec(fs.readFileSync(new URL('../migrations/007_naprawa_kodowania.sql', import.meta.url),'utf8'));
- for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql','012_dotacje.sql','013_przelacznik_2fa.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
+ for(const m of ['008_audyt_bezpieczenstwa.sql','009_uprawnienia_akcje.sql','010_prawo_konta_limity.sql','011_pisma.sql','012_dotacje.sql','013_przelacznik_2fa.sql','014_procesy_spraw.sql'])await db.exec(fs.readFileSync(new URL('../migrations/'+m, import.meta.url),'utf8'));  // późniejsze migracje ponownie (007 nadpisuje funkcje)
  R((await db.query(`select label from public.notification_rules where event_type='case.closed'`)).rows[0].label==='Zakończenie sprawy','007: etykiety reguł powiadomień z polskimi znakami');
  R((await db.query(`select position('spełniony' in prosrc)>0 ok from pg_proc where proname='fee_event'`)).rows[0].ok,'007: app.fee_event porównuje „spełniony” poprawnie');
  R((await db.query(`select position('Zbliża się termin' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok&&(await db.query(`select position('Europe/Warsaw' in prosrc)>0 ok from pg_proc where proname='run_deadline_reminders'`)).rows[0].ok,'007: przypomnienia zostają w wersji z 006 (czas polski)');}
@@ -337,4 +337,21 @@ await as('admin',`select public.mfa_set(true)`);
 R((await as('admin',`select app.session_ok() ok`)).rows[0].ok===false,'013: po ponownym włączeniu sesja aal1 znów nieważna');
 R((await db.query(`select count(*)::int n from public.audit_log where action like 'bezpieczenstwo.2fa_%'`)).rows[0].n===2,'013: zmiany przełącznika w audycie');
 AAL=prevAAL;
+}
+{ // --- 014: procesy spraw, listy kontrolne
+const cd=(await as('admin',`select public.create_case('DOT','Ewa','Grantowa',$1,null,'600700800','e@g.pl','Kraków',0,0,0) id`,[U.jan])).rows[0].id;
+const st=(await db.query(`select id,sort_order,name,status,checklist from public.case_stages where case_id=$1 order by sort_order`,[cd])).rows;
+R(st.length===11&&st[0].status==='open'&&st[4].name==='Analiza możliwości finansowania'&&st[5].checklist[0].auto==='dokument'&&st[5].checklist[0].done===false,'014: sprawa DOT dostaje proces dotacji z listami kontrolnymi');
+await as('admin',`select public.stage_check($1,0,true)`,[st[0].id]);
+const c0=(await db.query(`select checklist from public.case_stages where id=$1`,[st[0].id])).rows[0].checklist[0];
+R(c0.done===true&&!!c0.by&&!!c0.at,'014: odklikanie punktu listy (kto, kiedy)');
+R(!!await fails('anna',`select public.stage_check($1,0,false)`,[st[0].id]),'014: osoba spoza zespołu nie odklika punktu');
+await as('admin',`select public.stage_edit($1,'Przyjęcie sprawy (zmienione)','[{"t":"Nowy punkt"}]'::jsonb)`,[st[0].id]);
+R((await db.query(`select name from public.case_stages where id=$1`,[st[0].id])).rows[0].name==='Przyjęcie sprawy (zmienione)','014: edycja etapu w sprawie');
+await as('admin',`select public.stage_add($1,1,'Etap dodatkowy')`,[cd]);
+const st2=(await db.query(`select sort_order,name,status from public.case_stages where case_id=$1 order by sort_order`,[cd])).rows;
+R(st2.length===12&&st2[1].name==='Etap dodatkowy'&&st2[1].status==='todo'&&st2[2].name==='Rejestracja klienta','014: dodanie etapu w środku procesu (przesunięcie kolejnych)');
+await as('admin',`select public.approve_stage($1)`,[st[0].id]);
+R((await db.query(`select status from public.case_stages where case_id=$1 and sort_order=2`,[cd])).rows[0].status==='open','014: proces idzie dalej automatycznie — zatwierdzenie otwiera następny etap');
+R(!!await fails('jan',`insert into public.process_templates(code,name) values('xx','X')`)&&!(await fails('admin',`insert into public.process_templates(code,name) values('rodo','RODO')`)),'014: nowe procesy dodaje tylko Administrator');
 }

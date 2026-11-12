@@ -299,6 +299,16 @@ CRM → 📜 Prawo → grupa **Urzędy**:
 
 Karta sprawy → Dokumenty → **📝 Pismo z szablonu**. Szablony wbudowane: oświadczenie o sankcji kredytu darmowego, wezwanie do zapłaty (nieważność umowy CHF/EUR), wniosek o zaświadczenie o historii kredytu, przedsądowe wezwanie do zapłaty, pełnomocnictwo. Dane klienta, sprawy, kancelarii, pełnomocnika i data wypełniają się same; pozostałe pola wpisujesz w formularzu (podgląd na żywo). Wynik: **DOCX**, **wydruk / PDF** albo **zapis w dokumentach sprawy** (z historią wersji). Administrator: Ustawienia → **Pisma i szablony** (dane kancelarii, edycja / wyłączanie wbudowanych, własne szablony z dowolnymi polami `{{nazwa_pola}}`; znaczniki `# ` tytuł, `>> ` do prawej, `**pogrubienie**`). Dane w bazie: tabela `office_settings` (migracja 011), zmiany w audycie; szablony nie są publiczne.
 
+## 12e. Procesy spraw i listy kontrolne
+
+- **Ustawienia → Procesy spraw** (Administrator): procesy (Standardowy, Restrukturyzacja, **Dotacje i granty**, własne — „+ Nowy proces”), dla każdego etapy (nazwa, kolejność, kontrola konfliktu) i **lista kontrolna** etapu. Punkt z dopiskiem `[dokument]`, `[wpis]`, `[wplata]` albo `[termin]` zaznacza się sam, gdy w etapie pojawi się dokument / wpis albo w sprawie wpłata / termin. Proces przypisujesz kategorii w zakładce Kategorie. Zmiany dotyczą nowych spraw.
+- **Karta sprawy → Etapy**: lista kontrolna etapu z odklikiwaniem (kto i kiedy — w historii sprawy), punkty automatyczne oznaczone ⚙️, licznik wykonanych. **✏️** zmienia nazwę i listę w tej sprawie, **+ Etap** dodaje etap po bieżącym. Proces idzie jak dotąd: zatwierdzenie etapu otwiera następny; lista podpowiada, ale nie blokuje.
+- Kategoria **DOT** ma proces dotacji: przyjęcie, rejestracja klienta, kontrola konfliktu, opłata wstępna, analiza możliwości finansowania, umowa z klientem, przygotowanie dokumentacji, złożenie wniosku, ocena i uzupełnienia, umowa o dofinansowanie, realizacja i rozliczenie.
+
+## 12f. Publikacja — zielona kropka i powiadomienie
+
+Gdy w **Treściach strony** albo **Dotacjach** są zmiany do opublikowania (albo treści nie były jeszcze nigdy publikowane do bazy), w menu przy tej pozycji świeci **zielona kropka**. Administratorzy dostają też powiadomienie „Do opublikowania: …” z nazwą osoby, która wprowadziła zmiany (szkic jest w jej przeglądarce); po publikacji powiadomienie oznacza się jako przeczytane.
+
 ## 12d. Serwis dotacji w CRM
 
 Serwis jest w folderze `dotacje/` (adres https://lexsalus.github.io/PiK/dotacje/); na stronie Porównaj.to prowadzi do niego pozycja **Dotacje** w menu i kafelek w sekcji **Dla firm**. Stary adres lexsalus.github.io/Grants przekierowuje.
