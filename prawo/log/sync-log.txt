@@ -19,9 +19,17 @@
 ✓ uchylony? DU/1934/502 — Rozporządzenie Prezydenta Rzeczypospolitej z dnia 27 czerwca 1934 r. Kodeks hand [uchylony]
 ✓ zmiany: +0, razem 27
   – frank: brak tekstu HTML
-✓ projekty: kadencja 10, przejrzano 486, pasuje 12
+✓ projekty: kadencja 10, przejrzano 490, pasuje 12
 ✓ kursy CHF: 299 miesięcy (od 2026-10-01)
 ✓ kursy EUR: 299 miesięcy (od 2026-10-01)
-✓ orzecznictwo: 151 orzeczeń w 8 kategoriach
+⚠ orzecznictwo SKD: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo CHF: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo FX: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo PLN: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo RST: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo ROD: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo CIV: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+⚠ orzecznictwo INNE: JSONDecodeError('Expecting value: line 1 column 1 (char 0)') — zostaje poprzednia lista
+✗ orzecznictwo: RuntimeError('SAOS niedostępny')
 ✓ decyzje UODO: 40
 ✓ klauzule UOKiK: aktualne (7453 wpisów, pobrano 2026-11-11)
